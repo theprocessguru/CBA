@@ -142,6 +142,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get marketplace listings
+  app.get('/api/marketplace', async (req, res) => {
+    try {
+      const { categoryId, search, limit } = req.query;
+      const options = {
+        categoryId: categoryId ? parseInt(categoryId as string) : undefined,
+        search: search as string | undefined,
+        limit: limit ? parseInt(limit as string) : undefined
+      };
+      
+      const listings = await storage.listMarketplaceListings(options);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching marketplace listings:", error);
+      res.status(500).json({ message: "Failed to fetch marketplace listings" });
+    }
+  });
+
+  // Get barter listings
+  app.get('/api/barter', async (req, res) => {
+    try {
+      const { categoryId, search, limit } = req.query;
+      const options = {
+        categoryId: categoryId ? parseInt(categoryId as string) : undefined,
+        search: search as string | undefined,
+        limit: limit ? parseInt(limit as string) : undefined
+      };
+      
+      const listings = await storage.listBarterListings(options);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching barter listings:", error);
+      res.status(500).json({ message: "Failed to fetch barter listings" });
+    }
+  });
+  
   // Get offers for a business
   app.get('/api/businesses/:id/offers', async (req, res) => {
     try {

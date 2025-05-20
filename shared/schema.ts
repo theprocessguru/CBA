@@ -10,6 +10,7 @@ import {
   boolean,
   primaryKey,
   decimal,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -115,6 +116,66 @@ export const memberImports = pgTable("member_imports", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Marketplace listings (for member-to-member sales)
+export const marketplaceListings = pgTable("marketplace_listings", {
+  id: serial("id").primaryKey(),
+  businessId: integer("business_id").notNull().references(() => businesses.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  imageUrl: varchar("image_url"),
+  quantity: integer("quantity").default(1),
+  status: varchar("status").default("active").notNull(), // active, sold, expired, draft
+  categoryId: integer("category_id").references(() => categories.id),
+  isService: boolean("is_service").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+// Barter listings (for member-to-member trades without money)
+export const barterListings = pgTable("barter_listings", {
+  id: serial("id").primaryKey(),
+  businessId: integer("business_id").notNull().references(() => businesses.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  offering: text("offering").notNull(), // What the member is offering
+  lookingFor: text("looking_for").notNull(), // What the member wants in exchange
+  status: varchar("status").default("active").notNull(), // active, traded, expired, draft
+  categoryId: integer("category_id").references(() => categories.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+// Transaction records between members
+export const transactions = pgTable("transactions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  listingId: integer("listing_id").references(() => marketplaceListings.id),
+  sellerBusinessId: integer("seller_business_id").notNull().references(() => businesses.id),
+  buyerBusinessId: integer("buyer_business_id").notNull().references(() => businesses.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status").default("pending").notNull(), // pending, completed, canceled, disputed
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+// Barter exchanges between members
+export const barterExchanges = pgTable("barter_exchanges", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  listingId: integer("listing_id").references(() => barterListings.id),
+  initiatorBusinessId: integer("initiator_business_id").notNull().references(() => businesses.id),
+  responderBusinessId: integer("responder_business_id").notNull().references(() => businesses.id),
+  initiatorOffer: text("initiator_offer").notNull(),
+  responderOffer: text("responder_offer").notNull(),
+  status: varchar("status").default("proposed").notNull(), // proposed, accepted, completed, declined, canceled
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -127,6 +188,12 @@ export const businessesRelations = relations(businesses, ({ one, many }) => ({
   }),
   products: many(products),
   offers: many(offers),
+  marketplaceListings: many(marketplaceListings),
+  barterListings: many(barterListings),
+  sellerTransactions: many(transactions, { relationName: "sellerTransactions" }),
+  buyerTransactions: many(transactions, { relationName: "buyerTransactions" }),
+  initiatedBarterExchanges: many(barterExchanges, { relationName: "initiatedBarterExchanges" }),
+  respondedBarterExchanges: many(barterExchanges, { relationName: "respondedBarterExchanges" }),
 }));
 
 export const productsRelations = relations(products, ({ one }) => ({
@@ -150,6 +217,66 @@ export const offersRelations = relations(offers, ({ one }) => ({
 export const categoriesRelations = relations(categories, ({ many }) => ({
   businesses: many(businesses),
   products: many(products),
+  marketplaceListings: many(marketplaceListings),
+  barterListings: many(barterListings),
+}));
+
+export const marketplaceListingsRelations = relations(marketplaceListings, ({ one, many }) => ({
+  business: one(businesses, {
+    fields: [marketplaceListings.businessId],
+    references: [businesses.id],
+  }),
+  category: one(categories, {
+    fields: [marketplaceListings.categoryId],
+    references: [categories.id],
+  }),
+  transactions: many(transactions),
+}));
+
+export const barterListingsRelations = relations(barterListings, ({ one, many }) => ({
+  business: one(businesses, {
+    fields: [barterListings.businessId],
+    references: [businesses.id],
+  }),
+  category: one(categories, {
+    fields: [barterListings.categoryId],
+    references: [categories.id],
+  }),
+  exchanges: many(barterExchanges),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  listing: one(marketplaceListings, {
+    fields: [transactions.listingId],
+    references: [marketplaceListings.id],
+  }),
+  seller: one(businesses, {
+    relationName: "sellerTransactions",
+    fields: [transactions.sellerBusinessId],
+    references: [businesses.id],
+  }),
+  buyer: one(businesses, {
+    relationName: "buyerTransactions",
+    fields: [transactions.buyerBusinessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const barterExchangesRelations = relations(barterExchanges, ({ one }) => ({
+  listing: one(barterListings, {
+    fields: [barterExchanges.listingId],
+    references: [barterListings.id],
+  }),
+  initiator: one(businesses, {
+    relationName: "initiatedBarterExchanges",
+    fields: [barterExchanges.initiatorBusinessId],
+    references: [businesses.id],
+  }),
+  responder: one(businesses, {
+    relationName: "respondedBarterExchanges",
+    fields: [barterExchanges.responderBusinessId],
+    references: [businesses.id],
+  }),
 }));
 
 // Create insert schemas
@@ -159,6 +286,10 @@ export const insertProductSchema = createInsertSchema(products).omit({ id: true 
 export const insertOfferSchema = createInsertSchema(offers).omit({ id: true });
 export const insertCategorySchema = createInsertSchema(categories).omit({ id: true });
 export const insertMemberImportSchema = createInsertSchema(memberImports).omit({ id: true });
+export const insertMarketplaceListingSchema = createInsertSchema(marketplaceListings).omit({ id: true });
+export const insertBarterListingSchema = createInsertSchema(barterListings).omit({ id: true });
+export const insertTransactionSchema = createInsertSchema(transactions).omit({ id: true });
+export const insertBarterExchangeSchema = createInsertSchema(barterExchanges).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -178,3 +309,15 @@ export type Category = typeof categories.$inferSelect;
 
 export type InsertMemberImport = z.infer<typeof insertMemberImportSchema>;
 export type MemberImport = typeof memberImports.$inferSelect;
+
+export type InsertMarketplaceListing = z.infer<typeof insertMarketplaceListingSchema>;
+export type MarketplaceListing = typeof marketplaceListings.$inferSelect;
+
+export type InsertBarterListing = z.infer<typeof insertBarterListingSchema>;
+export type BarterListing = typeof barterListings.$inferSelect;
+
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type Transaction = typeof transactions.$inferSelect;
+
+export type InsertBarterExchange = z.infer<typeof insertBarterExchangeSchema>;
+export type BarterExchange = typeof barterExchanges.$inferSelect;
