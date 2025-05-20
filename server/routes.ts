@@ -6,7 +6,7 @@ import multer from "multer";
 import * as Papa from "papaparse";
 import { insertBusinessSchema, insertProductSchema, insertOfferSchema } from "@shared/schema";
 import { z } from "zod";
-import { parse } from "zod-validation-error";
+import { fromZodError } from "zod-validation-error";
 
 // Setup multer for file uploads
 const upload = multer({
@@ -18,7 +18,7 @@ const upload = multer({
 const validateRequest = <T extends z.ZodType>(schema: T, data: unknown): z.infer<T> => {
   const result = schema.safeParse(data);
   if (!result.success) {
-    const errorMessage = parse(result.error).message;
+    const errorMessage = fromZodError(result.error).message;
     throw new Error(errorMessage);
   }
   return result.data;
