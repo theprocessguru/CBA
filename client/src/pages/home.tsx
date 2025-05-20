@@ -1,0 +1,26 @@
+import { Helmet } from "react-helmet";
+import HeroSection from "@/components/home/HeroSection";
+import FeaturedMembers from "@/components/home/FeaturedMembers";
+import SpecialOffers from "@/components/home/SpecialOffers";
+import MarketplacePreview from "@/components/home/MarketplacePreview";
+import MemberDashboardPreview from "@/components/home/MemberDashboardPreview";
+import { META_DESCRIPTIONS } from "@/lib/constants";
+
+const Home = () => {
+  return (
+    <>
+      <Helmet>
+        <title>Croydon Business Association - Supporting Local Commerce</title>
+        <meta name="description" content={META_DESCRIPTIONS.home} />
+      </Helmet>
+      
+      <HeroSection />
+      <FeaturedMembers />
+      <SpecialOffers />
+      <MarketplacePreview />
+      <MemberDashboardPreview />
+    </>
+  );
+};
+
+export default Home;
