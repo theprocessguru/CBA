@@ -13,11 +13,11 @@ import { getRandomCoverImage } from "@/lib/utils";
 
 const BusinessDirectory = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([]);
   
   const { data: businesses, isLoading: isLoadingBusinesses } = useQuery<Business[]>({
-    queryKey: [`/api/businesses${categoryFilter ? `?categoryId=${categoryFilter}` : ''}`],
+    queryKey: [`/api/businesses${categoryFilter && categoryFilter !== 'all' ? `?categoryId=${categoryFilter}` : ''}`],
   });
   
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
@@ -84,7 +84,7 @@ const BusinessDirectory = () => {
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {categories?.map((category) => (
                     <SelectItem key={category.id} value={String(category.id)}>
                       {category.name}
@@ -195,7 +195,7 @@ const BusinessDirectory = () => {
             variant="outline" 
             onClick={() => {
               setSearchQuery("");
-              setCategoryFilter("");
+              setCategoryFilter("all");
             }}
           >
             Clear Filters
