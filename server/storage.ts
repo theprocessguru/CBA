@@ -61,6 +61,34 @@ export interface IStorage {
   createMemberImport(memberImport: InsertMemberImport): Promise<MemberImport>;
   updateMemberImport(id: number, memberImport: Partial<InsertMemberImport>): Promise<MemberImport>;
   getMemberImportsByAdminId(adminId: string): Promise<MemberImport[]>;
+  
+  // Marketplace listings operations
+  getMarketplaceListingById(id: number): Promise<MarketplaceListing | undefined>;
+  getMarketplaceListingsByBusinessId(businessId: number): Promise<MarketplaceListing[]>;
+  createMarketplaceListing(listing: InsertMarketplaceListing): Promise<MarketplaceListing>;
+  updateMarketplaceListing(id: number, listing: Partial<InsertMarketplaceListing>): Promise<MarketplaceListing>;
+  deleteMarketplaceListing(id: number): Promise<boolean>;
+  listMarketplaceListings(options?: { categoryId?: number, search?: string, limit?: number }): Promise<MarketplaceListing[]>;
+  
+  // Barter listings operations
+  getBarterListingById(id: number): Promise<BarterListing | undefined>;
+  getBarterListingsByBusinessId(businessId: number): Promise<BarterListing[]>;
+  createBarterListing(listing: InsertBarterListing): Promise<BarterListing>;
+  updateBarterListing(id: number, listing: Partial<InsertBarterListing>): Promise<BarterListing>;
+  deleteBarterListing(id: number): Promise<boolean>;
+  listBarterListings(options?: { categoryId?: number, search?: string, limit?: number }): Promise<BarterListing[]>;
+  
+  // Transaction operations
+  getTransactionById(id: string): Promise<Transaction | undefined>;
+  getTransactionsByBusinessId(businessId: number, role?: 'seller' | 'buyer'): Promise<Transaction[]>;
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  updateTransaction(id: string, transaction: Partial<InsertTransaction>): Promise<Transaction>;
+  
+  // Barter exchange operations
+  getBarterExchangeById(id: string): Promise<BarterExchange | undefined>;
+  getBarterExchangesByBusinessId(businessId: number, role?: 'initiator' | 'responder'): Promise<BarterExchange[]>;
+  createBarterExchange(exchange: InsertBarterExchange): Promise<BarterExchange>;
+  updateBarterExchange(id: string, exchange: Partial<InsertBarterExchange>): Promise<BarterExchange>;
 }
 
 export class DatabaseStorage implements IStorage {

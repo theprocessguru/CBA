@@ -449,6 +449,258 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Member marketplace listings routes
+  
+  // Get my marketplace listings
+  app.get('/api/my/marketplace', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const business = await storage.getBusinessByUserId(userId);
+      
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      const listings = await storage.getMarketplaceListingsByBusinessId(business.id);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching member marketplace listings:", error);
+      res.status(500).json({ message: "Failed to fetch marketplace listings" });
+    }
+  });
+  
+  // Create marketplace listing
+  app.post('/api/my/marketplace', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const business = await storage.getBusinessByUserId(userId);
+      
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      const listingData = validateRequest(insertMarketplaceListingSchema, { ...req.body, businessId: business.id });
+      const listing = await storage.createMarketplaceListing(listingData);
+      
+      res.json(listing);
+    } catch (error) {
+      console.error("Error creating marketplace listing:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create marketplace listing" });
+    }
+  });
+  
+  // Update marketplace listing
+  app.put('/api/my/marketplace/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const listingId = parseInt(req.params.id);
+      
+      if (isNaN(listingId)) {
+        return res.status(400).json({ message: "Invalid listing ID" });
+      }
+      
+      const business = await storage.getBusinessByUserId(userId);
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      // Verify listing belongs to this business
+      const listing = await storage.getMarketplaceListingById(listingId);
+      if (!listing || listing.businessId !== business.id) {
+        return res.status(403).json({ message: "You don't have permission to update this listing" });
+      }
+      
+      const listingData = {
+        ...req.body,
+        businessId: business.id // Ensure businessId is not changed
+      };
+      
+      const updatedListing = await storage.updateMarketplaceListing(listingId, listingData);
+      res.json(updatedListing);
+    } catch (error) {
+      console.error("Error updating marketplace listing:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to update marketplace listing" });
+    }
+  });
+  
+  // Delete marketplace listing
+  app.delete('/api/my/marketplace/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const listingId = parseInt(req.params.id);
+      
+      if (isNaN(listingId)) {
+        return res.status(400).json({ message: "Invalid listing ID" });
+      }
+      
+      const business = await storage.getBusinessByUserId(userId);
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      // Verify listing belongs to this business
+      const listing = await storage.getMarketplaceListingById(listingId);
+      if (!listing || listing.businessId !== business.id) {
+        return res.status(403).json({ message: "You don't have permission to delete this listing" });
+      }
+      
+      await storage.deleteMarketplaceListing(listingId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting marketplace listing:", error);
+      res.status(500).json({ message: "Failed to delete marketplace listing" });
+    }
+  });
+  
+  // Member barter listings routes
+  
+  // Get my barter listings
+  app.get('/api/my/barter', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const business = await storage.getBusinessByUserId(userId);
+      
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      const listings = await storage.getBarterListingsByBusinessId(business.id);
+      res.json(listings);
+    } catch (error) {
+      console.error("Error fetching member barter listings:", error);
+      res.status(500).json({ message: "Failed to fetch barter listings" });
+    }
+  });
+  
+  // Create barter listing
+  app.post('/api/my/barter', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const business = await storage.getBusinessByUserId(userId);
+      
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      const listingData = validateRequest(insertBarterListingSchema, { ...req.body, businessId: business.id });
+      const listing = await storage.createBarterListing(listingData);
+      
+      res.json(listing);
+    } catch (error) {
+      console.error("Error creating barter listing:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create barter listing" });
+    }
+  });
+  
+  // Update barter listing
+  app.put('/api/my/barter/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const listingId = parseInt(req.params.id);
+      
+      if (isNaN(listingId)) {
+        return res.status(400).json({ message: "Invalid listing ID" });
+      }
+      
+      const business = await storage.getBusinessByUserId(userId);
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      // Verify listing belongs to this business
+      const listing = await storage.getBarterListingById(listingId);
+      if (!listing || listing.businessId !== business.id) {
+        return res.status(403).json({ message: "You don't have permission to update this listing" });
+      }
+      
+      const listingData = {
+        ...req.body,
+        businessId: business.id // Ensure businessId is not changed
+      };
+      
+      const updatedListing = await storage.updateBarterListing(listingId, listingData);
+      res.json(updatedListing);
+    } catch (error) {
+      console.error("Error updating barter listing:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to update barter listing" });
+    }
+  });
+  
+  // Delete barter listing
+  app.delete('/api/my/barter/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const listingId = parseInt(req.params.id);
+      
+      if (isNaN(listingId)) {
+        return res.status(400).json({ message: "Invalid listing ID" });
+      }
+      
+      const business = await storage.getBusinessByUserId(userId);
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      // Verify listing belongs to this business
+      const listing = await storage.getBarterListingById(listingId);
+      if (!listing || listing.businessId !== business.id) {
+        return res.status(403).json({ message: "You don't have permission to delete this listing" });
+      }
+      
+      await storage.deleteBarterListing(listingId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting barter listing:", error);
+      res.status(500).json({ message: "Failed to delete barter listing" });
+    }
+  });
+  
+  // Barter exchange proposals
+  
+  // Create barter exchange proposal
+  app.post('/api/my/barter/exchanges', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const business = await storage.getBusinessByUserId(userId);
+      
+      if (!business) {
+        return res.status(404).json({ message: "Business profile not found" });
+      }
+      
+      const { listingId, responderBusinessId, initiatorOffer, notes } = req.body;
+      
+      if (!listingId || !responderBusinessId || !initiatorOffer) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // Verify the listing exists and belongs to the responder
+      const listing = await storage.getBarterListingById(parseInt(listingId));
+      if (!listing) {
+        return res.status(404).json({ message: "Barter listing not found" });
+      }
+      
+      if (listing.businessId !== parseInt(responderBusinessId)) {
+        return res.status(400).json({ message: "Listing does not belong to specified business" });
+      }
+      
+      const exchangeData = {
+        listingId: parseInt(listingId),
+        initiatorBusinessId: business.id,
+        responderBusinessId: parseInt(responderBusinessId),
+        initiatorOffer,
+        responderOffer: listing.offering, // Default to what they were offering in listing
+        status: 'proposed',
+        notes,
+      };
+      
+      const exchange = await storage.createBarterExchange(exchangeData);
+      res.json(exchange);
+    } catch (error) {
+      console.error("Error creating barter exchange:", error);
+      res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create barter exchange" });
+    }
+  });
+  
   // Admin routes
   
   // Upload member list
