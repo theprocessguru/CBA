@@ -27,13 +27,13 @@ const Navbar = () => {
                 </span>
               </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <div className="hidden sm:ml-6 sm:flex sm:space-x-8 sm:items-center sm:h-16">
               <Link href="/">
                 <a className={`border-b-2 ${
                   isActive('/') 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 pt-1 pb-2.5`}>
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
                   Home
                 </a>
               </Link>
@@ -42,7 +42,7 @@ const Navbar = () => {
                   isActive('/directory') 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 pt-1 pb-2.5`}>
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
                   Directory
                 </a>
               </Link>
@@ -51,7 +51,7 @@ const Navbar = () => {
                   isActive('/marketplace') 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 pt-1 pb-2.5`}>
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
                   Marketplace
                 </a>
               </Link>
@@ -60,7 +60,7 @@ const Navbar = () => {
                   isActive('/about') 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 pt-1 pb-2.5`}>
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
                   About
                 </a>
               </Link>
@@ -69,7 +69,7 @@ const Navbar = () => {
                   isActive('/contact') 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 pt-1 pb-2.5`}>
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
                   Contact
                 </a>
               </Link>
