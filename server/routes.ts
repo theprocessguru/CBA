@@ -7,6 +7,7 @@ import * as Papa from "papaparse";
 import { insertBusinessSchema, insertProductSchema, insertOfferSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { getGHLService } from "./ghlService";
 
 // Setup multer for file uploads
 const upload = multer({
@@ -238,6 +239,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Create new business
         business = await storage.createBusiness(businessData);
+        
+        // Auto-sync new member to GHL
+        const ghlService = getGHLService();
+        if (ghlService) {
+          try {
+            const user = await storage.getUser(userId);
+            if (user && user.email) {
+              const memberData = {
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                businessName: business.name,
+                membershipTier: 'Standard'
+              };
+              
+              await ghlService.syncBusinessMember(memberData);
+              console.log(`New member ${user.email} synced to GHL successfully`);
+            }
+          } catch (ghlError) {
+            console.error("Failed to sync new member to GHL:", ghlError);
+            // Don't fail the business creation if GHL sync fails
+          }
+        }
       }
       
       res.json(business);
@@ -698,6 +722,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating barter exchange:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create barter exchange" });
+    }
+  });
+  
+  // GHL Integration routes
+  
+  // Test GHL connection
+  app.get('/api/ghl/test', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const ghlService = getGHLService();
+      if (!ghlService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const isConnected = await ghlService.testConnection();
+      res.json({ 
+        connected: isConnected,
+        message: isConnected ? "GHL connection successful" : "GHL connection failed"
+      });
+    } catch (error) {
+      console.error("Error testing GHL connection:", error);
+      res.status(500).json({ message: "Failed to test GHL connection" });
+    }
+  });
+  
+  // Sync member to GHL
+  app.post('/api/ghl/sync-member', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const ghlService = getGHLService();
+      if (!ghlService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const { email, businessName } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Get user and business info
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const business = await storage.getBusinessByUserId(user.id);
+      
+      const memberData = {
+        email: user.email || email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        businessName: business?.name || businessName,
+        membershipTier: 'Standard'
+      };
+      
+      const ghlContact = await ghlService.syncBusinessMember(memberData);
+      res.json({ 
+        success: true, 
+        ghlContactId: ghlContact.id,
+        message: "Member synced to Go High Level successfully"
+      });
+    } catch (error) {
+      console.error("Error syncing member to GHL:", error);
+      res.status(500).json({ message: "Failed to sync member to GHL" });
     }
   });
   
