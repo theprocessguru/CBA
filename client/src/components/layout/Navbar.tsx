@@ -22,9 +22,16 @@ const Navbar = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
-                <span className="text-primary font-accent font-bold text-xl cursor-pointer">
-                  Croydon Business Association
-                </span>
+                <div className="flex items-center space-x-3 cursor-pointer">
+                  <img 
+                    src="/attached_assets/CBA LOGO.png" 
+                    alt="CBA Logo" 
+                    className="h-10 w-10"
+                  />
+                  <span className="text-primary font-accent font-bold text-xl">
+                    Croydon Business Association
+                  </span>
+                </div>
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8 sm:items-center sm:h-16">
