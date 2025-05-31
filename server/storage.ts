@@ -26,6 +26,7 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   isUserAdmin(id: string): Promise<boolean>;
   

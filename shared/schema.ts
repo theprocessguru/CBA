@@ -354,3 +354,9 @@ export type Transaction = typeof transactions.$inferSelect;
 
 export type InsertBarterExchange = z.infer<typeof insertBarterExchangeSchema>;
 export type BarterExchange = typeof barterExchanges.$inferSelect;
+
+export type InsertCbaCause = z.infer<typeof insertCbaCauseSchema>;
+export type CbaCause = typeof cbaCauses.$inferSelect;
+
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+export type Donation = typeof donations.$inferSelect;

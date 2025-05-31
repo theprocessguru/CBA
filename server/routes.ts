@@ -226,6 +226,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to create category" });
     }
   });
+
+  // Get CBA causes for trial membership
+  app.get('/api/cba-causes', async (req, res) => {
+    try {
+      const causes = await storage.listCbaCauses();
+      res.json(causes);
+    } catch (error) {
+      console.error("Error fetching CBA causes:", error);
+      res.status(500).json({ message: "Failed to fetch causes" });
+    }
+  });
+
+  // Start trial membership with donation
+  app.post('/api/start-trial-membership', isAuthenticated, async (req: any, res) => {
+    try {
+      const { causeId, tier } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Check if user already has trial membership
+      const user = await storage.getUser(userId);
+      if (user?.isTrialMember) {
+        return res.status(400).json({ message: "User already has trial membership" });
+      }
+
+      // For now, return success without payment processing
+      // When Stripe keys are available, this will create payment intent
+      await storage.updateUser(userId, {
+        membershipTier: tier,
+        membershipStatus: "trial",
+        isTrialMember: true,
+        membershipStartDate: new Date(),
+        membershipEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      });
+
+      res.json({ 
+        success: true, 
+        requiresPayment: false, // Will be true when Stripe is configured
+        message: "Trial membership started successfully" 
+      });
+    } catch (error) {
+      console.error("Error starting trial membership:", error);
+      res.status(500).json({ message: "Failed to start trial membership" });
+    }
+  });
   
   // Member routes (protected)
   

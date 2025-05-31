@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Directory from "@/pages/directory";
 import Business from "@/pages/business";
 import Marketplace from "@/pages/marketplace";
+import TrialMembership from "@/pages/trial-membership";
 import Dashboard from "@/pages/dashboard";
 import BusinessProfile from "@/pages/dashboard/business-profile";
 import ProductsServices from "@/pages/dashboard/products-services";
@@ -108,6 +109,11 @@ function Router() {
             <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
             <p>Page under construction.</p>
           </div>
+        </MainLayout>
+      </Route>
+      <Route path="/trial-membership">
+        <MainLayout>
+          <TrialMembership />
         </MainLayout>
       </Route>
       
