@@ -58,6 +58,9 @@ export interface IStorage {
   listCategories(): Promise<Category[]>;
   createCategory(category: InsertCategory): Promise<Category>;
   
+  // CBA Causes operations
+  listCbaCauses(): Promise<CbaCause[]>;
+  
   // Member Import operations
   createMemberImport(memberImport: InsertMemberImport): Promise<MemberImport>;
   updateMemberImport(id: number, memberImport: Partial<InsertMemberImport>): Promise<MemberImport>;
@@ -110,6 +113,18 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, userData: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...userData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }
@@ -302,6 +317,11 @@ export class DatabaseStorage implements IStorage {
   async createCategory(category: InsertCategory): Promise<Category> {
     const [newCategory] = await db.insert(categories).values(category).returning();
     return newCategory;
+  }
+
+  // CBA Causes operations
+  async listCbaCauses(): Promise<CbaCause[]> {
+    return await db.select().from(cbaCauses).orderBy(cbaCauses.name);
   }
 
   // Member Import operations
