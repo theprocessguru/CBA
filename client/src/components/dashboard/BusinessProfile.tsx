@@ -9,12 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Business, Category } from "@shared/schema";
+import { Plus } from "lucide-react";
 
 // Extended validation schema for business profile
 const businessProfileSchema = z.object({
@@ -30,7 +32,7 @@ const businessProfileSchema = z.object({
   coverImage: z.string().url("Please enter a valid image URL").optional().or(z.literal("")),
   categoryId: z.string().optional(),
   established: z.string().optional(),
-  employeeCount: z.string().transform(val => val === "" ? undefined : parseInt(val)).optional(),
+  employeeCount: z.string().optional(),
 });
 
 type BusinessProfileFormValues = z.infer<typeof businessProfileSchema>;
@@ -39,6 +41,9 @@ const BusinessProfile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryDescription, setNewCategoryDescription] = useState("");
   
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: ['/api/my/business'],
@@ -96,6 +101,33 @@ const BusinessProfile = () => {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update business profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation for creating new category
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: { name: string; description: string }) => {
+      const response = await apiRequest("POST", "/api/categories", data);
+      return response.json();
+    },
+    onSuccess: async (newCategory: Category) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/categories'] });
+      // Auto-select the newly created category
+      form.setValue("categoryId", String(newCategory.id));
+      setIsAddCategoryOpen(false);
+      setNewCategoryName("");
+      setNewCategoryDescription("");
+      toast({
+        title: "Success",
+        description: "New category added and selected",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create category",
         variant: "destructive",
       });
     },
