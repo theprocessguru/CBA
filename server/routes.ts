@@ -203,6 +203,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch categories" });
     }
   });
+
+  // Create new category
+  app.post('/api/categories', isAuthenticated, async (req, res) => {
+    try {
+      const categoryData = validateRequest(insertCategorySchema, req.body);
+      
+      // Check for duplicate category names (case-insensitive)
+      const existingCategories = await storage.listCategories();
+      const isDuplicate = existingCategories.some(
+        cat => cat.name.toLowerCase() === categoryData.name.toLowerCase()
+      );
+      
+      if (isDuplicate) {
+        return res.status(400).json({ message: "Category with this name already exists" });
+      }
+      
+      const category = await storage.createCategory(categoryData);
+      res.json(category);
+    } catch (error) {
+      console.error("Error creating category:", error);
+      res.status(500).json({ message: "Failed to create category" });
+    }
+  });
   
   // Member routes (protected)
   
