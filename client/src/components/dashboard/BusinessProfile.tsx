@@ -67,7 +67,7 @@ const BusinessProfile = () => {
       website: business?.website || "",
       logo: business?.logo || "",
       coverImage: business?.coverImage || "",
-      categoryId: business?.categoryId ? String(business.categoryId) : undefined,
+      categoryId: business?.categoryId ? String(business.categoryId) : "",
       established: business?.established || "",
       employeeCount: business?.employeeCount ? String(business.employeeCount) : "",
     };
@@ -87,7 +87,7 @@ const BusinessProfile = () => {
   
   // Mutation for creating/updating business profile
   const updateBusinessMutation = useMutation({
-    mutationFn: (data: BusinessProfileFormValues) => {
+    mutationFn: (data: any) => {
       return apiRequest("POST", "/api/my/business", data);
     },
     onSuccess: async () => {
@@ -136,9 +136,40 @@ const BusinessProfile = () => {
   const onSubmit = (data: BusinessProfileFormValues) => {
     const formattedData = {
       ...data,
-      categoryId: data.categoryId ? parseInt(data.categoryId) : undefined,
+      categoryId: data.categoryId && data.categoryId !== "" ? parseInt(data.categoryId) : undefined,
+      employeeCount: data.employeeCount && data.employeeCount !== "" ? parseInt(data.employeeCount) : undefined,
     };
     updateBusinessMutation.mutate(formattedData);
+  };
+
+  const handleAddCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a category name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for duplicate category names (case-insensitive)
+    const isDuplicate = categories?.some(
+      cat => cat.name.toLowerCase() === newCategoryName.trim().toLowerCase()
+    );
+
+    if (isDuplicate) {
+      toast({
+        title: "Error",
+        description: "This category already exists. Please choose a different name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createCategoryMutation.mutate({
+      name: newCategoryName.trim(),
+      description: newCategoryDescription.trim() || `${newCategoryName.trim()} category`,
+    });
   };
   
   const isLoading = isLoadingBusiness || isLoadingCategories;
@@ -211,23 +242,80 @@ const BusinessProfile = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Business Category</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {categories?.map((category) => (
-                              <SelectItem key={category.id} value={String(category.id)}>
-                                {category.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <div className="flex gap-2">
+                          <Select 
+                            onValueChange={field.onChange} 
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories?.map((category) => (
+                                <SelectItem key={category.id} value={String(category.id)}>
+                                  {category.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="icon">
+                                <Plus className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add New Category</DialogTitle>
+                                <DialogDescription>
+                                  Create a new business category if you don't see yours in the list. We'll check for duplicates to keep the list clean.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4 py-4">
+                                <div>
+                                  <label className="text-sm font-medium mb-2 block">Category Name*</label>
+                                  <Input
+                                    placeholder="e.g., Automotive Services"
+                                    value={newCategoryName}
+                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                  />
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium mb-2 block">Description (Optional)</label>
+                                  <Textarea
+                                    placeholder="Brief description of this category"
+                                    value={newCategoryDescription}
+                                    onChange={(e) => setNewCategoryDescription(e.target.value)}
+                                    className="min-h-[80px]"
+                                  />
+                                </div>
+                              </div>
+                              <DialogFooter>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setIsAddCategoryOpen(false);
+                                    setNewCategoryName("");
+                                    setNewCategoryDescription("");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  onClick={handleAddCategory}
+                                  disabled={createCategoryMutation.isPending}
+                                >
+                                  {createCategoryMutation.isPending ? "Adding..." : "Add Category"}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                        <FormDescription>
+                          Select your business category or add a new one if not listed
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
