@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import cbaLogo from "@assets/CBA LOGO.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,9 +25,9 @@ const Navbar = () => {
               <Link href="/">
                 <div className="flex items-center space-x-3 cursor-pointer">
                   <img 
-                    src="/attached_assets/CBA LOGO.png" 
+                    src={cbaLogo} 
                     alt="CBA Logo" 
-                    className="h-10 w-10"
+                    className="h-10 w-10 object-contain"
                   />
                   <span className="text-primary font-accent font-bold text-xl">
                     Croydon Business Association
