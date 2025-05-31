@@ -110,7 +110,11 @@ const BusinessProfile = () => {
   const createCategoryMutation = useMutation({
     mutationFn: async (data: { name: string; description: string }) => {
       const response = await apiRequest("POST", "/api/categories", data);
-      return response.json();
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || 'Failed to create category');
+      }
+      return await response.json();
     },
     onSuccess: async (newCategory: Category) => {
       queryClient.invalidateQueries({ queryKey: ['/api/categories'] });

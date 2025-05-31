@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import multer from "multer";
 import * as Papa from "papaparse";
-import { insertBusinessSchema, insertProductSchema, insertOfferSchema } from "@shared/schema";
+import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
