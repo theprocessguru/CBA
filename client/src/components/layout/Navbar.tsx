@@ -19,23 +19,23 @@ const Navbar = () => {
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
+        <div className="flex justify-between items-center h-16">
+          <div className="flex items-center min-w-0 flex-1">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
-                <div className="flex items-center space-x-3 cursor-pointer">
+                <div className="flex items-center space-x-2 cursor-pointer">
                   <img 
                     src={cbaLogo} 
                     alt="CBA Logo" 
-                    className="h-10 w-10 object-contain"
+                    className="h-8 w-8 object-contain"
                   />
-                  <span className="text-primary font-accent font-bold text-xl">
+                  <span className="text-primary font-accent font-bold text-lg lg:text-xl truncate">
                     Croydon Business Association
                   </span>
                 </div>
               </Link>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:space-x-8 sm:items-center sm:h-16">
+            <div className="hidden lg:ml-6 lg:flex lg:space-x-6 lg:items-center lg:h-16">
               <Link href="/">
                 <a className={`border-b-2 ${
                   isActive('/') 
@@ -83,7 +83,7 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          <div className="hidden sm:ml-4 sm:flex sm:items-center sm:space-x-3 flex-shrink-0">
             <button 
               type="button" 
               className="bg-white p-1 rounded-full text-neutral-500 hover:text-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -93,14 +93,14 @@ const Navbar = () => {
             </button>
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button className="ml-4">
-                  Member Dashboard
+                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                  Dashboard
                 </Button>
               </Link>
             ) : (
               <a href="/api/login">
-                <Button className="ml-4">
-                  Member Login
+                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                  Login
                 </Button>
               </a>
             )}
