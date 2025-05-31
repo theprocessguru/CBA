@@ -35,6 +35,14 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   isAdmin: boolean("is_admin").default(false),
+  membershipTier: varchar("membership_tier").default("Starter Tier"), // Starter Tier, Growth Tier, Strategic Tier, Patron Tier, Partner
+  membershipStatus: varchar("membership_status").default("trial"), // trial, active, suspended, expired
+  membershipStartDate: timestamp("membership_start_date").defaultNow(),
+  membershipEndDate: timestamp("membership_end_date"),
+  isTrialMember: boolean("is_trial_member").default(true),
+  trialDonationPaid: boolean("trial_donation_paid").default(false),
+  donationAmount: decimal("donation_amount", { precision: 10, scale: 2 }),
+  donationDate: timestamp("donation_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -176,6 +184,29 @@ export const barterExchanges = pgTable("barter_exchanges", {
   completedAt: timestamp("completed_at"),
 });
 
+// CBA causes and donations
+export const cbaCauses = pgTable("cba_causes", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  targetAmount: decimal("target_amount", { precision: 10, scale: 2 }),
+  raisedAmount: decimal("raised_amount", { precision: 10, scale: 2 }).default("0.00"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const donations = pgTable("donations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  causeId: integer("cause_id").notNull().references(() => cbaCauses.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  isTrialDonation: boolean("is_trial_donation").default(false),
+  donationDate: timestamp("donation_date").defaultNow(),
+  status: varchar("status").default("completed"), // pending, completed, failed, refunded
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -290,6 +321,8 @@ export const insertMarketplaceListingSchema = createInsertSchema(marketplaceList
 export const insertBarterListingSchema = createInsertSchema(barterListings).omit({ id: true });
 export const insertTransactionSchema = createInsertSchema(transactions).omit({ id: true });
 export const insertBarterExchangeSchema = createInsertSchema(barterExchanges).omit({ id: true });
+export const insertCbaCauseSchema = createInsertSchema(cbaCauses).omit({ id: true });
+export const insertDonationSchema = createInsertSchema(donations).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;

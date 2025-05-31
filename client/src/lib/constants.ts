@@ -17,6 +17,66 @@ export const BUSINESS_CATEGORIES = [
   { id: 16, name: "Other", icon: "more_horiz" }
 ];
 
+export const MEMBERSHIP_TIERS = {
+  "Starter Tier": {
+    name: "Starter Tier",
+    color: "bg-blue-500",
+    features: [
+      "Basic directory listing",
+      "Access to member directory",
+      "Email newsletters",
+      "Community forum access"
+    ]
+  },
+  "Growth Tier": {
+    name: "Growth Tier", 
+    color: "bg-green-500",
+    features: [
+      "Enhanced directory listing",
+      "Business profile with images",
+      "Event discounts",
+      "Basic networking events",
+      "Monthly business tips"
+    ]
+  },
+  "Strategic Tier": {
+    name: "Strategic Tier",
+    color: "bg-purple-500", 
+    features: [
+      "Premium directory placement",
+      "Multiple business images",
+      "Priority event booking",
+      "Quarterly networking sessions",
+      "Business consultation access",
+      "Marketing support"
+    ]
+  },
+  "Patron Tier": {
+    name: "Patron Tier",
+    color: "bg-orange-500",
+    features: [
+      "Featured directory listings",
+      "Event hosting opportunities", 
+      "Speaking opportunities",
+      "Exclusive patron events",
+      "Business mentoring access",
+      "PR and media support"
+    ]
+  },
+  "Partner": {
+    name: "Partner",
+    color: "bg-amber-500",
+    features: [
+      "Top-tier directory prominence",
+      "Co-branded event opportunities",
+      "Board meeting participation",
+      "Strategic planning input",
+      "Executive networking access",
+      "Full marketing partnership"
+    ]
+  }
+};
+
 export const MEMBER_BENEFITS = [
   "Access to exclusive member-only deals and discounts",
   "Networking opportunities with other local businesses",
