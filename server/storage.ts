@@ -5,6 +5,7 @@ import {
   offers,
   categories,
   memberImports,
+  cbaCauses,
   type User,
   type UpsertUser,
   type Business,
@@ -17,6 +18,7 @@ import {
   type InsertCategory,
   type MemberImport,
   type InsertMemberImport,
+  type CbaCause,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql } from "drizzle-orm";
