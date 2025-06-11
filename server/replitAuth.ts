@@ -12,6 +12,9 @@ if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
 
+// Add custom domain to the list of supported domains
+const supportedDomains = process.env.REPLIT_DOMAINS.split(",").concat(["members.croydonba.org.uk"]).filter(Boolean);
+
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -84,8 +87,7 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  for (const domain of supportedDomains) {
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
