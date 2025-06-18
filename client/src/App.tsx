@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import Directory from "@/pages/directory";
 import Business from "@/pages/business";
 import Marketplace from "@/pages/marketplace";
@@ -44,7 +46,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    window.location.href = "/api/login";
+    window.location.href = "/login";
     return <div>Redirecting to login...</div>;
   }
 
@@ -62,7 +64,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!user || !user.isAdmin) {
+  if (!user || !(user as any).isAdmin) {
     return <NotFound />;
   }
 
@@ -70,12 +72,30 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
     <Switch>
-      {/* Public Pages */}
+      {/* Authentication Routes */}
+      <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/register">
+        <Register />
+      </Route>
+      
+      {/* Home Route - Shows dashboard for authenticated users, landing page for others */}
       <Route path="/">
         <MainLayout>
-          <Home />
+          {isLoading ? (
+            <div className="flex justify-center items-center min-h-screen">
+              <Skeleton className="h-24 w-24 rounded-full" />
+            </div>
+          ) : isAuthenticated ? (
+            <Dashboard />
+          ) : (
+            <Home />
+          )}
         </MainLayout>
       </Route>
       <Route path="/directory">
