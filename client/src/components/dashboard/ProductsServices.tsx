@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGetMyProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from "@/hooks/useProducts";
 import { useQuery } from "@tanstack/react-query";
+import { useGetBusiness } from "@/hooks/useBusiness";
 import { Product, Category } from "@shared/schema";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,7 +43,8 @@ const ProductsServices = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productsToShow, setProductsToShow] = useState<"all" | "products" | "services">("all");
   
-  const { data: products, isLoading: isLoadingProducts } = useGetMyProducts();
+  const { data: business, isLoading: isLoadingBusiness, error: businessError } = useGetBusiness();
+  const { data: products, isLoading: isLoadingProducts, error: productsError } = useGetMyProducts();
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
@@ -115,6 +117,48 @@ const ProductsServices = () => {
     deleteProduct.mutate(id);
   };
   
+  // Show loading state
+  if (isLoadingBusiness || isLoadingProducts || isLoadingCategories) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Show business profile required message
+  if (!business || businessError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 px-4">
+        <div className="text-center max-w-md">
+          <Package className="mx-auto h-12 w-12 text-neutral-400 mb-4" />
+          <h2 className="text-xl font-semibold text-neutral-900 mb-2">Business Profile Required</h2>
+          <p className="text-neutral-600 mb-6">
+            You need to create your business profile before you can manage products and services.
+          </p>
+          <Button asChild>
+            <a href="/dashboard/business-profile">Create Business Profile</a>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   // Filter products based on selected tab
   const filteredProducts = products?.filter(product => {
     if (productsToShow === "all") return true;
