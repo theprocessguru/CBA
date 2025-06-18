@@ -15,6 +15,9 @@ if (!process.env.REPLIT_DOMAINS) {
 // Add custom domain to the list of supported domains
 const supportedDomains = process.env.REPLIT_DOMAINS.split(",").concat(["members.croydonba.org.uk"]).filter(Boolean);
 
+// Log supported domains for debugging
+console.log("Supported authentication domains:", supportedDomains);
+
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -104,14 +107,34 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const hostname = req.hostname;
+    const strategyName = `replitauth:${hostname}`;
+    
+    // Check if strategy exists, fallback to first supported domain if not
+    const fallbackStrategy = supportedDomains.includes(hostname) 
+      ? strategyName 
+      : `replitauth:${supportedDomains[0]}`;
+    
+    console.log(`Login attempt from ${hostname}, using strategy: ${fallbackStrategy}`);
+    
+    passport.authenticate(fallbackStrategy, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const hostname = req.hostname;
+    const strategyName = `replitauth:${hostname}`;
+    
+    // Check if strategy exists, fallback to first supported domain if not
+    const fallbackStrategy = supportedDomains.includes(hostname) 
+      ? strategyName 
+      : `replitauth:${supportedDomains[0]}`;
+    
+    console.log(`Callback from ${hostname}, using strategy: ${fallbackStrategy}`);
+    
+    passport.authenticate(fallbackStrategy, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
