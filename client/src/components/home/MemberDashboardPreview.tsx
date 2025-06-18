@@ -170,7 +170,7 @@ const MemberDashboardPreview = () => {
         <div className="text-center mt-10">
           <p className="text-neutral-600 mb-4">Ready to access these features and connect with other local businesses?</p>
           <Button 
-            onClick={() => window.location.href = "/api/login"}
+            onClick={() => window.location.href = "/register"}
             className="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark text-white font-medium rounded-md shadow-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
             size="lg"
           >

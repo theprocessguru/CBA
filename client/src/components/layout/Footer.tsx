@@ -48,7 +48,7 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-medium mb-4">Member Resources</h4>
             <ul className="space-y-2">
-              <li><a href="/api/login" className="text-neutral-400 hover:text-white transition">Login / Register</a></li>
+              <li><Link href="/login"><a className="text-neutral-400 hover:text-white transition">Login / Register</a></Link></li>
               <li><a href="#" className="text-neutral-400 hover:text-white transition">Member Benefits</a></li>
               <li><Link href="/dashboard/business-profile"><a className="text-neutral-400 hover:text-white transition">Update Your Profile</a></Link></li>
               <li><Link href="/dashboard/special-offers"><a className="text-neutral-400 hover:text-white transition">Create Special Offers</a></Link></li>

@@ -98,11 +98,11 @@ const Navbar = () => {
                 </Button>
               </Link>
             ) : (
-              <a href="/api/login">
+              <Link href="/login">
                 <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
                   Login
                 </Button>
-              </a>
+              </Link>
             )}
           </div>
           <div className="-mr-2 flex items-center sm:hidden">
@@ -181,11 +181,11 @@ const Navbar = () => {
                   </Button>
                 </Link>
               ) : (
-                <a href="/api/login">
+                <Link href="/login">
                   <Button className="w-full flex justify-center">
                     Member Login
                   </Button>
-                </a>
+                </Link>
               )}
             </div>
           </div>
