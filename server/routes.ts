@@ -242,7 +242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/start-trial-membership', isAuthenticated, async (req: any, res) => {
     try {
       const { causeId, tier } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       
       // Check if user already has trial membership
       const user = await storage.getUser(userId);
@@ -276,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current member's business profile
   app.get('/api/my/business', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -293,7 +293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create or update business profile
   app.post('/api/my/business', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const businessData = validateRequest(insertBusinessSchema, { ...req.body, userId });
       
       // Check if business already exists
@@ -341,7 +341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get member's products
   app.get('/api/my/products', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -359,7 +359,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create product
   app.post('/api/my/products', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -379,7 +379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update product
   app.put('/api/my/products/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const productId = parseInt(req.params.id);
       
       if (isNaN(productId)) {
@@ -413,7 +413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete product
   app.delete('/api/my/products/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const productId = parseInt(req.params.id);
       
       if (isNaN(productId)) {
@@ -442,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get member's offers
   app.get('/api/my/offers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -460,7 +460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create offer
   app.post('/api/my/offers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -480,7 +480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update offer
   app.put('/api/my/offers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const offerId = parseInt(req.params.id);
       
       if (isNaN(offerId)) {
@@ -514,7 +514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete offer
   app.delete('/api/my/offers/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const offerId = parseInt(req.params.id);
       
       if (isNaN(offerId)) {
@@ -545,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get my marketplace listings
   app.get('/api/my/marketplace', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -563,7 +563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create marketplace listing
   app.post('/api/my/marketplace', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -583,7 +583,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update marketplace listing
   app.put('/api/my/marketplace/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const listingId = parseInt(req.params.id);
       
       if (isNaN(listingId)) {
@@ -617,7 +617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete marketplace listing
   app.delete('/api/my/marketplace/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const listingId = parseInt(req.params.id);
       
       if (isNaN(listingId)) {
@@ -648,7 +648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get my barter listings
   app.get('/api/my/barter', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -666,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create barter listing
   app.post('/api/my/barter', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -686,7 +686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update barter listing
   app.put('/api/my/barter/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const listingId = parseInt(req.params.id);
       
       if (isNaN(listingId)) {
@@ -720,7 +720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete barter listing
   app.delete('/api/my/barter/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const listingId = parseInt(req.params.id);
       
       if (isNaN(listingId)) {
@@ -751,7 +751,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create barter exchange proposal
   app.post('/api/my/barter/exchanges', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
@@ -863,7 +863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
       
-      const adminId = req.user.claims.sub;
+      const adminId = req.user.id;
       const fileBuffer = req.file.buffer.toString();
       
       // Create a record of the import
@@ -975,7 +975,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get member import history
   app.get('/api/admin/member-imports', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const adminId = req.user.claims.sub;
+      const adminId = req.user.id;
       const imports = await storage.getMemberImportsByAdminId(adminId);
       res.json(imports);
     } catch (error) {
