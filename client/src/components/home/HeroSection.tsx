@@ -10,14 +10,14 @@ const HeroSection = () => {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Supporting Local Businesses in Croydon</h1>
             <p className="text-xl mb-8 text-gray-700">Connecting businesses, promoting local commerce, and building a stronger community.</p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href="/api/login">
+              <Link href="/register">
                 <Button 
                   className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md text-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
                   size="lg"
                 >
                   Join the Association
                 </Button>
-              </a>
+              </Link>
               <Link href="/directory">
                 <Button 
                   variant="outline" 

@@ -113,14 +113,14 @@ const SpecialOffers = () => {
               <p className="text-neutral-100">Join the Croydon Business Association today to access exclusive deals and connect with other local businesses.</p>
             </div>
             <div className="flex-shrink-0">
-              <a href="/api/login">
+              <Link href="/register">
                 <Button 
                   className="inline-block px-6 py-3 bg-white text-primary font-medium rounded-md shadow-md hover:bg-neutral-100 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
                   size="lg"
                 >
                   Become a Member
                 </Button>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
