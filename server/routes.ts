@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import multer from "multer";
 import * as Papa from "papaparse";
 import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema } from "@shared/schema";
@@ -43,7 +43,7 @@ const isAdmin = async (req: Request, res: Response, next: Function) => {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
+  await setupLocalAuth(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
