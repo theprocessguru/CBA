@@ -95,6 +95,13 @@ export interface IStorage {
   getBarterExchangesByBusinessId(businessId: number, role?: 'initiator' | 'responder'): Promise<BarterExchange[]>;
   createBarterExchange(exchange: InsertBarterExchange): Promise<BarterExchange>;
   updateBarterExchange(id: string, exchange: Partial<InsertBarterExchange>): Promise<BarterExchange>;
+  
+  // Content report operations
+  createContentReport(report: InsertContentReport): Promise<ContentReport>;
+  getContentReportById(id: number): Promise<ContentReport | undefined>;
+  getContentReportsByStatus(status?: string): Promise<ContentReport[]>;
+  updateContentReport(id: number, report: Partial<InsertContentReport>): Promise<ContentReport>;
+  getContentReportsForContent(contentType: string, contentId: number): Promise<ContentReport[]>;
 }
 
 export class DatabaseStorage implements IStorage {

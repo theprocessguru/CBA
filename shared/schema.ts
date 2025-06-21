@@ -324,6 +324,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({ i
 export const insertBarterExchangeSchema = createInsertSchema(barterExchanges).omit({ id: true });
 export const insertCbaCauseSchema = createInsertSchema(cbaCauses).omit({ id: true });
 export const insertDonationSchema = createInsertSchema(donations).omit({ id: true });
+export const insertContentReportSchema = createInsertSchema(contentReports).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -361,3 +362,6 @@ export type CbaCause = typeof cbaCauses.$inferSelect;
 
 export type InsertDonation = z.infer<typeof insertDonationSchema>;
 export type Donation = typeof donations.$inferSelect;
+
+export type InsertContentReport = z.infer<typeof insertContentReportSchema>;
+export type ContentReport = typeof contentReports.$inferSelect;
