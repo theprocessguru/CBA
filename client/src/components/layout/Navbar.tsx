@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowLeft } from "lucide-react";
+import { Search, ArrowLeft, Home } from "lucide-react";
 import cbaLogo from "@assets/CBA LOGO.png";
 
 const Navbar = () => {
@@ -21,17 +21,27 @@ const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center min-w-0 flex-1">
-            <div className="flex-shrink-0 flex items-center space-x-3">
+            <div className="flex-shrink-0 flex items-center space-x-2">
               {location !== '/' && (
                 <Button 
                   variant="ghost" 
                   size="icon"
                   onClick={() => window.history.back()}
-                  className="text-neutral-600 hover:text-neutral-800"
+                  className="text-neutral-600 hover:text-neutral-800 lg:hidden"
+                  title="Go back"
                 >
                   <ArrowLeft size={20} />
                 </Button>
               )}
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => window.location.href = '/'}
+                className="text-neutral-600 hover:text-neutral-800 lg:hidden"
+                title="Home"
+              >
+                <Home size={20} />
+              </Button>
               <Link href="/">
                 <div className="flex items-center space-x-2 cursor-pointer">
                   <img 

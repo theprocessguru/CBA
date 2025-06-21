@@ -15,7 +15,8 @@ import {
   X,
   Flag,
   BarChart3,
-  ArrowLeft
+  ArrowLeft,
+  Home
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -34,27 +35,37 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col">
       {/* Mobile Header */}
-      <div className="bg-primary text-white py-4 px-4 flex justify-between items-center md:hidden">
-        <div className="flex items-center space-x-2">
+      <div className="bg-primary text-white py-3 px-4 flex justify-between items-center md:hidden shadow-md">
+        <div className="flex items-center space-x-3">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => window.history.back()}
-            className="text-white hover:bg-primary-dark"
+            className="text-white hover:bg-primary/20 p-1"
+            title="Go back"
           >
-            <ArrowLeft />
+            <ArrowLeft size={18} />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => window.location.href = '/'}
+            className="text-white hover:bg-primary/20 p-1"
+            title="Home"
+          >
+            <Home size={18} />
           </Button>
           <Link href="/dashboard">
-            <a className="font-bold text-lg">CBA Dashboard</a>
+            <a className="font-bold text-lg">Dashboard</a>
           </Link>
         </div>
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={toggleMobileSidebar}
-          className="text-white hover:bg-primary-dark"
+          className="text-white hover:bg-primary/20"
         >
-          {isMobileSidebarOpen ? <X /> : <Menu />}
+          {isMobileSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </Button>
       </div>
 
