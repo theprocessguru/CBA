@@ -88,6 +88,12 @@ function Router() {
       <Route path="/register">
         <Register />
       </Route>
+      <Route path="/forgot-password">
+        <ForgotPassword />
+      </Route>
+      <Route path="/reset-password">
+        <ResetPassword />
+      </Route>
       
       {/* Home Route - Shows dashboard for authenticated users, landing page for others */}
       <Route path="/">
