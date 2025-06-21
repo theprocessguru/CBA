@@ -478,12 +478,65 @@ const ProductsServices = () => {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>Product Image</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <div className="space-y-3">
+                        {field.value && (
+                          <div className="relative">
+                            <img 
+                              src={field.value} 
+                              alt="Product image" 
+                              className="w-full h-48 object-cover rounded-lg border"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="icon"
+                              className="absolute -top-2 -right-2 h-6 w-6"
+                              onClick={() => field.onChange("")}
+                            >
+                              <X size={12} />
+                            </Button>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="flex-1"
+                            disabled={isUploadingImage}
+                            onClick={() => {
+                              const input = document.createElement('input');
+                              input.type = 'file';
+                              input.accept = 'image/*';
+                              input.capture = 'environment';
+                              input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0];
+                                if (file) handleImageUpload(file, field.onChange);
+                              };
+                              input.click();
+                            }}
+                          >
+                            {isUploadingImage ? (
+                              <>Uploading...</>
+                            ) : (
+                              <>
+                                <Upload size={16} className="mr-2" />
+                                Upload Image
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        <Input 
+                          placeholder="Or enter image URL" 
+                          value={field.value}
+                          onChange={field.onChange}
+                          className="text-sm"
+                        />
+                      </div>
                     </FormControl>
                     <FormDescription>
-                      Provide a URL to an image of your product or service
+                      Upload or provide a URL for your product/service image
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
