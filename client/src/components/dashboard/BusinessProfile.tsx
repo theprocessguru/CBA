@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Business, Category } from "@shared/schema";
-import { Plus } from "lucide-react";
+import { Plus, Upload, X } from "lucide-react";
 
 // Extended validation schema for business profile
 const businessProfileSchema = z.object({
@@ -44,6 +44,8 @@ const BusinessProfile = () => {
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: ['/api/my/business'],
@@ -105,6 +107,48 @@ const BusinessProfile = () => {
       });
     },
   });
+
+  // Image upload mutation
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      return await response.json();
+    },
+    onError: (error) => {
+      toast({
+        title: "Upload Error",
+        description: error instanceof Error ? error.message : "Failed to upload image",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleImageUpload = async (file: File, fieldName: 'logo' | 'coverImage') => {
+    if (fieldName === 'logo') setIsUploadingLogo(true);
+    if (fieldName === 'coverImage') setIsUploadingCover(true);
+
+    try {
+      const result = await uploadImageMutation.mutateAsync(file);
+      form.setValue(fieldName, result.imageUrl);
+      toast({
+        title: "Image Uploaded",
+        description: "Your image has been uploaded successfully",
+      });
+    } catch (error) {
+      // Error already handled in mutation
+    } finally {
+      if (fieldName === 'logo') setIsUploadingLogo(false);
+      if (fieldName === 'coverImage') setIsUploadingCover(false);
+    }
+  };
 
   // Mutation for creating new category
   const createCategoryMutation = useMutation({
@@ -444,12 +488,65 @@ const BusinessProfile = () => {
                     name="logo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Logo URL</FormLabel>
+                        <FormLabel>Business Logo</FormLabel>
                         <FormControl>
-                          <Input placeholder="https://example.com/logo.png" {...field} />
+                          <div className="space-y-3">
+                            {field.value && (
+                              <div className="relative">
+                                <img 
+                                  src={field.value} 
+                                  alt="Business logo" 
+                                  className="w-32 h-32 object-cover rounded-lg border"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute -top-2 -right-2 h-6 w-6"
+                                  onClick={() => field.onChange("")}
+                                >
+                                  <X size={12} />
+                                </Button>
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1"
+                                disabled={isUploadingLogo}
+                                onClick={() => {
+                                  const input = document.createElement('input');
+                                  input.type = 'file';
+                                  input.accept = 'image/*';
+                                  input.capture = 'environment';
+                                  input.onchange = (e) => {
+                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                    if (file) handleImageUpload(file, 'logo');
+                                  };
+                                  input.click();
+                                }}
+                              >
+                                {isUploadingLogo ? (
+                                  <>Uploading...</>
+                                ) : (
+                                  <>
+                                    <Upload size={16} className="mr-2" />
+                                    Upload Logo
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                            <Input 
+                              placeholder="Or enter image URL" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              className="text-sm"
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
-                          Provide a URL to your business logo image
+                          Upload or provide a URL for your business logo
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -461,12 +558,65 @@ const BusinessProfile = () => {
                     name="coverImage"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Cover Image URL</FormLabel>
+                        <FormLabel>Cover Image</FormLabel>
                         <FormControl>
-                          <Input placeholder="https://example.com/cover.jpg" {...field} />
+                          <div className="space-y-3">
+                            {field.value && (
+                              <div className="relative">
+                                <img 
+                                  src={field.value} 
+                                  alt="Cover image" 
+                                  className="w-full h-32 object-cover rounded-lg border"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  className="absolute -top-2 -right-2 h-6 w-6"
+                                  onClick={() => field.onChange("")}
+                                >
+                                  <X size={12} />
+                                </Button>
+                              </div>
+                            )}
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className="flex-1"
+                                disabled={isUploadingCover}
+                                onClick={() => {
+                                  const input = document.createElement('input');
+                                  input.type = 'file';
+                                  input.accept = 'image/*';
+                                  input.capture = 'environment';
+                                  input.onchange = (e) => {
+                                    const file = (e.target as HTMLInputElement).files?.[0];
+                                    if (file) handleImageUpload(file, 'coverImage');
+                                  };
+                                  input.click();
+                                }}
+                              >
+                                {isUploadingCover ? (
+                                  <>Uploading...</>
+                                ) : (
+                                  <>
+                                    <Upload size={16} className="mr-2" />
+                                    Upload Cover
+                                  </>
+                                )}
+                              </Button>
+                            </div>
+                            <Input 
+                              placeholder="Or enter image URL" 
+                              value={field.value}
+                              onChange={field.onChange}
+                              className="text-sm"
+                            />
+                          </div>
                         </FormControl>
                         <FormDescription>
-                          Provide a URL to a cover image for your business
+                          Upload or provide a URL for your business cover image
                         </FormDescription>
                         <FormMessage />
                       </FormItem>

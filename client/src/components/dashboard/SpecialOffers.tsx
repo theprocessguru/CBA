@@ -13,7 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
-import { Tag, Plus, Clock, Store, CalendarIcon, PenSquare, Trash2, AlertCircle, MoreVertical } from "lucide-react";
+import { Tag, Plus, Clock, Store, CalendarIcon, PenSquare, Trash2, AlertCircle, MoreVertical, Upload, X } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -41,12 +41,35 @@ type OfferFormValues = z.infer<typeof offerSchema>;
 const SpecialOffers = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const { data: offers, isLoading } = useGetMyOffers();
   
   const createOffer = useCreateOffer();
   const updateOffer = useUpdateOffer();
   const deleteOffer = useDeleteOffer();
+
+  // Image upload functionality
+  const handleImageUpload = async (file: File, setValue: (value: string) => void) => {
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      const result = await response.json();
+      setValue(result.imageUrl);
+    } catch (error) {
+      console.error('Image upload error:', error);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
   
   const form = useForm<OfferFormValues>({
     resolver: zodResolver(offerSchema),

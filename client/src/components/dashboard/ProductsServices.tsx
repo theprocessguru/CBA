@@ -20,7 +20,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Package, Plus, PenSquare, Trash2, Tag, FileText, MoreVertical } from "lucide-react";
+import { Package, Plus, PenSquare, Trash2, Tag, FileText, MoreVertical, Upload, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/utils";
 
@@ -42,6 +42,7 @@ const ProductsServices = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productsToShow, setProductsToShow] = useState<"all" | "products" | "services">("all");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   
   const { data: business, isLoading: isLoadingBusiness, error: businessError } = useGetBusiness();
   const { data: products, isLoading: isLoadingProducts, error: productsError } = useGetMyProducts();
@@ -52,6 +53,28 @@ const ProductsServices = () => {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
+
+  // Image upload functionality
+  const handleImageUpload = async (file: File, setValue: (value: string) => void) => {
+    setIsUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      const result = await response.json();
+      setValue(result.imageUrl);
+    } catch (error) {
+      console.error('Image upload error:', error);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
   
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),

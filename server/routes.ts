@@ -14,7 +14,20 @@ import { emailService } from "./emailService";
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    // Allow only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed!'));
+    }
+  }
 });
+
+// Image upload helper function
+const saveImageAsDataUrl = (buffer: Buffer, mimetype: string): string => {
+  return `data:${mimetype};base64,${buffer.toString('base64')}`;
+};
 
 // Helper to handle validation errors
 const validateRequest = <T extends z.ZodType>(schema: T, data: unknown): z.infer<T> => {
@@ -45,6 +58,21 @@ const isAdmin = async (req: Request, res: Response, next: Function) => {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupLocalAuth(app);
+
+  // Image upload endpoint
+  app.post('/api/upload/image', isAuthenticated, upload.single('image'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      const imageDataUrl = saveImageAsDataUrl(req.file.buffer, req.file.mimetype);
+      res.json({ imageUrl: imageDataUrl });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
