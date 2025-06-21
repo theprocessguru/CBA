@@ -24,13 +24,25 @@ const MemberDirectory = () => {
   });
   
   const filteredBusinesses = (businesses || []).filter(business => {
-    if (!business || !searchQuery) return true;
+    if (!business) return false;
     
-    const query = searchQuery.toLowerCase();
-    return (
-      business.name?.toLowerCase().includes(query) ||
-      (business.description && business.description.toLowerCase().includes(query))
-    );
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = (
+        business.name?.toLowerCase().includes(query) ||
+        (business.description && business.description.toLowerCase().includes(query))
+      );
+      if (!matchesSearch) return false;
+    }
+    
+    // Apply category filter
+    if (categoryFilter && categoryFilter !== "") {
+      const categoryId = parseInt(categoryFilter);
+      if (business.categoryId !== categoryId) return false;
+    }
+    
+    return true;
   });
   
   return (
