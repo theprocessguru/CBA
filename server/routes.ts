@@ -976,6 +976,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put('/api/admin/users/:userId/suspend', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      const adminId = req.user.id;
+      
+      if (!reason) {
+        return res.status(400).json({ message: "Suspension reason is required" });
+      }
+      
+      const user = await storage.suspendUser(userId, reason, adminId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error suspending user:", error);
+      res.status(500).json({ message: "Failed to suspend user" });
+    }
+  });
+
+  app.put('/api/admin/users/:userId/reactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await storage.reactivateUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error reactivating user:", error);
+      res.status(500).json({ message: "Failed to reactivate user" });
+    }
+  });
+
   app.put('/api/admin/users/:id/suspend', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const userId = req.params.id;

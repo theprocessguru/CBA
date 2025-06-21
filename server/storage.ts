@@ -173,6 +173,60 @@ export class DatabaseStorage implements IStorage {
     return !!user?.isAdmin;
   }
 
+  async listUsers(options?: { search?: string; status?: string; limit?: number }): Promise<User[]> {
+    let query = db.select().from(users);
+    
+    if (options?.search) {
+      query = query.where(
+        or(
+          like(users.email, `%${options.search}%`),
+          like(users.firstName, `%${options.search}%`),
+          like(users.lastName, `%${options.search}%`)
+        )
+      );
+    }
+    
+    if (options?.status && options.status !== 'all') {
+      query = query.where(eq(users.accountStatus, options.status));
+    }
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    return await query;
+  }
+
+  async suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        accountStatus: 'suspended',
+        suspensionReason: reason,
+        suspendedAt: new Date(),
+        suspendedBy: suspendedBy,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async reactivateUser(userId: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        accountStatus: 'active',
+        suspensionReason: null,
+        suspendedAt: null,
+        suspendedBy: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
   // Business operations
   async getBusinessById(id: number): Promise<Business | undefined> {
     const [business] = await db.select().from(businesses).where(eq(businesses.id, id));
