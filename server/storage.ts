@@ -34,6 +34,9 @@ export interface IStorage {
   updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   isUserAdmin(id: string): Promise<boolean>;
+  listUsers(options?: { search?: string; status?: string; limit?: number }): Promise<User[]>;
+  suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User>;
+  reactivateUser(userId: string): Promise<User>;
   
   // Business operations
   getBusinessById(id: number): Promise<Business | undefined>;

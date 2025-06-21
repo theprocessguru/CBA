@@ -904,6 +904,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User management endpoints (admin only)
+  app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { search, status, limit } = req.query;
+      const users = await storage.listUsers({
+        search,
+        status,
+        limit: limit ? parseInt(limit) : undefined
+      });
+      res.json(users);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.put('/api/admin/users/:id/suspend', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const adminId = req.user.id;
+      const { reason } = req.body;
+      
+      if (!reason) {
+        return res.status(400).json({ message: "Suspension reason is required" });
+      }
+      
+      const user = await storage.suspendUser(userId, reason, adminId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error suspending user:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to suspend user" 
+      });
+    }
+  });
+
+  app.put('/api/admin/users/:id/reactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.params.id;
+      const user = await storage.reactivateUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error reactivating user:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to reactivate user" 
+      });
+    }
+  });
+
   // Admin routes
   
   // Upload member list
