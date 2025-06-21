@@ -18,6 +18,7 @@ import { Business, Offer, Product } from "@shared/schema";
 
 const DashboardOverview = () => {
   const { user } = useAuth();
+  const [isContactSupportOpen, setIsContactSupportOpen] = useState(false);
   
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: ['/api/my/business'],
@@ -169,9 +170,26 @@ const DashboardOverview = () => {
         
         <div className="text-center">
           <p className="text-neutral-600 mb-4">Need help with your business profile or listings?</p>
-          <Button className="mr-2" variant="outline">View Guide</Button>
-          <Button>Contact Support</Button>
+          <Button 
+            className="mr-2" 
+            variant="outline"
+            onClick={() => window.open('mailto:support@croydonba.org.uk?subject=Business Profile Help', '_blank')}
+          >
+            <HelpCircle className="mr-2 h-4 w-4" />
+            View Guide
+          </Button>
+          <Button
+            onClick={() => setIsContactSupportOpen(true)}
+          >
+            Contact Support
+          </Button>
         </div>
+        
+        <ContactSupportDialog
+          open={isContactSupportOpen}
+          onOpenChange={setIsContactSupportOpen}
+          initialSubject="Business Listing Support Request"
+        />
       </div>
     </div>
   );

@@ -74,6 +74,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Support contact endpoint
+  app.post('/api/support/contact', async (req, res) => {
+    try {
+      const { name, email, subject, category, message } = req.body;
+      
+      if (!name || !email || !subject || !message) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // In a real application, you would send this to your support system
+      // For now, we'll log it and return success
+      console.log('Support request received:', {
+        name,
+        email,
+        subject,
+        category,
+        message,
+        timestamp: new Date().toISOString()
+      });
+
+      // You could integrate with:
+      // - Email service (SendGrid, Mailgun, etc.)
+      // - Support ticket system (Zendesk, Freshdesk, etc.)
+      // - Slack notifications
+      // - Database storage for admin review
+
+      res.json({ 
+        success: true, 
+        message: "Support request received successfully" 
+      });
+    } catch (error) {
+      console.error("Error processing support request:", error);
+      res.status(500).json({ message: "Failed to send support request" });
+    }
+  });
+
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
