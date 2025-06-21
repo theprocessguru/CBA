@@ -44,6 +44,10 @@ export const users = pgTable("users", {
   trialDonationPaid: boolean("trial_donation_paid").default(false),
   donationAmount: decimal("donation_amount", { precision: 10, scale: 2 }),
   donationDate: timestamp("donation_date"),
+  accountStatus: varchar("account_status").notNull().default("active"), // active, suspended, closed
+  suspensionReason: text("suspension_reason"),
+  suspendedAt: timestamp("suspended_at"),
+  suspendedBy: varchar("suspended_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
