@@ -13,7 +13,8 @@ import {
   LogOut,
   Menu,
   X,
-  Flag
+  Flag,
+  BarChart3
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -150,6 +151,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               
               {user?.isAdmin && (
                 <>
+                  <Link href="/dashboard/analytics">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/analytics' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <BarChart3 className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/analytics' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Analytics
+                    </a>
+                  </Link>
+                  
                   <Link href="/dashboard/user-management">
                     <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/user-management' 

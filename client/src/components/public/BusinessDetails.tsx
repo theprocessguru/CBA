@@ -21,8 +21,10 @@ import {
   CalendarDays
 } from "lucide-react";
 import { formatCurrency, formatDate, getRandomCoverImage } from "@/lib/utils";
+import { useEffect } from "react";
 import { ReportDialog } from "@/components/ui/report-dialog";
 import { useAuth } from "@/hooks/useAuth";
+import { useInteractionTracking } from "@/hooks/useInteractionTracking";
 
 interface BusinessDetailsProps {
   businessId: number | string;
@@ -30,6 +32,7 @@ interface BusinessDetailsProps {
 
 const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
   const { isAuthenticated } = useAuth();
+  const { trackView, trackContact } = useInteractionTracking();
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: [`/api/businesses/${businessId}`],
     enabled: !!businessId,
@@ -56,6 +59,13 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
   };
   
   const isLoading = isLoadingBusiness || isLoadingProducts || isLoadingOffers || isLoadingCategories;
+  
+  // Track business view when component mounts and business data is available
+  useEffect(() => {
+    if (business && !isLoadingBusiness) {
+      trackView('business', business.id);
+    }
+  }, [business, isLoadingBusiness, trackView]);
   
   if (isLoading) {
     return (
@@ -155,7 +165,11 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
                 {business.phone && (
                   <div className="flex items-center">
                     <Phone className="h-5 w-5 mr-3 text-neutral-500" />
-                    <a href={`tel:${business.phone}`} className="text-neutral-700 hover:text-primary">
+                    <a 
+                      href={`tel:${business.phone}`} 
+                      className="text-neutral-700 hover:text-primary"
+                      onClick={() => trackContact('business', business.id, 'phone')}
+                    >
                       {business.phone}
                     </a>
                   </div>
@@ -164,7 +178,11 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
                 {business.email && (
                   <div className="flex items-center">
                     <Mail className="h-5 w-5 mr-3 text-neutral-500" />
-                    <a href={`mailto:${business.email}`} className="text-neutral-700 hover:text-primary">
+                    <a 
+                      href={`mailto:${business.email}`} 
+                      className="text-neutral-700 hover:text-primary"
+                      onClick={() => trackContact('business', business.id, 'email')}
+                    >
                       {business.email}
                     </a>
                   </div>

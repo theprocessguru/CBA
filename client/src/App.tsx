@@ -18,6 +18,7 @@ import SpecialOffers from "@/pages/dashboard/special-offers";
 import MemberDirectory from "@/pages/dashboard/member-directory";
 import ContentReports from "@/pages/admin/ContentReports";
 import UserManagement from "@/pages/admin/UserManagement";
+import Analytics from "@/pages/admin/Analytics";
 import UploadMembers from "@/pages/admin/upload-members";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -173,6 +174,11 @@ function Router() {
       <Route path="/dashboard/user-management">
         <AdminRoute>
           <UserManagement />
+        </AdminRoute>
+      </Route>
+      <Route path="/dashboard/analytics">
+        <AdminRoute>
+          <Analytics />
         </AdminRoute>
       </Route>
       
