@@ -208,6 +208,21 @@ export const donations = pgTable("donations", {
   status: varchar("status").default("completed"), // pending, completed, failed, refunded
 });
 
+// Content reports table
+export const contentReports = pgTable("content_reports", {
+  id: serial("id").primaryKey(),
+  reporterUserId: varchar("reporter_user_id").notNull().references(() => users.id),
+  contentType: varchar("content_type").notNull(), // 'business', 'product', 'offer', 'marketplace_listing', 'barter_listing'
+  contentId: integer("content_id").notNull(),
+  reason: varchar("reason").notNull(), // 'inappropriate', 'spam', 'misleading', 'offensive', 'other'
+  description: text("description"),
+  status: varchar("status").notNull().default("pending"), // pending, reviewed, resolved, dismissed
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {

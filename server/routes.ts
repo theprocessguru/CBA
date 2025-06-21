@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import multer from "multer";
 import * as Papa from "papaparse";
-import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema } from "@shared/schema";
+import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema, insertContentReportSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
@@ -854,6 +854,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Content reporting endpoints
+  app.post('/api/content-reports', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const reportData = validateRequest(insertContentReportSchema, { 
+        ...req.body, 
+        reporterUserId: userId 
+      });
+      
+      const report = await storage.createContentReport(reportData);
+      res.json(report);
+    } catch (error) {
+      console.error("Error creating content report:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to create report" 
+      });
+    }
+  });
+
+  app.get('/api/admin/content-reports', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { status } = req.query;
+      const reports = await storage.getContentReportsByStatus(status);
+      res.json(reports);
+    } catch (error) {
+      console.error("Error fetching content reports:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  app.put('/api/admin/content-reports/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const reportId = parseInt(req.params.id);
+      const adminId = req.user.id;
+      const updateData = {
+        ...req.body,
+        reviewedBy: adminId,
+        reviewedAt: new Date(),
+      };
+      
+      const report = await storage.updateContentReport(reportId, updateData);
+      res.json(report);
+    } catch (error) {
+      console.error("Error updating content report:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to update report" 
+      });
+    }
+  });
+
   // Admin routes
   
   // Upload member list

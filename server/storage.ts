@@ -19,6 +19,9 @@ import {
   type MemberImport,
   type InsertMemberImport,
   type CbaCause,
+  contentReports,
+  type ContentReport,
+  type InsertContentReport,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql } from "drizzle-orm";
@@ -354,6 +357,48 @@ export class DatabaseStorage implements IStorage {
       .from(memberImports)
       .where(eq(memberImports.adminId, adminId))
       .orderBy(desc(memberImports.createdAt));
+  }
+  
+  // Content report operations
+  async createContentReport(report: InsertContentReport): Promise<ContentReport> {
+    const [contentReport] = await db
+      .insert(contentReports)
+      .values(report)
+      .returning();
+    return contentReport;
+  }
+
+  async getContentReportById(id: number): Promise<ContentReport | undefined> {
+    const [report] = await db.select().from(contentReports).where(eq(contentReports.id, id));
+    return report;
+  }
+
+  async getContentReportsByStatus(status?: string): Promise<ContentReport[]> {
+    if (status) {
+      return await db.select().from(contentReports).where(eq(contentReports.status, status));
+    }
+    return await db.select().from(contentReports);
+  }
+
+  async updateContentReport(id: number, report: Partial<InsertContentReport>): Promise<ContentReport> {
+    const [updatedReport] = await db
+      .update(contentReports)
+      .set(report)
+      .where(eq(contentReports.id, id))
+      .returning();
+    return updatedReport;
+  }
+
+  async getContentReportsForContent(contentType: string, contentId: number): Promise<ContentReport[]> {
+    return await db
+      .select()
+      .from(contentReports)
+      .where(
+        and(
+          eq(contentReports.contentType, contentType),
+          eq(contentReports.contentId, contentId)
+        )
+      );
   }
 }
 
