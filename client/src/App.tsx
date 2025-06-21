@@ -190,6 +190,11 @@ function Router() {
           <Analytics />
         </AdminRoute>
       </Route>
+      <Route path="/dashboard/email-settings">
+        <AdminRoute>
+          <EmailSettings />
+        </AdminRoute>
+      </Route>
       
       {/* Admin Routes */}
       <Route path="/admin/upload-members">
