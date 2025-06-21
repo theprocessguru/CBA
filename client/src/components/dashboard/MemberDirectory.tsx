@@ -15,20 +15,20 @@ const MemberDirectory = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   
-  const { data: businesses, isLoading } = useQuery<Business[]>({
+  const { data: businesses = [], isLoading } = useQuery<Business[]>({
     queryKey: [`/api/businesses${categoryFilter ? `?categoryId=${categoryFilter}` : ''}`],
   });
   
-  const { data: categories, isLoading: isLoadingCategories } = useQuery({
+  const { data: categories = [], isLoading: isLoadingCategories } = useQuery({
     queryKey: ['/api/categories'],
   });
   
-  const filteredBusinesses = businesses?.filter(business => {
-    if (!searchQuery) return true;
+  const filteredBusinesses = (businesses || []).filter(business => {
+    if (!business || !searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
     return (
-      business.name.toLowerCase().includes(query) ||
+      business.name?.toLowerCase().includes(query) ||
       (business.description && business.description.toLowerCase().includes(query))
     );
   });
