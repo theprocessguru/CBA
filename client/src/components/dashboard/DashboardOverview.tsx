@@ -18,7 +18,6 @@ import { Business, Offer, Product } from "@shared/schema";
 
 const DashboardOverview = () => {
   const { user } = useAuth();
-  const [isContactSupportOpen, setIsContactSupportOpen] = useState(false);
   
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: ['/api/my/business'],
@@ -165,8 +164,6 @@ const DashboardOverview = () => {
             </Button>
           </Link>
         </div>
-        
-
       </div>
     </div>
   );
