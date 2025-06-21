@@ -14,7 +14,8 @@ import {
   Menu,
   X,
   Flag,
-  BarChart3
+  BarChart3,
+  ArrowLeft
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -34,9 +35,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     <div className="min-h-screen bg-neutral-50 flex flex-col">
       {/* Mobile Header */}
       <div className="bg-primary text-white py-4 px-4 flex justify-between items-center md:hidden">
-        <Link href="/dashboard">
-          <a className="font-bold text-lg">CBA Dashboard</a>
-        </Link>
+        <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => window.history.back()}
+            className="text-white hover:bg-primary-dark"
+          >
+            <ArrowLeft />
+          </Button>
+          <Link href="/dashboard">
+            <a className="font-bold text-lg">CBA Dashboard</a>
+          </Link>
+        </div>
         <Button 
           variant="ghost" 
           size="icon" 
@@ -55,7 +66,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                      fixed md:static top-0 left-0 h-full md:h-auto z-40`}
         >
           <div className="p-4 bg-primary text-white hidden md:block">
-            <h1 className="text-lg font-bold">CBA Dashboard</h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-lg font-bold">CBA Dashboard</h1>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => window.history.back()}
+                className="text-white hover:bg-primary-dark"
+              >
+                <ArrowLeft size={18} />
+              </Button>
+            </div>
           </div>
           
           <div className="p-4">
