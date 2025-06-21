@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import multer from "multer";
 import * as Papa from "papaparse";
-import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema, insertContentReportSchema } from "@shared/schema";
+import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema, insertContentReportSchema, insertInteractionSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
@@ -901,6 +901,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ 
         message: error instanceof Error ? error.message : "Failed to update report" 
       });
+    }
+  });
+
+  // Interaction tracking endpoints
+  app.post('/api/interactions', async (req: any, res) => {
+    try {
+      const userId = req.user?.id || null; // Allow anonymous tracking
+      const interactionData = validateRequest(insertInteractionSchema, {
+        ...req.body,
+        userId,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent')
+      });
+      
+      const interaction = await storage.recordInteraction(interactionData);
+      res.json(interaction);
+    } catch (error) {
+      console.error("Error recording interaction:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to record interaction" 
+      });
+    }
+  });
+
+  // Analytics endpoints (admin only)
+  app.get('/api/admin/analytics/interactions', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { contentType, timeframe } = req.query;
+      const stats = await storage.getInteractionStats(contentType, timeframe);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching interaction stats:", error);
+      res.status(500).json({ message: "Failed to fetch interaction stats" });
+    }
+  });
+
+  app.get('/api/admin/analytics/offers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const stats = await storage.getOfferEngagementStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching offer engagement stats:", error);
+      res.status(500).json({ message: "Failed to fetch offer engagement stats" });
+    }
+  });
+
+  app.get('/api/admin/analytics/top-content/:type', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { type } = req.params;
+      const { limit } = req.query;
+      const topContent = await storage.getTopViewedContent(type, limit ? parseInt(limit) : 10);
+      res.json(topContent);
+    } catch (error) {
+      console.error("Error fetching top content:", error);
+      res.status(500).json({ message: "Failed to fetch top content" });
     }
   });
 

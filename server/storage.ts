@@ -22,6 +22,9 @@ import {
   contentReports,
   type ContentReport,
   type InsertContentReport,
+  interactions,
+  type Interaction,
+  type InsertInteraction,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql } from "drizzle-orm";
@@ -108,6 +111,13 @@ export interface IStorage {
   getContentReportsByStatus(status?: string): Promise<ContentReport[]>;
   updateContentReport(id: number, report: Partial<InsertContentReport>): Promise<ContentReport>;
   getContentReportsForContent(contentType: string, contentId: number): Promise<ContentReport[]>;
+  
+  // Interaction tracking operations
+  recordInteraction(interaction: InsertInteraction): Promise<Interaction>;
+  getInteractionStats(contentType?: string, timeframe?: string): Promise<any>;
+  getOfferEngagementStats(): Promise<any>;
+  getBusinessProfileViews(businessId: number): Promise<number>;
+  getTopViewedContent(contentType: string, limit?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -402,6 +412,112 @@ export class DatabaseStorage implements IStorage {
           eq(contentReports.contentId, contentId)
         )
       );
+  }
+  
+  // Interaction tracking operations
+  async recordInteraction(interaction: InsertInteraction): Promise<Interaction> {
+    const [newInteraction] = await db
+      .insert(interactions)
+      .values(interaction)
+      .returning();
+    return newInteraction;
+  }
+
+  async getInteractionStats(contentType?: string, timeframe?: string): Promise<any> {
+    let query = db
+      .select({
+        contentType: interactions.contentType,
+        contentId: interactions.contentId,
+        interactionType: interactions.interactionType,
+        count: sql<number>`count(*)::int`
+      })
+      .from(interactions);
+    
+    const conditions = [];
+    
+    if (contentType) {
+      conditions.push(eq(interactions.contentType, contentType));
+    }
+    
+    if (timeframe) {
+      const now = new Date();
+      let startDate: Date;
+      
+      switch (timeframe) {
+        case 'today':
+          startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        default:
+          startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      }
+      
+      conditions.push(gte(interactions.createdAt, startDate));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query
+      .groupBy(interactions.contentType, interactions.contentId, interactions.interactionType)
+      .orderBy(desc(sql`count(*)`));
+  }
+
+  async getOfferEngagementStats(): Promise<any> {
+    return await db
+      .select({
+        offerId: interactions.contentId,
+        views: sql<number>`count(case when ${interactions.interactionType} = 'view' then 1 end)::int`,
+        clicks: sql<number>`count(case when ${interactions.interactionType} = 'click' then 1 end)::int`,
+        contacts: sql<number>`count(case when ${interactions.interactionType} = 'contact' then 1 end)::int`,
+        uniqueUsers: sql<number>`count(distinct ${interactions.userId})::int`
+      })
+      .from(interactions)
+      .where(eq(interactions.contentType, 'offer'))
+      .groupBy(interactions.contentId)
+      .orderBy(desc(sql`count(*)`));
+  }
+
+  async getBusinessProfileViews(businessId: number): Promise<number> {
+    const result = await db
+      .select({
+        count: sql<number>`count(*)::int`
+      })
+      .from(interactions)
+      .where(
+        and(
+          eq(interactions.contentType, 'business'),
+          eq(interactions.contentId, businessId),
+          eq(interactions.interactionType, 'view')
+        )
+      );
+    
+    return result[0]?.count || 0;
+  }
+
+  async getTopViewedContent(contentType: string, limit: number = 10): Promise<any[]> {
+    return await db
+      .select({
+        contentId: interactions.contentId,
+        views: sql<number>`count(*)::int`,
+        uniqueViews: sql<number>`count(distinct ${interactions.userId})::int`
+      })
+      .from(interactions)
+      .where(
+        and(
+          eq(interactions.contentType, contentType),
+          eq(interactions.interactionType, 'view')
+        )
+      )
+      .groupBy(interactions.contentId)
+      .orderBy(desc(sql`count(*)`))
+      .limit(limit);
   }
 }
 

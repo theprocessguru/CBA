@@ -223,6 +223,19 @@ export const contentReports = pgTable("content_reports", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Interaction tracking table
+export const interactions = pgTable("interactions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id), // null for anonymous views
+  contentType: varchar("content_type").notNull(), // 'business', 'product', 'offer', 'marketplace_listing'
+  contentId: integer("content_id").notNull(),
+  interactionType: varchar("interaction_type").notNull(), // 'view', 'click', 'contact', 'phone_click', 'email_click', 'website_click'
+  metadata: text("metadata"), // JSON string for additional data
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -340,6 +353,7 @@ export const insertBarterExchangeSchema = createInsertSchema(barterExchanges).om
 export const insertCbaCauseSchema = createInsertSchema(cbaCauses).omit({ id: true });
 export const insertDonationSchema = createInsertSchema(donations).omit({ id: true });
 export const insertContentReportSchema = createInsertSchema(contentReports).omit({ id: true });
+export const insertInteractionSchema = createInsertSchema(interactions).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -380,3 +394,6 @@ export type Donation = typeof donations.$inferSelect;
 
 export type InsertContentReport = z.infer<typeof insertContentReportSchema>;
 export type ContentReport = typeof contentReports.$inferSelect;
+
+export type InsertInteraction = z.infer<typeof insertInteractionSchema>;
+export type Interaction = typeof interactions.$inferSelect;
