@@ -166,30 +166,7 @@ const DashboardOverview = () => {
           </Link>
         </div>
         
-        <Separator className="my-6" />
-        
-        <div className="text-center">
-          <p className="text-neutral-600 mb-4">Need help with your business profile or listings?</p>
-          <Button 
-            className="mr-2" 
-            variant="outline"
-            onClick={() => window.open('mailto:support@croydonba.org.uk?subject=Business Profile Help', '_blank')}
-          >
-            <HelpCircle className="mr-2 h-4 w-4" />
-            View Guide
-          </Button>
-          <Button
-            onClick={() => setIsContactSupportOpen(true)}
-          >
-            Contact Support
-          </Button>
-        </div>
-        
-        <ContactSupportDialog
-          open={isContactSupportOpen}
-          onOpenChange={setIsContactSupportOpen}
-          initialSubject="Business Listing Support Request"
-        />
+
       </div>
     </div>
   );

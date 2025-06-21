@@ -56,7 +56,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Home size={18} />
           </Button>
           <Link href="/dashboard">
-            <a className="font-bold text-lg">Dashboard</a>
+            <a className="font-bold text-lg">My Business</a>
           </Link>
         </div>
         <Button 
@@ -78,7 +78,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         >
           <div className="p-4 bg-primary text-white hidden md:block">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-bold">CBA Dashboard</h1>
+              <h1 className="text-lg font-bold">My Business Dashboard</h1>
               <Button 
                 variant="ghost" 
                 size="icon" 
