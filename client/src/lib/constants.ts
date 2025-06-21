@@ -111,6 +111,7 @@ export const META_DESCRIPTIONS = {
   home: "Croydon Business Association - Supporting local businesses, promoting commerce, and building a stronger community in Croydon.",
   directory: "Browse our comprehensive directory of Croydon businesses. Find local services, products, and connect with business owners.",
   marketplace: "Shop local at our marketplace of products and services from Croydon businesses. Support your local economy and find what you need.",
+  offers: "Discover exclusive deals and special offers from Croydon Business Association members. Save money while supporting local businesses.",
   businessProfile: "View this business profile and discover their products, services, and special offers available to the community.",
   dashboard: "Member dashboard for Croydon Business Association. Manage your business profile, products, services, and special offers.",
 };

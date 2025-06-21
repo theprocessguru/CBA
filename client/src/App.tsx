@@ -130,6 +130,11 @@ function Router() {
           <Marketplace />
         </MainLayout>
       </Route>
+      <Route path="/offers">
+        <MainLayout>
+          <OffersPage />
+        </MainLayout>
+      </Route>
       <Route path="/about">
         <MainLayout>
           <div className="container mx-auto px-4 py-12">
