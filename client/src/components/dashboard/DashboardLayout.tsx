@@ -196,13 +196,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Separator className="my-4" />
             
             <div className="pt-2">
-              <a 
-                href="/api/logout" 
-                className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-neutral-700 hover:bg-neutral-100"
+              <button 
+                onClick={() => {
+                  fetch('/api/auth/logout', { method: 'POST' })
+                    .then(() => window.location.href = '/')
+                    .catch(() => window.location.href = '/');
+                }}
+                className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-neutral-700 hover:bg-neutral-100 w-full text-left"
               >
                 <LogOut className="mr-3 h-4 w-4 text-neutral-500" />
                 Sign Out
-              </a>
+              </button>
             </div>
           </div>
         </div>
