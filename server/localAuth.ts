@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { storage } from "./storage";
+import { emailService } from "./emailService";
 import type { Express, Request, Response, RequestHandler } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
@@ -164,14 +165,20 @@ export async function setupLocalAuth(app: Express) {
         expiresAt,
       });
 
-      // In a real application, you would send an email here
-      console.log(`Password reset token for ${email}: ${token}`);
-      console.log(`Reset URL: http://localhost:5000/reset-password?token=${token}`);
+      // Send password reset email
+      const emailSent = await emailService.sendPasswordResetEmail(
+        email, 
+        token, 
+        user.firstName || undefined
+      );
 
       res.json({ 
         message: "If an account with that email exists, a password reset link has been sent.",
+        emailSent,
         // For development/testing only - remove in production
-        resetUrl: `http://localhost:5000/reset-password?token=${token}`
+        ...(process.env.NODE_ENV === 'development' && {
+          resetUrl: `http://localhost:5000/reset-password?token=${token}`
+        })
       });
     } catch (error) {
       console.error("Forgot password error:", error);

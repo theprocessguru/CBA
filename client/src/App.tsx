@@ -21,6 +21,7 @@ import MemberDirectory from "@/pages/dashboard/member-directory";
 import ContentReports from "@/pages/admin/ContentReports";
 import UserManagement from "@/pages/admin/UserManagement";
 import Analytics from "@/pages/admin/Analytics";
+import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";

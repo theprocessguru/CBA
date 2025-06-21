@@ -8,6 +8,7 @@ import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCat
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
+import { emailService } from "./emailService";
 
 // Setup multer for file uploads
 const upload = multer({
@@ -1005,6 +1006,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json({ 
         message: error instanceof Error ? error.message : "Failed to reactivate user" 
       });
+    }
+  });
+
+  // Email configuration routes (admin only)
+  app.get('/api/admin/email/status', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const configured = emailService.isConfigured();
+      const connectionTest = configured ? await emailService.testConnection() : false;
+      res.json({ 
+        configured, 
+        connectionWorking: connectionTest 
+      });
+    } catch (error) {
+      console.error("Error checking email status:", error);
+      res.status(500).json({ message: "Failed to check email status" });
+    }
+  });
+
+  app.post('/api/admin/email/configure', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { host, port, secure, user, password, fromEmail, fromName } = req.body;
+      
+      if (!host || !port || !user || !password || !fromEmail || !fromName) {
+        return res.status(400).json({ message: "All email configuration fields are required" });
+      }
+
+      emailService.configure({
+        host,
+        port: parseInt(port),
+        secure: Boolean(secure),
+        user,
+        password,
+        fromEmail,
+        fromName,
+      });
+
+      // Test the configuration
+      const connectionTest = await emailService.testConnection();
+      if (!connectionTest) {
+        return res.status(400).json({ message: "Email configuration test failed. Please check your settings." });
+      }
+
+      res.json({ message: "Email service configured successfully" });
+    } catch (error) {
+      console.error("Error configuring email:", error);
+      res.status(500).json({ message: "Failed to configure email service" });
+    }
+  });
+
+  app.post('/api/admin/email/test', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      // Send a test email (we'll create a simple test method)
+      const success = await emailService.sendPasswordResetEmail(email, 'test-token-123', 'Test User');
+      
+      if (success) {
+        res.json({ message: "Test email sent successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ message: "Failed to send test email" });
     }
   });
 
