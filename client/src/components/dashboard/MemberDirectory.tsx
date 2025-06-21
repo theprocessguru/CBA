@@ -13,7 +13,7 @@ import { Link } from "wouter";
 
 const MemberDirectory = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   
   const { data: businesses = [], isLoading } = useQuery<Business[]>({
     queryKey: [`/api/businesses${categoryFilter ? `?categoryId=${categoryFilter}` : ''}`],
@@ -37,7 +37,7 @@ const MemberDirectory = () => {
     }
     
     // Apply category filter
-    if (categoryFilter && categoryFilter !== "") {
+    if (categoryFilter && categoryFilter !== "" && categoryFilter !== "all") {
       const categoryId = parseInt(categoryFilter);
       if (business.categoryId !== categoryId) return false;
     }
@@ -72,7 +72,7 @@ const MemberDirectory = () => {
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories?.map((category) => (
                   <SelectItem key={category.id} value={String(category.id)}>
                     {category.name}
@@ -183,7 +183,7 @@ const MemberDirectory = () => {
           <p className="text-neutral-600 mb-4">No businesses found matching your search criteria.</p>
           <Button variant="outline" onClick={() => {
             setSearchQuery("");
-            setCategoryFilter("");
+            setCategoryFilter("all");
           }}>
             Clear Filters
           </Button>
