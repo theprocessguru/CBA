@@ -21,12 +21,15 @@ import {
   CalendarDays
 } from "lucide-react";
 import { formatCurrency, formatDate, getRandomCoverImage } from "@/lib/utils";
+import { ReportDialog } from "@/components/ui/report-dialog";
+import { useAuth } from "@/hooks/useAuth";
 
 interface BusinessDetailsProps {
   businessId: number | string;
 }
 
 const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
+  const { isAuthenticated } = useAuth();
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: [`/api/businesses/${businessId}`],
     enabled: !!businessId,
