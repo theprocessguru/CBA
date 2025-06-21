@@ -16,6 +16,7 @@ import BusinessProfile from "@/pages/dashboard/business-profile";
 import ProductsServices from "@/pages/dashboard/products-services";
 import SpecialOffers from "@/pages/dashboard/special-offers";
 import MemberDirectory from "@/pages/dashboard/member-directory";
+import ContentReports from "@/pages/admin/ContentReports";
 import UploadMembers from "@/pages/admin/upload-members";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -162,6 +163,11 @@ function Router() {
         <ProtectedRoute>
           <MemberDirectory />
         </ProtectedRoute>
+      </Route>
+      <Route path="/dashboard/content-reports">
+        <AdminRoute>
+          <ContentReports />
+        </AdminRoute>
       </Route>
       
       {/* Admin Routes */}

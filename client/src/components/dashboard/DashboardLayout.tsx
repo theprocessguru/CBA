@@ -146,6 +146,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   Member Directory
                 </a>
               </Link>
+              
+              {user?.isAdmin && (
+                <Link href="/dashboard/content-reports">
+                  <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    location === '/dashboard/content-reports' 
+                      ? 'bg-primary text-white' 
+                      : 'text-neutral-700 hover:bg-neutral-100'
+                  }`}>
+                    <Flag className={`mr-3 h-4 w-4 ${
+                      location === '/dashboard/content-reports' ? 'text-white' : 'text-neutral-500'
+                    }`} />
+                    Content Reports
+                  </a>
+                </Link>
+              )}
             </nav>
             
             <Separator className="my-4" />
