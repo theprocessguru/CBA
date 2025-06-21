@@ -28,11 +28,11 @@ const validateRequest = <T extends z.ZodType>(schema: T, data: unknown): z.infer
 // Check if user is admin
 const isAdmin = async (req: Request, res: Response, next: Function) => {
   try {
-    const userId = req.user?.claims?.sub;
+    const userId = (req.session as any)?.userId;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
     
-    const isAdmin = await storage.isUserAdmin(userId);
-    if (!isAdmin) return res.status(403).json({ message: "Forbidden: Admin access required" });
+    const user = await storage.getUser(userId);
+    if (!user || !user.isAdmin) return res.status(403).json({ message: "Forbidden: Admin access required" });
     
     next();
   } catch (error) {
