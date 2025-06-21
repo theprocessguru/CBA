@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import BusinessProfile from "@/components/dashboard/BusinessProfile";
+import { PageHeader } from "@/components/ui/page-header";
 
 const BusinessProfilePage = () => {
   return (

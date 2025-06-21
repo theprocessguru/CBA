@@ -25,17 +25,19 @@ import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import BottomNavigation from "@/components/ui/bottom-navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen pb-16 md:pb-0">
       <Navbar />
       <main className="flex-grow">
         {children}
       </main>
       <Footer />
+      <BottomNavigation />
     </div>
   );
 }
