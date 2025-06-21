@@ -358,6 +358,7 @@ export const insertCbaCauseSchema = createInsertSchema(cbaCauses).omit({ id: tru
 export const insertDonationSchema = createInsertSchema(donations).omit({ id: true });
 export const insertContentReportSchema = createInsertSchema(contentReports).omit({ id: true });
 export const insertInteractionSchema = createInsertSchema(interactions).omit({ id: true });
+export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -401,3 +402,6 @@ export type ContentReport = typeof contentReports.$inferSelect;
 
 export type InsertInteraction = z.infer<typeof insertInteractionSchema>;
 export type Interaction = typeof interactions.$inferSelect;
+
+export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;

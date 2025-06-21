@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { storage } from "./storage";
 import type { Express, Request, Response, RequestHandler } from "express";
 import session from "express-session";
