@@ -6,72 +6,77 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/ui/page-header";
 import { BottomNavigation } from "@/components/ui/bottom-navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Check, Crown, Star, Users } from "lucide-react";
+import { Check, Crown, Star, Users, Heart, Gift } from "lucide-react";
 
 // Load Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
 const membershipPlans = [
   {
+    id: "free-trial",
+    name: "Free Trial Membership",
+    price: 0,
+    period: "12 months free",
+    description: "Get started with CBA - first year absolutely free!",
+    features: [
+      "Basic business listing",
+      "Contact information display", 
+      "Member directory access",
+      "Monthly newsletter",
+      "Community events access",
+      "12 months completely free",
+      "Optional donation welcome"
+    ],
+    icon: Users,
+    popular: true,
+    isFree: true
+  },
+  {
     id: "standard",
     name: "Standard Membership",
     price: 29.99,
     period: "monthly",
-    description: "Perfect for small businesses getting started",
+    description: "Perfect for established businesses",
     features: [
-      "Basic business listing",
-      "Contact information display",
-      "Member directory access",
-      "Monthly newsletter",
-      "Community events access"
-    ],
-    icon: Users,
-    popular: false
-  },
-  {
-    id: "premium",
-    name: "Premium Membership", 
-    price: 49.99,
-    period: "monthly",
-    description: "Enhanced visibility and networking opportunities",
-    features: [
+      "Everything in Free Trial",
       "Priority business listing",
       "Product & service showcase",
       "Special offers posting",
       "Enhanced profile features",
-      "Networking event priority",
-      "Business referral system",
-      "Analytics dashboard"
+      "Business referral system"
     ],
     icon: Star,
-    popular: true
+    popular: false
   },
   {
-    id: "enterprise",
-    name: "Enterprise Membership",
-    price: 99.99,
+    id: "premium",
+    name: "Premium Membership",
+    price: 49.99,
     period: "monthly", 
     description: "Maximum exposure and business growth tools",
     features: [
+      "Everything in Standard",
       "Featured business placement",
       "Unlimited product listings",
       "Premium offer highlighting",
       "Advanced analytics",
       "Priority customer support",
       "Co-marketing opportunities",
-      "Exclusive enterprise events",
-      "Custom business solutions"
+      "Exclusive premium events"
     ],
     icon: Crown,
     popular: false
   }
 ];
 
-const CheckoutForm = ({ planId, amount }: { planId: string, amount: number }) => {
+const CheckoutForm = ({ planId, amount, isDonation = false }: { planId: string, amount: number, isDonation?: boolean }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -90,7 +95,7 @@ const CheckoutForm = ({ planId, amount }: { planId: string, amount: number }) =>
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/dashboard?membership=success`,
+          return_url: `${window.location.origin}/dashboard?${isDonation ? 'donation=success' : 'membership=success'}`,
         },
       });
 
@@ -120,9 +125,127 @@ const CheckoutForm = ({ planId, amount }: { planId: string, amount: number }) =>
         className="w-full" 
         disabled={!stripe || isProcessing}
       >
-        {isProcessing ? "Processing..." : `Pay £${amount}`}
+        {isProcessing ? "Processing..." : isDonation ? `Donate £${amount}` : `Pay £${amount}`}
       </Button>
     </form>
+  );
+};
+
+const DonationForm = () => {
+  const { toast } = useToast();
+  const [donationAmount, setDonationAmount] = useState<string>("");
+  const [donorName, setDonorName] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+  const [clientSecret, setClientSecret] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const predefinedAmounts = [5, 10, 25, 50, 100];
+
+  const handleDonationSubmit = async () => {
+    const amount = parseFloat(donationAmount);
+    if (!amount || amount <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid donation amount",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await apiRequest("POST", "/api/create-donation", {
+        amount,
+        donorName: donorName.trim(),
+        message: message.trim()
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setClientSecret(data.clientSecret);
+      } else {
+        throw new Error("Failed to create donation");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to process donation. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (clientSecret) {
+    return (
+      <Elements stripe={stripePromise} options={{ clientSecret }}>
+        <CheckoutForm 
+          planId="donation" 
+          amount={parseFloat(donationAmount)} 
+          isDonation={true}
+        />
+      </Elements>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Label htmlFor="donation-amount">Donation Amount (£)</Label>
+        <div className="flex flex-wrap gap-2 mt-2 mb-3">
+          {predefinedAmounts.map((amount) => (
+            <Button
+              key={amount}
+              type="button"
+              variant={donationAmount === amount.toString() ? "default" : "outline"}
+              size="sm"
+              onClick={() => setDonationAmount(amount.toString())}
+            >
+              £{amount}
+            </Button>
+          ))}
+        </div>
+        <Input
+          id="donation-amount"
+          type="number"
+          placeholder="Enter custom amount"
+          value={donationAmount}
+          onChange={(e) => setDonationAmount(e.target.value)}
+          min="1"
+          step="0.01"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="donor-name">Your Name (Optional)</Label>
+        <Input
+          id="donor-name"
+          placeholder="Enter your name"
+          value={donorName}
+          onChange={(e) => setDonorName(e.target.value)}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="message">Message (Optional)</Label>
+        <Textarea
+          id="message"
+          placeholder="Leave a message with your donation"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={3}
+        />
+      </div>
+
+      <Button 
+        onClick={handleDonationSubmit}
+        disabled={isLoading || !donationAmount}
+        className="w-full"
+      >
+        {isLoading ? "Processing..." : "Continue to Payment"}
+      </Button>
+    </div>
   );
 };
 
@@ -131,11 +254,18 @@ const MembershipPage = () => {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showDonation, setShowDonation] = useState(false);
 
   const handleSelectPlan = async (planId: string, amount: number) => {
+    // Handle free trial separately
+    if (planId === "free-trial") {
+      setShowDonation(true);
+      setSelectedPlan(planId);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // For demo, using payment intent. In production, use subscription endpoint
       const response = await apiRequest("POST", "/api/create-payment-intent", {
         amount,
         description: `CBA ${planId} membership`
@@ -158,6 +288,84 @@ const MembershipPage = () => {
       setIsLoading(false);
     }
   };
+
+  // Show donation form for free trial
+  if (selectedPlan === "free-trial" && showDonation) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <PageHeader 
+          title="Support CBA with a Donation"
+          showBack={true}
+          onBack={() => {
+            setSelectedPlan(null);
+            setShowDonation(false);
+          }}
+        />
+        
+        <div className="p-4 pb-24">
+          <Card className="mb-6 bg-green-50 border-green-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-green-800">
+                <Gift className="h-5 w-5" />
+                Free Trial Membership Activated!
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-green-700 mb-4">
+                Congratulations! Your free 12-month trial membership is ready to activate. 
+                As a new member, you have access to all basic CBA benefits at no cost.
+              </p>
+              <div className="bg-white p-4 rounded-lg border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">Your Free Benefits Include:</h4>
+                <ul className="text-sm text-green-700 space-y-1">
+                  <li>✓ Basic business listing</li>
+                  <li>✓ Member directory access</li>
+                  <li>✓ Monthly newsletter</li>
+                  <li>✓ Community events access</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Heart className="h-5 w-5 text-red-500" />
+                Optional Donation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-neutral-600 mb-6">
+                While your membership is completely free, CBA relies on donations to support our community initiatives, 
+                events, and member services. Any contribution helps us grow stronger together.
+              </p>
+              
+              <DonationForm />
+              
+              <Separator className="my-6" />
+              
+              <div className="text-center">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    toast({
+                      title: "Welcome to CBA!",
+                      description: "Your free membership is now active. Welcome to the community!",
+                    });
+                    window.location.href = "/dashboard";
+                  }}
+                >
+                  Skip Donation & Continue
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <BottomNavigation />
+      </div>
+    );
+  }
 
   if (selectedPlan && clientSecret) {
     const plan = membershipPlans.find(p => p.id === selectedPlan)!;
@@ -268,7 +476,9 @@ const MembershipPage = () => {
                     onClick={() => handleSelectPlan(plan.id, plan.price)}
                     disabled={isLoading}
                   >
-                    {isLoading ? "Loading..." : `Choose ${plan.name}`}
+                    {isLoading ? "Loading..." : 
+                     plan.isFree ? "Start Free Trial" : 
+                     `Choose ${plan.name}`}
                   </Button>
                 </CardContent>
               </Card>

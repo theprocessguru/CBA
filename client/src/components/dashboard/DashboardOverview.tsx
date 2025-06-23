@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import DonationWidget from "@/components/donation/DonationWidget";
 import {
   Eye,
   Tag,
@@ -12,6 +13,7 @@ import {
   Building,
   ChevronUp,
   Plus,
+  Gift,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Business, Offer, Product } from "@shared/schema";
@@ -164,6 +166,18 @@ const DashboardOverview = () => {
             </Button>
           </Link>
         </div>
+        
+        <Separator className="my-6" />
+        
+        <DonationWidget 
+          showInline={true}
+          trigger={
+            <Button variant="outline" className="w-full gap-2">
+              <Gift className="h-4 w-4" />
+              Support CBA with a Donation
+            </Button>
+          }
+        />
       </div>
     </div>
   );
