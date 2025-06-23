@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Store, Tag, User, Building } from "lucide-react";
+import { Home, Users, Store, Tag, User, Building, Crown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const BottomNavigation = () => {
@@ -12,6 +12,7 @@ const BottomNavigation = () => {
     { href: "/directory", icon: Users, label: "Directory" },
     { href: "/marketplace", icon: Store, label: "Marketplace" },
     { href: "/offers", icon: Tag, label: "Offers" },
+    { href: "/membership", icon: Crown, label: "Join" },
   ];
 
   const dashboardItem = { href: "/dashboard", icon: Building, label: "Dashboard" };

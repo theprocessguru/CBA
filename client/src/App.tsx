@@ -13,6 +13,7 @@ import Directory from "@/pages/directory";
 import Business from "@/pages/business";
 import Marketplace from "@/pages/marketplace";
 import TrialMembership from "@/pages/trial-membership";
+import MembershipPage from "@/pages/membership";
 import Dashboard from "@/pages/dashboard";
 import BusinessProfile from "@/pages/dashboard/business-profile";
 import ProductsServices from "@/pages/dashboard/products-services";
