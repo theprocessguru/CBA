@@ -9,6 +9,15 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
+import Stripe from "stripe";
+
+// Initialize Stripe
+let stripe: Stripe | null = null;
+if (process.env.STRIPE_SECRET_KEY) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16",
+  });
+}
 
 // Setup multer for file uploads
 const upload = multer({
