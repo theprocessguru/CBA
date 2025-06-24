@@ -26,12 +26,12 @@ import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
-import TestPage from "@/test-page";
+
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { Skeleton } from "@/components/ui/skeleton";
+
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -105,7 +105,15 @@ function Router() {
       {/* Home Route - Shows dashboard for authenticated users, landing page for others */}
       <Route path="/">
         <MainLayout>
-          <Home />
+          {isLoading ? (
+            <div className="flex justify-center items-center min-h-screen">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          ) : isAuthenticated ? (
+            <Dashboard />
+          ) : (
+            <Home />
+          )}
         </MainLayout>
       </Route>
       <Route path="/directory">
