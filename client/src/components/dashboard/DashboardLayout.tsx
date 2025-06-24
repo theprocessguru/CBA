@@ -74,7 +74,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div 
           className={`bg-white shadow-md border-r border-neutral-200 w-64 flex-shrink-0 
                      ${isMobileSidebarOpen ? 'block' : 'hidden'} md:block 
-                     fixed md:static top-0 left-0 h-full md:h-auto z-40`}
+                     fixed md:static top-0 left-0 h-full md:h-auto z-40 overflow-hidden`}
         >
           <div className="p-4 bg-primary text-white hidden md:block">
             <div className="flex items-center justify-between">
@@ -90,7 +90,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
           </div>
           
-          <div className="p-4">
+          <div className="p-4 overflow-hidden">
             {isLoading ? (
               <div className="flex items-center mb-6">
                 <Skeleton className="w-12 h-12 rounded-full" />
@@ -100,15 +100,15 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center mb-6">
+              <div className="flex items-center mb-6 min-w-0">
                 <img 
                   src={user?.profileImageUrl || "https://secure.gravatar.com/avatar/?s=50&d=mp"} 
                   alt="Profile" 
-                  className="w-12 h-12 rounded-full object-cover"
+                  className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                 />
-                <div className="ml-3">
-                  <p className="font-medium text-neutral-900">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-neutral-500 text-sm">{user?.email}</p>
+                <div className="ml-3 min-w-0 flex-1">
+                  <p className="font-medium text-neutral-900 truncate">{user?.firstName} {user?.lastName}</p>
+                  <p className="text-neutral-500 text-sm truncate" title={user?.email}>{user?.email}</p>
                 </div>
               </div>
             )}
