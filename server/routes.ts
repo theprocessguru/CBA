@@ -1313,6 +1313,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Stripe donation endpoint
+  app.post("/api/create-donation", async (req, res) => {
+    if (!stripe) {
+      return res.status(500).json({ message: "Stripe not configured" });
+    }
+    
+    try {
+      const { amount, donorName, message } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Valid donation amount required" });
+      }
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "gbp",
+        description: `CBA Donation${donorName ? ` from ${donorName}` : ''}`,
+        metadata: {
+          userId: req.user?.id || 'anonymous',
+          donationType: 'general',
+          donorName: donorName || '',
+          message: message || '',
+          businessAssociation: 'CBA'
+        }
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Stripe donation error:", error);
+      res.status(500).json({ 
+        message: "Error creating donation: " + error.message 
+      });
+    }
+  });
+
+  // General payment intent endpoint  
+  app.post("/api/create-payment-intent", async (req, res) => {
+    if (!stripe) {
+      return res.status(500).json({ message: "Stripe not configured" });
+    }
+    
+    try {
+      const { amount, description = "CBA Payment" } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Valid amount required" });
+      }
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "gbp", // British pounds for CBA
+        description,
+        metadata: {
+          userId: req.user?.id || 'anonymous',
+          businessAssociation: 'CBA'
+        }
+      });
+      
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      console.error("Stripe payment intent error:", error);
+      res.status(500).json({ 
+        message: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
