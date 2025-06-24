@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import ContactSupportDialog from "@/components/ui/contact-support-dialog";
-import { MapPin, Phone, Mail, Clock, Directions } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Navigation } from "lucide-react";
 import { useState } from "react";
 import { CONTACT_INFO } from "@/lib/constants";
 
@@ -52,7 +52,7 @@ const ContactPage = () => {
               variant="outline" 
               className="w-full gap-2"
             >
-              <Directions className="h-4 w-4" />
+              <Navigation className="h-4 w-4" />
               Get Directions
             </Button>
           </CardContent>
