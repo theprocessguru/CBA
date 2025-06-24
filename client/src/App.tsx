@@ -105,15 +105,7 @@ function Router() {
       {/* Home Route - Shows dashboard for authenticated users, landing page for others */}
       <Route path="/">
         <MainLayout>
-          {isLoading ? (
-            <div className="flex justify-center items-center min-h-screen">
-              <Skeleton className="h-24 w-24 rounded-full" />
-            </div>
-          ) : isAuthenticated ? (
-            <Dashboard />
-          ) : (
-            <Home />
-          )}
+          <Home />
         </MainLayout>
       </Route>
       <Route path="/directory">
