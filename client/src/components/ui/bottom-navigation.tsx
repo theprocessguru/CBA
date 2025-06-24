@@ -27,36 +27,32 @@ const BottomNavigation = () => {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden">
       <div className="flex justify-around py-1 px-2">
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 ${
+          <Link key={item.href} href={item.href} asChild>
+            <button
+              className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
                 isActive(item.href) 
                   ? "text-primary bg-primary/10" 
-                  : "text-gray-600 hover:text-gray-900"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
               <item.icon size={18} className="mb-1" />
               <span className="text-xs leading-tight">{item.label}</span>
-            </Button>
+            </button>
           </Link>
         ))}
         
         {isAuthenticated && (
-          <Link href={dashboardItem.href}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 ${
+          <Link href={dashboardItem.href} asChild>
+            <button
+              className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
                 isActive(dashboardItem.href) 
                   ? "text-primary bg-primary/10" 
-                  : "text-gray-600 hover:text-gray-900"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
               <dashboardItem.icon size={18} className="mb-1" />
               <span className="text-xs leading-tight">{dashboardItem.label}</span>
-            </Button>
+            </button>
           </Link>
         )}
       </div>

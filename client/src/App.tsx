@@ -26,6 +26,7 @@ import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
+import TestPage from "@/test-page";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
