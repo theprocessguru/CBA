@@ -25,6 +25,7 @@ import Analytics from "@/pages/admin/Analytics";
 import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import OffersPage from "@/pages/offers";
+import ContactPage from "@/pages/contact";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
@@ -146,10 +147,7 @@ function Router() {
       </Route>
       <Route path="/contact">
         <MainLayout>
-          <div className="container mx-auto px-4 py-12">
-            <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
-            <p>Page under construction.</p>
-          </div>
+          <ContactPage />
         </MainLayout>
       </Route>
       <Route path="/trial-membership">

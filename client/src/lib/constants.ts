@@ -101,10 +101,10 @@ export const PLACEHOLDER_IMAGES = {
 };
 
 export const CONTACT_INFO = {
-  address: "123 Main Street, Croydon",
-  postcode: "CR0 1AA",
-  phone: "020 8123 4567",
-  email: "info@croydonbusiness.org"
+  address: "50 George Street, Croydon",
+  postcode: "CR0 1PD",
+  phone: "+44 7832 417784",
+  email: "info@croydonba.org.uk"
 };
 
 export const META_DESCRIPTIONS = {

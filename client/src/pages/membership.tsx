@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/ui/page-header";
-import { BottomNavigation } from "@/components/ui/bottom-navigation";
+import BottomNavigation from "@/components/ui/bottom-navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Check, Crown, Star, Users, Heart, Gift } from "lucide-react";

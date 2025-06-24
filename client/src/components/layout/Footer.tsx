@@ -62,15 +62,15 @@ const Footer = () => {
             <ul className="space-y-3 text-neutral-400">
               <li className="flex items-start">
                 <MapPin className="mt-1 mr-3 text-neutral-300" size={16} />
-                <span>123 Main Street, Croydon<br />London, CR0 1AA</span>
+                <span>50 George Street, Croydon<br />CR0 1PD, UK</span>
               </li>
               <li className="flex items-center">
                 <Phone className="mr-3 text-neutral-300" size={16} />
-                <span>020 8123 4567</span>
+                <span>+44 7832 417784</span>
               </li>
               <li className="flex items-center">
                 <Mail className="mr-3 text-neutral-300" size={16} />
-                <span>info@croydonbusiness.org</span>
+                <span>info@croydonba.org.uk</span>
               </li>
             </ul>
           </div>
