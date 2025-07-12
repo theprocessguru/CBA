@@ -11,7 +11,14 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Heart, Gift } from "lucide-react";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
+// Check if Stripe public key is available
+if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
+  console.error('Missing VITE_STRIPE_PUBLIC_KEY environment variable');
+}
+
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+  : null;
 
 const DonationCheckoutForm = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
@@ -187,10 +194,24 @@ export const DonationWidget = ({ trigger, showInline = false }: DonationWidgetPr
             {isLoading ? "Processing..." : "Continue to Payment"}
           </Button>
         </>
-      ) : (
+      ) : stripePromise ? (
         <Elements stripe={stripePromise} options={{ clientSecret }}>
           <DonationCheckoutForm amount={parseFloat(donationAmount)} />
         </Elements>
+      ) : (
+        <div className="text-center space-y-4">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <h3 className="font-medium text-yellow-800 mb-2">Payment Processing Unavailable</h3>
+            <p className="text-yellow-700 text-sm">
+              Stripe payment processing is not currently configured. Please contact CBA directly to make a donation.
+            </p>
+          </div>
+          <div className="space-y-2 text-sm">
+            <p className="font-medium">Contact CBA:</p>
+            <p>Phone: +44 7832 417784</p>
+            <p>Email: info@croydonba.org.uk</p>
+          </div>
+        </div>
       )}
     </div>
   );

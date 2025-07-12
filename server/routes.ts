@@ -1316,7 +1316,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Stripe donation endpoint
   app.post("/api/create-donation", async (req, res) => {
     if (!stripe) {
-      return res.status(500).json({ message: "Stripe not configured" });
+      console.error("Stripe not configured - missing STRIPE_SECRET_KEY");
+      return res.status(500).json({ message: "Payment processing is not configured. Please contact CBA directly." });
     }
     
     try {
@@ -1326,19 +1327,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Valid donation amount required" });
       }
       
+      // Get user ID from session if available
+      const userId = (req.session as any)?.userId;
+      
       const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
+        amount: Math.round(amount * 100), // Convert to pence
         currency: "gbp",
         description: `CBA Donation${donorName ? ` from ${donorName}` : ''}`,
         metadata: {
-          userId: req.user?.id || 'anonymous',
+          userId: userId || 'anonymous',
           donationType: 'general',
           donorName: donorName || '',
           message: message || '',
           businessAssociation: 'CBA'
-        }
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
       });
       
+      console.log("Payment intent created:", paymentIntent.id);
       res.json({ clientSecret: paymentIntent.client_secret });
     } catch (error: any) {
       console.error("Stripe donation error:", error);
