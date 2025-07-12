@@ -18,15 +18,22 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; password: string }) => {
       const response = await apiRequest("POST", "/api/auth/login", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Welcome back!",
         description: "You've been successfully logged in.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      setLocation("/dashboard");
+      // Small delay to ensure session is established
+      setTimeout(() => {
+        setLocation("/");
+      }, 100);
     },
     onError: (error) => {
       toast({
@@ -86,6 +93,13 @@ export default function Login() {
             </Button>
           </form>
           <div className="mt-6 text-center space-y-2">
+            <div className="bg-blue-50 p-4 rounded-md mb-4">
+              <p className="text-sm font-medium text-blue-900">Demo Account</p>
+              <p className="text-sm text-blue-700">
+                Email: demo@croydonba.org.uk<br />
+                Password: demo123
+              </p>
+            </div>
             <p className="text-sm text-neutral-600">
               <Link href="/forgot-password">
                 <a className="text-primary hover:text-primary-dark font-medium">
