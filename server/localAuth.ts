@@ -15,8 +15,13 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  // Ensure SESSION_SECRET is available
+  if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required');
+  }
+  
   return session({
-    secret: process.env.SESSION_SECRET || "your-secret-key-here",
+    secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
@@ -41,6 +46,17 @@ export async function setupLocalAuth(app: Express) {
 
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+      
+      // Password strength validation
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
       }
 
       // Check if user already exists
@@ -93,6 +109,12 @@ export async function setupLocalAuth(app: Express) {
 
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
       }
 
       // Find user

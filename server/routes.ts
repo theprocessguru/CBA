@@ -10,6 +10,7 @@ import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import Stripe from "stripe";
+import rateLimit from "express-rate-limit";
 
 // Initialize Stripe
 let stripe: Stripe | null = null;
@@ -65,6 +66,27 @@ const isAdmin = async (req: Request, res: Response, next: Function) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Security middleware
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  // Stricter rate limiting for auth endpoints
+  const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 requests per windowMs
+    message: 'Too many auth attempts from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  app.use('/api/auth', authLimiter);
+  app.use('/api', limiter);
+  
   // Auth middleware
   await setupLocalAuth(app);
 

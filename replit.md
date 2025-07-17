@@ -102,6 +102,12 @@ This is a full-stack web application for the Croydon Business Association (CBA),
 ```
 Changelog:
 - June 24, 2025. Initial setup
+- July 17, 2025. Security hardening and vulnerability fixes completed
+  - Implemented comprehensive security measures
+  - Added rate limiting and input validation
+  - Fixed authentication vulnerabilities
+  - Added security headers and CSP
+  - Remaining: 4 moderate esbuild vulnerabilities in dev dependencies only
 ```
 
 ## User Preferences
