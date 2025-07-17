@@ -63,7 +63,8 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
   // Track business view when component mounts and business data is available
   useEffect(() => {
     if (business && !isLoadingBusiness) {
-      trackView('business', business.id);
+      // Temporarily disable view tracking to prevent runaway calls
+      // trackView('business', business.id);
     }
   }, [business, isLoadingBusiness, trackView]);
   
@@ -168,7 +169,10 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
                     <a 
                       href={`tel:${business.phone}`} 
                       className="text-neutral-700 hover:text-primary"
-                      onClick={() => trackContact('business', business.id, 'phone')}
+                      onClick={() => {
+                        // Temporarily disable contact tracking to prevent runaway calls
+                        // trackContact('business', business.id, 'phone');
+                      }}
                     >
                       {business.phone}
                     </a>
@@ -181,7 +185,10 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
                     <a 
                       href={`mailto:${business.email}`} 
                       className="text-neutral-700 hover:text-primary"
-                      onClick={() => trackContact('business', business.id, 'email')}
+                      onClick={() => {
+                        // Temporarily disable contact tracking to prevent runaway calls
+                        // trackContact('business', business.id, 'email');
+                      }}
                     >
                       {business.email}
                     </a>
@@ -218,7 +225,17 @@ const BusinessDetails = ({ businessId }: BusinessDetailsProps) => {
               </div>
               
               <div className="mt-6 pt-4 border-t border-neutral-200">
-                <Button className="w-full" variant="secondary">
+                <Button 
+                  className="w-full" 
+                  variant="secondary"
+                  onClick={() => {
+                    if (business.phone) {
+                      window.location.href = `tel:${business.phone}`;
+                    } else if (business.email) {
+                      window.location.href = `mailto:${business.email}`;
+                    }
+                  }}
+                >
                   Contact Business
                 </Button>
               </div>

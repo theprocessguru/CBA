@@ -17,6 +17,7 @@ export function useInteractionTracking() {
       // Silently fail for analytics - don't disrupt user experience
       console.warn("Failed to track interaction:", error);
     },
+    retry: false, // Don't retry failed tracking requests
   });
 
   const trackInteraction = (params: TrackInteractionParams) => {
@@ -24,6 +25,16 @@ export function useInteractionTracking() {
   };
 
   const trackView = (contentType: string, contentId: number, metadata?: any) => {
+    // Add debounce to prevent excessive calls
+    const key = `${contentType}-${contentId}-view`;
+    const lastCall = sessionStorage.getItem(key);
+    const now = Date.now();
+    
+    if (lastCall && now - parseInt(lastCall) < 60000) { // 1 minute cooldown
+      return;
+    }
+    
+    sessionStorage.setItem(key, now.toString());
     trackInteraction({
       contentType,
       contentId,
@@ -42,6 +53,16 @@ export function useInteractionTracking() {
   };
 
   const trackContact = (contentType: string, contentId: number, contactMethod: string) => {
+    // Add debounce to prevent excessive calls
+    const key = `${contentType}-${contentId}-contact-${contactMethod}`;
+    const lastCall = sessionStorage.getItem(key);
+    const now = Date.now();
+    
+    if (lastCall && now - parseInt(lastCall) < 5000) { // 5 second cooldown
+      return;
+    }
+    
+    sessionStorage.setItem(key, now.toString());
     trackInteraction({
       contentType,
       contentId,
