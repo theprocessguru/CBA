@@ -1,8 +1,8 @@
-# Croydon Business Association - Member Directory & Marketplace
+# Business Automation Platform
 
 ## Overview
 
-This is a full-stack web application for the Croydon Business Association (CBA), built with React/TypeScript frontend and Express backend. The platform serves as a comprehensive business directory and marketplace where local businesses can showcase their services, products, and special offers to members and the public.
+This is a comprehensive business automation platform built with React/TypeScript frontend and Express backend. The platform helps businesses automate their operations, manage workflows, track performance, and streamline processes for improved efficiency and productivity.
 
 ## System Architecture
 
@@ -34,43 +34,43 @@ This is a full-stack web application for the Croydon Business Association (CBA),
 ### Authentication & Authorization
 - **Dual Auth System**: Supports both Replit OAuth and traditional email/password
 - **Session Management**: Secure HTTP-only cookies with PostgreSQL session store
-- **Role-Based Access**: Admin and member roles with different permissions
+- **Role-Based Access**: Admin and user roles with different permissions
 - **Password Reset**: Email-based password recovery system
 
-### Business Management
-- **Business Profiles**: Comprehensive business information with images
-- **Product/Service Catalog**: Structured product and service listings
-- **Special Offers**: Time-limited promotional offers for members
-- **Category System**: Organized business and product categorization
+### Business Process Management
+- **Workflow Automation**: Automated business process execution
+- **Task Management**: Structured task and activity tracking
+- **Performance Analytics**: Business metrics and KPI monitoring
+- **Integration Hub**: Connect with external business tools and APIs
 
 ### User Interface
 - **Responsive Design**: Mobile-first approach with desktop enhancements
 - **Component Library**: Consistent UI components across the application
 - **Mobile Navigation**: Bottom navigation bar for mobile users
-- **Admin Interface**: Specialized admin panels for content management
+- **Admin Interface**: Specialized admin panels for system management
 
-### Content Management
-- **Member Import**: CSV bulk import functionality for businesses
-- **Content Reporting**: User-generated content moderation system
-- **Analytics**: Interaction tracking and business analytics
-- **Email System**: Configurable SMTP integration for notifications
+### Automation Features
+- **Process Builder**: Visual workflow creation and management
+- **Notification System**: Automated alerts and communication
+- **Data Import/Export**: Bulk data processing capabilities
+- **Reporting Dashboard**: Real-time business insights and analytics
 
 ## Data Flow
 
 1. **Authentication Flow**: Users authenticate via Replit OAuth or local registration
-2. **Business Registration**: Authenticated users can claim/create business profiles
-3. **Content Creation**: Business owners add products, services, and offers
-4. **Public Discovery**: Visitors browse directory and marketplace
-5. **Member Interactions**: Members access exclusive offers and networking features
-6. **Admin Oversight**: Administrators moderate content and manage users
+2. **Process Setup**: Authenticated users create and configure automation workflows
+3. **Task Execution**: System automatically executes defined business processes
+4. **Monitoring**: Real-time tracking of automation performance and results
+5. **Analytics**: Generate insights and reports on business efficiency
+6. **Admin Oversight**: Administrators manage users and system configuration
 
 ## External Dependencies
 
 ### Core Dependencies
 - **Database**: Neon PostgreSQL serverless database
 - **Email Service**: Configurable SMTP (NodeMailer) and SendGrid integration
-- **Payment Processing**: Stripe integration for membership payments
-- **Go High Level**: CRM integration for lead management
+- **Payment Processing**: Stripe integration for subscription management
+- **External APIs**: Integration capabilities for third-party business tools
 
 ### Development Tools
 - **TypeScript**: Type safety across frontend and backend
@@ -94,20 +94,19 @@ This is a full-stack web application for the Croydon Business Association (CBA),
 
 ### Performance Optimizations
 - **Connection Pooling**: Optimized database connections for serverless
-- **Image Optimization**: Base64 encoding for simple image storage
 - **Caching Strategy**: Query caching with TanStack Query
 - **Bundle Splitting**: Vite automatically splits code for optimal loading
+- **Real-time Updates**: WebSocket integration for live process monitoring
 
 ## Changelog
 ```
 Changelog:
-- June 24, 2025. Initial setup
-- July 17, 2025. Security hardening and vulnerability fixes completed
-  - Implemented comprehensive security measures
-  - Added rate limiting and input validation
-  - Fixed authentication vulnerabilities
-  - Added security headers and CSP
-  - Remaining: 4 moderate esbuild vulnerabilities in dev dependencies only
+- July 23, 2025. Initial setup as business automation platform
+- Copied from CBA member directory application with complete functionality
+- Updated branding and messaging for business automation focus
+- Modified home page and hero section for automation platform
+- Retained all technical infrastructure: authentication, database, security
+- Ready for customization with automation-specific features
 ```
 
 ## User Preferences

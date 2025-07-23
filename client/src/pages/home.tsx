@@ -11,14 +11,14 @@ const Home = () => {
   return (
     <>
       <Helmet>
-        <title>Croydon Business Association - Supporting Local Commerce</title>
-        <meta name="description" content={META_DESCRIPTIONS.home} />
+        <title>Business Automation Platform - Streamline Your Operations</title>
+        <meta name="description" content="Automate your business processes, manage workflows, and boost productivity with our comprehensive business automation platform." />
       </Helmet>
       
       <div className="md:hidden">
         <PageHeader 
-          title="CBA Home"
-          subtitle="Connecting Local Businesses"
+          title="Automation Hub"
+          subtitle="Streamline Your Business"
           showBackButton={false}
           showHomeButton={false}
         />
