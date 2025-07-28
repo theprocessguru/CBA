@@ -11,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { MEMBERSHIP_TIER_CONFIGS } from "@shared/membershipTiers";
-import { Users, Crown, TrendingUp, Settings, Search } from "lucide-react";
+import { BenefitsGrid } from "@/components/membership/BenefitsGrid";
+import { Users, Crown, TrendingUp, Settings, Search, Gift, Star } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 
 interface MembershipStats {
@@ -121,6 +122,7 @@ const MembershipManagement = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
           <TabsTrigger value="tiers">Tier Configuration</TabsTrigger>
+          <TabsTrigger value="benefits">Benefits Comparison</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -404,6 +406,23 @@ const MembershipManagement = () => {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        <TabsContent value="benefits" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Complete Benefits Comparison
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Comprehensive breakdown of all benefits across membership tiers
+              </p>
+            </CardHeader>
+            <CardContent>
+              <BenefitsGrid showComparison={true} />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

@@ -25,6 +25,7 @@ import Analytics from "@/pages/admin/Analytics";
 import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import MembershipManagement from "@/pages/admin/MembershipManagement";
+import MembershipBenefits from "@/pages/membership-benefits";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 
@@ -155,6 +156,11 @@ function Router() {
       <Route path="/trial-membership">
         <MainLayout>
           <TrialMembership />
+        </MainLayout>
+      </Route>
+      <Route path="/membership-benefits">
+        <MainLayout>
+          <MembershipBenefits />
         </MainLayout>
       </Route>
       
