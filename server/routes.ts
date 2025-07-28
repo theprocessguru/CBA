@@ -334,6 +334,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin membership management routes
+  app.get('/api/admin/membership-stats', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const stats = await storage.getMembershipStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching membership stats:", error);
+      res.status(500).json({ message: "Failed to fetch membership statistics" });
+    }
+  });
+
+  app.get('/api/admin/members', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { search, status, tier } = req.query;
+      const members = await storage.getMembers({
+        search: search as string,
+        status: status as string,
+        tier: tier as string
+      });
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      res.status(500).json({ message: "Failed to fetch members" });
+    }
+  });
+
+  app.put('/api/admin/members/:userId/membership', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      const { membershipTier, membershipStatus } = req.body;
+      
+      const updateData: any = {};
+      if (membershipTier) updateData.membershipTier = membershipTier;
+      if (membershipStatus) updateData.membershipStatus = membershipStatus;
+      
+      await storage.updateUser(userId, updateData);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating member:", error);
+      res.status(500).json({ message: "Failed to update member" });
+    }
+  });
+
   // Start trial membership with donation
   app.post('/api/start-trial-membership', isAuthenticated, async (req: any, res) => {
     try {

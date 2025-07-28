@@ -16,7 +16,8 @@ import {
   Flag,
   BarChart3,
   ArrowLeft,
-  Home
+  Home,
+  Crown
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -196,6 +197,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     </a>
                   </Link>
                   
+                  <Link href="/dashboard/membership-management">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/membership-management' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Crown className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/membership-management' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Membership Tiers
+                    </a>
+                  </Link>
+
                   <Link href="/dashboard/user-management">
                     <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/user-management' 

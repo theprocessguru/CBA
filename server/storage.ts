@@ -613,6 +613,78 @@ export class DatabaseStorage implements IStorage {
       .where(eq(passwordResetTokens.id, tokenId));
   }
 
+  // Membership management operations
+  async getMembershipStats(): Promise<any> {
+    const totalMembers = await db.select({ count: sql<number>`count(*)::int` }).from(users);
+    const activeMembers = await db.select({ count: sql<number>`count(*)::int` }).from(users).where(eq(users.membershipStatus, 'active'));
+    const trialMembers = await db.select({ count: sql<number>`count(*)::int` }).from(users).where(eq(users.isTrialMember, true));
+    
+    const tierDistribution = await db
+      .select({
+        tier: users.membershipTier,
+        count: sql<number>`count(*)::int`
+      })
+      .from(users)
+      .groupBy(users.membershipTier);
+    
+    const tierDistributionMap: Record<string, number> = {};
+    tierDistribution.forEach(row => {
+      if (row.tier) {
+        tierDistributionMap[row.tier] = row.count;
+      }
+    });
+
+    return {
+      totalMembers: totalMembers[0]?.count || 0,
+      activeMembers: activeMembers[0]?.count || 0,
+      trialMembers: trialMembers[0]?.count || 0,
+      tierDistribution: tierDistributionMap,
+      revenueThisMonth: 0, // TODO: Calculate from subscription data
+      revenueThisYear: 0   // TODO: Calculate from subscription data
+    };
+  }
+
+  async getMembers(filters?: { search?: string; status?: string; tier?: string }): Promise<any[]> {
+    let query = db.select({
+      id: users.id,
+      email: users.email,
+      firstName: users.firstName,
+      lastName: users.lastName,
+      membershipTier: users.membershipTier,
+      membershipStatus: users.membershipStatus,
+      membershipStartDate: users.membershipStartDate,
+      membershipEndDate: users.membershipEndDate,
+      isTrialMember: users.isTrialMember,
+      createdAt: users.createdAt
+    }).from(users);
+
+    const conditions = [];
+
+    if (filters?.search) {
+      conditions.push(
+        or(
+          ilike(users.email, `%${filters.search}%`),
+          ilike(users.firstName, `%${filters.search}%`),
+          ilike(users.lastName, `%${filters.search}%`)
+        )
+      );
+    }
+
+    if (filters?.status && filters.status !== 'all') {
+      conditions.push(eq(users.membershipStatus, filters.status));
+    }
+
+    if (filters?.tier && filters.tier !== 'all') {
+      conditions.push(eq(users.membershipTier, filters.tier));
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    return await query.orderBy(desc(users.createdAt));
+  }
+
   async deleteExpiredPasswordResetTokens(): Promise<void> {
     await db
       .delete(passwordResetTokens)
