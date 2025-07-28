@@ -44,7 +44,7 @@ export class EmailService {
   private createTransporter() {
     if (!this.config) return;
 
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: this.config.host,
       port: this.config.port,
       secure: this.config.secure,
