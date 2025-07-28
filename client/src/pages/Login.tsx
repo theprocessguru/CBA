@@ -55,15 +55,15 @@ export default function Login() {
   return (
     <>
       <Helmet>
-        <title>Sign In - Business Automation Platform</title>
-        <meta name="description" content="Sign in to your Business Automation Platform account to access your workflows and automation tools." />
+        <title>Sign In - Croydon Business Association</title>
+        <meta name="description" content="Sign in to your Croydon Business Association account to access member benefits and business networking." />
       </Helmet>
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to your Business Automation Platform account
+            Sign in to your Croydon Business Association account
           </CardDescription>
         </CardHeader>
         <CardContent>
