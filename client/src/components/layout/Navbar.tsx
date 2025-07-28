@@ -92,6 +92,15 @@ const Navbar = () => {
                   About
                 </a>
               </Link>
+              <Link href="/membership-benefits">
+                <a className={`border-b-2 ${
+                  isActive('/membership-benefits') 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
+                  Membership
+                </a>
+              </Link>
               <Link href="/contact">
                 <a className={`border-b-2 ${
                   isActive('/contact') 
@@ -179,6 +188,15 @@ const Navbar = () => {
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
               } font-medium`}>
               About
+            </a>
+          </Link>
+          <Link href="/membership-benefits">
+            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+              isActive('/membership-benefits') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium`}>
+              Membership
             </a>
           </Link>
           <Link href="/contact">
