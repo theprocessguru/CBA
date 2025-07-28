@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
+import { Helmet } from "react-helmet";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -52,12 +53,17 @@ export default function Login() {
   };
 
   return (
+    <>
+      <Helmet>
+        <title>Sign In - Business Automation Platform</title>
+        <meta name="description" content="Sign in to your Business Automation Platform account to access your workflows and automation tools." />
+      </Helmet>
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
           <CardDescription>
-            Sign in to your Croydon Business Association account
+            Sign in to your Business Automation Platform account
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,13 +99,6 @@ export default function Login() {
             </Button>
           </form>
           <div className="mt-6 text-center space-y-2">
-            <div className="bg-blue-50 p-4 rounded-md mb-4">
-              <p className="text-sm font-medium text-blue-900">Demo Account</p>
-              <p className="text-sm text-blue-700">
-                Email: demo@croydonba.org.uk<br />
-                Password: demo123
-              </p>
-            </div>
             <p className="text-sm text-neutral-600">
               <Link href="/forgot-password">
                 <a className="text-primary hover:text-primary-dark font-medium">
@@ -119,5 +118,6 @@ export default function Login() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
