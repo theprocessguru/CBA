@@ -196,12 +196,24 @@ export async function setupLocalAuth(app: Express) {
         user.firstName || undefined
       );
 
+      // Helper function to get the proper base URL
+      const getBaseUrl = () => {
+        if (process.env.BASE_URL) {
+          return process.env.BASE_URL;
+        }
+        if (process.env.REPLIT_DOMAINS) {
+          const domain = process.env.REPLIT_DOMAINS.split(',')[0];
+          return `https://${domain}`;
+        }
+        return 'http://localhost:5000';
+      };
+
       res.json({ 
         message: "If an account with that email exists, a password reset link has been sent.",
         emailSent,
         // For development/testing only - remove in production
         ...(process.env.NODE_ENV === 'development' && {
-          resetUrl: `http://localhost:5000/reset-password?token=${token}`
+          resetUrl: `${getBaseUrl()}/reset-password?token=${token}`
         })
       });
     } catch (error) {

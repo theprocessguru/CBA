@@ -18,6 +18,17 @@ export class EmailService {
     this.initializeFromEnv();
   }
 
+  private getBaseUrl(): string {
+    if (process.env.BASE_URL) {
+      return process.env.BASE_URL;
+    }
+    if (process.env.REPLIT_DOMAINS) {
+      const domain = process.env.REPLIT_DOMAINS.split(',')[0];
+      return `https://${domain}`;
+    }
+    return 'http://localhost:5000';
+  }
+
   private initializeFromEnv() {
     // Try to initialize from environment variables
     const host = process.env.SMTP_HOST;
@@ -67,11 +78,11 @@ export class EmailService {
   public async sendPasswordResetEmail(to: string, resetToken: string, userName?: string): Promise<boolean> {
     if (!this.isConfigured()) {
       console.warn('Email service not configured. Password reset token:', resetToken);
-      console.warn(`Reset URL: ${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`);
+      console.warn(`Reset URL: ${this.getBaseUrl()}/reset-password?token=${resetToken}`);
       return false;
     }
 
-    const resetUrl = `${process.env.BASE_URL || 'http://localhost:5000'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${this.getBaseUrl()}/reset-password?token=${resetToken}`;
     
     const htmlContent = `
       <!DOCTYPE html>
