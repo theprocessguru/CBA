@@ -30,7 +30,7 @@ import {
   type InsertPasswordResetToken,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, like, and, or, gte, lte, sql } from "drizzle-orm";
+import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -599,8 +599,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(passwordResetTokens.token, token),
-          gte(passwordResetTokens.expiresAt, new Date()),
-          eq(passwordResetTokens.usedAt, null)
+          gt(passwordResetTokens.expiresAt, new Date()),
+          isNull(passwordResetTokens.usedAt)
         )
       );
     return resetToken;
