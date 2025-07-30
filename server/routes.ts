@@ -2006,6 +2006,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Interdimensional & Universal AI Systems Endpoints
+  app.post("/api/ai/quantum-consciousness", isAuthenticated, async (req, res) => {
+    try {
+      const { consciousnessLevel, quantumState, awareness } = req.body;
+      
+      if (!consciousnessLevel) {
+        return res.status(400).json({ message: "Consciousness level is required" });
+      }
+
+      const analysis = await aiAdvancedService.analyzeQuantumConsciousness(consciousnessLevel, quantumState, awareness);
+      res.json({ 
+        analysis,
+        analyzed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Quantum consciousness error:", error);
+      res.status(500).json({ message: "Failed to analyze quantum consciousness: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/dimensional-analysis", isAuthenticated, async (req, res) => {
+    try {
+      const { dimensions, analysisType, scope } = req.body;
+      
+      if (!dimensions) {
+        return res.status(400).json({ message: "Dimensions are required" });
+      }
+
+      const analysis = await aiAdvancedService.performDimensionalAnalysis(dimensions, analysisType, scope);
+      res.json({ 
+        analysis,
+        analyzed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Dimensional analysis error:", error);
+      res.status(500).json({ message: "Failed to perform dimensional analysis: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/infinite-computing", isAuthenticated, async (req, res) => {
+    try {
+      const { computationScope, infinityLevel, parallelism } = req.body;
+      
+      if (!computationScope) {
+        return res.status(400).json({ message: "Computation scope is required" });
+      }
+
+      const computation = await aiAdvancedService.performInfiniteComputing(computationScope, infinityLevel, parallelism);
+      res.json({ 
+        computation,
+        computed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Infinite computing error:", error);
+      res.status(500).json({ message: "Failed to perform infinite computing: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

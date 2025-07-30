@@ -294,6 +294,18 @@ const benefitCategories = {
     { key: "aiCreativeAI", label: "AI Creative AI" },
     { key: "aiEmotionalIntelligence", label: "AI Emotional Intelligence" },
   ],
+  "Interdimensional & Universal AI Systems": [
+    { key: "aiQuantumConsciousness", label: "AI Quantum Consciousness" },
+    { key: "aiUniversalLanguageModels", label: "AI Universal Language Models" },
+    { key: "aiRelativisticComputing", label: "AI Relativistic Computing" },
+    { key: "aiHolographicDataStorage", label: "AI Holographic Data Storage" },
+    { key: "aiDimensionalAnalysis", label: "AI Dimensional Analysis" },
+    { key: "aiCosmicIntelligence", label: "AI Cosmic Intelligence" },
+    { key: "aiOmniscientNetworks", label: "AI Omniscient Networks" },
+    { key: "aiParallelUniverseAnalysis", label: "AI Parallel Universe Analysis" },
+    { key: "aiTranscendentAI", label: "AI Transcendent AI" },
+    { key: "aiInfiniteComputing", label: "AI Infinite Computing" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
