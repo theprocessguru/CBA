@@ -85,27 +85,44 @@ const AITools = () => {
     if (!contentPrompt.trim()) return;
     
     setIsGenerating(true);
-    // Simulate AI content generation
-    setTimeout(() => {
-      const sampleContent = `Here's AI-generated content based on your prompt: "${contentPrompt}"
+    try {
+      const response = await apiRequest("POST", "/api/ai/generate-content", {
+        prompt: contentPrompt,
+        contentType: "marketing"
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedContent(data.content);
+        
+        // Track usage
+        await apiRequest("POST", "/api/ai/track-usage", {
+          toolName: "Content Generator",
+          action: "generate",
+          metadata: { promptLength: contentPrompt.length }
+        });
+      } else {
+        throw new Error("Failed to generate content");
+      }
+    } catch (error) {
+      console.error("Content generation error:", error);
+      // Fallback to sample content if AI service fails
+      setGeneratedContent(`**AI-Generated Marketing Content**
 
-**Marketing Copy:**
-Transform your business with cutting-edge solutions designed for modern entrepreneurs. Our innovative approach combines industry expertise with personalized service to deliver exceptional results.
+Transform your business with innovative solutions designed for today's market leaders. Our comprehensive approach combines cutting-edge technology with proven strategies to deliver exceptional results.
 
 **Key Benefits:**
-• Streamlined operations for maximum efficiency
+• Enhanced operational efficiency and streamlined processes
 • Data-driven insights for informed decision making
 • Scalable solutions that grow with your business
-• Expert support when you need it most
+• Expert support and guidance every step of the way
 
-**Call to Action:**
-Ready to take your business to the next level? Contact us today for a free consultation and discover how our solutions can drive your success.
+**Ready to Get Started?**
+Contact us today to discover how we can help transform your business and drive sustainable growth.
 
-*This content was generated using AI and can be customized further based on your specific needs.*`;
-      
-      setGeneratedContent(sampleContent);
-      setIsGenerating(false);
-    }, 2000);
+*Note: This is a sample response. Connect AI services for personalized content generation.*`);
+    }
+    setIsGenerating(false);
   };
 
   const getTierBadgeColor = (tier: string) => {

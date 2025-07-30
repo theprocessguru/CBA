@@ -9,6 +9,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
+import { aiService } from "./aiService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
@@ -1462,6 +1463,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Error creating payment intent: " + error.message 
       });
+    }
+  });
+
+  // AI Services API Endpoints
+  app.post("/api/ai/generate-content", isAuthenticated, async (req, res) => {
+    try {
+      const { prompt, contentType = 'marketing' } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt is required" });
+      }
+
+      const content = await aiService.generateContent(prompt, contentType);
+      res.json({ 
+        content,
+        generated_at: new Date().toISOString(),
+        service_available: aiService.isAIAvailable()
+      });
+    } catch (error: any) {
+      console.error("AI content generation error:", error);
+      res.status(500).json({ message: "Failed to generate content: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/analyze-business", isAuthenticated, async (req, res) => {
+    try {
+      const { data, analysisType = 'performance' } = req.body;
+      
+      if (!data) {
+        return res.status(400).json({ message: "Business data is required" });
+      }
+
+      const analysis = await aiService.analyzeBusinessData(data, analysisType);
+      res.json({ 
+        analysis,
+        analyzed_at: new Date().toISOString(),
+        service_available: aiService.isAIAvailable()
+      });
+    } catch (error: any) {
+      console.error("AI business analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze business data: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/generate-strategy", isAuthenticated, async (req, res) => {
+    try {
+      const { businessInfo, goals } = req.body;
+      
+      if (!businessInfo || !goals) {
+        return res.status(400).json({ message: "Business information and goals are required" });
+      }
+
+      const strategy = await aiService.generateBusinessStrategy(businessInfo, goals);
+      res.json({ 
+        strategy,
+        generated_at: new Date().toISOString(),
+        service_available: aiService.isAIAvailable()
+      });
+    } catch (error: any) {
+      console.error("AI strategy generation error:", error);
+      res.status(500).json({ message: "Failed to generate strategy: " + error.message });
+    }
+  });
+
+  app.get("/api/ai/services", isAuthenticated, async (req, res) => {
+    try {
+      const services = aiService.getAvailableServices();
+      res.json({ 
+        services,
+        ai_available: aiService.isAIAvailable(),
+        capabilities: {
+          content_generation: true,
+          business_analysis: true,
+          strategy_development: true,
+          market_research: true,
+          financial_modeling: true
+        }
+      });
+    } catch (error: any) {
+      console.error("AI services error:", error);
+      res.status(500).json({ message: "Failed to get AI services: " + error.message });
+    }
+  });
+
+  // AI Tools Usage Tracking
+  app.post("/api/ai/track-usage", isAuthenticated, async (req, res) => {
+    try {
+      const { toolName, action, metadata } = req.body;
+      const userId = (req.user as any)?.id;
+      
+      // Here you could track AI tool usage in the database
+      console.log(`AI Tool Usage - User: ${userId}, Tool: ${toolName}, Action: ${action}`);
+      
+      res.json({ 
+        tracked: true,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("AI usage tracking error:", error);
+      res.status(500).json({ message: "Failed to track usage: " + error.message });
     }
   });
 
