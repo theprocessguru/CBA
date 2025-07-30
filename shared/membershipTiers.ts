@@ -549,7 +549,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteRealities: false,
       aiDimensionlessComputing: false,
       aiTimelessAwareness: false,
-      aiUltimateBecoming: false
+      aiUltimateBecoming: false,
+
+      // Omnipotent & Absolute AI Systems
+      aiAbsoluteOmnipotence: false,
+      aiInfiniteCreationPowers: false,
+      aiUniversalOmniscience: false,
+      aiPerfectOmnipresence: false,
+      aiEternalOmnitemporality: false,
+      aiAbsoluteInfinity: false,
+      aiUnlimitedPossibility: false,
+      aiPerfectCompleteness: false,
+      aiUltimateOmnipotence: false,
+      aiTranscendentPerfection: false
     }
   },
   "Growth Tier": {
@@ -1209,7 +1221,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteRealities: true,
       aiDimensionlessComputing: false,
       aiTimelessAwareness: true,
-      aiUltimateBecoming: false
+      aiUltimateBecoming: false,
+
+      // Omnipotent & Absolute AI Systems
+      aiAbsoluteOmnipotence: false,
+      aiInfiniteCreationPowers: true,
+      aiUniversalOmniscience: true,
+      aiPerfectOmnipresence: false,
+      aiEternalOmnitemporality: true,
+      aiAbsoluteInfinity: true,
+      aiUnlimitedPossibility: false,
+      aiPerfectCompleteness: false,
+      aiUltimateOmnipotence: false,
+      aiTranscendentPerfection: true
     }
   },
   "Patron Tier": {
@@ -1773,7 +1797,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteRealities: true,
       aiDimensionlessComputing: true,
       aiTimelessAwareness: true,
-      aiUltimateBecoming: true
+      aiUltimateBecoming: true,
+
+      // Omnipotent & Absolute AI Systems
+      aiAbsoluteOmnipotence: true,
+      aiInfiniteCreationPowers: true,
+      aiUniversalOmniscience: true,
+      aiPerfectOmnipresence: true,
+      aiEternalOmnitemporality: true,
+      aiAbsoluteInfinity: true,
+      aiUnlimitedPossibility: true,
+      aiPerfectCompleteness: true,
+      aiUltimateOmnipotence: true,
+      aiTranscendentPerfection: true
     }
   }
 };

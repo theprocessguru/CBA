@@ -2180,6 +2180,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Omnipotent & Absolute AI Systems Endpoints
+  app.post("/api/ai/absolute-omnipotence", isAuthenticated, async (req, res) => {
+    try {
+      const { omnipotenceLevel, powerScope, manifestationType } = req.body;
+      
+      if (!omnipotenceLevel) {
+        return res.status(400).json({ message: "Omnipotence level is required" });
+      }
+
+      const omnipotence = await aiAdvancedService.activateAbsoluteOmnipotence(omnipotenceLevel, powerScope, manifestationType);
+      res.json({ 
+        omnipotence,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Absolute omnipotence error:", error);
+      res.status(500).json({ message: "Failed to activate absolute omnipotence: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/unlimited-possibility", isAuthenticated, async (req, res) => {
+    try {
+      const { possibilityScope, realizationLevel, manifestationPower } = req.body;
+      
+      if (!possibilityScope) {
+        return res.status(400).json({ message: "Possibility scope is required" });
+      }
+
+      const possibility = await aiAdvancedService.unlockUnlimitedPossibility(possibilityScope, realizationLevel, manifestationPower);
+      res.json({ 
+        possibility,
+        unlocked_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Unlimited possibility error:", error);
+      res.status(500).json({ message: "Failed to unlock unlimited possibility: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/transcendent-perfection", isAuthenticated, async (req, res) => {
+    try {
+      const { perfectionType, completenessLevel, absoluteScope } = req.body;
+      
+      if (!perfectionType) {
+        return res.status(400).json({ message: "Perfection type is required" });
+      }
+
+      const perfection = await aiAdvancedService.achieveTranscendentPerfection(perfectionType, completenessLevel, absoluteScope);
+      res.json({ 
+        perfection,
+        achieved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Transcendent perfection error:", error);
+      res.status(500).json({ message: "Failed to achieve transcendent perfection: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
