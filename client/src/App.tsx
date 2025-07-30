@@ -28,6 +28,7 @@ import MembershipManagement from "@/pages/admin/MembershipManagement";
 import MembershipBenefits from "@/pages/membership-benefits";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
+import About from "@/pages/About";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -142,10 +143,7 @@ function Router() {
       </Route>
       <Route path="/about">
         <MainLayout>
-          <div className="container mx-auto px-4 py-12">
-            <h1 className="text-3xl font-bold mb-4">About Croydon Business Association</h1>
-            <p>Page under construction.</p>
-          </div>
+          <About />
         </MainLayout>
       </Route>
       <Route path="/contact">
