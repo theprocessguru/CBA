@@ -1663,6 +1663,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Research & Innovation Endpoints
+  app.post("/api/ai/neural-network-design", isAuthenticated, async (req, res) => {
+    try {
+      const { networkType, problemDescription, dataSpecs } = req.body;
+      
+      if (!networkType || !problemDescription) {
+        return res.status(400).json({ message: "Network type and problem description are required" });
+      }
+
+      const design = await aiAdvancedService.designNeuralNetwork(networkType, problemDescription, dataSpecs);
+      res.json({ 
+        design,
+        created_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Neural network design error:", error);
+      res.status(500).json({ message: "Failed to design neural network: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/quantum-enhancement", isAuthenticated, async (req, res) => {
+    try {
+      const { algorithm, quantumSpecs, optimization } = req.body;
+      
+      if (!algorithm) {
+        return res.status(400).json({ message: "Algorithm specification is required" });
+      }
+
+      const enhancement = await aiAdvancedService.enhanceWithQuantumComputing(algorithm, quantumSpecs, optimization);
+      res.json({ 
+        enhancement,
+        enhanced_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Quantum enhancement error:", error);
+      res.status(500).json({ message: "Failed to enhance with quantum computing: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/ethics-assessment", isAuthenticated, async (req, res) => {
+    try {
+      const { aiSystem, useCase, stakeholders } = req.body;
+      
+      if (!aiSystem || !useCase) {
+        return res.status(400).json({ message: "AI system and use case are required" });
+      }
+
+      const assessment = await aiAdvancedService.conductEthicsAssessment(aiSystem, useCase, stakeholders);
+      res.json({ 
+        assessment,
+        assessed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Ethics assessment error:", error);
+      res.status(500).json({ message: "Failed to conduct ethics assessment: " + error.message });
+    }
+  });
+
+  app.get("/api/ai/research-partnerships", isAuthenticated, async (req, res) => {
+    try {
+      const partnerships = await aiAdvancedService.getResearchPartnerships();
+      res.json({ 
+        partnerships,
+        retrieved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Research partnerships error:", error);
+      res.status(500).json({ message: "Failed to get research partnerships: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

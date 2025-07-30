@@ -198,6 +198,30 @@ const benefitCategories = {
     { key: "aiEdgeComputing", label: "AI Edge Computing" },
     { key: "aiAugmentedReality", label: "AI Augmented Reality" },
   ],
+  "AI Innovation & Research": [
+    { key: "aiNeuralNetworkDesign", label: "AI Neural Network Design" },
+    { key: "aiDeepLearningResearch", label: "AI Deep Learning Research" },
+    { key: "aiQuantumEnhancedAI", label: "AI Quantum Enhanced AI" },
+    { key: "aiNeuromorphicComputing", label: "AI Neuromorphic Computing" },
+    { key: "aiSwarmIntelligence", label: "AI Swarm Intelligence" },
+    { key: "aiEvolutionaryAlgorithms", label: "AI Evolutionary Algorithms" },
+    { key: "aiExplainableAI", label: "AI Explainable AI" },
+    { key: "aiEthicalAIFrameworks", label: "AI Ethical AI Frameworks" },
+    { key: "aiResearchPartnerships", label: "AI Research Partnerships" },
+    { key: "aiPatentAssistance", label: "AI Patent Assistance" },
+  ],
+  "AI Governance & Compliance": [
+    { key: "aiGovernanceFramework", label: "AI Governance Framework" },
+    { key: "aiEthicsBoard", label: "AI Ethics Board" },
+    { key: "aiComplianceMonitoring", label: "AI Compliance Monitoring" },
+    { key: "aiAuditTrails", label: "AI Audit Trails" },
+    { key: "aiRiskManagement", label: "AI Risk Management" },
+    { key: "aiBiasDetection", label: "AI Bias Detection" },
+    { key: "aiTransparencyReports", label: "AI Transparency Reports" },
+    { key: "aiRegulationTracking", label: "AI Regulation Tracking" },
+    { key: "aiDataSovereignty", label: "AI Data Sovereignty" },
+    { key: "aiPrivacyPreservation", label: "AI Privacy Preservation" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

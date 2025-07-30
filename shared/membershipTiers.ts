@@ -417,7 +417,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBlockchainAI: false,
       aiIoTIntelligence: false,
       aiEdgeComputing: false,
-      aiAugmentedReality: false
+      aiAugmentedReality: false,
+
+      // AI Innovation & Research
+      aiNeuralNetworkDesign: false,
+      aiDeepLearningResearch: false,
+      aiQuantumEnhancedAI: false,
+      aiNeuromorphicComputing: false,
+      aiSwarmIntelligence: false,
+      aiEvolutionaryAlgorithms: false,
+      aiExplainableAI: false,
+      aiEthicalAIFrameworks: false,
+      aiResearchPartnerships: false,
+      aiPatentAssistance: false,
+
+      // AI Governance & Compliance
+      aiGovernanceFramework: false,
+      aiEthicsBoard: false,
+      aiComplianceMonitoring: false,
+      aiAuditTrails: false,
+      aiRiskManagement: false,
+      aiBiasDetection: false,
+      aiTransparencyReports: false,
+      aiRegulationTracking: false,
+      aiDataSovereignty: false,
+      aiPrivacyPreservation: false
     }
   },
   "Growth Tier": {
@@ -657,7 +681,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBlockchainAI: false,
       aiIoTIntelligence: false,
       aiEdgeComputing: false,
-      aiAugmentedReality: false
+      aiAugmentedReality: false,
+
+      // AI Innovation & Research
+      aiNeuralNetworkDesign: true,
+      aiDeepLearningResearch: false,
+      aiQuantumEnhancedAI: false,
+      aiNeuromorphicComputing: false,
+      aiSwarmIntelligence: false,
+      aiEvolutionaryAlgorithms: false,
+      aiExplainableAI: true,
+      aiEthicalAIFrameworks: true,
+      aiResearchPartnerships: false,
+      aiPatentAssistance: false,
+
+      // AI Governance & Compliance
+      aiGovernanceFramework: true,
+      aiEthicsBoard: false,
+      aiComplianceMonitoring: true,
+      aiAuditTrails: true,
+      aiRiskManagement: true,
+      aiBiasDetection: true,
+      aiTransparencyReports: false,
+      aiRegulationTracking: true,
+      aiDataSovereignty: false,
+      aiPrivacyPreservation: true
     }
   },
   "Strategic Tier": {
@@ -897,7 +945,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBlockchainAI: false,
       aiIoTIntelligence: true,
       aiEdgeComputing: false,
-      aiAugmentedReality: false
+      aiAugmentedReality: false,
+
+      // AI Innovation & Research
+      aiNeuralNetworkDesign: true,
+      aiDeepLearningResearch: true,
+      aiQuantumEnhancedAI: true,
+      aiNeuromorphicComputing: false,
+      aiSwarmIntelligence: true,
+      aiEvolutionaryAlgorithms: true,
+      aiExplainableAI: true,
+      aiEthicalAIFrameworks: true,
+      aiResearchPartnerships: true,
+      aiPatentAssistance: false,
+
+      // AI Governance & Compliance
+      aiGovernanceFramework: true,
+      aiEthicsBoard: true,
+      aiComplianceMonitoring: true,
+      aiAuditTrails: true,
+      aiRiskManagement: true,
+      aiBiasDetection: true,
+      aiTransparencyReports: true,
+      aiRegulationTracking: true,
+      aiDataSovereignty: true,
+      aiPrivacyPreservation: true
     }
   },
   "Patron Tier": {
@@ -1329,7 +1401,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBlockchainAI: true,
       aiIoTIntelligence: true,
       aiEdgeComputing: true,
-      aiAugmentedReality: true
+      aiAugmentedReality: true,
+
+      // AI Innovation & Research
+      aiNeuralNetworkDesign: true,
+      aiDeepLearningResearch: true,
+      aiQuantumEnhancedAI: true,
+      aiNeuromorphicComputing: true,
+      aiSwarmIntelligence: true,
+      aiEvolutionaryAlgorithms: true,
+      aiExplainableAI: true,
+      aiEthicalAIFrameworks: true,
+      aiResearchPartnerships: true,
+      aiPatentAssistance: true,
+
+      // AI Governance & Compliance
+      aiGovernanceFramework: true,
+      aiEthicsBoard: true,
+      aiComplianceMonitoring: true,
+      aiAuditTrails: true,
+      aiRiskManagement: true,
+      aiBiasDetection: true,
+      aiTransparencyReports: true,
+      aiRegulationTracking: true,
+      aiDataSovereignty: true,
+      aiPrivacyPreservation: true
     }
   }
 };
