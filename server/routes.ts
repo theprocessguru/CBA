@@ -2470,6 +2470,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Self-Contradicting Logic & Paradoxical Reality AI Systems Endpoints
+  app.post("/api/ai/logical-paradox-engine", isAuthenticated, async (req, res) => {
+    try {
+      const { paradoxType, logicLevel, realityScope } = req.body;
+      
+      if (!paradoxType) {
+        return res.status(400).json({ message: "Paradox type is required" });
+      }
+
+      const logicalParadoxEngine = await aiAdvancedService.activateLogicalParadoxEngine(paradoxType, logicLevel, realityScope);
+      res.json({ 
+        logicalParadoxEngine,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Logical paradox engine error:", error);
+      res.status(500).json({ message: "Failed to activate logical paradox engine: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/self-referential-loop", isAuthenticated, async (req, res) => {
+    try {
+      const { loopType, recursionLevel, selfReferenceDepth } = req.body;
+      
+      if (!loopType) {
+        return res.status(400).json({ message: "Loop type is required" });
+      }
+
+      const selfReferentialLoop = await aiAdvancedService.createSelfReferentialLoop(loopType, recursionLevel, selfReferenceDepth);
+      res.json({ 
+        selfReferentialLoop,
+        created_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Self-referential loop error:", error);
+      res.status(500).json({ message: "Failed to create self-referential loop: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/paradoxical-reality", isAuthenticated, async (req, res) => {
+    try {
+      const { realityType, paradoxLevel, consistencyScope } = req.body;
+      
+      if (!realityType) {
+        return res.status(400).json({ message: "Reality type is required" });
+      }
+
+      const paradoxicalReality = await aiAdvancedService.manifestParadoxicalReality(realityType, paradoxLevel, consistencyScope);
+      res.json({ 
+        paradoxicalReality,
+        manifested_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Paradoxical reality error:", error);
+      res.status(500).json({ message: "Failed to manifest paradoxical reality: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
