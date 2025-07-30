@@ -1786,6 +1786,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Next-Generation AI Technologies Endpoints
+  app.post("/api/ai/neuromorphic-system", isAuthenticated, async (req, res) => {
+    try {
+      const { systemType, specifications, applications } = req.body;
+      
+      if (!systemType) {
+        return res.status(400).json({ message: "System type is required" });
+      }
+
+      const system = await aiAdvancedService.designNeuromorphicSystem(systemType, specifications, applications);
+      res.json({ 
+        system,
+        designed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Neuromorphic system error:", error);
+      res.status(500).json({ message: "Failed to design neuromorphic system: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/consciousness-analysis", isAuthenticated, async (req, res) => {
+    try {
+      const { entity, analysisType, parameters } = req.body;
+      
+      if (!entity || !analysisType) {
+        return res.status(400).json({ message: "Entity and analysis type are required" });
+      }
+
+      const analysis = await aiAdvancedService.analyzeConsciousness(entity, analysisType, parameters);
+      res.json({ 
+        analysis,
+        analyzed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Consciousness analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze consciousness: " + error.message });
+    }
+  });
+
+  app.get("/api/ai/singularity-readiness", isAuthenticated, async (req, res) => {
+    try {
+      const readiness = await aiAdvancedService.assessSingularityReadiness();
+      res.json({ 
+        readiness,
+        assessed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Singularity readiness error:", error);
+      res.status(500).json({ message: "Failed to assess singularity readiness: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

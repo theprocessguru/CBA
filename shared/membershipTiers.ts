@@ -465,7 +465,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiRiskMitigation: false,
       aiSafetyAuditing: false,
       aiContainmentProtocols: false,
-      aiSafetyValidation: false
+      aiSafetyValidation: false,
+
+      // Next-Generation AI Technologies
+      aiNeuromorphicComputing: false,
+      aiQuantumBiologicalAI: false,
+      aiConsciousnessResearch: false,
+      aiSingularityPreparation: false,
+      aiHybridIntelligence: false,
+      aiDigitalTwins: false,
+      aiMetaverseIntegration: false,
+      aiHolographicComputing: false,
+      aiDNAComputing: false,
+      aiPhotonicsAI: false
     }
   },
   "Growth Tier": {
@@ -1041,7 +1053,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiRiskMitigation: true,
       aiSafetyAuditing: true,
       aiContainmentProtocols: false,
-      aiSafetyValidation: true
+      aiSafetyValidation: true,
+
+      // Next-Generation AI Technologies
+      aiNeuromorphicComputing: true,
+      aiQuantumBiologicalAI: true,
+      aiConsciousnessResearch: false,
+      aiSingularityPreparation: false,
+      aiHybridIntelligence: true,
+      aiDigitalTwins: true,
+      aiMetaverseIntegration: true,
+      aiHolographicComputing: false,
+      aiDNAComputing: false,
+      aiPhotonicsAI: true
     }
   },
   "Patron Tier": {
@@ -1521,7 +1545,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiRiskMitigation: true,
       aiSafetyAuditing: true,
       aiContainmentProtocols: true,
-      aiSafetyValidation: true
+      aiSafetyValidation: true,
+
+      // Next-Generation AI Technologies
+      aiNeuromorphicComputing: true,
+      aiQuantumBiologicalAI: true,
+      aiConsciousnessResearch: true,
+      aiSingularityPreparation: true,
+      aiHybridIntelligence: true,
+      aiDigitalTwins: true,
+      aiMetaverseIntegration: true,
+      aiHolographicComputing: true,
+      aiDNAComputing: true,
+      aiPhotonicsAI: true
     }
   }
 };

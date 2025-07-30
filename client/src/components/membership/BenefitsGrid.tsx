@@ -246,6 +246,18 @@ const benefitCategories = {
     { key: "aiContainmentProtocols", label: "AI Containment Protocols" },
     { key: "aiSafetyValidation", label: "AI Safety Validation" },
   ],
+  "Next-Generation AI Technologies": [
+    { key: "aiNeuromorphicComputing", label: "AI Neuromorphic Computing" },
+    { key: "aiQuantumBiologicalAI", label: "AI Quantum-Biological AI" },
+    { key: "aiConsciousnessResearch", label: "AI Consciousness Research" },
+    { key: "aiSingularityPreparation", label: "AI Singularity Preparation" },
+    { key: "aiHybridIntelligence", label: "AI Hybrid Intelligence" },
+    { key: "aiDigitalTwins", label: "AI Digital Twins" },
+    { key: "aiMetaverseIntegration", label: "AI Metaverse Integration" },
+    { key: "aiHolographicComputing", label: "AI Holographic Computing" },
+    { key: "aiDNAComputing", label: "AI DNA Computing" },
+    { key: "aiPhotonicsAI", label: "AI Photonics AI" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
