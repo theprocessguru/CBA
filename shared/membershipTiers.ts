@@ -161,7 +161,8 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       "Monthly newsletters",
       "Community forum access",
       "Basic business profile",
-      "Contact information display"
+      "Contact information display",
+      "Basic AI training workshops"
     ],
     limits: {
       businessListings: 1,
@@ -315,7 +316,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       "Weekly business tips",
       "Basic analytics access",
       "Email marketing support",
-      "Social media promotion"
+      "Social media promotion",
+      "AI automation consultation",
+      "AI chatbot setup support"
     ],
     limits: {
       businessListings: 1,
@@ -469,7 +472,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       "Advanced business consultation",
       "Comprehensive marketing support",
       "Legal & HR support access",
-      "Advanced analytics & insights"
+      "Advanced analytics & insights",
+      "AI process optimization",
+      "Custom AI solution development"
     ],
     limits: {
       businessListings: 2,
@@ -587,7 +592,24 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       investorNetwork: false,
       mentorNetwork: true,
       advisoryBoard: false,
-      strategicPlanning: true
+      strategicPlanning: true,
+
+      // AI Support & Services
+      basicAiTraining: true,
+      aiAutomationConsult: true,
+      aiChatbotSupport: true,
+      aiContentTools: true,
+      aiProcessOptimization: true,
+      customAiSolutions: true,
+      aiEthicsGuidance: true,
+      aiRoiAnalysis: true,
+      advancedAiTraining: true,
+      aiStrategyConsult: true,
+      mlImplementation: false,
+      aiSystemIntegration: true,
+      dedicatedAiSupport: false,
+      aiVendorPartnerships: true,
+      customAiModelTraining: false
     }
   },
   "Patron Tier": {
@@ -606,7 +628,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       "Personal business mentoring access",
       "Full PR and media support package",
       "Dedicated account manager",
-      "Board meeting observer access"
+      "Board meeting observer access",
+      "AI strategy consultation",
+      "Machine learning implementation"
     ],
     limits: {
       businessListings: 3,
@@ -724,7 +748,24 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       investorNetwork: true,
       mentorNetwork: true,
       advisoryBoard: true,
-      strategicPlanning: true
+      strategicPlanning: true,
+
+      // AI Support & Services
+      basicAiTraining: true,
+      aiAutomationConsult: true,
+      aiChatbotSupport: true,
+      aiContentTools: true,
+      aiProcessOptimization: true,
+      customAiSolutions: true,
+      aiEthicsGuidance: true,
+      aiRoiAnalysis: true,
+      advancedAiTraining: true,
+      aiStrategyConsult: true,
+      mlImplementation: true,
+      aiSystemIntegration: true,
+      dedicatedAiSupport: true,
+      aiVendorPartnerships: true,
+      customAiModelTraining: false
     }
   },
   "Partner": {
@@ -743,7 +784,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       "Executive and VIP networking access",
       "Complete marketing partnership program",
       "White-label co-marketing opportunities",
-      "Organization spokesperson opportunities"
+      "Organization spokesperson opportunities",
+      "Dedicated AI support specialist",
+      "Custom AI model training"
     ],
     limits: {
       businessListings: 10,
@@ -861,7 +904,24 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       investorNetwork: true,
       mentorNetwork: true,
       advisoryBoard: true,
-      strategicPlanning: true
+      strategicPlanning: true,
+
+      // AI Support & Services
+      basicAiTraining: true,
+      aiAutomationConsult: true,
+      aiChatbotSupport: true,
+      aiContentTools: true,
+      aiProcessOptimization: true,
+      customAiSolutions: true,
+      aiEthicsGuidance: true,
+      aiRoiAnalysis: true,
+      advancedAiTraining: true,
+      aiStrategyConsult: true,
+      mlImplementation: true,
+      aiSystemIntegration: true,
+      dedicatedAiSupport: true,
+      aiVendorPartnerships: true,
+      customAiModelTraining: true
     }
   }
 };

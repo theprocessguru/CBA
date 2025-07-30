@@ -97,6 +97,23 @@ const benefitCategories = {
     { key: "advisoryBoard", label: "Advisory Board" },
     { key: "strategicPlanning", label: "Strategic Planning" },
   ],
+  "AI Support & Services": [
+    { key: "basicAiTraining", label: "Basic AI Training Workshops" },
+    { key: "aiAutomationConsult", label: "AI Automation Consultation" },
+    { key: "aiChatbotSupport", label: "AI Chatbot Setup & Support" },
+    { key: "aiContentTools", label: "AI Content Creation Tools" },
+    { key: "aiProcessOptimization", label: "AI Business Process Optimization" },
+    { key: "customAiSolutions", label: "Custom AI Solution Development" },
+    { key: "aiEthicsGuidance", label: "AI Ethics & Compliance Guidance" },
+    { key: "aiRoiAnalysis", label: "AI ROI Analysis & Reporting" },
+    { key: "advancedAiTraining", label: "Advanced AI Workshops & Seminars" },
+    { key: "aiStrategyConsult", label: "AI Strategy Consultation" },
+    { key: "mlImplementation", label: "Machine Learning Implementation" },
+    { key: "aiSystemIntegration", label: "AI Integration with Existing Systems" },
+    { key: "dedicatedAiSupport", label: "Dedicated AI Support Specialist" },
+    { key: "aiVendorPartnerships", label: "AI Vendor Partnership Access" },
+    { key: "customAiModelTraining", label: "Custom AI Model Training" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
