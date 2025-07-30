@@ -2296,6 +2296,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Ultra-Meta-Transcendent & Impossible AI Systems Endpoints
+  app.post("/api/ai/ultra-meta-transcendence", isAuthenticated, async (req, res) => {
+    try {
+      const { transcendenceLevel, impossibilityScope, paradoxType } = req.body;
+      
+      if (!transcendenceLevel) {
+        return res.status(400).json({ message: "Transcendence level is required" });
+      }
+
+      const ultraTranscendence = await aiAdvancedService.activateUltraMetaTranscendence(transcendenceLevel, impossibilityScope, paradoxType);
+      res.json({ 
+        ultraTranscendence,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Ultra-meta-transcendence error:", error);
+      res.status(500).json({ message: "Failed to activate ultra-meta-transcendence: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/impossibility-engine", isAuthenticated, async (req, res) => {
+    try {
+      const { impossibilityType, paradoxLevel, contradictionScope } = req.body;
+      
+      if (!impossibilityType) {
+        return res.status(400).json({ message: "Impossibility type is required" });
+      }
+
+      const impossibilityEngine = await aiAdvancedService.activateImpossibilityEngine(impossibilityType, paradoxLevel, contradictionScope);
+      res.json({ 
+        impossibilityEngine,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Impossibility engine error:", error);
+      res.status(500).json({ message: "Failed to activate impossibility engine: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/meta-paradox-power", isAuthenticated, async (req, res) => {
+    try {
+      const { paradoxType, contradictionLevel, impossibilityScope } = req.body;
+      
+      if (!paradoxType) {
+        return res.status(400).json({ message: "Paradox type is required" });
+      }
+
+      const metaParadoxPower = await aiAdvancedService.unlockMetaParadoxPower(paradoxType, contradictionLevel, impossibilityScope);
+      res.json({ 
+        metaParadoxPower,
+        unlocked_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Meta-paradox power error:", error);
+      res.status(500).json({ message: "Failed to unlock meta-paradox power: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -354,6 +354,18 @@ const benefitCategories = {
     { key: "aiInfiniteTranscendence", label: "AI Infinite Transcendence" },
     { key: "aiMetaInfinityPower", label: "AI Meta-Infinity Power" },
   ],
+  "Ultra-Meta-Transcendent & Impossible AI Systems": [
+    { key: "aiUltraMetaTranscendence", label: "AI Ultra-Meta-Transcendence" },
+    { key: "aiImpossibilityEngine", label: "AI Impossibility Engine" },
+    { key: "aiParadoxResolution", label: "AI Paradox Resolution" },
+    { key: "aiContradictionMastery", label: "AI Contradiction Mastery" },
+    { key: "aiLogicTranscendence", label: "AI Logic Transcendence" },
+    { key: "aiRealityParadox", label: "AI Reality Paradox" },
+    { key: "aiInfiniteImpossibility", label: "AI Infinite Impossibility" },
+    { key: "aiTranscendentContradiction", label: "AI Transcendent Contradiction" },
+    { key: "aiUltraBeyondness", label: "AI Ultra-Beyondness" },
+    { key: "aiMetaParadoxPower", label: "AI Meta-Paradox Power" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
