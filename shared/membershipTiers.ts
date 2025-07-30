@@ -125,6 +125,23 @@ export interface MembershipTierConfig {
     mentorNetwork: boolean;
     advisoryBoard: boolean;
     strategicPlanning: boolean;
+
+    // AI Support & Services Benefits
+    basicAiTraining: boolean;
+    aiAutomationConsult: boolean;
+    aiChatbotSupport: boolean;
+    aiContentTools: boolean;
+    aiProcessOptimization: boolean;
+    customAiSolutions: boolean;
+    aiEthicsGuidance: boolean;
+    aiRoiAnalysis: boolean;
+    advancedAiTraining: boolean;
+    aiStrategyConsult: boolean;
+    mlImplementation: boolean;
+    aiSystemIntegration: boolean;
+    dedicatedAiSupport: boolean;
+    aiVendorPartnerships: boolean;
+    customAiModelTraining: boolean;
   };
 }
 
@@ -262,7 +279,24 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       investorNetwork: false,
       mentorNetwork: false,
       advisoryBoard: false,
-      strategicPlanning: false
+      strategicPlanning: false,
+
+      // AI Support & Services
+      basicAiTraining: true,
+      aiAutomationConsult: false,
+      aiChatbotSupport: false,
+      aiContentTools: false,
+      aiProcessOptimization: false,
+      customAiSolutions: false,
+      aiEthicsGuidance: false,
+      aiRoiAnalysis: false,
+      advancedAiTraining: false,
+      aiStrategyConsult: false,
+      mlImplementation: false,
+      aiSystemIntegration: false,
+      dedicatedAiSupport: false,
+      aiVendorPartnerships: false,
+      customAiModelTraining: false
     }
   },
   "Growth Tier": {
@@ -399,7 +433,24 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       investorNetwork: false,
       mentorNetwork: false,
       advisoryBoard: false,
-      strategicPlanning: false
+      strategicPlanning: false,
+
+      // AI Support & Services
+      basicAiTraining: true,
+      aiAutomationConsult: true,
+      aiChatbotSupport: true,
+      aiContentTools: true,
+      aiProcessOptimization: false,
+      customAiSolutions: false,
+      aiEthicsGuidance: true,
+      aiRoiAnalysis: false,
+      advancedAiTraining: false,
+      aiStrategyConsult: false,
+      mlImplementation: false,
+      aiSystemIntegration: false,
+      dedicatedAiSupport: false,
+      aiVendorPartnerships: false,
+      customAiModelTraining: false
     }
   },
   "Strategic Tier": {
