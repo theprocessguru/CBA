@@ -1838,6 +1838,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Biological & Quantum AI Systems Endpoints
+  app.post("/api/ai/design-protein", isAuthenticated, async (req, res) => {
+    try {
+      const { proteinType, specifications, targetFunction } = req.body;
+      
+      if (!proteinType) {
+        return res.status(400).json({ message: "Protein type is required" });
+      }
+
+      const design = await aiAdvancedService.designProtein(proteinType, specifications, targetFunction);
+      res.json({ 
+        design,
+        designed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Protein design error:", error);
+      res.status(500).json({ message: "Failed to design protein: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/molecular-simulation", isAuthenticated, async (req, res) => {
+    try {
+      const { molecule, simulationType, parameters } = req.body;
+      
+      if (!molecule || !simulationType) {
+        return res.status(400).json({ message: "Molecule and simulation type are required" });
+      }
+
+      const simulation = await aiAdvancedService.runMolecularSimulation(molecule, simulationType, parameters);
+      res.json({ 
+        simulation,
+        simulated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Molecular simulation error:", error);
+      res.status(500).json({ message: "Failed to run molecular simulation: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/synthetic-biology", isAuthenticated, async (req, res) => {
+    try {
+      const { organismType, modifications, objectives } = req.body;
+      
+      if (!organismType) {
+        return res.status(400).json({ message: "Organism type is required" });
+      }
+
+      const design = await aiAdvancedService.designSyntheticOrganism(organismType, modifications, objectives);
+      res.json({ 
+        design,
+        designed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Synthetic biology error:", error);
+      res.status(500).json({ message: "Failed to design synthetic organism: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

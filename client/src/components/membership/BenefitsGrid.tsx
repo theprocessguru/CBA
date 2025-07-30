@@ -258,6 +258,18 @@ const benefitCategories = {
     { key: "aiDNAComputing", label: "AI DNA Computing" },
     { key: "aiPhotonicsAI", label: "AI Photonics AI" },
   ],
+  "Biological & Quantum AI Systems": [
+    { key: "aiBiologicalDesign", label: "AI Biological Design" },
+    { key: "aiProteinFolding", label: "AI Protein Folding" },
+    { key: "aiGeneticOptimization", label: "AI Genetic Optimization" },
+    { key: "aiMolecularSimulation", label: "AI Molecular Simulation" },
+    { key: "aiSyntheticBiology", label: "AI Synthetic Biology" },
+    { key: "aiQuantumBiology", label: "AI Quantum Biology" },
+    { key: "aiBiocomputing", label: "AI Biocomputing" },
+    { key: "aiNanoAssembly", label: "AI Nano Assembly" },
+    { key: "aiCellularAutomata", label: "AI Cellular Automata" },
+    { key: "aiEvolutionaryDesign", label: "AI Evolutionary Design" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

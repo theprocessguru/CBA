@@ -477,7 +477,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMetaverseIntegration: false,
       aiHolographicComputing: false,
       aiDNAComputing: false,
-      aiPhotonicsAI: false
+      aiPhotonicsAI: false,
+
+      // Biological & Quantum AI Systems
+      aiBiologicalDesign: false,
+      aiProteinFolding: false,
+      aiGeneticOptimization: false,
+      aiMolecularSimulation: false,
+      aiSyntheticBiology: false,
+      aiQuantumBiology: false,
+      aiBiocomputing: false,
+      aiNanoAssembly: false,
+      aiCellularAutomata: false,
+      aiEvolutionaryDesign: false
     }
   },
   "Growth Tier": {
@@ -1065,7 +1077,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMetaverseIntegration: true,
       aiHolographicComputing: false,
       aiDNAComputing: false,
-      aiPhotonicsAI: true
+      aiPhotonicsAI: true,
+
+      // Biological & Quantum AI Systems
+      aiBiologicalDesign: true,
+      aiProteinFolding: true,
+      aiGeneticOptimization: false,
+      aiMolecularSimulation: true,
+      aiSyntheticBiology: true,
+      aiQuantumBiology: false,
+      aiBiocomputing: true,
+      aiNanoAssembly: false,
+      aiCellularAutomata: true,
+      aiEvolutionaryDesign: true
     }
   },
   "Patron Tier": {
@@ -1557,7 +1581,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMetaverseIntegration: true,
       aiHolographicComputing: true,
       aiDNAComputing: true,
-      aiPhotonicsAI: true
+      aiPhotonicsAI: true,
+
+      // Biological & Quantum AI Systems
+      aiBiologicalDesign: true,
+      aiProteinFolding: true,
+      aiGeneticOptimization: true,
+      aiMolecularSimulation: true,
+      aiSyntheticBiology: true,
+      aiQuantumBiology: true,
+      aiBiocomputing: true,
+      aiNanoAssembly: true,
+      aiCellularAutomata: true,
+      aiEvolutionaryDesign: true
     }
   }
 };
