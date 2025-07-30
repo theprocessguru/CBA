@@ -441,7 +441,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiTransparencyReports: false,
       aiRegulationTracking: false,
       aiDataSovereignty: false,
-      aiPrivacyPreservation: false
+      aiPrivacyPreservation: false,
+
+      // Autonomous AI Systems
+      aiAutonomousAgents: false,
+      aiMultiAgentSystems: false,
+      aiSelfLearningAgents: false,
+      aiAgentOrchestration: false,
+      aiAgentCollaboration: false,
+      aiAgentGovernance: false,
+      aiAgentMonitoring: false,
+      aiAgentSecurity: false,
+      aiAgentOptimization: false,
+      aiAgentDeployment: false,
+
+      // AI Safety & Alignment
+      aiSafetyFrameworks: false,
+      aiAlignmentResearch: false,
+      aiRobustnessTesting: false,
+      aiFailSafeMechanisms: false,
+      aiHumanOversight: false,
+      aiSafetyMonitoring: false,
+      aiRiskMitigation: false,
+      aiSafetyAuditing: false,
+      aiContainmentProtocols: false,
+      aiSafetyValidation: false
     }
   },
   "Growth Tier": {
@@ -705,7 +729,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiTransparencyReports: false,
       aiRegulationTracking: true,
       aiDataSovereignty: false,
-      aiPrivacyPreservation: true
+      aiPrivacyPreservation: true,
+
+      // Autonomous AI Systems
+      aiAutonomousAgents: true,
+      aiMultiAgentSystems: false,
+      aiSelfLearningAgents: true,
+      aiAgentOrchestration: false,
+      aiAgentCollaboration: false,
+      aiAgentGovernance: true,
+      aiAgentMonitoring: true,
+      aiAgentSecurity: true,
+      aiAgentOptimization: false,
+      aiAgentDeployment: false,
+
+      // AI Safety & Alignment
+      aiSafetyFrameworks: true,
+      aiAlignmentResearch: false,
+      aiRobustnessTesting: true,
+      aiFailSafeMechanisms: true,
+      aiHumanOversight: true,
+      aiSafetyMonitoring: true,
+      aiRiskMitigation: true,
+      aiSafetyAuditing: false,
+      aiContainmentProtocols: false,
+      aiSafetyValidation: true
     }
   },
   "Strategic Tier": {
@@ -969,7 +1017,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiTransparencyReports: true,
       aiRegulationTracking: true,
       aiDataSovereignty: true,
-      aiPrivacyPreservation: true
+      aiPrivacyPreservation: true,
+
+      // Autonomous AI Systems
+      aiAutonomousAgents: true,
+      aiMultiAgentSystems: true,
+      aiSelfLearningAgents: true,
+      aiAgentOrchestration: true,
+      aiAgentCollaboration: true,
+      aiAgentGovernance: true,
+      aiAgentMonitoring: true,
+      aiAgentSecurity: true,
+      aiAgentOptimization: false,
+      aiAgentDeployment: true,
+
+      // AI Safety & Alignment
+      aiSafetyFrameworks: true,
+      aiAlignmentResearch: true,
+      aiRobustnessTesting: true,
+      aiFailSafeMechanisms: true,
+      aiHumanOversight: true,
+      aiSafetyMonitoring: true,
+      aiRiskMitigation: true,
+      aiSafetyAuditing: true,
+      aiContainmentProtocols: false,
+      aiSafetyValidation: true
     }
   },
   "Patron Tier": {
@@ -1425,7 +1497,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiTransparencyReports: true,
       aiRegulationTracking: true,
       aiDataSovereignty: true,
-      aiPrivacyPreservation: true
+      aiPrivacyPreservation: true,
+
+      // Autonomous AI Systems
+      aiAutonomousAgents: true,
+      aiMultiAgentSystems: true,
+      aiSelfLearningAgents: true,
+      aiAgentOrchestration: true,
+      aiAgentCollaboration: true,
+      aiAgentGovernance: true,
+      aiAgentMonitoring: true,
+      aiAgentSecurity: true,
+      aiAgentOptimization: true,
+      aiAgentDeployment: true,
+
+      // AI Safety & Alignment
+      aiSafetyFrameworks: true,
+      aiAlignmentResearch: true,
+      aiRobustnessTesting: true,
+      aiFailSafeMechanisms: true,
+      aiHumanOversight: true,
+      aiSafetyMonitoring: true,
+      aiRiskMitigation: true,
+      aiSafetyAuditing: true,
+      aiContainmentProtocols: true,
+      aiSafetyValidation: true
     }
   }
 };

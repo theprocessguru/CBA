@@ -222,6 +222,30 @@ const benefitCategories = {
     { key: "aiDataSovereignty", label: "AI Data Sovereignty" },
     { key: "aiPrivacyPreservation", label: "AI Privacy Preservation" },
   ],
+  "Autonomous AI Systems": [
+    { key: "aiAutonomousAgents", label: "AI Autonomous Agents" },
+    { key: "aiMultiAgentSystems", label: "AI Multi-Agent Systems" },
+    { key: "aiSelfLearningAgents", label: "AI Self-Learning Agents" },
+    { key: "aiAgentOrchestration", label: "AI Agent Orchestration" },
+    { key: "aiAgentCollaboration", label: "AI Agent Collaboration" },
+    { key: "aiAgentGovernance", label: "AI Agent Governance" },
+    { key: "aiAgentMonitoring", label: "AI Agent Monitoring" },
+    { key: "aiAgentSecurity", label: "AI Agent Security" },
+    { key: "aiAgentOptimization", label: "AI Agent Optimization" },
+    { key: "aiAgentDeployment", label: "AI Agent Deployment" },
+  ],
+  "AI Safety & Alignment": [
+    { key: "aiSafetyFrameworks", label: "AI Safety Frameworks" },
+    { key: "aiAlignmentResearch", label: "AI Alignment Research" },
+    { key: "aiRobustnessTesting", label: "AI Robustness Testing" },
+    { key: "aiFailSafeMechanisms", label: "AI Fail-Safe Mechanisms" },
+    { key: "aiHumanOversight", label: "AI Human Oversight" },
+    { key: "aiSafetyMonitoring", label: "AI Safety Monitoring" },
+    { key: "aiRiskMitigation", label: "AI Risk Mitigation" },
+    { key: "aiSafetyAuditing", label: "AI Safety Auditing" },
+    { key: "aiContainmentProtocols", label: "AI Containment Protocols" },
+    { key: "aiSafetyValidation", label: "AI Safety Validation" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

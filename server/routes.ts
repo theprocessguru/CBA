@@ -1734,6 +1734,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Autonomous AI Systems Endpoints
+  app.post("/api/ai/deploy-agent", isAuthenticated, async (req, res) => {
+    try {
+      const { agentType, configuration, objectives } = req.body;
+      
+      if (!agentType || !objectives) {
+        return res.status(400).json({ message: "Agent type and objectives are required" });
+      }
+
+      const deployment = await aiAdvancedService.deployAutonomousAgent(agentType, configuration, objectives);
+      res.json({ 
+        deployment,
+        deployed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Agent deployment error:", error);
+      res.status(500).json({ message: "Failed to deploy agent: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/safety-assessment", isAuthenticated, async (req, res) => {
+    try {
+      const { systemDescription, riskLevel, safetyRequirements } = req.body;
+      
+      if (!systemDescription) {
+        return res.status(400).json({ message: "System description is required" });
+      }
+
+      const assessment = await aiAdvancedService.conductSafetyAssessment(systemDescription, riskLevel, safetyRequirements);
+      res.json({ 
+        assessment,
+        assessed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Safety assessment error:", error);
+      res.status(500).json({ message: "Failed to conduct safety assessment: " + error.message });
+    }
+  });
+
+  app.get("/api/ai/agent-status", isAuthenticated, async (req, res) => {
+    try {
+      const status = await aiAdvancedService.getAgentSystemStatus();
+      res.json({ 
+        status,
+        checked_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Agent status error:", error);
+      res.status(500).json({ message: "Failed to get agent status: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
