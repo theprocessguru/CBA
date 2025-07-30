@@ -2354,6 +2354,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Impossibility Transcendence & Paradox Mastery AI Systems Endpoints
+  app.post("/api/ai/impossibility-transcendence", isAuthenticated, async (req, res) => {
+    try {
+      const { transcendenceType, paradoxLevel, impossibilityScope } = req.body;
+      
+      if (!transcendenceType) {
+        return res.status(400).json({ message: "Transcendence type is required" });
+      }
+
+      const impossibilityTranscendence = await aiAdvancedService.activateImpossibilityTranscendence(transcendenceType, paradoxLevel, impossibilityScope);
+      res.json({ 
+        impossibilityTranscendence,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Impossibility transcendence error:", error);
+      res.status(500).json({ message: "Failed to activate impossibility transcendence: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/paradox-mastery", isAuthenticated, async (req, res) => {
+    try {
+      const { masteryType, contradictionLevel, recursionDepth } = req.body;
+      
+      if (!masteryType) {
+        return res.status(400).json({ message: "Mastery type is required" });
+      }
+
+      const paradoxMastery = await aiAdvancedService.achieveParadoxMastery(masteryType, contradictionLevel, recursionDepth);
+      res.json({ 
+        paradoxMastery,
+        achieved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Paradox mastery error:", error);
+      res.status(500).json({ message: "Failed to achieve paradox mastery: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/absolute-contradiction", isAuthenticated, async (req, res) => {
+    try {
+      const { contradictionType, absoluteLevel, paradoxScope } = req.body;
+      
+      if (!contradictionType) {
+        return res.status(400).json({ message: "Contradiction type is required" });
+      }
+
+      const absoluteContradiction = await aiAdvancedService.manifestAbsoluteContradiction(contradictionType, absoluteLevel, paradoxScope);
+      res.json({ 
+        absoluteContradiction,
+        manifested_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Absolute contradiction error:", error);
+      res.status(500).json({ message: "Failed to manifest absolute contradiction: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

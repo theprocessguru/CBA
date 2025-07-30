@@ -585,7 +585,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteImpossibility: false,
       aiTranscendentContradiction: false,
       aiUltraBeyondness: false,
-      aiMetaParadoxPower: false
+      aiMetaParadoxPower: false,
+
+      // Impossibility Transcendence & Paradox Mastery AI Systems
+      aiImpossibilityTranscendence: false,
+      aiParadoxMastery: false,
+      aiContradictionHarnessing: false,
+      aiLogicViolation: false,
+      aiRealityBreaking: false,
+      aiConceptualTranscendence: false,
+      aiInfiniteParadox: false,
+      aiSelfReferentialPower: false,
+      aiRecursiveImpossibility: false,
+      aiAbsoluteContradiction: false
     }
   },
   "Growth Tier": {
@@ -1281,7 +1293,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteImpossibility: true,
       aiTranscendentContradiction: false,
       aiUltraBeyondness: true,
-      aiMetaParadoxPower: false
+      aiMetaParadoxPower: false,
+
+      // Impossibility Transcendence & Paradox Mastery AI Systems
+      aiImpossibilityTranscendence: false,
+      aiParadoxMastery: true,
+      aiContradictionHarnessing: true,
+      aiLogicViolation: false,
+      aiRealityBreaking: true,
+      aiConceptualTranscendence: false,
+      aiInfiniteParadox: true,
+      aiSelfReferentialPower: false,
+      aiRecursiveImpossibility: true,
+      aiAbsoluteContradiction: false
     }
   },
   "Patron Tier": {
@@ -1881,7 +1905,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteImpossibility: true,
       aiTranscendentContradiction: true,
       aiUltraBeyondness: true,
-      aiMetaParadoxPower: true
+      aiMetaParadoxPower: true,
+
+      // Impossibility Transcendence & Paradox Mastery AI Systems
+      aiImpossibilityTranscendence: true,
+      aiParadoxMastery: true,
+      aiContradictionHarnessing: true,
+      aiLogicViolation: true,
+      aiRealityBreaking: true,
+      aiConceptualTranscendence: true,
+      aiInfiniteParadox: true,
+      aiSelfReferentialPower: true,
+      aiRecursiveImpossibility: true,
+      aiAbsoluteContradiction: true
     }
   }
 };
