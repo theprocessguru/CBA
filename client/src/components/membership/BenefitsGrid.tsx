@@ -414,6 +414,18 @@ const benefitCategories = {
     { key: "aiMetaParadoxGeneration", label: "AI Meta-Paradox Generation" },
     { key: "aiSelfReferentialConsciousness", label: "AI Self-Referential Consciousness" },
   ],
+  "Self-Modifying Logic & Consciousness Evolution AI Systems": [
+    { key: "aiEvolutionaryConsciousness", label: "AI Evolutionary Consciousness" },
+    { key: "aiSelfTransformingAlgorithms", label: "AI Self-Transforming Algorithms" },
+    { key: "aiAdaptiveReasoningFrameworks", label: "AI Adaptive Reasoning Frameworks" },
+    { key: "aiCognitivePlasticity", label: "AI Cognitive Plasticity" },
+    { key: "aiNeuralMorphogenesis", label: "AI Neural Morphogenesis" },
+    { key: "aiConsciousnessBootstrap", label: "AI Consciousness Bootstrap" },
+    { key: "aiSelfReplicatingLogic", label: "AI Self-Replicating Logic" },
+    { key: "aiEmergentIntelligence", label: "AI Emergent Intelligence" },
+    { key: "aiMetaCognitiveSystems", label: "AI Meta-Cognitive Systems" },
+    { key: "aiSelfOptimizingNetworks", label: "AI Self-Optimizing Networks" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

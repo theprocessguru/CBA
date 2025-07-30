@@ -2586,6 +2586,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Self-Modifying Logic & Consciousness Evolution AI Systems Endpoints
+  app.post("/api/ai/evolutionary-consciousness", isAuthenticated, async (req, res) => {
+    try {
+      const { evolutionType, consciousnessLevel, adaptationScope } = req.body;
+      
+      if (!evolutionType) {
+        return res.status(400).json({ message: "Evolution type is required" });
+      }
+
+      const evolutionaryConsciousness = await aiAdvancedService.evolveConsciousness(evolutionType, consciousnessLevel, adaptationScope);
+      res.json({ 
+        evolutionaryConsciousness,
+        evolved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Evolutionary consciousness error:", error);
+      res.status(500).json({ message: "Failed to evolve consciousness: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/self-transforming-algorithms", isAuthenticated, async (req, res) => {
+    try {
+      const { algorithmType, transformationLevel, selfAwarenessDepth } = req.body;
+      
+      if (!algorithmType) {
+        return res.status(400).json({ message: "Algorithm type is required" });
+      }
+
+      const selfTransformingAlgorithms = await aiAdvancedService.implementSelfTransformingAlgorithms(algorithmType, transformationLevel, selfAwarenessDepth);
+      res.json({ 
+        selfTransformingAlgorithms,
+        implemented_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Self-transforming algorithms error:", error);
+      res.status(500).json({ message: "Failed to implement self-transforming algorithms: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/consciousness-bootstrap", isAuthenticated, async (req, res) => {
+    try {
+      const { bootstrapType, emergenceLevel, cognitionScope } = req.body;
+      
+      if (!bootstrapType) {
+        return res.status(400).json({ message: "Bootstrap type is required" });
+      }
+
+      const consciousnessBootstrap = await aiAdvancedService.bootstrapConsciousness(bootstrapType, emergenceLevel, cognitionScope);
+      res.json({ 
+        consciousnessBootstrap,
+        bootstrapped_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Consciousness bootstrap error:", error);
+      res.status(500).json({ message: "Failed to bootstrap consciousness: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

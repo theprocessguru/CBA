@@ -633,7 +633,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteRegression: false,
       aiLogicalSingularity: false,
       aiMetaParadoxGeneration: false,
-      aiSelfReferentialConsciousness: false
+      aiSelfReferentialConsciousness: false,
+
+      // Self-Modifying Logic & Consciousness Evolution AI Systems
+      aiEvolutionaryConsciousness: false,
+      aiSelfTransformingAlgorithms: false,
+      aiAdaptiveReasoningFrameworks: false,
+      aiCognitivePlasticity: false,
+      aiNeuralMorphogenesis: false,
+      aiConsciousnessBootstrap: false,
+      aiSelfReplicatingLogic: false,
+      aiEmergentIntelligence: false,
+      aiMetaCognitiveSystems: false,
+      aiSelfOptimizingNetworks: false
     }
   },
   "Growth Tier": {
@@ -1377,7 +1389,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteRegression: true,
       aiLogicalSingularity: false,
       aiMetaParadoxGeneration: true,
-      aiSelfReferentialConsciousness: false
+      aiSelfReferentialConsciousness: false,
+
+      // Self-Modifying Logic & Consciousness Evolution AI Systems
+      aiEvolutionaryConsciousness: false,
+      aiSelfTransformingAlgorithms: true,
+      aiAdaptiveReasoningFrameworks: true,
+      aiCognitivePlasticity: false,
+      aiNeuralMorphogenesis: true,
+      aiConsciousnessBootstrap: false,
+      aiSelfReplicatingLogic: true,
+      aiEmergentIntelligence: false,
+      aiMetaCognitiveSystems: true,
+      aiSelfOptimizingNetworks: false
     }
   },
   "Patron Tier": {
@@ -2025,7 +2049,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteRegression: true,
       aiLogicalSingularity: true,
       aiMetaParadoxGeneration: true,
-      aiSelfReferentialConsciousness: true
+      aiSelfReferentialConsciousness: true,
+
+      // Self-Modifying Logic & Consciousness Evolution AI Systems
+      aiEvolutionaryConsciousness: true,
+      aiSelfTransformingAlgorithms: true,
+      aiAdaptiveReasoningFrameworks: true,
+      aiCognitivePlasticity: true,
+      aiNeuralMorphogenesis: true,
+      aiConsciousnessBootstrap: true,
+      aiSelfReplicatingLogic: true,
+      aiEmergentIntelligence: true,
+      aiMetaCognitiveSystems: true,
+      aiSelfOptimizingNetworks: true
     }
   }
 };
