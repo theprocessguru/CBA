@@ -270,6 +270,18 @@ const benefitCategories = {
     { key: "aiCellularAutomata", label: "AI Cellular Automata" },
     { key: "aiEvolutionaryDesign", label: "AI Evolutionary Design" },
   ],
+  "Space & Temporal AI Systems": [
+    { key: "aiSpaceComputing", label: "AI Space Computing" },
+    { key: "aiSatelliteAI", label: "AI Satellite AI" },
+    { key: "aiTemporalProcessing", label: "AI Temporal Processing" },
+    { key: "aiTimeSeriesAI", label: "AI Time Series AI" },
+    { key: "aiInterdimensionalAI", label: "AI Interdimensional AI" },
+    { key: "aiCosmicDataAnalysis", label: "AI Cosmic Data Analysis" },
+    { key: "aiAstrobiologyAI", label: "AI Astrobiology AI" },
+    { key: "aiPlanetaryAI", label: "AI Planetary AI" },
+    { key: "aiGalacticNetworks", label: "AI Galactic Networks" },
+    { key: "aiUniversalComputing", label: "AI Universal Computing" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

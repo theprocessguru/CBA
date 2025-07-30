@@ -489,7 +489,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBiocomputing: false,
       aiNanoAssembly: false,
       aiCellularAutomata: false,
-      aiEvolutionaryDesign: false
+      aiEvolutionaryDesign: false,
+
+      // Space & Temporal AI Systems
+      aiSpaceComputing: false,
+      aiSatelliteAI: false,
+      aiTemporalProcessing: false,
+      aiTimeSeriesAI: false,
+      aiInterdimensionalAI: false,
+      aiCosmicDataAnalysis: false,
+      aiAstrobiologyAI: false,
+      aiPlanetaryAI: false,
+      aiGalacticNetworks: false,
+      aiUniversalComputing: false
     }
   },
   "Growth Tier": {
@@ -1089,7 +1101,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBiocomputing: true,
       aiNanoAssembly: false,
       aiCellularAutomata: true,
-      aiEvolutionaryDesign: true
+      aiEvolutionaryDesign: true,
+
+      // Space & Temporal AI Systems
+      aiSpaceComputing: true,
+      aiSatelliteAI: true,
+      aiTemporalProcessing: true,
+      aiTimeSeriesAI: true,
+      aiInterdimensionalAI: false,
+      aiCosmicDataAnalysis: true,
+      aiAstrobiologyAI: true,
+      aiPlanetaryAI: true,
+      aiGalacticNetworks: false,
+      aiUniversalComputing: false
     }
   },
   "Patron Tier": {
@@ -1593,7 +1617,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiBiocomputing: true,
       aiNanoAssembly: true,
       aiCellularAutomata: true,
-      aiEvolutionaryDesign: true
+      aiEvolutionaryDesign: true,
+
+      // Space & Temporal AI Systems
+      aiSpaceComputing: true,
+      aiSatelliteAI: true,
+      aiTemporalProcessing: true,
+      aiTimeSeriesAI: true,
+      aiInterdimensionalAI: true,
+      aiCosmicDataAnalysis: true,
+      aiAstrobiologyAI: true,
+      aiPlanetaryAI: true,
+      aiGalacticNetworks: true,
+      aiUniversalComputing: true
     }
   }
 };

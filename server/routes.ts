@@ -1896,6 +1896,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Space & Temporal AI Systems Endpoints
+  app.post("/api/ai/space-computing", isAuthenticated, async (req, res) => {
+    try {
+      const { missionType, objectives, constraints } = req.body;
+      
+      if (!missionType) {
+        return res.status(400).json({ message: "Mission type is required" });
+      }
+
+      const system = await aiAdvancedService.designSpaceComputingSystem(missionType, objectives, constraints);
+      res.json({ 
+        system,
+        designed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Space computing error:", error);
+      res.status(500).json({ message: "Failed to design space computing system: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/temporal-analysis", isAuthenticated, async (req, res) => {
+    try {
+      const { dataType, timeRange, analysisObjectives } = req.body;
+      
+      if (!dataType || !timeRange) {
+        return res.status(400).json({ message: "Data type and time range are required" });
+      }
+
+      const analysis = await aiAdvancedService.performTemporalAnalysis(dataType, timeRange, analysisObjectives);
+      res.json({ 
+        analysis,
+        analyzed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Temporal analysis error:", error);
+      res.status(500).json({ message: "Failed to perform temporal analysis: " + error.message });
+    }
+  });
+
+  app.get("/api/ai/cosmic-data", isAuthenticated, async (req, res) => {
+    try {
+      const data = await aiAdvancedService.analyzeCosmicData();
+      res.json({ 
+        data,
+        retrieved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Cosmic data error:", error);
+      res.status(500).json({ message: "Failed to analyze cosmic data: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
