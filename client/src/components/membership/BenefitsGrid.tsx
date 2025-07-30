@@ -114,6 +114,18 @@ const benefitCategories = {
     { key: "aiVendorPartnerships", label: "AI Vendor Partnership Access" },
     { key: "customAiModelTraining", label: "Custom AI Model Training" },
   ],
+  "Advanced AI Tools & Features": [
+    { key: "aiToolsAccess", label: "AI Tools Platform Access" },
+    { key: "aiContentGenerator", label: "AI Content Generator" },
+    { key: "aiBusinessAnalytics", label: "AI Business Analytics" },
+    { key: "aiChatbotBuilder", label: "AI Chatbot Builder" },
+    { key: "aiProcessAnalyzer", label: "AI Process Analyzer" },
+    { key: "aiCustomerInsights", label: "AI Customer Insights" },
+    { key: "aiMarketingOptimizer", label: "AI Marketing Optimizer" },
+    { key: "aiPredictiveAnalytics", label: "AI Predictive Analytics" },
+    { key: "aiAutomationPlatform", label: "AI Automation Platform" },
+    { key: "ai24x7Assistant", label: "24/7 AI Business Assistant" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

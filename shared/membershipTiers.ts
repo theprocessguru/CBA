@@ -142,6 +142,18 @@ export interface MembershipTierConfig {
     dedicatedAiSupport: boolean;
     aiVendorPartnerships: boolean;
     customAiModelTraining: boolean;
+
+    // Advanced AI Tools & Features
+    aiToolsAccess: boolean;
+    aiContentGenerator: boolean;
+    aiBusinessAnalytics: boolean;
+    aiChatbotBuilder: boolean;
+    aiProcessAnalyzer: boolean;
+    aiCustomerInsights: boolean;
+    aiMarketingOptimizer: boolean;
+    aiPredictiveAnalytics: boolean;
+    aiAutomationPlatform: boolean;
+    ai24x7Assistant: boolean;
   };
 }
 
@@ -297,7 +309,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiSystemIntegration: false,
       dedicatedAiSupport: false,
       aiVendorPartnerships: false,
-      customAiModelTraining: false
+      customAiModelTraining: false,
+
+      // Advanced AI Tools & Features
+      aiToolsAccess: true,
+      aiContentGenerator: false,
+      aiBusinessAnalytics: false,
+      aiChatbotBuilder: false,
+      aiProcessAnalyzer: false,
+      aiCustomerInsights: false,
+      aiMarketingOptimizer: false,
+      aiPredictiveAnalytics: false,
+      aiAutomationPlatform: false,
+      ai24x7Assistant: false
     }
   },
   "Growth Tier": {
@@ -453,7 +477,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiSystemIntegration: false,
       dedicatedAiSupport: false,
       aiVendorPartnerships: false,
-      customAiModelTraining: false
+      customAiModelTraining: false,
+
+      // Advanced AI Tools & Features
+      aiToolsAccess: true,
+      aiContentGenerator: true,
+      aiBusinessAnalytics: true,
+      aiChatbotBuilder: true,
+      aiProcessAnalyzer: true,
+      aiCustomerInsights: false,
+      aiMarketingOptimizer: false,
+      aiPredictiveAnalytics: false,
+      aiAutomationPlatform: false,
+      ai24x7Assistant: false
     }
   },
   "Strategic Tier": {
@@ -609,7 +645,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiSystemIntegration: true,
       dedicatedAiSupport: false,
       aiVendorPartnerships: true,
-      customAiModelTraining: false
+      customAiModelTraining: false,
+
+      // Advanced AI Tools & Features
+      aiToolsAccess: true,
+      aiContentGenerator: true,
+      aiBusinessAnalytics: false,
+      aiChatbotBuilder: true,
+      aiProcessAnalyzer: false,
+      aiCustomerInsights: false,
+      aiMarketingOptimizer: false,
+      aiPredictiveAnalytics: false,
+      aiAutomationPlatform: false,
+      ai24x7Assistant: false
     }
   },
   "Patron Tier": {
@@ -765,7 +813,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiSystemIntegration: true,
       dedicatedAiSupport: true,
       aiVendorPartnerships: true,
-      customAiModelTraining: false
+      customAiModelTraining: false,
+
+      // Advanced AI Tools & Features
+      aiToolsAccess: true,
+      aiContentGenerator: true,
+      aiBusinessAnalytics: true,
+      aiChatbotBuilder: true,
+      aiProcessAnalyzer: true,
+      aiCustomerInsights: false,
+      aiMarketingOptimizer: true,
+      aiPredictiveAnalytics: true,
+      aiAutomationPlatform: false,
+      ai24x7Assistant: false
     }
   },
   "Partner": {
@@ -921,7 +981,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiSystemIntegration: true,
       dedicatedAiSupport: true,
       aiVendorPartnerships: true,
-      customAiModelTraining: true
+      customAiModelTraining: true,
+
+      // Advanced AI Tools & Features
+      aiToolsAccess: true,
+      aiContentGenerator: true,
+      aiBusinessAnalytics: true,
+      aiChatbotBuilder: true,
+      aiProcessAnalyzer: true,
+      aiCustomerInsights: true,
+      aiMarketingOptimizer: true,
+      aiPredictiveAnalytics: true,
+      aiAutomationPlatform: true,
+      ai24x7Assistant: true
     }
   }
 };

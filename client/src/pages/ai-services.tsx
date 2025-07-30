@@ -144,9 +144,9 @@ const AIServices = () => {
                   View Membership Tiers
                 </Button>
               </Link>
-              <Link to="/contact">
+              <Link to="/ai-tools">
                 <Button size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
-                  Book AI Consultation
+                  Access AI Tools
                 </Button>
               </Link>
             </div>
