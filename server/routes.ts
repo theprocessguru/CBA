@@ -10,6 +10,7 @@ import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
+import { aiAdvancedService } from "./aiAdvancedService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
@@ -1563,6 +1564,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("AI usage tracking error:", error);
       res.status(500).json({ message: "Failed to track usage: " + error.message });
+    }
+  });
+
+  // Advanced AI Services API Endpoints
+  app.post("/api/ai/process-document", isAuthenticated, async (req, res) => {
+    try {
+      const { documentContent, analysisType = 'general' } = req.body;
+      
+      if (!documentContent) {
+        return res.status(400).json({ message: "Document content is required" });
+      }
+
+      const analysis = await aiAdvancedService.processDocument(documentContent, analysisType);
+      res.json({ 
+        analysis,
+        processed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Document processing error:", error);
+      res.status(500).json({ message: "Failed to process document: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/industry-report", isAuthenticated, async (req, res) => {
+    try {
+      const { industry, reportType = 'market' } = req.body;
+      
+      if (!industry) {
+        return res.status(400).json({ message: "Industry is required" });
+      }
+
+      const report = await aiAdvancedService.generateIndustryReport(industry, reportType);
+      res.json({ 
+        report,
+        generated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Industry report generation error:", error);
+      res.status(500).json({ message: "Failed to generate industry report: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/optimize-process", isAuthenticated, async (req, res) => {
+    try {
+      const { processDescription, currentMetrics = {} } = req.body;
+      
+      if (!processDescription) {
+        return res.status(400).json({ message: "Process description is required" });
+      }
+
+      const optimization = await aiAdvancedService.optimizeBusinessProcess(processDescription, currentMetrics);
+      res.json({ 
+        optimization,
+        analyzed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Process optimization error:", error);
+      res.status(500).json({ message: "Failed to optimize process: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/risk-assessment", isAuthenticated, async (req, res) => {
+    try {
+      const { businessContext, riskType = 'operational' } = req.body;
+      
+      if (!businessContext) {
+        return res.status(400).json({ message: "Business context is required" });
+      }
+
+      const assessment = await aiAdvancedService.generateRiskAssessment(businessContext, riskType);
+      res.json({ 
+        assessment,
+        assessed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Risk assessment error:", error);
+      res.status(500).json({ message: "Failed to generate risk assessment: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/implementation-plan", isAuthenticated, async (req, res) => {
+    try {
+      const { businessGoals, currentTech = 'Standard business systems' } = req.body;
+      
+      if (!businessGoals || !Array.isArray(businessGoals) || businessGoals.length === 0) {
+        return res.status(400).json({ message: "Business goals array is required" });
+      }
+
+      const plan = await aiAdvancedService.createAIImplementationPlan(businessGoals, currentTech);
+      res.json({ 
+        plan,
+        created_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("AI implementation plan error:", error);
+      res.status(500).json({ message: "Failed to create implementation plan: " + error.message });
     }
   });
 

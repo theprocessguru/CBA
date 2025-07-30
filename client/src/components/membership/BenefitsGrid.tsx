@@ -174,6 +174,30 @@ const benefitCategories = {
     { key: "aiEngagementTracking", label: "AI Engagement Tracking" },
     { key: "aiResponseOptimization", label: "AI Response Optimization" },
   ],
+  "AI Operations & MLOps": [
+    { key: "aiModelDeployment", label: "AI Model Deployment" },
+    { key: "aiDataEngineering", label: "AI Data Engineering" },
+    { key: "aiMLPipelines", label: "AI ML Pipelines" },
+    { key: "aiModelMonitoring", label: "AI Model Monitoring" },
+    { key: "aiVersionControl", label: "AI Version Control" },
+    { key: "aiScalingInfrastructure", label: "AI Scaling Infrastructure" },
+    { key: "aiDevOpsIntegration", label: "AI DevOps Integration" },
+    { key: "aiModelOptimization", label: "AI Model Optimization" },
+    { key: "aiA_BTestingAI", label: "AI A/B Testing" },
+    { key: "aiContinuousLearning", label: "AI Continuous Learning" },
+  ],
+  "Specialized AI Solutions": [
+    { key: "aiDocumentProcessing", label: "AI Document Processing" },
+    { key: "aiImageRecognition", label: "AI Image Recognition" },
+    { key: "aiNaturalLanguageProcessing", label: "AI Natural Language Processing" },
+    { key: "aiComputerVision", label: "AI Computer Vision" },
+    { key: "aiRoboticProcessAutomation", label: "AI Robotic Process Automation" },
+    { key: "aiQuantumComputing", label: "AI Quantum Computing" },
+    { key: "aiBlockchainAI", label: "AI Blockchain Integration" },
+    { key: "aiIoTIntelligence", label: "AI IoT Intelligence" },
+    { key: "aiEdgeComputing", label: "AI Edge Computing" },
+    { key: "aiAugmentedReality", label: "AI Augmented Reality" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

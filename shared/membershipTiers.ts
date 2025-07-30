@@ -393,7 +393,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiLeadScoring: false,
       aiCommunicationAI: false,
       aiEngagementTracking: false,
-      aiResponseOptimization: false
+      aiResponseOptimization: false,
+
+      // AI Operations & MLOps
+      aiModelDeployment: false,
+      aiDataEngineering: false,
+      aiMLPipelines: false,
+      aiModelMonitoring: false,
+      aiVersionControl: false,
+      aiScalingInfrastructure: false,
+      aiDevOpsIntegration: false,
+      aiModelOptimization: false,
+      aiA_BTestingAI: false,
+      aiContinuousLearning: false,
+
+      // Specialized AI Solutions
+      aiDocumentProcessing: false,
+      aiImageRecognition: false,
+      aiNaturalLanguageProcessing: false,
+      aiComputerVision: false,
+      aiRoboticProcessAutomation: false,
+      aiQuantumComputing: false,
+      aiBlockchainAI: false,
+      aiIoTIntelligence: false,
+      aiEdgeComputing: false,
+      aiAugmentedReality: false
     }
   },
   "Growth Tier": {
@@ -609,7 +633,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiLeadScoring: true,
       aiCommunicationAI: false,
       aiEngagementTracking: true,
-      aiResponseOptimization: false
+      aiResponseOptimization: false,
+
+      // AI Operations & MLOps
+      aiModelDeployment: true,
+      aiDataEngineering: false,
+      aiMLPipelines: false,
+      aiModelMonitoring: true,
+      aiVersionControl: false,
+      aiScalingInfrastructure: false,
+      aiDevOpsIntegration: false,
+      aiModelOptimization: false,
+      aiA_BTestingAI: false,
+      aiContinuousLearning: false,
+
+      // Specialized AI Solutions
+      aiDocumentProcessing: true,
+      aiImageRecognition: true,
+      aiNaturalLanguageProcessing: true,
+      aiComputerVision: false,
+      aiRoboticProcessAutomation: false,
+      aiQuantumComputing: false,
+      aiBlockchainAI: false,
+      aiIoTIntelligence: false,
+      aiEdgeComputing: false,
+      aiAugmentedReality: false
     }
   },
   "Strategic Tier": {
@@ -825,7 +873,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiLeadScoring: true,
       aiCommunicationAI: true,
       aiEngagementTracking: true,
-      aiResponseOptimization: false
+      aiResponseOptimization: false,
+
+      // AI Operations & MLOps
+      aiModelDeployment: true,
+      aiDataEngineering: true,
+      aiMLPipelines: true,
+      aiModelMonitoring: true,
+      aiVersionControl: true,
+      aiScalingInfrastructure: false,
+      aiDevOpsIntegration: true,
+      aiModelOptimization: true,
+      aiA_BTestingAI: true,
+      aiContinuousLearning: false,
+
+      // Specialized AI Solutions
+      aiDocumentProcessing: true,
+      aiImageRecognition: true,
+      aiNaturalLanguageProcessing: true,
+      aiComputerVision: true,
+      aiRoboticProcessAutomation: true,
+      aiQuantumComputing: false,
+      aiBlockchainAI: false,
+      aiIoTIntelligence: true,
+      aiEdgeComputing: false,
+      aiAugmentedReality: false
     }
   },
   "Patron Tier": {
@@ -1233,7 +1305,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiLeadScoring: true,
       aiCommunicationAI: true,
       aiEngagementTracking: true,
-      aiResponseOptimization: true
+      aiResponseOptimization: true,
+
+      // AI Operations & MLOps
+      aiModelDeployment: true,
+      aiDataEngineering: true,
+      aiMLPipelines: true,
+      aiModelMonitoring: true,
+      aiVersionControl: true,
+      aiScalingInfrastructure: true,
+      aiDevOpsIntegration: true,
+      aiModelOptimization: true,
+      aiA_BTestingAI: true,
+      aiContinuousLearning: true,
+
+      // Specialized AI Solutions
+      aiDocumentProcessing: true,
+      aiImageRecognition: true,
+      aiNaturalLanguageProcessing: true,
+      aiComputerVision: true,
+      aiRoboticProcessAutomation: true,
+      aiQuantumComputing: true,
+      aiBlockchainAI: true,
+      aiIoTIntelligence: true,
+      aiEdgeComputing: true,
+      aiAugmentedReality: true
     }
   }
 };
