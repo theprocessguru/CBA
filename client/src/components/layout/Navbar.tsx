@@ -101,6 +101,15 @@ const Navbar = () => {
                   Membership
                 </a>
               </Link>
+              <Link href="/ai-services">
+                <a className={`border-b-2 ${
+                  isActive('/ai-services') 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
+                  AI Services
+                </a>
+              </Link>
               <Link href="/contact">
                 <a className={`border-b-2 ${
                   isActive('/contact') 

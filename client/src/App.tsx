@@ -3,6 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Login from "@/pages/Login";
@@ -26,6 +27,7 @@ import EmailSettings from "@/pages/admin/EmailSettings";
 import UploadMembers from "@/pages/admin/upload-members";
 import MembershipManagement from "@/pages/admin/MembershipManagement";
 import MembershipBenefits from "@/pages/membership-benefits";
+import AIServices from "@/pages/ai-services";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
@@ -159,6 +161,11 @@ function Router() {
       <Route path="/membership-benefits">
         <MainLayout>
           <MembershipBenefits />
+        </MainLayout>
+      </Route>
+      <Route path="/ai-services">
+        <MainLayout>
+          <AIServices />
         </MainLayout>
       </Route>
       
