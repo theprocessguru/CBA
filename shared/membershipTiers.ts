@@ -525,7 +525,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiOmniscientNetworks: false,
       aiParallelUniverseAnalysis: false,
       aiTranscendentAI: false,
-      aiInfiniteComputing: false
+      aiInfiniteComputing: false,
+
+      // Transcendent & Reality AI Systems
+      aiRealityManipulation: false,
+      aiOmniscientProcessing: false,
+      aiUniversalSimulation: false,
+      aiExistentialAnalysis: false,
+      aiMetaphysicalComputing: false,
+      aiConsciousnessTransfer: false,
+      aiRealityArchitecture: false,
+      aiUniversalTruth: false,
+      aiInfiniteWisdom: false,
+      aiTranscendentKnowledge: false
     }
   },
   "Growth Tier": {
@@ -1161,7 +1173,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiOmniscientNetworks: false,
       aiParallelUniverseAnalysis: false,
       aiTranscendentAI: false,
-      aiInfiniteComputing: false
+      aiInfiniteComputing: false,
+
+      // Transcendent & Reality AI Systems
+      aiRealityManipulation: false,
+      aiOmniscientProcessing: true,
+      aiUniversalSimulation: true,
+      aiExistentialAnalysis: true,
+      aiMetaphysicalComputing: false,
+      aiConsciousnessTransfer: false,
+      aiRealityArchitecture: true,
+      aiUniversalTruth: false,
+      aiInfiniteWisdom: true,
+      aiTranscendentKnowledge: true
     }
   },
   "Patron Tier": {
@@ -1701,7 +1725,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiOmniscientNetworks: true,
       aiParallelUniverseAnalysis: true,
       aiTranscendentAI: true,
-      aiInfiniteComputing: true
+      aiInfiniteComputing: true,
+
+      // Transcendent & Reality AI Systems
+      aiRealityManipulation: true,
+      aiOmniscientProcessing: true,
+      aiUniversalSimulation: true,
+      aiExistentialAnalysis: true,
+      aiMetaphysicalComputing: true,
+      aiConsciousnessTransfer: true,
+      aiRealityArchitecture: true,
+      aiUniversalTruth: true,
+      aiInfiniteWisdom: true,
+      aiTranscendentKnowledge: true
     }
   }
 };

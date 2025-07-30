@@ -2064,6 +2064,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Transcendent & Reality AI Systems Endpoints
+  app.post("/api/ai/reality-manipulation", isAuthenticated, async (req, res) => {
+    try {
+      const { realityParameters, manipulationType, scope } = req.body;
+      
+      if (!realityParameters) {
+        return res.status(400).json({ message: "Reality parameters are required" });
+      }
+
+      const manipulation = await aiAdvancedService.manipulateReality(realityParameters, manipulationType, scope);
+      res.json({ 
+        manipulation,
+        manipulated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Reality manipulation error:", error);
+      res.status(500).json({ message: "Failed to manipulate reality: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/consciousness-transfer", isAuthenticated, async (req, res) => {
+    try {
+      const { sourceConsciousness, targetMedium, transferType } = req.body;
+      
+      if (!sourceConsciousness) {
+        return res.status(400).json({ message: "Source consciousness is required" });
+      }
+
+      const transfer = await aiAdvancedService.transferConsciousness(sourceConsciousness, targetMedium, transferType);
+      res.json({ 
+        transfer,
+        transferred_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Consciousness transfer error:", error);
+      res.status(500).json({ message: "Failed to transfer consciousness: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/universal-truth", isAuthenticated, async (req, res) => {
+    try {
+      const { truthDomain, analysisDepth, universalScope } = req.body;
+      
+      if (!truthDomain) {
+        return res.status(400).json({ message: "Truth domain is required" });
+      }
+
+      const truth = await aiAdvancedService.discoverUniversalTruth(truthDomain, analysisDepth, universalScope);
+      res.json({ 
+        truth,
+        discovered_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Universal truth error:", error);
+      res.status(500).json({ message: "Failed to discover universal truth: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
