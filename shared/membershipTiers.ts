@@ -369,7 +369,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiPerformanceMonitoring: false,
       aiSecurityAnalysis: false,
       aiBackupAutomation: false,
-      aiSystemOptimization: false
+      aiSystemOptimization: false,
+
+      // Advanced AI Analytics & Intelligence
+      aiRealTimeAnalytics: false,
+      aiPredictiveModeling: false,
+      aiAnomalyDetection: false,
+      aiSentimentAnalysis: false,
+      aiBehaviorTracking: false,
+      aiTrendForecasting: false,
+      aiCompetitiveIntelligence: false,
+      aiMarketSignals: false,
+      aiCustomerJourney: false,
+      aiConversionOptimization: false,
+
+      // AI Communication & Engagement
+      aiChatbotDevelopment: false,
+      aiVoiceAssistants: false,
+      aiContentPersonalization: false,
+      aiEmailOptimization: false,
+      aiSocialMediaAI: false,
+      aiCustomerSegmentation: false,
+      aiLeadScoring: false,
+      aiCommunicationAI: false,
+      aiEngagementTracking: false,
+      aiResponseOptimization: false
     }
   },
   "Growth Tier": {
@@ -561,7 +585,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiPerformanceMonitoring: false,
       aiSecurityAnalysis: false,
       aiBackupAutomation: false,
-      aiSystemOptimization: false
+      aiSystemOptimization: false,
+
+      // Advanced AI Analytics & Intelligence
+      aiRealTimeAnalytics: true,
+      aiPredictiveModeling: false,
+      aiAnomalyDetection: true,
+      aiSentimentAnalysis: true,
+      aiBehaviorTracking: false,
+      aiTrendForecasting: true,
+      aiCompetitiveIntelligence: false,
+      aiMarketSignals: false,
+      aiCustomerJourney: true,
+      aiConversionOptimization: false,
+
+      // AI Communication & Engagement
+      aiChatbotDevelopment: true,
+      aiVoiceAssistants: false,
+      aiContentPersonalization: true,
+      aiEmailOptimization: true,
+      aiSocialMediaAI: false,
+      aiCustomerSegmentation: true,
+      aiLeadScoring: true,
+      aiCommunicationAI: false,
+      aiEngagementTracking: true,
+      aiResponseOptimization: false
     }
   },
   "Strategic Tier": {
@@ -753,7 +801,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiPerformanceMonitoring: false,
       aiSecurityAnalysis: false,
       aiBackupAutomation: false,
-      aiSystemOptimization: false
+      aiSystemOptimization: false,
+
+      // Advanced AI Analytics & Intelligence
+      aiRealTimeAnalytics: true,
+      aiPredictiveModeling: true,
+      aiAnomalyDetection: true,
+      aiSentimentAnalysis: true,
+      aiBehaviorTracking: true,
+      aiTrendForecasting: true,
+      aiCompetitiveIntelligence: true,
+      aiMarketSignals: false,
+      aiCustomerJourney: true,
+      aiConversionOptimization: true,
+
+      // AI Communication & Engagement
+      aiChatbotDevelopment: true,
+      aiVoiceAssistants: true,
+      aiContentPersonalization: true,
+      aiEmailOptimization: true,
+      aiSocialMediaAI: true,
+      aiCustomerSegmentation: true,
+      aiLeadScoring: true,
+      aiCommunicationAI: true,
+      aiEngagementTracking: true,
+      aiResponseOptimization: false
     }
   },
   "Patron Tier": {
@@ -1137,7 +1209,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiPerformanceMonitoring: true,
       aiSecurityAnalysis: true,
       aiBackupAutomation: true,
-      aiSystemOptimization: true
+      aiSystemOptimization: true,
+
+      // Advanced AI Analytics & Intelligence
+      aiRealTimeAnalytics: true,
+      aiPredictiveModeling: true,
+      aiAnomalyDetection: true,
+      aiSentimentAnalysis: true,
+      aiBehaviorTracking: true,
+      aiTrendForecasting: true,
+      aiCompetitiveIntelligence: true,
+      aiMarketSignals: true,
+      aiCustomerJourney: true,
+      aiConversionOptimization: true,
+
+      // AI Communication & Engagement
+      aiChatbotDevelopment: true,
+      aiVoiceAssistants: true,
+      aiContentPersonalization: true,
+      aiEmailOptimization: true,
+      aiSocialMediaAI: true,
+      aiCustomerSegmentation: true,
+      aiLeadScoring: true,
+      aiCommunicationAI: true,
+      aiEngagementTracking: true,
+      aiResponseOptimization: true
     }
   }
 };

@@ -150,6 +150,30 @@ const benefitCategories = {
     { key: "aiBackupAutomation", label: "AI Backup Automation" },
     { key: "aiSystemOptimization", label: "AI System Optimization" },
   ],
+  "Advanced AI Analytics & Intelligence": [
+    { key: "aiRealTimeAnalytics", label: "AI Real-time Analytics" },
+    { key: "aiPredictiveModeling", label: "AI Predictive Modeling" },
+    { key: "aiAnomalyDetection", label: "AI Anomaly Detection" },
+    { key: "aiSentimentAnalysis", label: "AI Sentiment Analysis" },
+    { key: "aiBehaviorTracking", label: "AI Behavior Tracking" },
+    { key: "aiTrendForecasting", label: "AI Trend Forecasting" },
+    { key: "aiCompetitiveIntelligence", label: "AI Competitive Intelligence" },
+    { key: "aiMarketSignals", label: "AI Market Signals" },
+    { key: "aiCustomerJourney", label: "AI Customer Journey Mapping" },
+    { key: "aiConversionOptimization", label: "AI Conversion Optimization" },
+  ],
+  "AI Communication & Engagement": [
+    { key: "aiChatbotDevelopment", label: "AI Chatbot Development" },
+    { key: "aiVoiceAssistants", label: "AI Voice Assistants" },
+    { key: "aiContentPersonalization", label: "AI Content Personalization" },
+    { key: "aiEmailOptimization", label: "AI Email Optimization" },
+    { key: "aiSocialMediaAI", label: "AI Social Media Management" },
+    { key: "aiCustomerSegmentation", label: "AI Customer Segmentation" },
+    { key: "aiLeadScoring", label: "AI Lead Scoring" },
+    { key: "aiCommunicationAI", label: "AI Communication Tools" },
+    { key: "aiEngagementTracking", label: "AI Engagement Tracking" },
+    { key: "aiResponseOptimization", label: "AI Response Optimization" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
