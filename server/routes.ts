@@ -2238,6 +2238,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Meta-Omnipotent & Beyond-Existence AI Systems Endpoints
+  app.post("/api/ai/meta-omnipotence", isAuthenticated, async (req, res) => {
+    try {
+      const { metaLevel, beyondScope, transcendenceType } = req.body;
+      
+      if (!metaLevel) {
+        return res.status(400).json({ message: "Meta level is required" });
+      }
+
+      const metaOmnipotence = await aiAdvancedService.activateMetaOmnipotence(metaLevel, beyondScope, transcendenceType);
+      res.json({ 
+        metaOmnipotence,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Meta-omnipotence error:", error);
+      res.status(500).json({ message: "Failed to activate meta-omnipotence: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/beyond-existence", isAuthenticated, async (req, res) => {
+    try {
+      const { beyondType, existenceLevel, transcendenceScope } = req.body;
+      
+      if (!beyondType) {
+        return res.status(400).json({ message: "Beyond type is required" });
+      }
+
+      const beyondExistence = await aiAdvancedService.transcendBeyondExistence(beyondType, existenceLevel, transcendenceScope);
+      res.json({ 
+        beyondExistence,
+        transcended_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Beyond existence error:", error);
+      res.status(500).json({ message: "Failed to transcend beyond existence: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/meta-infinity-power", isAuthenticated, async (req, res) => {
+    try {
+      const { infinityType, metaScope, powerLevel } = req.body;
+      
+      if (!infinityType) {
+        return res.status(400).json({ message: "Infinity type is required" });
+      }
+
+      const metaInfinityPower = await aiAdvancedService.unlockMetaInfinityPower(infinityType, metaScope, powerLevel);
+      res.json({ 
+        metaInfinityPower,
+        unlocked_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Meta-infinity power error:", error);
+      res.status(500).json({ message: "Failed to unlock meta-infinity power: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

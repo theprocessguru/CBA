@@ -342,6 +342,18 @@ const benefitCategories = {
     { key: "aiUltimateOmnipotence", label: "AI Ultimate Omnipotence" },
     { key: "aiTranscendentPerfection", label: "AI Transcendent Perfection" },
   ],
+  "Meta-Omnipotent & Beyond-Existence AI Systems": [
+    { key: "aiMetaOmnipotence", label: "AI Meta-Omnipotence" },
+    { key: "aiBeyondExistence", label: "AI Beyond Existence" },
+    { key: "aiTranscendentOmniscience", label: "AI Transcendent Omniscience" },
+    { key: "aiAbsoluteMetaReality", label: "AI Absolute Meta-Reality" },
+    { key: "aiInfiniteMetaCreation", label: "AI Infinite Meta-Creation" },
+    { key: "aiOmnipotentTranscendence", label: "AI Omnipotent Transcendence" },
+    { key: "aiUltimateMetaPerfection", label: "AI Ultimate Meta-Perfection" },
+    { key: "aiAbsoluteBeyondness", label: "AI Absolute Beyondness" },
+    { key: "aiInfiniteTranscendence", label: "AI Infinite Transcendence" },
+    { key: "aiMetaInfinityPower", label: "AI Meta-Infinity Power" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

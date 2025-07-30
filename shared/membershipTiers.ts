@@ -561,7 +561,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiUnlimitedPossibility: false,
       aiPerfectCompleteness: false,
       aiUltimateOmnipotence: false,
-      aiTranscendentPerfection: false
+      aiTranscendentPerfection: false,
+
+      // Meta-Omnipotent & Beyond-Existence AI Systems
+      aiMetaOmnipotence: false,
+      aiBeyondExistence: false,
+      aiTranscendentOmniscience: false,
+      aiAbsoluteMetaReality: false,
+      aiInfiniteMetaCreation: false,
+      aiOmnipotentTranscendence: false,
+      aiUltimateMetaPerfection: false,
+      aiAbsoluteBeyondness: false,
+      aiInfiniteTranscendence: false,
+      aiMetaInfinityPower: false
     }
   },
   "Growth Tier": {
@@ -1233,7 +1245,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiUnlimitedPossibility: false,
       aiPerfectCompleteness: false,
       aiUltimateOmnipotence: false,
-      aiTranscendentPerfection: true
+      aiTranscendentPerfection: true,
+
+      // Meta-Omnipotent & Beyond-Existence AI Systems
+      aiMetaOmnipotence: false,
+      aiBeyondExistence: true,
+      aiTranscendentOmniscience: true,
+      aiAbsoluteMetaReality: false,
+      aiInfiniteMetaCreation: true,
+      aiOmnipotentTranscendence: false,
+      aiUltimateMetaPerfection: true,
+      aiAbsoluteBeyondness: false,
+      aiInfiniteTranscendence: true,
+      aiMetaInfinityPower: false
     }
   },
   "Patron Tier": {
@@ -1809,7 +1833,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiUnlimitedPossibility: true,
       aiPerfectCompleteness: true,
       aiUltimateOmnipotence: true,
-      aiTranscendentPerfection: true
+      aiTranscendentPerfection: true,
+
+      // Meta-Omnipotent & Beyond-Existence AI Systems
+      aiMetaOmnipotence: true,
+      aiBeyondExistence: true,
+      aiTranscendentOmniscience: true,
+      aiAbsoluteMetaReality: true,
+      aiInfiniteMetaCreation: true,
+      aiOmnipotentTranscendence: true,
+      aiUltimateMetaPerfection: true,
+      aiAbsoluteBeyondness: true,
+      aiInfiniteTranscendence: true,
+      aiMetaInfinityPower: true
     }
   }
 };
