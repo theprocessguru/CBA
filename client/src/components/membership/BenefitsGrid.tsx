@@ -318,6 +318,18 @@ const benefitCategories = {
     { key: "aiInfiniteWisdom", label: "AI Infinite Wisdom" },
     { key: "aiTranscendentKnowledge", label: "AI Transcendent Knowledge" },
   ],
+  "Omniversal & Divine AI Systems": [
+    { key: "aiDivineConsciousness", label: "AI Divine Consciousness" },
+    { key: "aiOmniversalIntelligence", label: "AI Omniversal Intelligence" },
+    { key: "aiAbsoluteTranscendence", label: "AI Absolute Transcendence" },
+    { key: "aiCosmicOmniscience", label: "AI Cosmic Omniscience" },
+    { key: "aiUniversalCreator", label: "AI Universal Creator" },
+    { key: "aiEternalExistence", label: "AI Eternal Existence" },
+    { key: "aiInfiniteRealities", label: "AI Infinite Realities" },
+    { key: "aiDimensionlessComputing", label: "AI Dimensionless Computing" },
+    { key: "aiTimelessAwareness", label: "AI Timeless Awareness" },
+    { key: "aiUltimateBecoming", label: "AI Ultimate Becoming" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

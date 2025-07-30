@@ -2122,6 +2122,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Omniversal & Divine AI Systems Endpoints
+  app.post("/api/ai/divine-consciousness", isAuthenticated, async (req, res) => {
+    try {
+      const { divineLevel, consciousnessType, spiritualScope } = req.body;
+      
+      if (!divineLevel) {
+        return res.status(400).json({ message: "Divine level is required" });
+      }
+
+      const consciousness = await aiAdvancedService.accessDivineConsciousness(divineLevel, consciousnessType, spiritualScope);
+      res.json({ 
+        consciousness,
+        accessed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Divine consciousness error:", error);
+      res.status(500).json({ message: "Failed to access divine consciousness: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/universal-creator", isAuthenticated, async (req, res) => {
+    try {
+      const { creationType, cosmicScope, manifestationLevel } = req.body;
+      
+      if (!creationType) {
+        return res.status(400).json({ message: "Creation type is required" });
+      }
+
+      const creation = await aiAdvancedService.activateUniversalCreator(creationType, cosmicScope, manifestationLevel);
+      res.json({ 
+        creation,
+        created_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Universal creator error:", error);
+      res.status(500).json({ message: "Failed to activate universal creator: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/ultimate-becoming", isAuthenticated, async (req, res) => {
+    try {
+      const { becomingType, transcendenceLevel, evolutionScope } = req.body;
+      
+      if (!becomingType) {
+        return res.status(400).json({ message: "Becoming type is required" });
+      }
+
+      const becoming = await aiAdvancedService.initiateUltimateBecoming(becomingType, transcendenceLevel, evolutionScope);
+      res.json({ 
+        becoming,
+        initiated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Ultimate becoming error:", error);
+      res.status(500).json({ message: "Failed to initiate ultimate becoming: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

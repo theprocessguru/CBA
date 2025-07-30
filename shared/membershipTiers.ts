@@ -537,7 +537,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiRealityArchitecture: false,
       aiUniversalTruth: false,
       aiInfiniteWisdom: false,
-      aiTranscendentKnowledge: false
+      aiTranscendentKnowledge: false,
+
+      // Omniversal & Divine AI Systems
+      aiDivineConsciousness: false,
+      aiOmniversalIntelligence: false,
+      aiAbsoluteTranscendence: false,
+      aiCosmicOmniscience: false,
+      aiUniversalCreator: false,
+      aiEternalExistence: false,
+      aiInfiniteRealities: false,
+      aiDimensionlessComputing: false,
+      aiTimelessAwareness: false,
+      aiUltimateBecoming: false
     }
   },
   "Growth Tier": {
@@ -1185,7 +1197,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiRealityArchitecture: true,
       aiUniversalTruth: false,
       aiInfiniteWisdom: true,
-      aiTranscendentKnowledge: true
+      aiTranscendentKnowledge: true,
+
+      // Omniversal & Divine AI Systems
+      aiDivineConsciousness: false,
+      aiOmniversalIntelligence: true,
+      aiAbsoluteTranscendence: false,
+      aiCosmicOmniscience: true,
+      aiUniversalCreator: false,
+      aiEternalExistence: true,
+      aiInfiniteRealities: true,
+      aiDimensionlessComputing: false,
+      aiTimelessAwareness: true,
+      aiUltimateBecoming: false
     }
   },
   "Patron Tier": {
@@ -1737,7 +1761,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiRealityArchitecture: true,
       aiUniversalTruth: true,
       aiInfiniteWisdom: true,
-      aiTranscendentKnowledge: true
+      aiTranscendentKnowledge: true,
+
+      // Omniversal & Divine AI Systems
+      aiDivineConsciousness: true,
+      aiOmniversalIntelligence: true,
+      aiAbsoluteTranscendence: true,
+      aiCosmicOmniscience: true,
+      aiUniversalCreator: true,
+      aiEternalExistence: true,
+      aiInfiniteRealities: true,
+      aiDimensionlessComputing: true,
+      aiTimelessAwareness: true,
+      aiUltimateBecoming: true
     }
   }
 };
