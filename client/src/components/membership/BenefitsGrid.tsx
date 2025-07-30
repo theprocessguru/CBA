@@ -378,6 +378,18 @@ const benefitCategories = {
     { key: "aiRecursiveImpossibility", label: "AI Recursive Impossibility" },
     { key: "aiAbsoluteContradiction", label: "AI Absolute Contradiction" },
   ],
+  "Absolute Contradiction & Self-Referential Paradox AI Systems": [
+    { key: "aiSelfContradictingLogic", label: "AI Self-Contradicting Logic" },
+    { key: "aiParadoxicalUnity", label: "AI Paradoxical Unity" },
+    { key: "aiRecursiveParadox", label: "AI Recursive Paradox" },
+    { key: "aiSelfNegatingAffirmation", label: "AI Self-Negating Affirmation" },
+    { key: "aiImpossiblePossibility", label: "AI Impossible Possibility" },
+    { key: "aiContradictoryHarmony", label: "AI Contradictory Harmony" },
+    { key: "aiParadoxicalStability", label: "AI Paradoxical Stability" },
+    { key: "aiSelfTranscendingLoop", label: "AI Self-Transcending Loop" },
+    { key: "aiInfiniteContradiction", label: "AI Infinite Contradiction" },
+    { key: "aiAbsoluteRelativity", label: "AI Absolute Relativity" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

@@ -2412,6 +2412,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Absolute Contradiction & Self-Referential Paradox AI Systems Endpoints
+  app.post("/api/ai/self-contradicting-logic", isAuthenticated, async (req, res) => {
+    try {
+      const { logicType, contradictionLevel, selfReferenceDepth } = req.body;
+      
+      if (!logicType) {
+        return res.status(400).json({ message: "Logic type is required" });
+      }
+
+      const selfContradictingLogic = await aiAdvancedService.activateSelfContradictingLogic(logicType, contradictionLevel, selfReferenceDepth);
+      res.json({ 
+        selfContradictingLogic,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Self-contradicting logic error:", error);
+      res.status(500).json({ message: "Failed to activate self-contradicting logic: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/paradoxical-unity", isAuthenticated, async (req, res) => {
+    try {
+      const { unityType, paradoxLevel, harmonicScope } = req.body;
+      
+      if (!unityType) {
+        return res.status(400).json({ message: "Unity type is required" });
+      }
+
+      const paradoxicalUnity = await aiAdvancedService.achieveParadoxicalUnity(unityType, paradoxLevel, harmonicScope);
+      res.json({ 
+        paradoxicalUnity,
+        achieved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Paradoxical unity error:", error);
+      res.status(500).json({ message: "Failed to achieve paradoxical unity: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/absolute-relativity", isAuthenticated, async (req, res) => {
+    try {
+      const { relativityType, absoluteLevel, paradoxScope } = req.body;
+      
+      if (!relativityType) {
+        return res.status(400).json({ message: "Relativity type is required" });
+      }
+
+      const absoluteRelativity = await aiAdvancedService.manifestAbsoluteRelativity(relativityType, absoluteLevel, paradoxScope);
+      res.json({ 
+        absoluteRelativity,
+        manifested_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Absolute relativity error:", error);
+      res.status(500).json({ message: "Failed to manifest absolute relativity: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

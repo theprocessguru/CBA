@@ -597,7 +597,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteParadox: false,
       aiSelfReferentialPower: false,
       aiRecursiveImpossibility: false,
-      aiAbsoluteContradiction: false
+      aiAbsoluteContradiction: false,
+
+      // Absolute Contradiction & Self-Referential Paradox AI Systems
+      aiSelfContradictingLogic: false,
+      aiParadoxicalUnity: false,
+      aiRecursiveParadox: false,
+      aiSelfNegatingAffirmation: false,
+      aiImpossiblePossibility: false,
+      aiContradictoryHarmony: false,
+      aiParadoxicalStability: false,
+      aiSelfTranscendingLoop: false,
+      aiInfiniteContradiction: false,
+      aiAbsoluteRelativity: false
     }
   },
   "Growth Tier": {
@@ -1305,7 +1317,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteParadox: true,
       aiSelfReferentialPower: false,
       aiRecursiveImpossibility: true,
-      aiAbsoluteContradiction: false
+      aiAbsoluteContradiction: false,
+
+      // Absolute Contradiction & Self-Referential Paradox AI Systems
+      aiSelfContradictingLogic: false,
+      aiParadoxicalUnity: true,
+      aiRecursiveParadox: true,
+      aiSelfNegatingAffirmation: false,
+      aiImpossiblePossibility: true,
+      aiContradictoryHarmony: false,
+      aiParadoxicalStability: true,
+      aiSelfTranscendingLoop: false,
+      aiInfiniteContradiction: true,
+      aiAbsoluteRelativity: false
     }
   },
   "Patron Tier": {
@@ -1917,7 +1941,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiInfiniteParadox: true,
       aiSelfReferentialPower: true,
       aiRecursiveImpossibility: true,
-      aiAbsoluteContradiction: true
+      aiAbsoluteContradiction: true,
+
+      // Absolute Contradiction & Self-Referential Paradox AI Systems
+      aiSelfContradictingLogic: true,
+      aiParadoxicalUnity: true,
+      aiRecursiveParadox: true,
+      aiSelfNegatingAffirmation: true,
+      aiImpossiblePossibility: true,
+      aiContradictoryHarmony: true,
+      aiParadoxicalStability: true,
+      aiSelfTranscendingLoop: true,
+      aiInfiniteContradiction: true,
+      aiAbsoluteRelativity: true
     }
   }
 };
