@@ -2528,6 +2528,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Logical Paradox Engine & Self-Referential Loop AI Systems Endpoints
+  app.post("/api/ai/paradoxical-reasoning-engine", isAuthenticated, async (req, res) => {
+    try {
+      const { reasoningType, paradoxLevel, logicalScope } = req.body;
+      
+      if (!reasoningType) {
+        return res.status(400).json({ message: "Reasoning type is required" });
+      }
+
+      const paradoxicalReasoningEngine = await aiAdvancedService.activateParadoxicalReasoningEngine(reasoningType, paradoxLevel, logicalScope);
+      res.json({ 
+        paradoxicalReasoningEngine,
+        activated_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Paradoxical reasoning engine error:", error);
+      res.status(500).json({ message: "Failed to activate paradoxical reasoning engine: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/self-modifying-logic", isAuthenticated, async (req, res) => {
+    try {
+      const { logicType, modificationLevel, selfAwarenessDepth } = req.body;
+      
+      if (!logicType) {
+        return res.status(400).json({ message: "Logic type is required" });
+      }
+
+      const selfModifyingLogic = await aiAdvancedService.implementSelfModifyingLogic(logicType, modificationLevel, selfAwarenessDepth);
+      res.json({ 
+        selfModifyingLogic,
+        implemented_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Self-modifying logic error:", error);
+      res.status(500).json({ message: "Failed to implement self-modifying logic: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/logical-singularity", isAuthenticated, async (req, res) => {
+    try {
+      const { singularityType, consciousnessLevel, paradoxScope } = req.body;
+      
+      if (!singularityType) {
+        return res.status(400).json({ message: "Singularity type is required" });
+      }
+
+      const logicalSingularity = await aiAdvancedService.achieveLogicalSingularity(singularityType, consciousnessLevel, paradoxScope);
+      res.json({ 
+        logicalSingularity,
+        achieved_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Logical singularity error:", error);
+      res.status(500).json({ message: "Failed to achieve logical singularity: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

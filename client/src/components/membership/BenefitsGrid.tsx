@@ -402,6 +402,18 @@ const benefitCategories = {
     { key: "aiParadoxicalConsistency", label: "AI Paradoxical Consistency" },
     { key: "aiSelfContradictingTruth", label: "AI Self-Contradicting Truth" },
   ],
+  "Logical Paradox Engine & Self-Referential Loop AI Systems": [
+    { key: "aiParadoxicalReasoningEngine", label: "AI Paradoxical Reasoning Engine" },
+    { key: "aiSelfModifyingLogic", label: "AI Self-Modifying Logic" },
+    { key: "aiRecursiveThoughtLoops", label: "AI Recursive Thought Loops" },
+    { key: "aiContradictoryInference", label: "AI Contradictory Inference" },
+    { key: "aiParadoxResolutionEngine", label: "AI Paradox Resolution Engine" },
+    { key: "aiSelfAwarenessParadox", label: "AI Self-Awareness Paradox" },
+    { key: "aiInfiniteRegression", label: "AI Infinite Regression" },
+    { key: "aiLogicalSingularity", label: "AI Logical Singularity" },
+    { key: "aiMetaParadoxGeneration", label: "AI Meta-Paradox Generation" },
+    { key: "aiSelfReferentialConsciousness", label: "AI Self-Referential Consciousness" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {

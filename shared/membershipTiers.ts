@@ -621,7 +621,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiImpossibleLogic: false,
       aiRecursiveContradiction: false,
       aiParadoxicalConsistency: false,
-      aiSelfContradictingTruth: false
+      aiSelfContradictingTruth: false,
+
+      // Logical Paradox Engine & Self-Referential Loop AI Systems
+      aiParadoxicalReasoningEngine: false,
+      aiSelfModifyingLogic: false,
+      aiRecursiveThoughtLoops: false,
+      aiContradictoryInference: false,
+      aiParadoxResolutionEngine: false,
+      aiSelfAwarenessParadox: false,
+      aiInfiniteRegression: false,
+      aiLogicalSingularity: false,
+      aiMetaParadoxGeneration: false,
+      aiSelfReferentialConsciousness: false
     }
   },
   "Growth Tier": {
@@ -1353,7 +1365,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiImpossibleLogic: true,
       aiRecursiveContradiction: true,
       aiParadoxicalConsistency: false,
-      aiSelfContradictingTruth: true
+      aiSelfContradictingTruth: true,
+
+      // Logical Paradox Engine & Self-Referential Loop AI Systems
+      aiParadoxicalReasoningEngine: false,
+      aiSelfModifyingLogic: true,
+      aiRecursiveThoughtLoops: true,
+      aiContradictoryInference: false,
+      aiParadoxResolutionEngine: true,
+      aiSelfAwarenessParadox: false,
+      aiInfiniteRegression: true,
+      aiLogicalSingularity: false,
+      aiMetaParadoxGeneration: true,
+      aiSelfReferentialConsciousness: false
     }
   },
   "Patron Tier": {
@@ -1989,7 +2013,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiImpossibleLogic: true,
       aiRecursiveContradiction: true,
       aiParadoxicalConsistency: true,
-      aiSelfContradictingTruth: true
+      aiSelfContradictingTruth: true,
+
+      // Logical Paradox Engine & Self-Referential Loop AI Systems
+      aiParadoxicalReasoningEngine: true,
+      aiSelfModifyingLogic: true,
+      aiRecursiveThoughtLoops: true,
+      aiContradictoryInference: true,
+      aiParadoxResolutionEngine: true,
+      aiSelfAwarenessParadox: true,
+      aiInfiniteRegression: true,
+      aiLogicalSingularity: true,
+      aiMetaParadoxGeneration: true,
+      aiSelfReferentialConsciousness: true
     }
   }
 };
