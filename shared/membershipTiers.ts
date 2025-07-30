@@ -154,6 +154,30 @@ export interface MembershipTierConfig {
     aiPredictiveAnalytics: boolean;
     aiAutomationPlatform: boolean;
     ai24x7Assistant: boolean;
+
+    // Premium AI Business Services
+    aiSalesForecasting: boolean;
+    aiCompetitorAnalysis: boolean;
+    aiMarketResearch: boolean;
+    aiFinancialModeling: boolean;
+    aiRiskAssessment: boolean;
+    aiComplianceMonitoring: boolean;
+    aiWorkforceOptimization: boolean;
+    aiSupplyChainAnalysis: boolean;
+    aiCustomerRetention: boolean;
+    aiRevenueOptimization: boolean;
+
+    // AI Automation & Integration
+    aiApiIntegrations: boolean;
+    aiWorkflowAutomation: boolean;
+    aiDataPipelines: boolean;
+    aiNotificationSystems: boolean;
+    aiReportGeneration: boolean;
+    aiQualityAssurance: boolean;
+    aiPerformanceMonitoring: boolean;
+    aiSecurityAnalysis: boolean;
+    aiBackupAutomation: boolean;
+    aiSystemOptimization: boolean;
   };
 }
 
@@ -321,7 +345,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMarketingOptimizer: false,
       aiPredictiveAnalytics: false,
       aiAutomationPlatform: false,
-      ai24x7Assistant: false
+      ai24x7Assistant: false,
+
+      // Premium AI Business Services
+      aiSalesForecasting: false,
+      aiCompetitorAnalysis: false,
+      aiMarketResearch: false,
+      aiFinancialModeling: false,
+      aiRiskAssessment: false,
+      aiComplianceMonitoring: false,
+      aiWorkforceOptimization: false,
+      aiSupplyChainAnalysis: false,
+      aiCustomerRetention: false,
+      aiRevenueOptimization: false,
+
+      // AI Automation & Integration
+      aiApiIntegrations: false,
+      aiWorkflowAutomation: false,
+      aiDataPipelines: false,
+      aiNotificationSystems: false,
+      aiReportGeneration: false,
+      aiQualityAssurance: false,
+      aiPerformanceMonitoring: false,
+      aiSecurityAnalysis: false,
+      aiBackupAutomation: false,
+      aiSystemOptimization: false
     }
   },
   "Growth Tier": {
@@ -489,7 +537,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMarketingOptimizer: false,
       aiPredictiveAnalytics: false,
       aiAutomationPlatform: false,
-      ai24x7Assistant: false
+      ai24x7Assistant: false,
+
+      // Premium AI Business Services
+      aiSalesForecasting: true,
+      aiCompetitorAnalysis: true,
+      aiMarketResearch: true,
+      aiFinancialModeling: false,
+      aiRiskAssessment: false,
+      aiComplianceMonitoring: false,
+      aiWorkforceOptimization: false,
+      aiSupplyChainAnalysis: false,
+      aiCustomerRetention: true,
+      aiRevenueOptimization: false,
+
+      // AI Automation & Integration
+      aiApiIntegrations: true,
+      aiWorkflowAutomation: true,
+      aiDataPipelines: false,
+      aiNotificationSystems: true,
+      aiReportGeneration: true,
+      aiQualityAssurance: false,
+      aiPerformanceMonitoring: false,
+      aiSecurityAnalysis: false,
+      aiBackupAutomation: false,
+      aiSystemOptimization: false
     }
   },
   "Strategic Tier": {
@@ -657,7 +729,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMarketingOptimizer: false,
       aiPredictiveAnalytics: false,
       aiAutomationPlatform: false,
-      ai24x7Assistant: false
+      ai24x7Assistant: false,
+
+      // Premium AI Business Services
+      aiSalesForecasting: true,
+      aiCompetitorAnalysis: true,
+      aiMarketResearch: true,
+      aiFinancialModeling: true,
+      aiRiskAssessment: true,
+      aiComplianceMonitoring: false,
+      aiWorkforceOptimization: true,
+      aiSupplyChainAnalysis: false,
+      aiCustomerRetention: true,
+      aiRevenueOptimization: true,
+
+      // AI Automation & Integration
+      aiApiIntegrations: true,
+      aiWorkflowAutomation: true,
+      aiDataPipelines: true,
+      aiNotificationSystems: true,
+      aiReportGeneration: true,
+      aiQualityAssurance: true,
+      aiPerformanceMonitoring: false,
+      aiSecurityAnalysis: false,
+      aiBackupAutomation: false,
+      aiSystemOptimization: false
     }
   },
   "Patron Tier": {
@@ -825,7 +921,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMarketingOptimizer: true,
       aiPredictiveAnalytics: true,
       aiAutomationPlatform: false,
-      ai24x7Assistant: false
+      ai24x7Assistant: false,
+
+      // Premium AI Business Services
+      aiSalesForecasting: true,
+      aiCompetitorAnalysis: true,
+      aiMarketResearch: true,
+      aiFinancialModeling: true,
+      aiRiskAssessment: true,
+      aiComplianceMonitoring: true,
+      aiWorkforceOptimization: true,
+      aiSupplyChainAnalysis: true,
+      aiCustomerRetention: true,
+      aiRevenueOptimization: true,
+
+      // AI Automation & Integration
+      aiApiIntegrations: true,
+      aiWorkflowAutomation: true,
+      aiDataPipelines: true,
+      aiNotificationSystems: true,
+      aiReportGeneration: true,
+      aiQualityAssurance: true,
+      aiPerformanceMonitoring: true,
+      aiSecurityAnalysis: true,
+      aiBackupAutomation: true,
+      aiSystemOptimization: true
     }
   },
   "Partner": {
@@ -993,7 +1113,31 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiMarketingOptimizer: true,
       aiPredictiveAnalytics: true,
       aiAutomationPlatform: true,
-      ai24x7Assistant: true
+      ai24x7Assistant: true,
+
+      // Premium AI Business Services
+      aiSalesForecasting: true,
+      aiCompetitorAnalysis: true,
+      aiMarketResearch: true,
+      aiFinancialModeling: true,
+      aiRiskAssessment: true,
+      aiComplianceMonitoring: true,
+      aiWorkforceOptimization: true,
+      aiSupplyChainAnalysis: true,
+      aiCustomerRetention: true,
+      aiRevenueOptimization: true,
+
+      // AI Automation & Integration
+      aiApiIntegrations: true,
+      aiWorkflowAutomation: true,
+      aiDataPipelines: true,
+      aiNotificationSystems: true,
+      aiReportGeneration: true,
+      aiQualityAssurance: true,
+      aiPerformanceMonitoring: true,
+      aiSecurityAnalysis: true,
+      aiBackupAutomation: true,
+      aiSystemOptimization: true
     }
   }
 };

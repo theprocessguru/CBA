@@ -54,14 +54,14 @@ const MembershipBenefits = () => {
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Gift className="h-8 w-8 mx-auto mb-3 text-green-500" />
-                  <div className="text-2xl font-bold">105+</div>
+                  <div className="text-2xl font-bold">135+</div>
                   <div className="text-sm text-muted-foreground">Total Benefits</div>
                 </CardContent>
               </Card>
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Star className="h-8 w-8 mx-auto mb-3 text-blue-500" />
-                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-2xl font-bold">14</div>
                   <div className="text-sm text-muted-foreground">Benefit Categories</div>
                 </CardContent>
               </Card>

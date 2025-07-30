@@ -29,6 +29,8 @@ import MembershipManagement from "@/pages/admin/MembershipManagement";
 import MembershipBenefits from "@/pages/membership-benefits";
 import AIServices from "@/pages/ai-services";
 import AITools from "@/pages/ai-tools";
+import AIAutomation from "@/pages/ai-automation";
+import AIStrategy from "@/pages/ai-strategy";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
@@ -172,6 +174,16 @@ function Router() {
       <Route path="/ai-tools">
         <MainLayout>
           <AITools />
+        </MainLayout>
+      </Route>
+      <Route path="/ai-automation">
+        <MainLayout>
+          <AIAutomation />
+        </MainLayout>
+      </Route>
+      <Route path="/ai-strategy">
+        <MainLayout>
+          <AIStrategy />
         </MainLayout>
       </Route>
       

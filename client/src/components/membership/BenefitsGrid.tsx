@@ -126,6 +126,30 @@ const benefitCategories = {
     { key: "aiAutomationPlatform", label: "AI Automation Platform" },
     { key: "ai24x7Assistant", label: "24/7 AI Business Assistant" },
   ],
+  "Premium AI Business Services": [
+    { key: "aiSalesForecasting", label: "AI Sales Forecasting" },
+    { key: "aiCompetitorAnalysis", label: "AI Competitor Analysis" },
+    { key: "aiMarketResearch", label: "AI Market Research" },
+    { key: "aiFinancialModeling", label: "AI Financial Modeling" },
+    { key: "aiRiskAssessment", label: "AI Risk Assessment" },
+    { key: "aiComplianceMonitoring", label: "AI Compliance Monitoring" },
+    { key: "aiWorkforceOptimization", label: "AI Workforce Optimization" },
+    { key: "aiSupplyChainAnalysis", label: "AI Supply Chain Analysis" },
+    { key: "aiCustomerRetention", label: "AI Customer Retention" },
+    { key: "aiRevenueOptimization", label: "AI Revenue Optimization" },
+  ],
+  "AI Automation & Integration": [
+    { key: "aiApiIntegrations", label: "AI API Integrations" },
+    { key: "aiWorkflowAutomation", label: "AI Workflow Automation" },
+    { key: "aiDataPipelines", label: "AI Data Pipelines" },
+    { key: "aiNotificationSystems", label: "AI Notification Systems" },
+    { key: "aiReportGeneration", label: "AI Report Generation" },
+    { key: "aiQualityAssurance", label: "AI Quality Assurance" },
+    { key: "aiPerformanceMonitoring", label: "AI Performance Monitoring" },
+    { key: "aiSecurityAnalysis", label: "AI Security Analysis" },
+    { key: "aiBackupAutomation", label: "AI Backup Automation" },
+    { key: "aiSystemOptimization", label: "AI System Optimization" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
