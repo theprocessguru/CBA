@@ -501,7 +501,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiAstrobiologyAI: false,
       aiPlanetaryAI: false,
       aiGalacticNetworks: false,
-      aiUniversalComputing: false
+      aiUniversalComputing: false,
+
+      // Multimodal & Financial AI Systems
+      aiMultimodalFusion: false,
+      aiQuantumFinance: false,
+      aiMarketPrediction: false,
+      aiRiskModeling: false,
+      aiAlgorithmicTrading: false,
+      aiFinancialForecasting: false,
+      aiCryptoAnalysis: false,
+      aiPortfolioOptimization: false,
+      aiCreativeAI: false,
+      aiEmotionalIntelligence: false
     }
   },
   "Growth Tier": {
@@ -1113,7 +1125,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiAstrobiologyAI: true,
       aiPlanetaryAI: true,
       aiGalacticNetworks: false,
-      aiUniversalComputing: false
+      aiUniversalComputing: false,
+
+      // Multimodal & Financial AI Systems
+      aiMultimodalFusion: true,
+      aiQuantumFinance: true,
+      aiMarketPrediction: true,
+      aiRiskModeling: true,
+      aiAlgorithmicTrading: true,
+      aiFinancialForecasting: true,
+      aiCryptoAnalysis: true,
+      aiPortfolioOptimization: true,
+      aiCreativeAI: true,
+      aiEmotionalIntelligence: true
     }
   },
   "Patron Tier": {
@@ -1629,7 +1653,19 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       aiAstrobiologyAI: true,
       aiPlanetaryAI: true,
       aiGalacticNetworks: true,
-      aiUniversalComputing: true
+      aiUniversalComputing: true,
+
+      // Multimodal & Financial AI Systems
+      aiMultimodalFusion: true,
+      aiQuantumFinance: true,
+      aiMarketPrediction: true,
+      aiRiskModeling: true,
+      aiAlgorithmicTrading: true,
+      aiFinancialForecasting: true,
+      aiCryptoAnalysis: true,
+      aiPortfolioOptimization: true,
+      aiCreativeAI: true,
+      aiEmotionalIntelligence: true
     }
   }
 };

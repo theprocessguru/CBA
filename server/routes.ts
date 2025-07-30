@@ -1948,6 +1948,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Multimodal & Financial AI Systems Endpoints
+  app.post("/api/ai/multimodal-fusion", isAuthenticated, async (req, res) => {
+    try {
+      const { inputTypes, fusionObjectives, outputFormat } = req.body;
+      
+      if (!inputTypes || !inputTypes.length) {
+        return res.status(400).json({ message: "Input types are required" });
+      }
+
+      const fusion = await aiAdvancedService.performMultimodalFusion(inputTypes, fusionObjectives, outputFormat);
+      res.json({ 
+        fusion,
+        processed_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Multimodal fusion error:", error);
+      res.status(500).json({ message: "Failed to perform multimodal fusion: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/market-prediction", isAuthenticated, async (req, res) => {
+    try {
+      const { market, timeframe, factors } = req.body;
+      
+      if (!market) {
+        return res.status(400).json({ message: "Market is required" });
+      }
+
+      const prediction = await aiAdvancedService.predictMarketTrends(market, timeframe, factors);
+      res.json({ 
+        prediction,
+        predicted_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Market prediction error:", error);
+      res.status(500).json({ message: "Failed to predict market trends: " + error.message });
+    }
+  });
+
+  app.post("/api/ai/portfolio-optimization", isAuthenticated, async (req, res) => {
+    try {
+      const { assets, riskTolerance, objectives } = req.body;
+      
+      if (!assets || !assets.length) {
+        return res.status(400).json({ message: "Assets are required" });
+      }
+
+      const optimization = await aiAdvancedService.optimizePortfolio(assets, riskTolerance, objectives);
+      res.json({ 
+        optimization,
+        optimized_at: new Date().toISOString()
+      });
+    } catch (error: any) {
+      console.error("Portfolio optimization error:", error);
+      res.status(500).json({ message: "Failed to optimize portfolio: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

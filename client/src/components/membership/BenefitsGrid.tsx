@@ -282,6 +282,18 @@ const benefitCategories = {
     { key: "aiGalacticNetworks", label: "AI Galactic Networks" },
     { key: "aiUniversalComputing", label: "AI Universal Computing" },
   ],
+  "Multimodal & Financial AI Systems": [
+    { key: "aiMultimodalFusion", label: "AI Multimodal Fusion" },
+    { key: "aiQuantumFinance", label: "AI Quantum Finance" },
+    { key: "aiMarketPrediction", label: "AI Market Prediction" },
+    { key: "aiRiskModeling", label: "AI Risk Modeling" },
+    { key: "aiAlgorithmicTrading", label: "AI Algorithmic Trading" },
+    { key: "aiFinancialForecasting", label: "AI Financial Forecasting" },
+    { key: "aiCryptoAnalysis", label: "AI Crypto Analysis" },
+    { key: "aiPortfolioOptimization", label: "AI Portfolio Optimization" },
+    { key: "aiCreativeAI", label: "AI Creative AI" },
+    { key: "aiEmotionalIntelligence", label: "AI Emotional Intelligence" },
+  ],
 };
 
 export function BenefitsGrid({ selectedTier, showComparison = false }: BenefitsGridProps) {
