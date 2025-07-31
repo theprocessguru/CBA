@@ -96,6 +96,23 @@ const MembershipBenefits = () => {
                   <CardContent className="text-center space-y-4">
                     <p className="text-sm text-muted-foreground">{tier.description}</p>
                     
+                    {tier.targetAudience && (
+                      <div className="space-y-2 p-3 bg-neutral-50 rounded-lg">
+                        <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                          <Users className="h-4 w-4 text-blue-500" />
+                          <span>Who this is for:</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{tier.targetAudience}</p>
+                        {tier.businessExamples && tier.businessExamples.length > 0 && (
+                          <div className="flex flex-wrap justify-center gap-1 mt-2">
+                            {tier.businessExamples.slice(0, 3).map((example, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">{example}</Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="space-y-2">
                       <div className="flex items-center justify-center gap-2 text-sm">
                         <Gift className="h-4 w-4 text-green-500" />
@@ -166,9 +183,25 @@ const MembershipBenefits = () => {
                     <div className="border rounded-lg p-6">
                       <div className="flex items-center gap-4 mb-4">
                         <div className="text-4xl">{MEMBERSHIP_TIER_CONFIGS[selectedTier].badge}</div>
-                        <div>
+                        <div className="flex-1">
                           <h3 className="text-2xl font-bold">{MEMBERSHIP_TIER_CONFIGS[selectedTier].name}</h3>
                           <p className="text-muted-foreground">{MEMBERSHIP_TIER_CONFIGS[selectedTier].description}</p>
+                          {MEMBERSHIP_TIER_CONFIGS[selectedTier].targetAudience && (
+                            <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Users className="h-4 w-4 text-blue-600" />
+                                <span className="font-medium text-sm text-blue-900">Target Audience:</span>
+                              </div>
+                              <p className="text-sm text-blue-800 mb-2">{MEMBERSHIP_TIER_CONFIGS[selectedTier].targetAudience}</p>
+                              {MEMBERSHIP_TIER_CONFIGS[selectedTier].businessExamples && (
+                                <div className="flex flex-wrap gap-1">
+                                  {MEMBERSHIP_TIER_CONFIGS[selectedTier].businessExamples.map((example, idx) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs bg-blue-100 text-blue-800">{example}</Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       

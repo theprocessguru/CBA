@@ -2,6 +2,8 @@ export interface MembershipTierConfig {
   id: string;
   name: string;
   description: string;
+  targetAudience: string; // Who this tier is designed for
+  businessExamples: string[]; // Examples of business types
   monthlyPrice: number;
   annualPrice: number;
   color: string;
@@ -186,6 +188,8 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
     id: "starter",
     name: "Starter Tier",
     description: "Perfect for new businesses getting started in the community",
+    targetAudience: "New entrepreneurs, freelancers, and small local businesses taking their first steps into professional networking",
+    businessExamples: ["Independent consultants", "Home-based businesses", "New market traders", "Freelance services", "Startup ventures"],
     monthlyPrice: 0,
     annualPrice: 0,
     color: "bg-blue-500",
@@ -652,6 +656,8 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
     id: "growth", 
     name: "Growth Tier",
     description: "Enhanced features for growing businesses",
+    targetAudience: "Established small businesses ready to expand their reach and improve their professional presence",
+    businessExamples: ["Retail shops", "Service providers", "Restaurants & cafes", "Local contractors", "Professional services"],
     monthlyPrice: 29.99,
     annualPrice: 299.99,
     color: "bg-green-500",
@@ -940,6 +946,8 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
     id: "strategic",
     name: "Strategic Tier", 
     description: "Premium features for established businesses seeking strategic growth",
+    targetAudience: "Medium-sized businesses and established companies looking to dominate their market and expand strategically",
+    businessExamples: ["Multi-location businesses", "Professional firms", "Manufacturing companies", "Tech startups", "Established retailers"],
     monthlyPrice: 59.99,
     annualPrice: 599.99,
     color: "bg-purple-500",
@@ -1408,6 +1416,8 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
     id: "patron",
     name: "Patron Tier",
     description: "Exclusive access and premium benefits for influential business leaders",
+    targetAudience: "Successful business leaders, industry influencers, and established entrepreneurs who want premium access and networking opportunities",
+    businessExamples: ["Industry leaders", "Successful entrepreneurs", "Corporate executives", "High-profile professionals", "Established business owners"],
     monthlyPrice: 99.99,
     annualPrice: 999.99,
     color: "bg-orange-500",
@@ -1600,6 +1610,8 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
     id: "partner",
     name: "Partner",
     description: "Ultimate strategic partnership with full organizational benefits and influence",
+    targetAudience: "Major corporations, key industry partners, and strategic stakeholders who want maximum influence and co-branding opportunities",
+    businessExamples: ["Large corporations", "Major sponsors", "Strategic partners", "Government organizations", "Key industry players"],
     monthlyPrice: 199.99,
     annualPrice: 1999.99,
     color: "bg-amber-500",
