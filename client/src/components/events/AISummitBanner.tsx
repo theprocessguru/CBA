@@ -91,7 +91,7 @@ const AISummitBanner = () => {
             </Link>
             <Link href="/membership-benefits">
               <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 font-semibold px-8 py-3">
-                Join CBA Membership
+                <span>Join CBA Membership</span>
               </Button>
             </Link>
           </div>
