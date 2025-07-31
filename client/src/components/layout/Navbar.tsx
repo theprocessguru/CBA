@@ -23,7 +23,7 @@ const Navbar = () => {
     setIsAiMenuOpen(!isAiMenuOpen);
   };
 
-  // Close AI menu when clicking outside
+  // Close AI menu when clicking outside or navigating
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (aiMenuRef.current && !aiMenuRef.current.contains(event.target as Node)) {
@@ -36,6 +36,11 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Close AI menu when location changes
+  useEffect(() => {
+    setIsAiMenuOpen(false);
+  }, [location]);
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -203,10 +208,10 @@ const Navbar = () => {
       </div>
 
       {/* AI Horizontal Submenu */}
-      {(isAiMenuOpen || isAiPathActive()) && (
-        <div className="bg-gray-50 border-t border-gray-200 hidden lg:block relative z-40">
+      {isAiMenuOpen && (
+        <div className="bg-gray-50 border-t border-gray-200 block relative z-40">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex space-x-8 py-3">
+            <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
               <Link href="/ai-summit">
                 <a className={`text-sm font-medium ${
                   isActive('/ai-summit') 
