@@ -425,9 +425,9 @@ const MembershipBenefits = () => {
               <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-medium text-blue-900 mb-2">Total Monthly Cost Examples:</h4>
                 <div className="text-sm text-blue-800 space-y-1">
-                  <div>• Growth Tier (£29.99) + AI Essentials (£49.99) = <strong>£79.98/month</strong></div>
-                  <div>• Strategic Tier (£99.99) + AI Professional (£149.99) = <strong>£249.98/month</strong></div>
-                  <div>• Patron Tier (£299.99) + AI Ultimate (£999.99) = <strong>£1,299.98/month</strong></div>
+                  <div>• Growth Tier (£29.99) + AI Basics (£29.99) = <strong>£59.98/month</strong></div>
+                  <div>• Strategic Tier (£99.99) + AI Professional (£79.99) = <strong>£179.98/month</strong></div>
+                  <div>• Partner Tier (£499.99) + AI Professional (£79.99) = <strong>£579.98/month</strong></div>
                 </div>
               </div>
             </div>
