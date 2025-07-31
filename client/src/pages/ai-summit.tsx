@@ -43,7 +43,6 @@ const AISummit = () => {
     phoneNumber: "",
     businessType: "",
     aiInterest: "",
-    dietaryRequirements: "",
     accessibilityNeeds: "",
     comments: ""
   });
@@ -215,7 +214,6 @@ const AISummit = () => {
         phoneNumber: "",
         businessType: "",
         aiInterest: "",
-        dietaryRequirements: "",
         accessibilityNeeds: "",
         comments: ""
       });
@@ -748,17 +746,6 @@ const AISummit = () => {
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="dietaryRequirements">Dietary Requirements</Label>
-                    <Input
-                      id="dietaryRequirements"
-                      type="text"
-                      value={registrationData.dietaryRequirements}
-                      onChange={(e) => handleInputChange('dietaryRequirements', e.target.value)}
-                      placeholder="Any dietary restrictions or preferences"
-                    />
                   </div>
 
                   <div>

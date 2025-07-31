@@ -260,7 +260,6 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   phoneNumber: varchar("phone_number"),
   businessType: varchar("business_type"),
   aiInterest: varchar("ai_interest"),
-  dietaryRequirements: varchar("dietary_requirements"),
   accessibilityNeeds: varchar("accessibility_needs"),
   comments: text("comments"),
   registeredAt: timestamp("registered_at").defaultNow(),

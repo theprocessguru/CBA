@@ -2655,7 +2655,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber, 
         businessType, 
         aiInterest, 
-        dietaryRequirements, 
         accessibilityNeeds, 
         comments 
       } = req.body;
@@ -2680,7 +2679,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber: phoneNumber || null,
         businessType: businessType || null,
         aiInterest: aiInterest || null,
-        dietaryRequirements: dietaryRequirements || null,
         accessibilityNeeds: accessibilityNeeds || null,
         comments: comments || null,
         registeredAt: new Date()
@@ -2712,7 +2710,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               job_title: jobTitle,
               business_type: businessType,
               ai_interest: aiInterest,
-              dietary_requirements: dietaryRequirements,
               accessibility_needs: accessibilityNeeds,
               registration_comments: comments,
               event_name: 'First AI Summit Croydon 2025',
