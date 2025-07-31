@@ -101,6 +101,12 @@ This is a comprehensive business automation platform built with React/TypeScript
 ## Changelog
 ```
 Changelog:
+- July 31, 2025. Navigation Enhancement + MyT Accounting Pricing Updates:
+  * Added tagline "UK's Leading AI-Powered Business Association" under CBA logo
+  * Fixed login button z-index layering issue - no longer hidden by menu elements
+  * Updated MyT Accounting pricing to Standard/Plus/Pro at £5/£10/£15 (50% CBA discount)
+  * Corrected AI analytics document limits: 75/150/300 documents per month respectively
+  * Enhanced navigation with proper layering and improved mobile responsiveness
 - July 31, 2025. MyT Accounting & Bookkeeping Software Integration + Premium AI Service Pricing:
   * Added comprehensive MyT Accounting software page with AI document scanning capabilities
   * Implemented HMRC compliance warning system for businesses earning over £50,000

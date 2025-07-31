@@ -70,9 +70,14 @@ const Navbar = () => {
                     alt="CBA Logo" 
                     className="h-8 w-8 object-contain"
                   />
-                  <span className="text-primary font-accent font-bold text-lg lg:text-xl truncate">
-                    Croydon Business Association
-                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-primary font-accent font-bold text-lg lg:text-xl truncate">
+                      Croydon Business Association
+                    </span>
+                    <span className="text-xs text-blue-600 font-medium -mt-1 hidden sm:block">
+                      UK's Leading AI-Powered Business Association
+                    </span>
+                  </div>
                 </div>
               </Link>
             </div>
