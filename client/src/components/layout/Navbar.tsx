@@ -157,24 +157,7 @@ const Navbar = () => {
                 </button>
               </div>
               
-              <Link href="/myt-accounting">
-                <a className={`border-b-2 ${
-                  isActive('/myt-accounting') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  MyT Accounting
-                </a>
-              </Link>
-              <Link href="/contact">
-                <a className={`border-b-2 ${
-                  isActive('/contact') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Contact
-                </a>
-              </Link>
+
             </div>
           </div>
           <div className="hidden sm:ml-4 sm:flex sm:items-center sm:space-x-3 flex-shrink-0 relative z-50">
@@ -379,25 +362,7 @@ const Navbar = () => {
               AI Analytics
             </a>
           </Link>
-          
-          <Link href="/myt-accounting">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-              isActive('/myt-accounting') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
-              MyT Accounting
-            </a>
-          </Link>
-          <Link href="/contact">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-              isActive('/contact') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
-              Contact
-            </a>
-          </Link>
+
         </div>
         <div className="pt-4 pb-3 border-t border-neutral-200">
           <div className="flex items-center px-4">
