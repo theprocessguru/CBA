@@ -463,29 +463,29 @@ const AISummit = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button 
                     size="lg" 
-                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4"
+                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 font-semibold"
                     onClick={() => setShowRegistrationForm(true)}
                   >
                     <UserPlus className="mr-2 h-5 w-5" />
-                    Register FREE - Limited Places
+                    <span>Register FREE - Limited Places</span>
                   </Button>
                   <Button 
                     size="lg" 
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4"
+                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold"
                     onClick={() => setShowExhibitorForm(true)}
                   >
                     <Building className="mr-2 h-5 w-5" />
-                    Exhibit Your Business
+                    <span>Exhibit Your Business</span>
                   </Button>
                   <Button 
                     size="lg" 
                     variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4"
+                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold"
                     onClick={() => setShowSpeakerForm(true)}
                   >
                     <Mic className="mr-2 h-5 w-5" />
-                    Speak at Summit
+                    <span>Speak at Summit</span>
                   </Button>
                 </div>
               </div>
@@ -596,11 +596,11 @@ const AISummit = () => {
                     Free admission but places are limited. Register now to guarantee your attendance.
                   </p>
                   <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    className="w-full bg-blue-600 hover:bg-blue-700 font-semibold"
                     onClick={() => setShowRegistrationForm(true)}
                   >
                     <UserPlus className="mr-2 h-4 w-4" />
-                    Register Now
+                    <span>Register Now</span>
                   </Button>
                 </CardContent>
               </Card>
