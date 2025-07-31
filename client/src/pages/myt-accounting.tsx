@@ -72,6 +72,20 @@ export default function MyTAccounting() {
 
   const pricingTiers = [
     {
+      name: "Basic",
+      price: "£5",
+      originalPrice: "£10",
+      discount: "50% OFF for CBA Members",
+      description: "Essential accounting for micro businesses",
+      features: [
+        "AI document scanning (up to 50 docs/month)",
+        "Basic expense tracking",
+        "HMRC compliance reports",
+        "Mobile app access",
+        "Email support"
+      ]
+    },
+    {
       name: "Starter",
       price: "£19",
       originalPrice: "£29",
@@ -252,11 +266,11 @@ export default function MyTAccounting() {
               CBA Member Pricing
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Exclusive discounts for Croydon Business Association members
+              Exclusive discounts for Croydon Business Association members - Starting from just £5 + VAT per month
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {pricingTiers.map((tier, index) => (
               <Card key={index} className={`relative ${tier.popular ? 'border-blue-500 shadow-lg scale-105' : ''}`}>
                 {tier.popular && (
@@ -274,7 +288,7 @@ export default function MyTAccounting() {
                   <div className="flex items-center justify-center gap-2">
                     <span className="text-3xl font-bold">{tier.price}</span>
                     <span className="text-gray-500 line-through">{tier.originalPrice}</span>
-                    <span className="text-sm text-gray-500">/month</span>
+                    <span className="text-sm text-gray-500">/month + VAT</span>
                   </div>
                   <CardDescription>{tier.description}</CardDescription>
                 </CardHeader>
