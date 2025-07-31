@@ -75,10 +75,10 @@ const MarketplacePreview = () => {
               <div className="flex-shrink-0">
                 <Link href="/marketplace">
                   <Button 
-                    className="inline-block px-6 py-3 bg-accent hover:bg-accent-dark text-white font-medium rounded-md shadow-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+                    className="inline-block px-6 py-3 bg-accent hover:bg-accent-dark text-white font-semibold rounded-md shadow-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
                     size="lg"
                   >
-                    View All Categories
+                    <span>View All Categories</span>
                   </Button>
                 </Link>
               </div>

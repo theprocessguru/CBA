@@ -91,8 +91,8 @@ const SpecialOffers = () => {
                   </div>
                   <div className="mt-6 pt-4 border-t border-neutral-200">
                     <Link href={`/business/${offer.businessId}`}>
-                      <Button className="block w-full text-center px-4 py-2 bg-secondary hover:bg-secondary-dark text-white font-medium rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-                        View Details
+                      <Button className="block w-full text-center px-4 py-2 bg-secondary hover:bg-secondary-dark text-white font-semibold rounded-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                        <span>View Details</span>
                       </Button>
                     </Link>
                   </div>
@@ -115,10 +115,10 @@ const SpecialOffers = () => {
             <div className="flex-shrink-0">
               <Link href="/register">
                 <Button 
-                  className="inline-block px-6 py-3 bg-white text-primary font-medium rounded-md shadow-md hover:bg-neutral-100 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
+                  className="inline-block px-6 py-3 bg-white text-primary font-semibold rounded-md shadow-md hover:bg-neutral-100 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white"
                   size="lg"
                 >
-                  Become a Member
+                  <span>Become a Member</span>
                 </Button>
               </Link>
             </div>
