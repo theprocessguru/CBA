@@ -1789,7 +1789,8 @@ export function getTierPriority(tierName: string): number {
 
 export function canAccessFeature(tierName: string, feature: keyof MembershipTierConfig['benefits']): boolean {
   const config = getMembershipTierConfig(tierName);
-  return config?.benefits[feature] || false;
+  const benefit = config?.benefits[feature];
+  return Boolean(benefit);
 }
 
 export function getTierLimits(tierName: string) {

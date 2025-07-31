@@ -9,34 +9,6 @@ interface BenefitsGridProps {
 }
 
 const benefitCategories = {
-  "MyT Accounting Software": [
-    { key: "mytAccountingDiscount", label: "Accounting Software Discount", type: "percentage" },
-    { key: "mytAccountingSupport", label: "Technical Support" },
-    { key: "mytAccountingTraining", label: "Training & Onboarding" },
-    { key: "mytAccountingMultiUser", label: "Multi-User Access" },
-    { key: "mytAccountingAdvancedFeatures", label: "Advanced Features" },
-    { key: "mytAccountingPrioritySupport", label: "Priority Support" },
-  ],
-  "MyT AI Services": [
-    { key: "mytAiBasicAccess", label: "Basic AI Tools" },
-    { key: "mytAiAdvancedTools", label: "Advanced AI Tools" },
-    { key: "mytAiCustomSolutions", label: "Custom AI Solutions" },
-    { key: "mytAiConsultation", label: "AI Strategy Consultation" },
-    { key: "mytAiTraining", label: "AI Training & Support" },
-    { key: "mytAiPrioritySupport", label: "Priority AI Support" },
-    { key: "mytAiApiAccess", label: "AI API Access" },
-    { key: "mytAiModelTraining", label: "Custom Model Training" },
-  ],
-  "MyT Automation Services": [
-    { key: "mytAutomationBasic", label: "Basic Automation" },
-    { key: "mytAutomationAdvanced", label: "Advanced Automation" },
-    { key: "mytAutomationCustom", label: "Custom Automation" },
-    { key: "mytAutomationConsultation", label: "Automation Consultation" },
-    { key: "mytAutomationImplementation", label: "Implementation Support" },
-    { key: "mytAutomationSupport", label: "Ongoing Support" },
-    { key: "mytAutomationTraining", label: "Training & Documentation" },
-    { key: "mytAutomationMonitoring", label: "Performance Monitoring" },
-  ],
   "Directory & Visibility": [
     { key: "enhancedListing", label: "Enhanced Directory Listing" },
     { key: "featuredPlacement", label: "Featured Placement" },
@@ -143,6 +115,34 @@ const benefitCategories = {
     { key: "vipLounge", label: "VIP Lounge" },
     { key: "privateEvents", label: "Private Events" },
     { key: "exclusivePartnerships", label: "Exclusive Partnerships" },
+  ],
+  "MyT Accounting Software": [
+    { key: "mytAccountingDiscount", label: "Accounting Software Discount", type: "percentage" },
+    { key: "mytAccountingSupport", label: "Technical Support" },
+    { key: "mytAccountingTraining", label: "Training & Onboarding" },
+    { key: "mytAccountingMultiUser", label: "Multi-User Access" },
+    { key: "mytAccountingAdvancedFeatures", label: "Advanced Features" },
+    { key: "mytAccountingPrioritySupport", label: "Priority Support" },
+  ],
+  "MyT AI Services": [
+    { key: "mytAiBasicAccess", label: "Basic AI Tools" },
+    { key: "mytAiAdvancedTools", label: "Advanced AI Tools" },
+    { key: "mytAiCustomSolutions", label: "Custom AI Solutions" },
+    { key: "mytAiConsultation", label: "AI Strategy Consultation" },
+    { key: "mytAiTraining", label: "AI Training & Support" },
+    { key: "mytAiPrioritySupport", label: "Priority AI Support" },
+    { key: "mytAiApiAccess", label: "AI API Access" },
+    { key: "mytAiModelTraining", label: "Custom Model Training" },
+  ],
+  "MyT Automation Services": [
+    { key: "mytAutomationBasic", label: "Basic Automation" },
+    { key: "mytAutomationAdvanced", label: "Advanced Automation" },
+    { key: "mytAutomationCustom", label: "Custom Automation" },
+    { key: "mytAutomationConsultation", label: "Automation Consultation" },
+    { key: "mytAutomationImplementation", label: "Implementation Support" },
+    { key: "mytAutomationSupport", label: "Ongoing Support" },
+    { key: "mytAutomationTraining", label: "Training & Documentation" },
+    { key: "mytAutomationMonitoring", label: "Performance Monitoring" },
   ],
 };
 
