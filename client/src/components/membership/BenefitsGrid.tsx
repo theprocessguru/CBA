@@ -46,7 +46,7 @@ const benefitCategories = {
   ],
 };
 
-export default function BenefitsGrid({ selectedTier, showComparison = true }: BenefitsGridProps) {
+function BenefitsGrid({ selectedTier, showComparison = true }: BenefitsGridProps) {
   const tiers = Object.values(MEMBERSHIP_TIER_CONFIGS);
   const displayTiers = showComparison ? tiers : selectedTier ? [MEMBERSHIP_TIER_CONFIGS[selectedTier]] : tiers;
 
@@ -122,3 +122,6 @@ export default function BenefitsGrid({ selectedTier, showComparison = true }: Be
     </div>
   );
 }
+
+export default BenefitsGrid;
+export { BenefitsGrid };

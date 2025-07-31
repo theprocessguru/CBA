@@ -1,20 +1,41 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowLeft, Home } from "lucide-react";
+import { Search, ArrowLeft, Home, ChevronDown } from "lucide-react";
 import cbaLogo from "@assets/CBA LOGO.png";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const [location] = useLocation();
+  const aiMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location === path;
+  const isAiPathActive = () => location.startsWith('/ai-');
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const toggleAiMenu = () => {
+    setIsAiMenuOpen(!isAiMenuOpen);
+  };
+
+  // Close AI menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (aiMenuRef.current && !aiMenuRef.current.contains(event.target as Node)) {
+        setIsAiMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -101,42 +122,22 @@ const Navbar = () => {
                   Membership
                 </a>
               </Link>
-              <Link href="/ai-services">
-                <a className={`border-b-2 ${
-                  isActive('/ai-services') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  AI Services
-                </a>
-              </Link>
-              <Link href="/ai-tools">
-                <a className={`border-b-2 ${
-                  isActive('/ai-tools') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  AI Tools
-                </a>
-              </Link>
-              <Link href="/ai-automation">
-                <a className={`border-b-2 ${
-                  isActive('/ai-automation') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  AI Automation
-                </a>
-              </Link>
-              <Link href="/ai-analytics">
-                <a className={`border-b-2 ${
-                  isActive('/ai-analytics') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  AI Analytics
-                </a>
-              </Link>
+              
+              {/* AI Top-tier Menu - Non-clickable */}
+              <div className="relative" ref={aiMenuRef}>
+                <button 
+                  className={`border-b-2 ${
+                    isAiPathActive() 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                    } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
+                  onClick={toggleAiMenu}
+                >
+                  <span>AI</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAiMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
+              
               <Link href="/contact">
                 <a className={`border-b-2 ${
                   isActive('/contact') 
@@ -158,13 +159,13 @@ const Navbar = () => {
             </button>
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap ml-2">
                   Dashboard
                 </Button>
               </Link>
             ) : (
               <Link href="/login">
-                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap ml-2">
                   Login
                 </Button>
               </Link>
@@ -186,6 +187,52 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* AI Horizontal Submenu */}
+      {(isAiMenuOpen || isAiPathActive()) && (
+        <div className="bg-gray-50 border-t border-gray-200 hidden lg:block">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex space-x-8 py-3">
+              <Link href="/ai-services">
+                <a className={`text-sm font-medium ${
+                  isActive('/ai-services') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}>
+                  AI Services
+                </a>
+              </Link>
+              <Link href="/ai-tools">
+                <a className={`text-sm font-medium ${
+                  isActive('/ai-tools') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}>
+                  AI Tools
+                </a>
+              </Link>
+              <Link href="/ai-automation">
+                <a className={`text-sm font-medium ${
+                  isActive('/ai-automation') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}>
+                  AI Automation
+                </a>
+              </Link>
+              <Link href="/ai-analytics">
+                <a className={`text-sm font-medium ${
+                  isActive('/ai-analytics') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}>
+                  AI Analytics
+                </a>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile menu */}
       <div className={`sm:hidden ${isMenuOpen ? 'block' : 'hidden'}`} id="mobile-menu">
@@ -235,6 +282,48 @@ const Navbar = () => {
               Membership
             </a>
           </Link>
+          
+          {/* AI Section Header */}
+          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            AI Services
+          </div>
+          <Link href="/ai-services">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/ai-services') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              AI Services
+            </a>
+          </Link>
+          <Link href="/ai-tools">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/ai-tools') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              AI Tools
+            </a>
+          </Link>
+          <Link href="/ai-automation">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/ai-automation') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              AI Automation
+            </a>
+          </Link>
+          <Link href="/ai-analytics">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/ai-analytics') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              AI Analytics
+            </a>
+          </Link>
+          
           <Link href="/contact">
             <a className={`block pl-3 pr-4 py-2 border-l-4 ${
               isActive('/contact') 
