@@ -590,9 +590,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       innovationTraining: false
     }
   },
-  "Growth+ Tier": {
+  "Growth Tier": {
     id: "growth",
-    name: "Growth+ Tier",
+    name: "Growth Tier",
     description: "Enhanced benefits for growing businesses",
     targetAudience: "Established small businesses looking to expand their network and access advanced resources",
     businessExamples: ["Retail shops with 2-5 employees", "Service businesses", "Restaurants", "Professional services", "Growing consultancies"],
@@ -887,9 +887,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       innovationTraining: false
     }
   },
-  "Strategic+ Tier": {
+  "Strategic Tier": {
     id: "strategic",
-    name: "Strategic+ Tier",
+    name: "Strategic Tier",
     description: "Advanced features for strategic business growth",
     targetAudience: "Medium businesses with 5-15 employees seeking strategic partnerships and premium services",
     businessExamples: ["Regional businesses", "Manufacturing companies", "Professional firms", "Multi-location businesses", "Franchise operations"],
@@ -1172,9 +1172,9 @@ export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
       innovationTraining: true
     }
   },
-  "Patron+ Tier": {
+  "Patron Tier": {
     id: "patron",
-    name: "Patron+ Tier",
+    name: "Patron Tier",
     description: "Premium tier with exclusive benefits and priority access",
     targetAudience: "Large businesses and organizations with 15+ employees requiring premium services and exclusive access",
     businessExamples: ["Corporate offices", "Large retailers", "Major service providers", "Industry leaders", "Established enterprises"],
