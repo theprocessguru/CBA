@@ -33,6 +33,7 @@ import AIAutomation from "@/pages/ai-automation";
 import AIStrategy from "@/pages/ai-strategy";
 import AIEnterprise from "@/pages/ai-enterprise";
 import AIAnalytics from "@/pages/ai-analytics";
+import AISummit from "@/pages/ai-summit";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
@@ -202,6 +203,11 @@ function Router() {
       <Route path="/ai-analytics">
         <MainLayout>
           <AIAnalytics />
+        </MainLayout>
+      </Route>
+      <Route path="/ai-summit">
+        <MainLayout>
+          <AISummit />
         </MainLayout>
       </Route>
       

@@ -4,6 +4,7 @@ import FeaturedMembers from "@/components/home/FeaturedMembers";
 import SpecialOffers from "@/components/home/SpecialOffers";
 import MarketplacePreview from "@/components/home/MarketplacePreview";
 import MemberDashboardPreview from "@/components/home/MemberDashboardPreview";
+import AISummitBanner from "@/components/events/AISummitBanner";
 import { PageHeader } from "@/components/ui/page-header";
 import { META_DESCRIPTIONS } from "@/lib/constants";
 
@@ -25,6 +26,7 @@ const Home = () => {
       </div>
       
       <HeroSection />
+      <AISummitBanner />
       <FeaturedMembers />
       <SpecialOffers />
       <MarketplacePreview />

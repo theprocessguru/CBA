@@ -202,6 +202,15 @@ const Navbar = () => {
         <div className="bg-gray-50 border-t border-gray-200 hidden lg:block">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-8 py-3">
+              <Link href="/ai-summit">
+                <a className={`text-sm font-medium ${
+                  isActive('/ai-summit') 
+                    ? 'text-primary' 
+                    : 'text-red-600 hover:text-red-700 font-semibold'
+                  } transition-colors duration-200`}>
+                  🚀 AI Summit Oct 1st
+                </a>
+              </Link>
               <Link href="/ai-services">
                 <a className={`text-sm font-medium ${
                   isActive('/ai-services') 
@@ -246,6 +255,11 @@ const Navbar = () => {
       {/* Mobile menu */}
       <div className={`sm:hidden ${isMenuOpen ? 'block' : 'hidden'}`} id="mobile-menu">
         <div className="pt-2 pb-3 space-y-1">
+          <Link href="/ai-summit">
+            <a className="block pl-3 pr-4 py-2 border-l-4 border-red-500 text-red-600 bg-red-50 font-bold text-sm">
+              🚀 First AI Summit - Oct 1st FREE
+            </a>
+          </Link>
           <Link href="/">
             <a className={`block pl-3 pr-4 py-2 border-l-4 ${
               isActive('/') 
@@ -296,6 +310,15 @@ const Navbar = () => {
           <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
             AI Services
           </div>
+          <Link href="/ai-summit">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/ai-summit') 
+                ? 'border-red-500 text-red-600 bg-red-100' 
+                : 'border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50 hover:border-red-500'
+              } font-bold text-sm`}>
+              🚀 AI Summit Oct 1st
+            </a>
+          </Link>
           <Link href="/ai-services">
             <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/ai-services') 

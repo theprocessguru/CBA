@@ -1,0 +1,564 @@
+import { useState } from "react";
+import { Helmet } from "react-helmet";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Users, 
+  Mic, 
+  Wrench,
+  GraduationCap,
+  Lightbulb,
+  Rocket,
+  Brain,
+  Zap,
+  Star,
+  Gift,
+  UserPlus,
+  Building,
+  Coffee
+} from "lucide-react";
+import { Link } from "wouter";
+
+const AISummit = () => {
+  const [selectedSession, setSelectedSession] = useState("");
+
+  const eventDetails = {
+    title: "First AI Summit Croydon 2025",
+    date: "October 1st, 2025",
+    time: "10:00 AM - 4:00 PM",
+    venue: "LSBU London South Bank University Croydon",
+    price: "FREE to attend",
+    capacity: "Limited places available",
+    registration: "Required - Book your free ticket now"
+  };
+
+  const speakers = [
+    {
+      name: "Dr. Sarah Chen",
+      title: "AI Research Director, Tech Innovation Hub",
+      topic: "The Future of AI in Small Business",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
+      bio: "Leading AI researcher with 15+ years experience in business automation"
+    },
+    {
+      name: "Marcus Johnson",
+      title: "CEO, AI Solutions Ltd",
+      topic: "Implementing AI on a Budget",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
+      bio: "Serial entrepreneur who built three successful AI startups"
+    },
+    {
+      name: "Dr. Priya Patel",
+      title: "AI Ethics Consultant",
+      topic: "Responsible AI for Business",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
+      bio: "Expert in AI ethics and compliance frameworks"
+    }
+  ];
+
+  const schedule = [
+    {
+      time: "9:30 - 10:00",
+      title: "Registration & Welcome Coffee",
+      type: "registration",
+      speaker: "CBA Team",
+      description: "Network with fellow attendees and collect your summit materials"
+    },
+    {
+      time: "10:00 - 10:30",
+      title: "Opening Keynote: AI Revolution in Croydon",
+      type: "keynote",
+      speaker: "Jose Martinez, CBA Founder",
+      description: "How Croydon is becoming the AI capital of South London"
+    },
+    {
+      time: "10:30 - 11:15",
+      title: "The Future of AI in Small Business",
+      type: "talk",
+      speaker: "Dr. Sarah Chen",
+      description: "Practical AI applications that every small business can implement"
+    },
+    {
+      time: "11:15 - 11:30",
+      title: "Coffee Break & Networking",
+      type: "break",
+      speaker: "",
+      description: "Connect with other entrepreneurs and AI enthusiasts"
+    },
+    {
+      time: "11:30 - 12:15",
+      title: "Workshop: AI Tools for Content Creation",
+      type: "workshop",
+      speaker: "LSBU Students & Volunteers",
+      description: "Hands-on session with ChatGPT, Midjourney, and business AI tools"
+    },
+    {
+      time: "12:15 - 13:00",
+      title: "Implementing AI on a Budget",
+      type: "talk",
+      speaker: "Marcus Johnson",
+      description: "Real-world case studies of affordable AI implementation"
+    },
+    {
+      time: "13:00 - 14:00",
+      title: "Lunch & Micro Business Exhibition",
+      type: "exhibition",
+      speaker: "",
+      description: "Explore AI startups and connect with innovative businesses"
+    },
+    {
+      time: "14:00 - 14:45",
+      title: "Workshop: AI for Customer Service",
+      type: "workshop",
+      speaker: "CBA AI Experts",
+      description: "Build your first chatbot and automate customer interactions"
+    },
+    {
+      time: "14:45 - 15:30",
+      title: "Responsible AI for Business",
+      type: "talk",
+      speaker: "Dr. Priya Patel",
+      description: "Ethics, compliance, and best practices for AI adoption"
+    },
+    {
+      time: "15:30 - 16:00",
+      title: "Panel Discussion & Closing",
+      type: "panel",
+      speaker: "All Speakers + CBA Team",
+      description: "Q&A session and next steps for AI adoption in Croydon"
+    }
+  ];
+
+  const workshops = [
+    {
+      title: "AI Tools for Content Creation",
+      time: "11:30 - 12:15",
+      level: "Beginner",
+      capacity: "30 people",
+      description: "Learn to use ChatGPT, Midjourney, and other AI tools for marketing content",
+      tools: ["ChatGPT", "Midjourney", "Copy.ai", "Canva AI"]
+    },
+    {
+      title: "Building Your First AI Chatbot",
+      time: "14:00 - 14:45", 
+      level: "Intermediate",
+      capacity: "25 people",
+      description: "Hands-on workshop to create a customer service chatbot for your business",
+      tools: ["Chatfuel", "ManyChat", "Dialogflow", "WordPress AI"]
+    },
+    {
+      title: "AI Data Analysis for Small Business",
+      time: "15:45 - 16:30",
+      level: "Advanced",
+      capacity: "20 people",
+      description: "Use AI to analyze business data and make informed decisions",
+      tools: ["Google Analytics AI", "Excel AI", "Tableau", "Power BI"]
+    }
+  ];
+
+  const getSessionIcon = (type: string) => {
+    switch (type) {
+      case 'keynote': return <Mic className="h-5 w-5 text-purple-600" />;
+      case 'talk': return <Users className="h-5 w-5 text-blue-600" />;
+      case 'workshop': return <Wrench className="h-5 w-5 text-green-600" />;
+      case 'break': return <Coffee className="h-5 w-5 text-orange-600" />;
+      case 'exhibition': return <Building className="h-5 w-5 text-red-600" />;
+      case 'panel': return <Users className="h-5 w-5 text-indigo-600" />;
+      default: return <Calendar className="h-5 w-5 text-gray-600" />;
+    }
+  };
+
+  const getSessionColor = (type: string) => {
+    switch (type) {
+      case 'keynote': return 'bg-purple-50 border-purple-200';
+      case 'talk': return 'bg-blue-50 border-blue-200';
+      case 'workshop': return 'bg-green-50 border-green-200';
+      case 'break': return 'bg-orange-50 border-orange-200';
+      case 'exhibition': return 'bg-red-50 border-red-200';
+      case 'panel': return 'bg-indigo-50 border-indigo-200';
+      default: return 'bg-gray-50 border-gray-200';
+    }
+  };
+
+  return (
+    <>
+      <Helmet>
+        <title>First AI Summit Croydon 2025 - Free AI Event | CBA</title>
+        <meta name="description" content="Join the First AI Summit in Croydon on October 1st, 2025. Free to attend event with AI talks, workshops, and micro business exhibition at LSBU. Limited places available - register now!" />
+        <meta property="og:title" content="First AI Summit Croydon 2025 - Free AI Event" />
+        <meta property="og:description" content="Educational AI event for entrepreneurs and residents. Talks, workshops, and networking at LSBU Croydon. Free admission, limited places." />
+      </Helmet>
+
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        {/* Hero Section */}
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white">
+          <div className="container mx-auto px-4 py-16">
+            <div className="text-center space-y-6">
+              <Badge className="bg-white/20 text-white border-white/30 text-sm px-4 py-2">
+                🚀 INAUGURAL EVENT
+              </Badge>
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                First AI Summit
+                <span className="block text-3xl md:text-5xl text-blue-200">Croydon 2025</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+                Educate • Motivate • Develop • Inspire • Empower
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-6 text-lg">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  <span>{eventDetails.date}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  <span>{eventDetails.time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  <span>LSBU Croydon</span>
+                </div>
+              </div>
+              <div className="pt-4">
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4">
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  Register FREE Now - Limited Places
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="container mx-auto px-4 py-12">
+          {/* Event Overview */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <div className="lg:col-span-2">
+              <Card className="h-full">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-center">About the AI Summit</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-lg text-neutral-700">
+                    The Croydon Business Association is proud to present the <strong>First AI Summit in Croydon</strong>, 
+                    positioning our community as leaders in the AI revolution. This groundbreaking event brings together 
+                    entrepreneurs, residents, students, and AI experts for a day of learning and networking.
+                  </p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4">
+                    <div className="text-center">
+                      <div className="bg-blue-100 p-3 rounded-full w-fit mx-auto mb-2">
+                        <GraduationCap className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div className="font-medium">Educate</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-green-100 p-3 rounded-full w-fit mx-auto mb-2">
+                        <Lightbulb className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div className="font-medium">Motivate</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-purple-100 p-3 rounded-full w-fit mx-auto mb-2">
+                        <Brain className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div className="font-medium">Develop</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="bg-orange-100 p-3 rounded-full w-fit mx-auto mb-2">
+                        <Rocket className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <div className="font-medium">Empower</div>
+                    </div>
+                  </div>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">
+                      <strong>Special Thanks:</strong> This event is made possible by the enthusiastic support of 
+                      LSBU students and volunteers who are eager for work opportunities in the fast-moving AI sector.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">Event Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <div className="font-medium">Date</div>
+                        <div className="text-sm text-neutral-600">{eventDetails.date}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Clock className="h-5 w-5 text-green-600 mt-0.5" />
+                      <div>
+                        <div className="font-medium">Time</div>
+                        <div className="text-sm text-neutral-600">{eventDetails.time}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-red-600 mt-0.5" />
+                      <div>
+                        <div className="font-medium">Venue</div>
+                        <div className="text-sm text-neutral-600">{eventDetails.venue}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Gift className="h-5 w-5 text-purple-600 mt-0.5" />
+                      <div>
+                        <div className="font-medium">Admission</div>
+                        <div className="text-sm text-green-600 font-medium">{eventDetails.price}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Users className="h-5 w-5 text-orange-600 mt-0.5" />
+                      <div>
+                        <div className="font-medium">Capacity</div>
+                        <div className="text-sm text-orange-600">{eventDetails.capacity}</div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+                <CardContent className="p-6 text-center">
+                  <h3 className="font-bold text-lg mb-2">Secure Your Spot</h3>
+                  <p className="text-sm text-neutral-600 mb-4">
+                    Free admission but places are limited. Register now to guarantee your attendance.
+                  </p>
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Register Now
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Tabs Section */}
+          <Tabs defaultValue="schedule" className="space-y-8">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="schedule">Schedule</TabsTrigger>
+              <TabsTrigger value="speakers">Speakers</TabsTrigger>
+              <TabsTrigger value="workshops">Workshops</TabsTrigger>
+              <TabsTrigger value="exhibition">Exhibition</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="schedule" className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-neutral-900 mb-2">Event Schedule</h2>
+                <p className="text-lg text-neutral-600">Full day program from 10 AM to 4 PM</p>
+              </div>
+
+              <div className="space-y-4">
+                {schedule.map((session, index) => (
+                  <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <div className="flex-shrink-0">
+                          {getSessionIcon(session.type)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                            <h3 className="text-lg font-semibold text-neutral-900">{session.title}</h3>
+                            <Badge variant="outline" className="w-fit">
+                              {session.time}
+                            </Badge>
+                          </div>
+                          {session.speaker && (
+                            <p className="text-sm font-medium text-neutral-700 mb-1">
+                              Speaker: {session.speaker}
+                            </p>
+                          )}
+                          <p className="text-sm text-neutral-600">{session.description}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="speakers" className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-neutral-900 mb-2">Featured Speakers</h2>
+                <p className="text-lg text-neutral-600">Learn from AI experts and industry leaders</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {speakers.map((speaker, index) => (
+                  <Card key={index} className="text-center hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <img 
+                        src={speaker.image} 
+                        alt={speaker.name}
+                        className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                      />
+                      <CardTitle className="text-xl">{speaker.name}</CardTitle>
+                      <p className="text-sm text-blue-600 font-medium">{speaker.title}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="bg-blue-50 p-3 rounded-lg">
+                          <p className="font-medium text-blue-900">Topic:</p>
+                          <p className="text-sm text-blue-800">{speaker.topic}</p>
+                        </div>
+                        <p className="text-sm text-neutral-600">{speaker.bio}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="workshops" className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-neutral-900 mb-2">Hands-on Workshops</h2>
+                <p className="text-lg text-neutral-600">Practical AI skills you can use immediately</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {workshops.map((workshop, index) => (
+                  <Card key={index} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex justify-between items-start mb-2">
+                        <CardTitle className="text-lg">{workshop.title}</CardTitle>
+                        <Badge className={`${
+                          workshop.level === 'Beginner' ? 'bg-green-100 text-green-800' :
+                          workshop.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'
+                        }`}>
+                          {workshop.level}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between text-sm text-neutral-600">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {workshop.time}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="h-4 w-4" />
+                          {workshop.capacity}
+                        </span>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-neutral-700 mb-4">{workshop.description}</p>
+                      <div>
+                        <p className="font-medium text-sm mb-2">Tools Covered:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {workshop.tools.map((tool, toolIndex) => (
+                            <Badge key={toolIndex} variant="secondary" className="text-xs">
+                              {tool}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="exhibition" className="space-y-6">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-neutral-900 mb-2">Micro Business Exhibition</h2>
+                <p className="text-lg text-neutral-600">Discover innovative AI startups and connect with entrepreneurs</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-2">
+                      <Building className="h-5 w-5 text-blue-600" />
+                      Exhibition Highlights
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-2">
+                        <Star className="h-4 w-4 text-yellow-500 mt-1 flex-shrink-0" />
+                        <span className="text-sm">AI startups showcasing innovative solutions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Star className="h-4 w-4 text-yellow-500 mt-1 flex-shrink-0" />
+                        <span className="text-sm">Live demonstrations of AI tools and services</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Star className="h-4 w-4 text-yellow-500 mt-1 flex-shrink-0" />
+                        <span className="text-sm">Networking opportunities with AI entrepreneurs</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Star className="h-4 w-4 text-yellow-500 mt-1 flex-shrink-0" />
+                        <span className="text-sm">Product launches and exclusive previews</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Star className="h-4 w-4 text-yellow-500 mt-1 flex-shrink-0" />
+                        <span className="text-sm">Investment and partnership opportunities</span>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-br from-green-50 to-blue-50 border-green-200">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-green-800">Exhibit at the Summit</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-green-700 mb-4">
+                      Are you an AI startup or business with AI solutions? Showcase your innovation 
+                      at our micro business exhibition.
+                    </p>
+                    <div className="space-y-2 text-sm text-green-700">
+                      <div>• Free exhibition space for CBA members</div>
+                      <div>• Direct access to potential customers</div>
+                      <div>• Networking with investors and partners</div>
+                      <div>• Exposure to local media and influencers</div>
+                    </div>
+                    <Button className="w-full mt-4 bg-green-600 hover:bg-green-700">
+                      Apply for Exhibition Space
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          {/* Call to Action */}
+          <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white mt-12">
+            <CardContent className="text-center p-8">
+              <h3 className="text-3xl font-bold mb-4">Ready to Join the AI Revolution?</h3>
+              <p className="text-xl mb-6 text-blue-100">
+                Be part of Croydon's first AI Summit and position yourself at the forefront of technological innovation
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  Register for FREE
+                </Button>
+                <Link to="/membership-benefits">
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                    <Users className="mr-2 h-5 w-5" />
+                    Join CBA Membership
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AISummit;
