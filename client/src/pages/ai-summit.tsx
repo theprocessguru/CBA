@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Calendar, 
   Clock, 
@@ -27,6 +34,21 @@ import { Link } from "wouter";
 
 const AISummit = () => {
   const [selectedSession, setSelectedSession] = useState("");
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [registrationData, setRegistrationData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    jobTitle: "",
+    phoneNumber: "",
+    businessType: "",
+    aiInterest: "",
+    dietaryRequirements: "",
+    accessibilityNeeds: "",
+    comments: ""
+  });
+  
+  const { toast } = useToast();
 
   const eventDetails = {
     title: "First AI Summit Croydon 2025",
@@ -174,6 +196,51 @@ const AISummit = () => {
     }
   };
 
+  const registerMutation = useMutation({
+    mutationFn: async (data: typeof registrationData) => {
+      const response = await apiRequest("POST", "/api/ai-summit-registration", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Registration Successful!",
+        description: "Thank you for registering for the AI Summit. You'll receive a confirmation email shortly.",
+      });
+      setShowRegistrationForm(false);
+      setRegistrationData({
+        name: "",
+        email: "",
+        company: "",
+        jobTitle: "",
+        phoneNumber: "",
+        businessType: "",
+        aiInterest: "",
+        dietaryRequirements: "",
+        accessibilityNeeds: "",
+        comments: ""
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Registration Failed",
+        description: error instanceof Error ? error.message : "Failed to register. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleRegistration = (e: React.FormEvent) => {
+    e.preventDefault();
+    registerMutation.mutate(registrationData);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setRegistrationData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const getSessionColor = (type: string) => {
     switch (type) {
       case 'keynote': return 'bg-purple-50 border-purple-200';
@@ -225,7 +292,11 @@ const AISummit = () => {
                 </div>
               </div>
               <div className="pt-4">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4"
+                  onClick={() => setShowRegistrationForm(true)}
+                >
                   <UserPlus className="mr-2 h-5 w-5" />
                   Register FREE Now - Limited Places
                 </Button>
@@ -336,7 +407,10 @@ const AISummit = () => {
                   <p className="text-sm text-neutral-600 mb-4">
                     Free admission but places are limited. Register now to guarantee your attendance.
                   </p>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={() => setShowRegistrationForm(true)}
+                  >
                     <UserPlus className="mr-2 h-4 w-4" />
                     Register Now
                   </Button>
@@ -542,7 +616,11 @@ const AISummit = () => {
                 Be part of Croydon's first AI Summit and position yourself at the forefront of technological innovation
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
+                <Button 
+                  size="lg" 
+                  className="bg-white text-blue-600 hover:bg-blue-50"
+                  onClick={() => setShowRegistrationForm(true)}
+                >
                   <UserPlus className="mr-2 h-5 w-5" />
                   Register for FREE
                 </Button>
@@ -556,6 +634,186 @@ const AISummit = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Registration Form Modal */}
+        {showRegistrationForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neutral-900">Register for AI Summit 2025</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowRegistrationForm(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleRegistration} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">Full Name *</Label>
+                      <Input
+                        id="name"
+                        type="text"
+                        required
+                        value={registrationData.name}
+                        onChange={(e) => handleInputChange('name', e.target.value)}
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="email">Email Address *</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        required
+                        value={registrationData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        placeholder="your.email@example.com"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="company">Company/Organization</Label>
+                      <Input
+                        id="company"
+                        type="text"
+                        value={registrationData.company}
+                        onChange={(e) => handleInputChange('company', e.target.value)}
+                        placeholder="Your company name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="jobTitle">Job Title</Label>
+                      <Input
+                        id="jobTitle"
+                        type="text"
+                        value={registrationData.jobTitle}
+                        onChange={(e) => handleInputChange('jobTitle', e.target.value)}
+                        placeholder="Your role/position"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Input
+                        id="phoneNumber"
+                        type="tel"
+                        value={registrationData.phoneNumber}
+                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                        placeholder="Your contact number"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="businessType">Business Type</Label>
+                      <Select value={registrationData.businessType} onValueChange={(value) => handleInputChange('businessType', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select business type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="startup">Startup</SelectItem>
+                          <SelectItem value="small-business">Small Business</SelectItem>
+                          <SelectItem value="medium-enterprise">Medium Enterprise</SelectItem>
+                          <SelectItem value="large-corporation">Large Corporation</SelectItem>
+                          <SelectItem value="freelancer">Freelancer/Consultant</SelectItem>
+                          <SelectItem value="non-profit">Non-Profit</SelectItem>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="aiInterest">AI Interest/Focus Area</Label>
+                    <Select value={registrationData.aiInterest} onValueChange={(value) => handleInputChange('aiInterest', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="What aspect of AI interests you most?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="content-creation">Content Creation & Marketing</SelectItem>
+                        <SelectItem value="automation">Business Process Automation</SelectItem>
+                        <SelectItem value="customer-service">Customer Service AI</SelectItem>
+                        <SelectItem value="data-analytics">Data Analytics & Insights</SelectItem>
+                        <SelectItem value="chatbots">Chatbots & Virtual Assistants</SelectItem>
+                        <SelectItem value="productivity">Productivity Tools</SelectItem>
+                        <SelectItem value="general-learning">General AI Learning</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="dietaryRequirements">Dietary Requirements</Label>
+                    <Input
+                      id="dietaryRequirements"
+                      type="text"
+                      value={registrationData.dietaryRequirements}
+                      onChange={(e) => handleInputChange('dietaryRequirements', e.target.value)}
+                      placeholder="Any dietary restrictions or preferences"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="accessibilityNeeds">Accessibility Requirements</Label>
+                    <Input
+                      id="accessibilityNeeds"
+                      type="text"
+                      value={registrationData.accessibilityNeeds}
+                      onChange={(e) => handleInputChange('accessibilityNeeds', e.target.value)}
+                      placeholder="Any accessibility support needed"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="comments">Additional Comments/Questions</Label>
+                    <Textarea
+                      id="comments"
+                      value={registrationData.comments}
+                      onChange={(e) => handleInputChange('comments', e.target.value)}
+                      placeholder="Any questions or additional information..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Event Details:</strong> October 1st, 2025 • 10:00 AM - 4:00 PM • LSBU Croydon • FREE Admission
+                    </p>
+                    <p className="text-xs text-blue-600 mt-2">
+                      By registering, you agree to receive event updates and information about CBA services. You can unsubscribe at any time.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowRegistrationForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? "Registering..." : "Complete Registration"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -2644,6 +2644,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Summit Registration endpoint
+  app.post("/api/ai-summit-registration", async (req, res) => {
+    try {
+      const { 
+        name, 
+        email, 
+        company, 
+        jobTitle, 
+        phoneNumber, 
+        businessType, 
+        aiInterest, 
+        dietaryRequirements, 
+        accessibilityNeeds, 
+        comments 
+      } = req.body;
+
+      // Basic validation
+      if (!name || !email) {
+        return res.status(400).json({ message: "Name and email are required" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Please provide a valid email address" });
+      }
+
+      // Store registration in database
+      const registration = await storage.createAISummitRegistration({
+        name,
+        email,
+        company: company || null,
+        jobTitle: jobTitle || null,
+        phoneNumber: phoneNumber || null,
+        businessType: businessType || null,
+        aiInterest: aiInterest || null,
+        dietaryRequirements: dietaryRequirements || null,
+        accessibilityNeeds: accessibilityNeeds || null,
+        comments: comments || null,
+        registeredAt: new Date()
+      });
+
+      // Send confirmation email if email service is available
+      try {
+        if (emailService) {
+          await emailService.sendEmail({
+            to: email,
+            subject: "AI Summit 2025 Registration Confirmed",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #2563eb;">Registration Confirmed!</h1>
+                <p>Dear ${name},</p>
+                <p>Thank you for registering for the <strong>First AI Summit Croydon 2025</strong>!</p>
+                
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h2 style="color: #1f2937; margin-top: 0;">Event Details</h2>
+                  <p><strong>Date:</strong> October 1st, 2025</p>
+                  <p><strong>Time:</strong> 10:00 AM - 4:00 PM</p>
+                  <p><strong>Venue:</strong> LSBU London South Bank University Croydon</p>
+                  <p><strong>Admission:</strong> FREE</p>
+                </div>
+
+                <p>We're excited to have you join us for this groundbreaking event featuring:</p>
+                <ul>
+                  <li>Keynote speakers from leading AI companies</li>
+                  <li>Hands-on AI workshops</li>
+                  <li>Micro business exhibition</li>
+                  <li>Networking opportunities</li>
+                  <li>Free refreshments throughout the day</li>
+                </ul>
+
+                <p>You'll receive more details about the agenda and speakers closer to the event date.</p>
+
+                <p>If you have any questions, please don't hesitate to contact us.</p>
+
+                <p>Best regards,<br>
+                <strong>The Croydon Business Association Team</strong></p>
+              </div>
+            `
+          });
+        }
+      } catch (emailError) {
+        console.error("Failed to send confirmation email:", emailError);
+        // Don't fail the registration if email fails
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Registration successful! You'll receive a confirmation email shortly.",
+        registrationId: registration.id
+      });
+
+    } catch (error: any) {
+      console.error("AI Summit registration error:", error);
+      res.status(500).json({ 
+        message: "Registration failed. Please try again or contact support." 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

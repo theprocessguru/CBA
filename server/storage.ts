@@ -6,6 +6,7 @@ import {
   categories,
   memberImports,
   cbaCauses,
+  aiSummitRegistrations,
   type User,
   type UpsertUser,
   type Business,
@@ -19,6 +20,8 @@ import {
   type MemberImport,
   type InsertMemberImport,
   type CbaCause,
+  type AISummitRegistration,
+  type InsertAISummitRegistration,
   contentReports,
   type ContentReport,
   type InsertContentReport,
@@ -127,6 +130,9 @@ export interface IStorage {
   getPasswordResetToken(token: string): Promise<PasswordResetToken | undefined>;
   markPasswordResetTokenAsUsed(tokenId: number): Promise<void>;
   deleteExpiredPasswordResetTokens(): Promise<void>;
+  
+  // AI Summit registration operations
+  createAISummitRegistration(registration: InsertAISummitRegistration): Promise<AISummitRegistration>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -689,6 +695,15 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(passwordResetTokens)
       .where(lte(passwordResetTokens.expiresAt, new Date()));
+  }
+
+  // AI Summit registration operations
+  async createAISummitRegistration(registrationData: InsertAISummitRegistration): Promise<AISummitRegistration> {
+    const [registration] = await db
+      .insert(aiSummitRegistrations)
+      .values(registrationData)
+      .returning();
+    return registration;
   }
 }
 

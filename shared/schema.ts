@@ -250,6 +250,22 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// AI Summit registrations table
+export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  phoneNumber: varchar("phone_number"),
+  businessType: varchar("business_type"),
+  aiInterest: varchar("ai_interest"),
+  dietaryRequirements: varchar("dietary_requirements"),
+  accessibilityNeeds: varchar("accessibility_needs"),
+  comments: text("comments"),
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -369,6 +385,7 @@ export const insertDonationSchema = createInsertSchema(donations).omit({ id: tru
 export const insertContentReportSchema = createInsertSchema(contentReports).omit({ id: true });
 export const insertInteractionSchema = createInsertSchema(interactions).omit({ id: true });
 export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({ id: true });
+export const insertAISummitRegistrationSchema = createInsertSchema(aiSummitRegistrations).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -415,3 +432,6 @@ export type Interaction = typeof interactions.$inferSelect;
 
 export type InsertPasswordResetToken = z.infer<typeof insertPasswordResetTokenSchema>;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
+export type InsertAISummitRegistration = z.infer<typeof insertAISummitRegistrationSchema>;
+export type AISummitRegistration = typeof aiSummitRegistrations.$inferSelect;
