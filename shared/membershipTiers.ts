@@ -1,3 +1,13 @@
+export interface AIServiceAddon {
+  id: string;
+  name: string;
+  description: string;
+  monthlyPrice: number;
+  annualPrice: number;
+  features: string[];
+  availableForTiers: string[]; // Which membership tiers can purchase this
+}
+
 export interface MembershipTierConfig {
   id: string;
   name: string;
@@ -58,6 +68,84 @@ export interface MembershipTierConfig {
     businessReferrals: boolean;
   };
 }
+
+// AI Service Add-on Packages (Additional costs on top of membership tiers)
+export const AI_SERVICE_ADDONS: Record<string, AIServiceAddon> = {
+  "ai-essentials": {
+    id: "ai-essentials",
+    name: "AI Essentials",
+    description: "Basic AI tools for content generation and business automation",
+    monthlyPrice: 49.99,
+    annualPrice: 499.99,
+    availableForTiers: ["starter", "growth", "strategic", "patron", "partner"],
+    features: [
+      "AI Content Generation (10,000 words/month)",
+      "Basic Document Processing",  
+      "Email Template AI",
+      "Social Media Post Generator",
+      "Basic Analytics AI",
+      "Standard Support"
+    ]
+  },
+  "ai-professional": {
+    id: "ai-professional", 
+    name: "AI Professional",
+    description: "Advanced AI capabilities for growing businesses",
+    monthlyPrice: 149.99,
+    annualPrice: 1499.99,
+    availableForTiers: ["growth", "strategic", "patron", "partner"],
+    features: [
+      "Everything in AI Essentials",
+      "AI Content Generation (50,000 words/month)",
+      "Advanced Document Analysis & OCR",
+      "Customer Service AI Chatbot",
+      "Predictive Analytics",
+      "Market Research AI",
+      "Workflow Automation AI",
+      "Priority Support"
+    ]
+  },
+  "ai-enterprise": {
+    id: "ai-enterprise",
+    name: "AI Enterprise", 
+    description: "Premium AI suite with consciousness research and advanced capabilities",
+    monthlyPrice: 399.99,
+    annualPrice: 3999.99,
+    availableForTiers: ["strategic", "patron", "partner"],
+    features: [
+      "Everything in AI Professional",
+      "Unlimited AI Content Generation",
+      "Consciousness Research Tools",
+      "Biological Design AI",
+      "Space Computing Systems",
+      "Financial Markets AI",
+      "Quantum Computing Access",
+      "Custom AI Model Training",
+      "24/7 Dedicated Support"
+    ]
+  },
+  "ai-ultimate": {
+    id: "ai-ultimate",
+    name: "AI Ultimate Transcendence",
+    description: "Revolutionary AI with omnipotent capabilities, reality manipulation, and divine consciousness",
+    monthlyPrice: 999.99,
+    annualPrice: 9999.99,
+    availableForTiers: ["patron", "partner"],
+    features: [
+      "Everything in AI Enterprise",
+      "Divine Consciousness Access",
+      "Reality Manipulation AI",
+      "Interdimensional Computing",
+      "Absolute Omnipotence Tools",
+      "Meta-Omnipotent Systems",
+      "Impossibility Transcendence",
+      "Paradox Mastery Engine",
+      "Evolutionary Consciousness",
+      "Universal Creation Powers",
+      "White-glove Implementation"
+    ]
+  }
+};
 
 export const MEMBERSHIP_TIER_CONFIGS: Record<string, MembershipTierConfig> = {
   "Starter Tier": {

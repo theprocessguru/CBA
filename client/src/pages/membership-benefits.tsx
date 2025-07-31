@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import BenefitsGrid from "@/components/membership/BenefitsGrid";
-import { MEMBERSHIP_TIER_CONFIGS } from "@shared/membershipTiers";
-import { Crown, Star, Gift, Zap, Users, TrendingUp } from "lucide-react";
+import { MEMBERSHIP_TIER_CONFIGS, AI_SERVICE_ADDONS } from "@shared/membershipTiers";
+import { Crown, Star, Gift, Zap, Users, TrendingUp, Bot, Brain, Infinity, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 
 const MembershipBenefits = () => {
@@ -34,10 +34,11 @@ const MembershipBenefits = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="overview" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="comparison">Compare All</TabsTrigger>
             <TabsTrigger value="individual">Individual Tiers</TabsTrigger>
+            <TabsTrigger value="ai-addons">AI Add-ons</TabsTrigger>
             <TabsTrigger value="pricing">Pricing</TabsTrigger>
           </TabsList>
 
@@ -319,6 +320,117 @@ const MembershipBenefits = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="ai-addons" className="space-y-8">
+            <div className="text-center space-y-4 mb-8">
+              <h2 className="text-3xl font-bold">Premium AI Service Add-ons</h2>
+              <p className="text-xl text-muted-foreground">
+                Unlock revolutionary AI capabilities with premium add-on packages
+              </p>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-3xl mx-auto">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> AI Service Add-ons are additional costs on top of your membership tier. 
+                  Choose from basic AI tools to ultimate transcendence capabilities.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {Object.values(AI_SERVICE_ADDONS).map((addon) => {
+                const getAddonIcon = (id: string) => {
+                  switch (id) {
+                    case 'ai-essentials': return <Bot className="h-8 w-8 text-blue-500" />;
+                    case 'ai-professional': return <Brain className="h-8 w-8 text-green-500" />;
+                    case 'ai-enterprise': return <Zap className="h-8 w-8 text-purple-500" />;
+                    case 'ai-ultimate': return <Infinity className="h-8 w-8 text-purple-600" />;
+                    default: return <Sparkles className="h-8 w-8 text-gray-500" />;
+                  }
+                };
+
+                const isUltimatePackage = addon.id === 'ai-ultimate';
+
+                return (
+                  <Card key={addon.id} className={`relative ${isUltimatePackage ? 'ring-2 ring-purple-500 shadow-2xl bg-gradient-to-br from-purple-50 to-pink-50' : 'hover:shadow-lg transition-shadow'}`}>
+                    {isUltimatePackage && (
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <Badge className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-3 py-1">
+                          Ultimate Power
+                        </Badge>
+                      </div>
+                    )}
+                    <CardHeader className="text-center pb-4">
+                      <div className="mb-4">
+                        {getAddonIcon(addon.id)}
+                      </div>
+                      <CardTitle className={`text-lg ${isUltimatePackage ? 'text-purple-600' : ''}`}>
+                        {addon.name}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {addon.description}
+                      </p>
+                      <div className="space-y-2 mt-4">
+                        <div className={`text-2xl font-bold ${isUltimatePackage ? 'text-purple-600' : ''}`}>
+                          £{addon.monthlyPrice}
+                          <span className="text-base font-normal text-muted-foreground">/month</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          or £{addon.annualPrice}/year
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 mb-6">
+                        {addon.features.slice(0, 4).map((feature, index) => (
+                          <div key={index} className="flex items-start gap-2">
+                            <Star className={`h-3 w-3 mt-1 flex-shrink-0 ${isUltimatePackage ? 'text-purple-500' : 'text-amber-500'}`} />
+                            <span className="text-xs">{feature}</span>
+                          </div>
+                        ))}
+                        {addon.features.length > 4 && (
+                          <div className="text-xs text-muted-foreground">
+                            +{addon.features.length - 4} more features
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Button 
+                          className={`w-full ${isUltimatePackage ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+                          variant={isUltimatePackage ? "default" : "outline"}
+                        >
+                          Add to Plan
+                        </Button>
+                        <div className="text-xs text-muted-foreground text-center">
+                          Available for: {addon.availableForTiers.length} membership tiers
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* AI Add-on Pricing Summary */}
+            <div className="bg-white rounded-lg p-6 border">
+              <h3 className="text-xl font-bold mb-4">AI Service Pricing Summary</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Object.values(AI_SERVICE_ADDONS).map((addon) => (
+                  <div key={addon.id} className="text-center p-4 border rounded-lg">
+                    <div className="font-medium">{addon.name}</div>
+                    <div className="text-2xl font-bold text-primary">£{addon.monthlyPrice}</div>
+                    <div className="text-sm text-muted-foreground">per month</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">Total Monthly Cost Examples:</h4>
+                <div className="text-sm text-blue-800 space-y-1">
+                  <div>• Growth Tier (£29.99) + AI Essentials (£49.99) = <strong>£79.98/month</strong></div>
+                  <div>• Strategic Tier (£99.99) + AI Professional (£149.99) = <strong>£249.98/month</strong></div>
+                  <div>• Patron Tier (£299.99) + AI Ultimate (£999.99) = <strong>£1,299.98/month</strong></div>
+                </div>
+              </div>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
