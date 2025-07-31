@@ -250,7 +250,7 @@ const MembershipBenefits = () => {
                             </td>
                             <td className="text-center py-4 px-4">
                               {annualSavings > 0 ? (
-                                <span className="text-green-600 font-medium">£{annualSavings}</span>
+                                <span className="text-green-600 font-medium">£{annualSavings.toFixed(2)}</span>
                               ) : (
                                 <span className="text-muted-foreground">-</span>
                               )}
