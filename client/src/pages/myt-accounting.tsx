@@ -78,7 +78,7 @@ export default function MyTAccounting() {
       discount: "50% OFF for CBA Members",
       description: "Perfect for sole traders and small businesses",
       features: [
-        "AI document scanning (up to 100 docs/month)",
+        "AI analytics up to 75 documents per month",
         "Basic bookkeeping automation",
         "HMRC compliance checks",
         "Mobile app access",
@@ -92,7 +92,7 @@ export default function MyTAccounting() {
       discount: "50% OFF for CBA Members",
       description: "For growing businesses with higher volume",
       features: [
-        "AI document scanning (up to 500 docs/month)",
+        "AI analytics up to 150 documents per month",
         "Advanced bookkeeping automation",
         "Real-time financial dashboards",
         "VAT management",
@@ -108,7 +108,7 @@ export default function MyTAccounting() {
       discount: "50% OFF for CBA Members",
       description: "For established businesses and Ltd companies",
       features: [
-        "Unlimited AI document scanning",
+        "AI analytics up to 300 documents per month",
         "Complete bookkeeping automation",
         "Advanced analytics & forecasting",
         "Multi-entity management",
