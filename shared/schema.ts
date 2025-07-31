@@ -109,6 +109,10 @@ export const offers = pgTable("offers", {
   description: text("description"),
   discountPercentage: integer("discount_percentage"),
   discountValue: decimal("discount_value", { precision: 10, scale: 2 }),
+  originalPrice: decimal("original_price", { precision: 10, scale: 2 }), // Original price for members to see savings
+  memberOnlyDiscount: boolean("member_only_discount").default(false), // True if this is a member-only offer
+  memberDiscountPercentage: integer("member_discount_percentage"), // Additional discount for members
+  memberDiscountValue: decimal("member_discount_value", { precision: 10, scale: 2 }), // Fixed discount for members
   imageUrl: varchar("image_url"),
   validFrom: timestamp("valid_from").defaultNow(),
   validUntil: timestamp("valid_until"),

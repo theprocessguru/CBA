@@ -71,7 +71,7 @@ export interface IStorage {
   createOffer(offer: InsertOffer): Promise<Offer>;
   updateOffer(id: number, offer: Partial<InsertOffer>): Promise<Offer>;
   deleteOffer(id: number): Promise<boolean>;
-  listActiveOffers(options?: { limit?: number }): Promise<Offer[]>;
+  listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean }): Promise<Offer[]>;
   
   // Category operations
   getCategoryById(id: number): Promise<Category | undefined>;
@@ -378,20 +378,28 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  async listActiveOffers(options?: { limit?: number }): Promise<Offer[]> {
-    let query = db.select().from(offers).where(
-      and(
-        eq(offers.isActive, true),
-        or(
-          sql`${offers.validUntil} IS NULL`,
-          gte(offers.validUntil, new Date())
-        ),
-        or(
-          sql`${offers.validFrom} IS NULL`,
-          lte(offers.validFrom, new Date())
-        )
+  async listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean }): Promise<Offer[]> {
+    let whereConditions = [
+      eq(offers.isActive, true),
+      or(
+        sql`${offers.validUntil} IS NULL`,
+        gte(offers.validUntil, new Date())
+      ),
+      or(
+        sql`${offers.validFrom} IS NULL`,
+        lte(offers.validFrom, new Date())
       )
-    );
+    ];
+
+    // Filter by visibility based on options
+    if (options?.membersOnly) {
+      whereConditions.push(eq(offers.memberOnlyDiscount, true));
+    } else if (options?.includePublic && !options?.membersOnly) {
+      // For public API, exclude member-only offers
+      whereConditions.push(eq(offers.memberOnlyDiscount, false));
+    }
+
+    let query = db.select().from(offers).where(and(...whereConditions));
     
     if (options?.limit) {
       query = query.limit(options.limit);

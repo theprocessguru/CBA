@@ -3,14 +3,28 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Store, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Store, Calendar, Crown } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Offer } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 const SpecialOffers = () => {
+  const { isAuthenticated } = useAuth();
   const { data: offers, isLoading } = useQuery<Offer[]>({
     queryKey: ['/api/offers?limit=3'],
   });
+
+  const calculateMemberPrice = (offer: Offer) => {
+    if (!offer.originalPrice) return null;
+    
+    if (offer.memberDiscountPercentage) {
+      return offer.originalPrice * (1 - offer.memberDiscountPercentage / 100);
+    } else if (offer.memberDiscountValue) {
+      return Math.max(0, offer.originalPrice - offer.memberDiscountValue);
+    }
+    return null;
+  };
 
   return (
     <section className="py-12 bg-neutral-100">
@@ -66,15 +80,46 @@ const SpecialOffers = () => {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     <h3 className="text-xl font-bold text-neutral-900">{offer.title}</h3>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success text-white">
-                      {offer.discountPercentage 
-                        ? `${offer.discountPercentage}% OFF` 
-                        : offer.discountValue 
-                          ? `£${offer.discountValue} OFF` 
-                          : 'SPECIAL OFFER'
-                      }
-                    </span>
+                    <div className="flex flex-col items-end space-y-1">
+                      {offer.memberOnlyDiscount && isAuthenticated ? (
+                        <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200">
+                          <Crown className="w-3 h-3 mr-1" />
+                          Member Only
+                        </Badge>
+                      ) : null}
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success text-white">
+                        {offer.discountPercentage 
+                          ? `${offer.discountPercentage}% OFF` 
+                          : offer.discountValue 
+                            ? `£${offer.discountValue} OFF` 
+                            : 'SPECIAL OFFER'
+                        }
+                      </span>
+                    </div>
                   </div>
+                  
+                  {/* Member-exclusive pricing display */}
+                  {offer.memberOnlyDiscount && isAuthenticated && offer.originalPrice && (
+                    <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-blue-700 dark:text-blue-300 font-medium">Member Price:</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm text-blue-600 dark:text-blue-400 line-through">
+                            £{Number(offer.originalPrice).toFixed(2)}
+                          </span>
+                          <span className="text-lg font-bold text-blue-800 dark:text-blue-200">
+                            £{calculateMemberPrice(offer)?.toFixed(2) || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        You save £{offer.originalPrice && calculateMemberPrice(offer) 
+                          ? (Number(offer.originalPrice) - calculateMemberPrice(offer)!).toFixed(2) 
+                          : '0.00'
+                        }!
+                      </div>
+                    </div>
+                  )}
                   <p className="text-neutral-600 mb-4">{offer.description || 'No description available'}</p>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-neutral-500">

@@ -3,14 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tag, Clock, Store, ExternalLink, AlertCircle } from "lucide-react";
+import { Tag, Clock, Store, ExternalLink, AlertCircle, Crown } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Offer } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 const SpecialOffers = () => {
+  const { isAuthenticated } = useAuth();
   const { data: offers, isLoading, error } = useQuery<Offer[]>({
     queryKey: ['/api/offers'],
   });
+
+  const calculateMemberPrice = (offer: Offer) => {
+    if (!offer.originalPrice) return null;
+    
+    if (offer.memberDiscountPercentage) {
+      return offer.originalPrice * (1 - offer.memberDiscountPercentage / 100);
+    } else if (offer.memberDiscountValue) {
+      return Math.max(0, offer.originalPrice - offer.memberDiscountValue);
+    }
+    return null;
+  };
 
   if (isLoading) {
     return (

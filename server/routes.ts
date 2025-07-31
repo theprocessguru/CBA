@@ -225,12 +225,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get active offers
+  // Get public offers (excludes member-only offers)
   app.get('/api/offers', async (req, res) => {
     try {
       const { limit } = req.query;
       const options = {
-        limit: limit ? parseInt(limit as string) : undefined
+        limit: limit ? parseInt(limit as string) : undefined,
+        includePublic: true
       };
       
       const offers = await storage.listActiveOffers(options);
@@ -238,6 +239,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching offers:", error);
       res.status(500).json({ message: "Failed to fetch offers" });
+    }
+  });
+
+  // Get member-exclusive offers (only visible to authenticated members)
+  app.get('/api/member-offers', isAuthenticated, async (req: any, res) => {
+    try {
+      const { limit } = req.query;
+      const options = {
+        limit: limit ? parseInt(limit as string) : 20,
+        membersOnly: true
+      };
+      
+      const offers = await storage.listActiveOffers(options);
+      res.json(offers);
+    } catch (error) {
+      console.error("Error fetching member offers:", error);
+      res.status(500).json({ message: "Failed to fetch member offers" });
     }
   });
   

@@ -27,6 +27,10 @@ const offerSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters").max(500, "Description must be less than 500 characters"),
   discountPercentage: z.string().transform(val => val === "" ? null : parseInt(val)).optional().nullable(),
   discountValue: z.string().transform(val => val === "" ? null : parseFloat(val)).optional().nullable(),
+  originalPrice: z.string().transform(val => val === "" ? null : parseFloat(val)).optional().nullable(),
+  memberOnlyDiscount: z.boolean().default(false),
+  memberDiscountPercentage: z.string().transform(val => val === "" ? null : parseInt(val)).optional().nullable(),
+  memberDiscountValue: z.string().transform(val => val === "" ? null : parseFloat(val)).optional().nullable(),
   imageUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   validFrom: z.date().optional().nullable(),
   validUntil: z.date().optional().nullable(),
@@ -34,6 +38,14 @@ const offerSchema = z.object({
 }).refine(data => data.discountPercentage || data.discountValue, {
   message: "Please provide either a discount percentage or value",
   path: ["discountPercentage"],
+}).refine(data => {
+  if (data.memberOnlyDiscount) {
+    return data.memberDiscountPercentage || data.memberDiscountValue;
+  }
+  return true;
+}, {
+  message: "Member-only offers require either percentage or value discount",
+  path: ["memberDiscountPercentage"],
 });
 
 type OfferFormValues = z.infer<typeof offerSchema>;
@@ -78,6 +90,10 @@ const SpecialOffers = () => {
       description: "",
       discountPercentage: "",
       discountValue: "",
+      originalPrice: "",
+      memberOnlyDiscount: false,
+      memberDiscountPercentage: "",
+      memberDiscountValue: "",
       imageUrl: "",
       validFrom: new Date(),
       validUntil: null,
@@ -91,6 +107,10 @@ const SpecialOffers = () => {
       description: "",
       discountPercentage: "",
       discountValue: "",
+      originalPrice: "",
+      memberOnlyDiscount: false,
+      memberDiscountPercentage: "",
+      memberDiscountValue: "",
       imageUrl: "",
       validFrom: new Date(),
       validUntil: null,
@@ -106,6 +126,10 @@ const SpecialOffers = () => {
       description: offer.description || "",
       discountPercentage: offer.discountPercentage ? String(offer.discountPercentage) : "",
       discountValue: offer.discountValue ? String(offer.discountValue) : "",
+      originalPrice: offer.originalPrice ? String(offer.originalPrice) : "",
+      memberOnlyDiscount: offer.memberOnlyDiscount || false,
+      memberDiscountPercentage: offer.memberDiscountPercentage ? String(offer.memberDiscountPercentage) : "",
+      memberDiscountValue: offer.memberDiscountValue ? String(offer.memberDiscountValue) : "",
       imageUrl: offer.imageUrl || "",
       validFrom: offer.validFrom ? new Date(offer.validFrom) : new Date(),
       validUntil: offer.validUntil ? new Date(offer.validUntil) : null,
@@ -422,6 +446,117 @@ const SpecialOffers = () => {
                     </FormItem>
                   )}
                 />
+              </div>
+              
+              {/* Member-Exclusive Discount Section */}
+              <div className="border rounded-lg p-4 bg-blue-50 dark:bg-blue-950">
+                <FormField
+                  control={form.control}
+                  name="memberOnlyDiscount"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between space-x-3 space-y-0 mb-4">
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-blue-800 dark:text-blue-200 font-semibold">🎯 Member-Exclusive Offer</FormLabel>
+                        <FormDescription className="text-blue-700 dark:text-blue-300">
+                          Only visible to logged-in CBA members with special pricing
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                {form.watch("memberOnlyDiscount") && (
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="originalPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-blue-800 dark:text-blue-200">Original Price (£)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              step="0.01"
+                              min="0"
+                              placeholder="e.g. 50.00" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormDescription className="text-blue-700 dark:text-blue-300">
+                            Original price that will show as crossed out for members
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="memberDiscountPercentage"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-blue-800 dark:text-blue-200">Member Discount (%)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                min="0"
+                                max="100"
+                                placeholder="e.g. 20" 
+                                {...field} 
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  if (e.target.value) {
+                                    form.setValue("memberDiscountValue", "");
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-blue-700 dark:text-blue-300">
+                              Percentage discount for members
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="memberDiscountValue"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-blue-800 dark:text-blue-200">Member Discount (£)</FormLabel>
+                            <FormControl>
+                              <Input 
+                                type="number" 
+                                step="0.01"
+                                min="0"
+                                placeholder="e.g. 10.00" 
+                                {...field} 
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  if (e.target.value) {
+                                    form.setValue("memberDiscountPercentage", "");
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormDescription className="text-blue-700 dark:text-blue-300">
+                              Fixed amount discount for members
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
