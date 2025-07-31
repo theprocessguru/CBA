@@ -788,10 +788,10 @@ const AISummit = () => {
                       <div>• Exposure to local media and influencers</div>
                     </div>
                     <Button 
-                      className="w-full mt-4 bg-green-600 hover:bg-green-700"
+                      className="w-full mt-4 bg-green-600 hover:bg-green-700 font-semibold text-white"
                       onClick={() => setShowExhibitorForm(true)}
                     >
-                      Apply for Exhibition Space
+                      <span>Apply for Exhibition Space</span>
                     </Button>
                   </CardContent>
                 </Card>
@@ -809,33 +809,33 @@ const AISummit = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg" 
-                  className="bg-white text-blue-600 hover:bg-blue-50"
+                  className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
                   onClick={() => setShowRegistrationForm(true)}
                 >
                   <UserPlus className="mr-2 h-5 w-5" />
-                  Register for FREE
+                  <span>Register for FREE</span>
                 </Button>
                 <Button 
                   size="lg" 
-                  className="bg-purple-600 text-white hover:bg-purple-700"
+                  className="bg-purple-600 text-white hover:bg-purple-700 font-semibold"
                   onClick={() => setShowExhibitorForm(true)}
                 >
                   <Building className="mr-2 h-5 w-5" />
-                  Become an Exhibitor
+                  <span>Become an Exhibitor</span>
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10"
+                  className="border-white text-white hover:bg-white/10 font-semibold"
                   onClick={() => setShowSpeakerForm(true)}
                 >
                   <Mic className="mr-2 h-5 w-5" />
-                  Speak at Summit
+                  <span>Speak at Summit</span>
                 </Button>
                 <Link to="/membership-benefits">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 font-semibold">
                     <Users className="mr-2 h-5 w-5" />
-                    Join CBA Membership
+                    <span>Join CBA Membership</span>
                   </Button>
                 </Link>
               </div>
