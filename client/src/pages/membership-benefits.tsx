@@ -55,14 +55,14 @@ const MembershipBenefits = () => {
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Gift className="h-8 w-8 mx-auto mb-3 text-green-500" />
-                  <div className="text-2xl font-bold">875+</div>
+                  <div className="text-2xl font-bold">245+</div>
                   <div className="text-sm text-muted-foreground">Total Benefits</div>
                 </CardContent>
               </Card>
               <Card className="text-center">
                 <CardContent className="p-6">
                   <Star className="h-8 w-8 mx-auto mb-3 text-blue-500" />
-                  <div className="text-2xl font-bold">37</div>
+                  <div className="text-2xl font-bold">16</div>
                   <div className="text-sm text-muted-foreground">Benefit Categories</div>
                 </CardContent>
               </Card>
@@ -375,7 +375,7 @@ const MembershipBenefits = () => {
                           <span className="text-base font-normal text-muted-foreground">/month</span>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          or £{addon.annualPrice}/year
+                          or £{(addon.monthlyPrice * 12 * 0.9).toFixed(2)}/year (save 10%)
                         </div>
                       </div>
                     </CardHeader>
@@ -401,7 +401,7 @@ const MembershipBenefits = () => {
                           Add to Plan
                         </Button>
                         <div className="text-xs text-muted-foreground text-center">
-                          Available for: {addon.availableForTiers.length} membership tiers
+                          Available for all membership tiers
                         </div>
                       </div>
                     </CardContent>
