@@ -158,7 +158,7 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          <div className="hidden sm:ml-4 sm:flex sm:items-center sm:space-x-3 flex-shrink-0">
+          <div className="hidden sm:ml-4 sm:flex sm:items-center sm:space-x-3 flex-shrink-0 relative z-50">
             <button 
               type="button" 
               className="bg-white p-1 rounded-full text-neutral-500 hover:text-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -199,7 +199,7 @@ const Navbar = () => {
 
       {/* AI Horizontal Submenu */}
       {(isAiMenuOpen || isAiPathActive()) && (
-        <div className="bg-gray-50 border-t border-gray-200 hidden lg:block">
+        <div className="bg-gray-50 border-t border-gray-200 hidden lg:block relative z-40">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex space-x-8 py-3">
               <Link href="/ai-summit">
