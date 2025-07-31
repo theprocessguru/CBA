@@ -2377,3 +2377,46 @@ export function getTierLimits(tierName: string) {
   const config = getMembershipTierConfig(tierName);
   return config?.limits || MEMBERSHIP_TIER_CONFIGS["Starter Tier"].limits;
 }
+
+export interface AIServiceAddon {
+  id: string;
+  name: string;
+  description: string;
+  monthlyPrice: number;
+  features: string[];
+  targetAudience: string;
+}
+
+export const AI_SERVICE_ADDONS: Record<string, AIServiceAddon> = {
+  "ai-basics": {
+    id: "ai-basics",
+    name: "AI Basics",
+    description: "Essential AI tools for small businesses",
+    monthlyPrice: 29.99,
+    features: [
+      "AI Content Writing Assistant",
+      "Basic Chatbot Builder",
+      "Document Analysis (50 docs/month)",
+      "Email Template Generator",
+      "Social Media Content Creator"
+    ],
+    targetAudience: "Small businesses starting their AI journey"
+  },
+  "ai-professional": {
+    id: "ai-professional", 
+    name: "AI Professional",
+    description: "Advanced AI automation for growing businesses",
+    monthlyPrice: 79.99,
+    features: [
+      "Advanced Content Generation",
+      "Custom AI Workflows",
+      "Document Analysis (200 docs/month)",
+      "Customer Service Automation",
+      "Predictive Analytics Dashboard",
+      "API Access for Integrations"
+    ],
+    targetAudience: "Growing businesses seeking competitive advantages"
+  }
+};
+
+export type InsertMembershipTier = Omit<MembershipTierConfig, 'id'>;
