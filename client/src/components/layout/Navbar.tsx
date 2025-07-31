@@ -23,10 +23,17 @@ const Navbar = () => {
     setIsAiMenuOpen(!isAiMenuOpen);
   };
 
-  // Close AI menu when clicking outside or navigating
+  // Close AI menu when clicking outside (but not on menu items)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (aiMenuRef.current && !aiMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Element;
+      
+      // Don't close if clicking on a submenu link
+      if (target.closest('a[href^="/ai-"]')) {
+        return;
+      }
+      
+      if (aiMenuRef.current && !aiMenuRef.current.contains(target)) {
         setIsAiMenuOpen(false);
       }
     };
@@ -39,7 +46,9 @@ const Navbar = () => {
 
   // Close AI menu when location changes
   useEffect(() => {
-    setIsAiMenuOpen(false);
+    if (location.startsWith('/ai-')) {
+      setIsAiMenuOpen(false);
+    }
   }, [location]);
 
   return (
@@ -209,7 +218,7 @@ const Navbar = () => {
 
       {/* AI Horizontal Submenu */}
       {isAiMenuOpen && (
-        <div className="bg-gray-50 border-t border-gray-200 block relative z-40">
+        <div className="bg-gray-50 border-t border-gray-200 block relative z-40" onClick={(e) => e.stopPropagation()}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
               <Link href="/ai-summit">
@@ -217,7 +226,8 @@ const Navbar = () => {
                   isActive('/ai-summit') 
                     ? 'text-primary' 
                     : 'text-red-600 hover:text-red-700 font-semibold'
-                  } transition-colors duration-200`}>
+                  } transition-colors duration-200`}
+                  onClick={() => setIsAiMenuOpen(false)}>
                   🚀 AI Summit Oct 1st
                 </a>
               </Link>
@@ -226,7 +236,8 @@ const Navbar = () => {
                   isActive('/ai-services') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}>
+                  } transition-colors duration-200`}
+                  onClick={() => setIsAiMenuOpen(false)}>
                   AI Services
                 </a>
               </Link>
@@ -235,7 +246,8 @@ const Navbar = () => {
                   isActive('/ai-tools') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}>
+                  } transition-colors duration-200`}
+                  onClick={() => setIsAiMenuOpen(false)}>
                   AI Tools
                 </a>
               </Link>
@@ -244,7 +256,8 @@ const Navbar = () => {
                   isActive('/ai-automation') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}>
+                  } transition-colors duration-200`}
+                  onClick={() => setIsAiMenuOpen(false)}>
                   AI Automation
                 </a>
               </Link>
@@ -253,7 +266,8 @@ const Navbar = () => {
                   isActive('/ai-analytics') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}>
+                  } transition-colors duration-200`}
+                  onClick={() => setIsAiMenuOpen(false)}>
                   AI Analytics
                 </a>
               </Link>
