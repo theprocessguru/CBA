@@ -7,6 +7,7 @@ import {
   memberImports,
   cbaCauses,
   aiSummitRegistrations,
+  aiSummitExhibitorRegistrations,
   type User,
   type UpsertUser,
   type Business,
@@ -22,6 +23,8 @@ import {
   type CbaCause,
   type AISummitRegistration,
   type InsertAISummitRegistration,
+  type AISummitExhibitorRegistration,
+  type InsertAISummitExhibitorRegistration,
   contentReports,
   type ContentReport,
   type InsertContentReport,
@@ -133,6 +136,7 @@ export interface IStorage {
   
   // AI Summit registration operations
   createAISummitRegistration(registration: InsertAISummitRegistration): Promise<AISummitRegistration>;
+  createAISummitExhibitorRegistration(registration: InsertAISummitExhibitorRegistration): Promise<AISummitExhibitorRegistration>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -701,6 +705,14 @@ export class DatabaseStorage implements IStorage {
   async createAISummitRegistration(registrationData: InsertAISummitRegistration): Promise<AISummitRegistration> {
     const [registration] = await db
       .insert(aiSummitRegistrations)
+      .values(registrationData)
+      .returning();
+    return registration;
+  }
+
+  async createAISummitExhibitorRegistration(registrationData: InsertAISummitExhibitorRegistration): Promise<AISummitExhibitorRegistration> {
+    const [registration] = await db
+      .insert(aiSummitExhibitorRegistrations)
       .values(registrationData)
       .returning();
     return registration;

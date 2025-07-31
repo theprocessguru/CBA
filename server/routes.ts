@@ -2644,6 +2644,188 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Summit Exhibitor Registration endpoint
+  app.post("/api/ai-summit-exhibitor-registration", async (req, res) => {
+    try {
+      const { 
+        companyName,
+        contactName,
+        email,
+        phone,
+        website,
+        businessDescription,
+        productsServices,
+        exhibitionGoals,
+        boothRequirements,
+        electricalNeeds,
+        internetNeeds,
+        specialRequirements,
+        marketingMaterials,
+        numberOfAttendees,
+        previousExhibitor,
+        referralSource,
+        agreesToTerms
+      } = req.body;
+
+      // Basic validation
+      if (!companyName || !contactName || !email) {
+        return res.status(400).json({ message: "Company name, contact name, and email are required" });
+      }
+
+      if (!agreesToTerms) {
+        return res.status(400).json({ message: "Must agree to exhibitor terms and conditions" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Please provide a valid email address" });
+      }
+
+      // Store registration in database
+      const registration = await storage.createAISummitExhibitorRegistration({
+        companyName,
+        contactName,
+        email,
+        phone: phone || null,
+        website: website || null,
+        businessDescription: businessDescription || null,
+        productsServices: productsServices || null,
+        exhibitionGoals: exhibitionGoals || null,
+        boothRequirements: boothRequirements || "Standard",
+        electricalNeeds: electricalNeeds || false,
+        internetNeeds: internetNeeds || false,
+        specialRequirements: specialRequirements || null,
+        marketingMaterials: marketingMaterials || null,
+        numberOfAttendees: numberOfAttendees || 2,
+        previousExhibitor: previousExhibitor || false,
+        referralSource: referralSource || null,
+        agreesToTerms: agreesToTerms,
+        registeredAt: new Date()
+      });
+
+      // Sync with GHL (Go High Level)
+      try {
+        const ghlService = getGHLService();
+        if (ghlService) {
+          // Split contact name into first and last name
+          const nameParts = contactName.trim().split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+
+          // Prepare GHL contact data
+          const ghlContactData = {
+            email,
+            firstName,
+            lastName,
+            phone: phone,
+            companyName: companyName,
+            tags: [
+              'AI_Summit_2025',
+              'Exhibitor_Registration',
+              `Booth_${boothRequirements.replace(/[^a-zA-Z0-9]/g, '_')}`,
+              ...(previousExhibitor ? ['Previous_Exhibitor'] : ['New_Exhibitor']),
+              ...(electricalNeeds ? ['Needs_Electrical'] : []),
+              ...(internetNeeds ? ['Needs_Internet'] : [])
+            ],
+            customFields: {
+              company_name: companyName,
+              contact_name: contactName,
+              website: website,
+              business_description: businessDescription,
+              products_services: productsServices,
+              exhibition_goals: exhibitionGoals,
+              booth_requirements: boothRequirements,
+              electrical_needs: electricalNeeds,
+              internet_needs: internetNeeds,
+              special_requirements: specialRequirements,
+              marketing_materials: marketingMaterials,
+              number_of_attendees: numberOfAttendees,
+              previous_exhibitor: previousExhibitor,
+              referral_source: referralSource,
+              event_name: 'First AI Summit Croydon 2025',
+              event_date: 'October 1st, 2025',
+              registration_type: 'Exhibitor',
+              registration_date: new Date().toISOString()
+            }
+          };
+
+          // Create or update contact in GHL
+          const ghlContact = await ghlService.upsertContact(ghlContactData);
+          console.log(`AI Summit exhibitor registration synced to GHL: Contact ID ${ghlContact.id}`);
+        }
+      } catch (ghlError) {
+        console.error("Failed to sync AI Summit exhibitor registration to GHL:", ghlError);
+        // Don't fail the registration if GHL sync fails
+      }
+
+      // Send confirmation email if email service is available
+      try {
+        if (emailService) {
+          await emailService.sendEmail({
+            to: email,
+            subject: "AI Summit 2025 Exhibitor Registration Confirmed",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #2563eb;">Exhibitor Registration Confirmed!</h1>
+                <p>Dear ${contactName},</p>
+                <p>Thank you for registering <strong>${companyName}</strong> as an exhibitor for the <strong>First AI Summit Croydon 2025</strong>!</p>
+                
+                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h2 style="color: #1f2937; margin-top: 0;">Event Details</h2>
+                  <p><strong>Date:</strong> October 1st, 2025</p>
+                  <p><strong>Time:</strong> 10:00 AM - 4:00 PM</p>
+                  <p><strong>Venue:</strong> LSBU London South Bank University Croydon</p>
+                  <p><strong>Booth Type:</strong> ${boothRequirements}</p>
+                </div>
+
+                <div style="background: #e0f2fe; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h2 style="color: #1f2937; margin-top: 0;">Your Registration Details</h2>
+                  <p><strong>Company:</strong> ${companyName}</p>
+                  <p><strong>Contact:</strong> ${contactName}</p>
+                  <p><strong>Booth Requirements:</strong> ${boothRequirements}</p>
+                  <p><strong>Number of Attendees:</strong> ${numberOfAttendees}</p>
+                  ${electricalNeeds ? '<p><strong>✓</strong> Electrical connection required</p>' : ''}
+                  ${internetNeeds ? '<p><strong>✓</strong> Internet connection required</p>' : ''}
+                </div>
+
+                <p>Our event team will contact you within 2 business days to discuss:</p>
+                <ul>
+                  <li>Booth allocation and setup details</li>
+                  <li>Technical requirements and logistics</li>
+                  <li>Marketing opportunities and promotional materials</li>
+                  <li>Schedule for setup and breakdown</li>
+                </ul>
+
+                <p>We're excited to have ${companyName} as part of this groundbreaking AI event in Croydon!</p>
+
+                <p>If you have any immediate questions, please don't hesitate to contact us.</p>
+
+                <p>Best regards,<br>
+                <strong>The Croydon Business Association Events Team</strong></p>
+              </div>
+            `
+          });
+        }
+      } catch (emailError) {
+        console.error("Failed to send exhibitor confirmation email:", emailError);
+        // Don't fail the registration if email fails
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Exhibitor registration successful! We'll contact you within 2 business days with booth details.",
+        registrationId: registration.id
+      });
+
+    } catch (error: any) {
+      console.error("AI Summit exhibitor registration error:", error);
+      res.status(500).json({ 
+        message: "Exhibitor registration failed. Please try again or contact support." 
+      });
+    }
+  });
+
   // AI Summit Registration endpoint
   app.post("/api/ai-summit-registration", async (req, res) => {
     try {

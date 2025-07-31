@@ -265,6 +265,29 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
+// AI Summit exhibitor registrations table
+export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_registrations", {
+  id: serial("id").primaryKey(),
+  companyName: varchar("company_name").notNull(),
+  contactName: varchar("contact_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  website: varchar("website"),
+  businessDescription: text("business_description"),
+  productsServices: text("products_services"),
+  exhibitionGoals: text("exhibition_goals"),
+  boothRequirements: varchar("booth_requirements"), // Standard, Premium, Custom
+  electricalNeeds: boolean("electrical_needs").default(false),
+  internetNeeds: boolean("internet_needs").default(false),
+  specialRequirements: text("special_requirements"),
+  marketingMaterials: text("marketing_materials"),
+  numberOfAttendees: integer("number_of_attendees").default(2),
+  previousExhibitor: boolean("previous_exhibitor").default(false),
+  referralSource: varchar("referral_source"),
+  agreesToTerms: boolean("agrees_to_terms").default(false),
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -385,6 +408,7 @@ export const insertContentReportSchema = createInsertSchema(contentReports).omit
 export const insertInteractionSchema = createInsertSchema(interactions).omit({ id: true });
 export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({ id: true });
 export const insertAISummitRegistrationSchema = createInsertSchema(aiSummitRegistrations).omit({ id: true });
+export const insertAISummitExhibitorRegistrationSchema = createInsertSchema(aiSummitExhibitorRegistrations).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -434,3 +458,6 @@ export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 
 export type InsertAISummitRegistration = z.infer<typeof insertAISummitRegistrationSchema>;
 export type AISummitRegistration = typeof aiSummitRegistrations.$inferSelect;
+
+export type InsertAISummitExhibitorRegistration = z.infer<typeof insertAISummitExhibitorRegistrationSchema>;
+export type AISummitExhibitorRegistration = typeof aiSummitExhibitorRegistrations.$inferSelect;

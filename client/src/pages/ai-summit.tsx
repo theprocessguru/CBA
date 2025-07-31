@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -35,6 +36,7 @@ import { Link } from "wouter";
 const AISummit = () => {
   const [selectedSession, setSelectedSession] = useState("");
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [showExhibitorForm, setShowExhibitorForm] = useState(false);
   const [registrationData, setRegistrationData] = useState({
     name: "",
     email: "",
@@ -45,6 +47,25 @@ const AISummit = () => {
     aiInterest: "",
     accessibilityNeeds: "",
     comments: ""
+  });
+  const [exhibitorData, setExhibitorData] = useState({
+    companyName: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    website: "",
+    businessDescription: "",
+    productsServices: "",
+    exhibitionGoals: "",
+    boothRequirements: "Standard",
+    electricalNeeds: false,
+    internetNeeds: false,
+    specialRequirements: "",
+    marketingMaterials: "",
+    numberOfAttendees: 2,
+    previousExhibitor: false,
+    referralSource: "",
+    agreesToTerms: false
   });
   
   const { toast } = useToast();
@@ -227,13 +248,73 @@ const AISummit = () => {
     },
   });
 
+  const exhibitorMutation = useMutation({
+    mutationFn: async (data: typeof exhibitorData) => {
+      const response = await apiRequest("POST", "/api/ai-summit-exhibitor-registration", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Exhibitor Registration Successful!",
+        description: "Thank you for registering as an exhibitor. We'll contact you shortly with booth details.",
+      });
+      setShowExhibitorForm(false);
+      setExhibitorData({
+        companyName: "",
+        contactName: "",
+        email: "",
+        phone: "",
+        website: "",
+        businessDescription: "",
+        productsServices: "",
+        exhibitionGoals: "",
+        boothRequirements: "Standard",
+        electricalNeeds: false,
+        internetNeeds: false,
+        specialRequirements: "",
+        marketingMaterials: "",
+        numberOfAttendees: 2,
+        previousExhibitor: false,
+        referralSource: "",
+        agreesToTerms: false
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Exhibitor Registration Failed",
+        description: error instanceof Error ? error.message : "Failed to register as exhibitor. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     registerMutation.mutate(registrationData);
   };
 
+  const handleExhibitorRegistration = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!exhibitorData.agreesToTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please agree to the exhibitor terms and conditions.",
+        variant: "destructive",
+      });
+      return;
+    }
+    exhibitorMutation.mutate(exhibitorData);
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setRegistrationData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleExhibitorInputChange = (field: string, value: string | number | boolean) => {
+    setExhibitorData(prev => ({
       ...prev,
       [field]: value
     }));
@@ -622,6 +703,14 @@ const AISummit = () => {
                   <UserPlus className="mr-2 h-5 w-5" />
                   Register for FREE
                 </Button>
+                <Button 
+                  size="lg" 
+                  className="bg-purple-600 text-white hover:bg-purple-700"
+                  onClick={() => setShowExhibitorForm(true)}
+                >
+                  <Building className="mr-2 h-5 w-5" />
+                  Become an Exhibitor
+                </Button>
                 <Link to="/membership-benefits">
                   <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                     <Users className="mr-2 h-5 w-5" />
@@ -794,6 +883,237 @@ const AISummit = () => {
                       disabled={registerMutation.isPending}
                     >
                       {registerMutation.isPending ? "Registering..." : "Complete Registration"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Exhibitor Registration Modal */}
+        {showExhibitorForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Exhibitor Registration</h2>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowExhibitorForm(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleExhibitorRegistration} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="companyName">Company Name *</Label>
+                      <Input
+                        id="companyName"
+                        type="text"
+                        required
+                        value={exhibitorData.companyName}
+                        onChange={(e) => handleExhibitorInputChange('companyName', e.target.value)}
+                        placeholder="Your company name"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="contactName">Contact Person *</Label>
+                      <Input
+                        id="contactName"
+                        type="text"
+                        required
+                        value={exhibitorData.contactName}
+                        onChange={(e) => handleExhibitorInputChange('contactName', e.target.value)}
+                        placeholder="Full name of main contact"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="exhibitorEmail">Email Address *</Label>
+                      <Input
+                        id="exhibitorEmail"
+                        type="email"
+                        required
+                        value={exhibitorData.email}
+                        onChange={(e) => handleExhibitorInputChange('email', e.target.value)}
+                        placeholder="contact@company.com"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="exhibitorPhone">Phone Number</Label>
+                      <Input
+                        id="exhibitorPhone"
+                        type="tel"
+                        value={exhibitorData.phone}
+                        onChange={(e) => handleExhibitorInputChange('phone', e.target.value)}
+                        placeholder="07123 456789"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        value={exhibitorData.website}
+                        onChange={(e) => handleExhibitorInputChange('website', e.target.value)}
+                        placeholder="https://yourcompany.com"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="boothRequirements">Booth Requirements</Label>
+                      <Select value={exhibitorData.boothRequirements} onValueChange={(value) => handleExhibitorInputChange('boothRequirements', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select booth type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Standard">Standard Booth (3x3m)</SelectItem>
+                          <SelectItem value="Premium">Premium Booth (3x6m)</SelectItem>
+                          <SelectItem value="Custom">Custom Requirements</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="businessDescription">Business Description</Label>
+                    <Textarea
+                      id="businessDescription"
+                      value={exhibitorData.businessDescription}
+                      onChange={(e) => handleExhibitorInputChange('businessDescription', e.target.value)}
+                      placeholder="Briefly describe your business and what you do..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="productsServices">Products/Services to Showcase</Label>
+                    <Textarea
+                      id="productsServices"
+                      value={exhibitorData.productsServices}
+                      onChange={(e) => handleExhibitorInputChange('productsServices', e.target.value)}
+                      placeholder="What will you be showcasing at the event?"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="exhibitionGoals">Exhibition Goals</Label>
+                    <Textarea
+                      id="exhibitionGoals"
+                      value={exhibitorData.exhibitionGoals}
+                      onChange={(e) => handleExhibitorInputChange('exhibitionGoals', e.target.value)}
+                      placeholder="What do you hope to achieve from exhibiting at this event?"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="numberOfAttendees">Number of Staff Attending</Label>
+                      <Input
+                        id="numberOfAttendees"
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={exhibitorData.numberOfAttendees}
+                        onChange={(e) => handleExhibitorInputChange('numberOfAttendees', parseInt(e.target.value) || 2)}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="referralSource">How did you hear about this event?</Label>
+                      <Select value={exhibitorData.referralSource} onValueChange={(value) => handleExhibitorInputChange('referralSource', value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select source" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CBA Website">CBA Website</SelectItem>
+                          <SelectItem value="Email Newsletter">Email Newsletter</SelectItem>
+                          <SelectItem value="Social Media">Social Media</SelectItem>
+                          <SelectItem value="Word of Mouth">Word of Mouth</SelectItem>
+                          <SelectItem value="Industry Publication">Industry Publication</SelectItem>
+                          <SelectItem value="Partner Organization">Partner Organization</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="electricalNeeds"
+                        checked={exhibitorData.electricalNeeds}
+                        onCheckedChange={(checked) => handleExhibitorInputChange('electricalNeeds', !!checked)}
+                      />
+                      <Label htmlFor="electricalNeeds">I require electrical connection for my booth</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="internetNeeds"
+                        checked={exhibitorData.internetNeeds}
+                        onCheckedChange={(checked) => handleExhibitorInputChange('internetNeeds', !!checked)}
+                      />
+                      <Label htmlFor="internetNeeds">I require internet connection for my booth</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="previousExhibitor"
+                        checked={exhibitorData.previousExhibitor}
+                        onCheckedChange={(checked) => handleExhibitorInputChange('previousExhibitor', !!checked)}
+                      />
+                      <Label htmlFor="previousExhibitor">I have exhibited at CBA events before</Label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="specialRequirements">Special Requirements</Label>
+                    <Textarea
+                      id="specialRequirements"
+                      value={exhibitorData.specialRequirements}
+                      onChange={(e) => handleExhibitorInputChange('specialRequirements', e.target.value)}
+                      placeholder="Any special setup requirements, accessibility needs, or other requests..."
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
+                    <Checkbox
+                      id="agreesToTerms"
+                      checked={exhibitorData.agreesToTerms}
+                      onCheckedChange={(checked) => handleExhibitorInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="agreesToTerms" className="text-sm">
+                      I agree to the exhibitor terms and conditions and understand that booth allocation is subject to availability *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowExhibitorForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                      disabled={exhibitorMutation.isPending || !exhibitorData.agreesToTerms}
+                    >
+                      {exhibitorMutation.isPending ? "Registering..." : "Submit Exhibitor Application"}
                     </Button>
                   </div>
                 </form>
