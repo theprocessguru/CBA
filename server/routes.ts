@@ -2686,6 +2686,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
         registeredAt: new Date()
       });
 
+      // Sync with GHL (Go High Level)
+      try {
+        const ghlService = getGHLService();
+        if (ghlService) {
+          // Split name into first and last name
+          const nameParts = name.trim().split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+
+          // Prepare GHL contact data
+          const ghlContactData = {
+            email,
+            firstName,
+            lastName,
+            phone: phoneNumber,
+            companyName: company,
+            tags: [
+              'AI_Summit_2025',
+              'Event_Registration',
+              ...(businessType ? [`Business_Type_${businessType.replace(/[^a-zA-Z0-9]/g, '_')}`] : []),
+              ...(aiInterest ? [`AI_Interest_${aiInterest.replace(/[^a-zA-Z0-9]/g, '_')}`] : [])
+            ],
+            customFields: {
+              job_title: jobTitle,
+              business_type: businessType,
+              ai_interest: aiInterest,
+              dietary_requirements: dietaryRequirements,
+              accessibility_needs: accessibilityNeeds,
+              registration_comments: comments,
+              event_name: 'First AI Summit Croydon 2025',
+              event_date: 'October 1st, 2025',
+              registration_date: new Date().toISOString()
+            }
+          };
+
+          // Create or update contact in GHL
+          const ghlContact = await ghlService.upsertContact(ghlContactData);
+          console.log(`AI Summit registration synced to GHL: Contact ID ${ghlContact.id}`);
+        }
+      } catch (ghlError) {
+        console.error("Failed to sync AI Summit registration to GHL:", ghlError);
+        // Don't fail the registration if GHL sync fails
+      }
+
       // Send confirmation email if email service is available
       try {
         if (emailService) {
