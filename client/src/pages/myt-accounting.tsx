@@ -72,24 +72,10 @@ export default function MyTAccounting() {
 
   const pricingTiers = [
     {
-      name: "Basic",
+      name: "Standard",
       price: "£5",
       originalPrice: "£10",
       discount: "50% OFF for CBA Members",
-      description: "Essential accounting for micro businesses",
-      features: [
-        "AI document scanning (up to 50 docs/month)",
-        "Basic expense tracking",
-        "HMRC compliance reports",
-        "Mobile app access",
-        "Email support"
-      ]
-    },
-    {
-      name: "Starter",
-      price: "£19",
-      originalPrice: "£29",
-      discount: "35% OFF",
       description: "Perfect for sole traders and small businesses",
       features: [
         "AI document scanning (up to 100 docs/month)",
@@ -100,10 +86,10 @@ export default function MyTAccounting() {
       ]
     },
     {
-      name: "Growth",
-      price: "£39",
-      originalPrice: "£59",
-      discount: "35% OFF",
+      name: "Plus",
+      price: "£10",
+      originalPrice: "£20",
+      discount: "50% OFF for CBA Members",
       description: "For growing businesses with higher volume",
       features: [
         "AI document scanning (up to 500 docs/month)",
@@ -116,10 +102,10 @@ export default function MyTAccounting() {
       popular: true
     },
     {
-      name: "Professional",
-      price: "£79",
-      originalPrice: "£119",
-      discount: "35% OFF",
+      name: "Pro",
+      price: "£15",
+      originalPrice: "£30",
+      discount: "50% OFF for CBA Members",
       description: "For established businesses and Ltd companies",
       features: [
         "Unlimited AI document scanning",
@@ -266,11 +252,11 @@ export default function MyTAccounting() {
               CBA Member Pricing
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Exclusive discounts for Croydon Business Association members - Starting from just £5 + VAT per month
+              Exclusive 50% discounts for Croydon Business Association members - Starting from just £5 + VAT per month
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {pricingTiers.map((tier, index) => (
               <Card key={index} className={`relative ${tier.popular ? 'border-blue-500 shadow-lg scale-105' : ''}`}>
                 {tier.popular && (
