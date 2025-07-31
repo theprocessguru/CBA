@@ -170,6 +170,11 @@ function Router() {
           <TrialMembership />
         </MainLayout>
       </Route>
+      <Route path="/membership">
+        <MainLayout>
+          <MembershipPage />
+        </MainLayout>
+      </Route>
       <Route path="/membership-benefits">
         <MainLayout>
           <MembershipBenefits />
