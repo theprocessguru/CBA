@@ -12,19 +12,19 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/register">
                 <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md text-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md text-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
                   size="lg"
                 >
-                  Join the Association
+                  <span>Join the Association</span>
                 </Button>
               </Link>
               <Link href="/directory">
                 <Button 
                   variant="outline" 
-                  className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-medium py-3 px-6 rounded-md text-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
+                  className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-3 px-6 rounded-md text-center transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
                   size="lg"
                 >
-                  Browse Directory
+                  <span>Browse Directory</span>
                 </Button>
               </Link>
             </div>
