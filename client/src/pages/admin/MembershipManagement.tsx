@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { MEMBERSHIP_TIER_CONFIGS } from "@shared/membershipTiers";
-import { BenefitsGrid } from "@/components/membership/BenefitsGrid";
+import BenefitsGrid from "@/components/membership/BenefitsGrid";
 import { Users, Crown, TrendingUp, Settings, Search, Gift, Star } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 
