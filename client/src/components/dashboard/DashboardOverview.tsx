@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import DonationWidget from "@/components/donation/DonationWidget";
+import IncomeWarningWidget from "@/components/widgets/IncomeWarningWidget";
 import {
   Eye,
   Tag,
@@ -169,15 +170,18 @@ const DashboardOverview = () => {
         
         <Separator className="my-6" />
         
-        <DonationWidget 
-          showInline={true}
-          trigger={
-            <Button variant="outline" className="w-full gap-2">
-              <Gift className="h-4 w-4" />
-              Support CBA with a Donation
-            </Button>
-          }
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <IncomeWarningWidget showTitle={false} />
+          <DonationWidget 
+            showInline={true}
+            trigger={
+              <Button variant="outline" className="w-full gap-2">
+                <Gift className="h-4 w-4" />
+                Support CBA with a Donation
+              </Button>
+            }
+          />
+        </div>
       </div>
     </div>
   );

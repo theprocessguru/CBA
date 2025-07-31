@@ -138,6 +138,15 @@ const Navbar = () => {
                 </button>
               </div>
               
+              <Link href="/myt-accounting">
+                <a className={`border-b-2 ${
+                  isActive('/myt-accounting') 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
+                  MyT Accounting
+                </a>
+              </Link>
               <Link href="/contact">
                 <a className={`border-b-2 ${
                   isActive('/contact') 
@@ -324,6 +333,15 @@ const Navbar = () => {
             </a>
           </Link>
           
+          <Link href="/myt-accounting">
+            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+              isActive('/myt-accounting') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium`}>
+              MyT Accounting
+            </a>
+          </Link>
           <Link href="/contact">
             <a className={`block pl-3 pr-4 py-2 border-l-4 ${
               isActive('/contact') 

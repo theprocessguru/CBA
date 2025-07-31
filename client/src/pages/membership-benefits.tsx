@@ -74,6 +74,25 @@ const MembershipBenefits = () => {
               </Card>
             </div>
 
+            {/* MyT Accounting Software Highlight */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-lg mb-8">
+              <h2 className="text-2xl font-bold mb-3">🚀 Featured: MyT Accounting & Bookkeeping Software</h2>
+              <p className="text-lg mb-4">
+                Revolutionary AI-powered accounting that scans all documents, eliminating the need for bookkeepers. 
+                <strong> Required for businesses earning over £50,000 - HMRC compliant!</strong>
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link href="/myt-accounting">
+                  <Button className="bg-white text-blue-600 hover:bg-gray-100">
+                    Explore MyT Accounting
+                  </Button>
+                </Link>
+                <Button variant="outline" className="border-white text-white hover:bg-white/10">
+                  35% Member Discount Available
+                </Button>
+              </div>
+            </div>
+
             {/* Tier Overview */}
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               {tiers.map((tier) => (

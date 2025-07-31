@@ -36,6 +36,7 @@ import AIAnalytics from "@/pages/ai-analytics";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
+import MyTAccounting from "@/pages/myt-accounting";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -156,6 +157,11 @@ function Router() {
       <Route path="/contact">
         <MainLayout>
           <ContactPage />
+        </MainLayout>
+      </Route>
+      <Route path="/myt-accounting">
+        <MainLayout>
+          <MyTAccounting />
         </MainLayout>
       </Route>
       <Route path="/trial-membership">
