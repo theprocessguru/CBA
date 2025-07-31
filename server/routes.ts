@@ -2967,6 +2967,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Summit Speaker Interest endpoint
+  app.post("/api/ai-summit-speaker-interest", async (req, res) => {
+    try {
+      const {
+        name,
+        email,
+        phone,
+        company,
+        jobTitle,
+        website,
+        linkedIn,
+        bio,
+        talkTitle,
+        talkDescription,
+        talkDuration,
+        audienceLevel,
+        speakingExperience,
+        previousSpeaking,
+        techRequirements,
+        motivationToSpeak,
+        keyTakeaways,
+        interactiveElements,
+        handoutsProvided,
+        agreesToTerms
+      } = req.body;
+
+      // Basic validation
+      if (!name || !email || !bio || !talkTitle || !talkDescription || !keyTakeaways) {
+        return res.status(400).json({ message: "Name, email, bio, talk title, description, and key takeaways are required" });
+      }
+
+      if (!agreesToTerms) {
+        return res.status(400).json({ message: "Must agree to speaker terms and conditions" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Please provide a valid email address" });
+      }
+
+      // Add speaker to GoHighLevel if available
+      const ghlService = getGHLService();
+      if (ghlService) {
+        try {
+          await ghlService.addContact({
+            firstName: name.split(' ')[0] || name,
+            lastName: name.split(' ').slice(1).join(' ') || '',
+            email: email,
+            phone: phone,
+            companyName: company,
+            tags: ['ai-summit-speaker-interest', 'speaker-2025'],
+            customFields: {
+              'talk_title': talkTitle,
+              'talk_duration': talkDuration,
+              'audience_level': audienceLevel,
+              'previous_speaking': previousSpeaking.toString(),
+              'job_title': jobTitle
+            }
+          });
+        } catch (ghlError) {
+          console.error('GHL sync failed for speaker:', ghlError);
+          // Continue with registration even if GHL sync fails
+        }
+      }
+
+      // Send confirmation email
+      const emailService = getEmailService();
+      if (emailService) {
+        try {
+          await emailService.sendNotificationEmail({
+            to: email,
+            subject: "AI Summit 2025 - Speaker Interest Received",
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Thank You for Your Speaker Interest!</h2>
+                <p>Dear ${name},</p>
+                <p>We've received your application to speak at the <strong>First AI Summit Croydon 2025</strong>.</p>
+                
+                <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Submission Summary:</h3>
+                  <p><strong>Speaker:</strong> ${name}</p>
+                  <p><strong>Company:</strong> ${company}</p>
+                  <p><strong>Proposed Talk:</strong> ${talkTitle}</p>
+                  <p><strong>Duration:</strong> ${talkDuration} minutes</p>
+                  <p><strong>Audience Level:</strong> ${audienceLevel}</p>
+                </div>
+
+                <p>Our program committee will review your speaking proposal and contact you within 1-2 weeks with:</p>
+                <ul>
+                  <li>Speaker selection status</li>
+                  <li>Schedule confirmation (if selected)</li>
+                  <li>Technical setup requirements</li>
+                  <li>Event preparation guidelines</li>
+                </ul>
+
+                <p>We appreciate your interest in contributing to our inaugural AI Summit and sharing your expertise with the Croydon business community!</p>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                  <p><strong>Event Details:</strong></p>
+                  <p>📅 October 1st, 2025 | 🕙 10:00 AM - 4:00 PM<br>
+                  📍 LSBU London South Bank University Croydon</p>
+                  <p>Best regards,<br>The Croydon Business Association Program Committee</p>
+                </div>
+              </div>
+            `
+          });
+        } catch (emailError) {
+          console.error("Failed to send speaker confirmation email:", emailError);
+          // Don't fail the registration if email fails
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Speaker interest submitted successfully! Our program committee will review your proposal and contact you soon."
+      });
+
+    } catch (error: any) {
+      console.error("AI Summit speaker interest error:", error);
+      res.status(500).json({ 
+        message: "Speaker interest submission failed. Please try again or contact support." 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
