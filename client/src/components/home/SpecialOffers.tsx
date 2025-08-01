@@ -18,10 +18,13 @@ const SpecialOffers = () => {
   const calculateMemberPrice = (offer: Offer) => {
     if (!offer.originalPrice) return null;
     
+    const originalPrice = typeof offer.originalPrice === 'string' ? parseFloat(offer.originalPrice) : offer.originalPrice;
+    
     if (offer.memberDiscountPercentage) {
-      return offer.originalPrice * (1 - offer.memberDiscountPercentage / 100);
+      return originalPrice * (1 - offer.memberDiscountPercentage / 100);
     } else if (offer.memberDiscountValue) {
-      return Math.max(0, offer.originalPrice - offer.memberDiscountValue);
+      const discountValue = typeof offer.memberDiscountValue === 'string' ? parseFloat(offer.memberDiscountValue) : offer.memberDiscountValue;
+      return Math.max(0, originalPrice - discountValue);
     }
     return null;
   };

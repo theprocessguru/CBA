@@ -20,8 +20,6 @@ const Home = () => {
         <PageHeader 
           title="CBA Home"
           subtitle="Connecting Local Businesses"
-          showBackButton={false}
-          showHomeButton={false}
         />
       </div>
       
