@@ -3084,8 +3084,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Registration not found or not owned by user" });
       }
       
-      // Get the badge for this registration
-      const badge = await storage.getAISummitBadgeByRegistrationId(parseInt(registrationId));
+      // Get the badge for this registration using direct database query
+      const badges = await db
+        .select()
+        .from(aiSummitBadges)
+        .where(eq(aiSummitBadges.participantId, registrationId.toString()));
+      
+      const badge = badges[0];
       if (!badge) {
         return res.status(404).json({ message: "Badge not found for this registration" });
       }
