@@ -7,10 +7,17 @@ import { Link } from "wouter";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 export default function MyQRCodeSimple() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+
+  // Get AI Summit status to get registration ID
+  const { data: summitStatus } = useQuery({
+    queryKey: ['/api/my-ai-summit-status'],
+    enabled: isAuthenticated,
+  });
 
   const sendBadgeEmail = async () => {
     try {
@@ -22,6 +29,42 @@ export default function MyQRCodeSimple() {
       toast({
         title: "Send Failed",
         description: "Could not send badge email. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const downloadBadge = async () => {
+    if (!summitStatus?.registrationId) {
+      toast({
+        title: "Download Failed",
+        description: "No registration found. Please make sure you're registered for the AI Summit.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await apiRequest('GET', `/api/download-badge/${summitStatus.registrationId}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ai-summit-badge-${summitStatus.registrationId}.html`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Badge Downloaded!",
+        description: "Your badge has been downloaded. You can print it from your browser.",
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Download Failed",
+        description: "Could not download badge. Please try again.",
         variant: "destructive",
       });
     }
@@ -124,7 +167,12 @@ export default function MyQRCodeSimple() {
                   <Mail className="h-4 w-4" />
                   Email Badge
                 </Button>
-                <Button variant="outline" className="flex items-center gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={downloadBadge}
+                  disabled={!summitStatus?.registrationId}
+                  className="flex items-center gap-2"
+                >
                   <Download className="h-4 w-4" />
                   Download Badge
                 </Button>
