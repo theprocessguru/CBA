@@ -42,6 +42,7 @@ import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
 import MyTAccounting from "@/pages/myt-accounting";
 import BadgeScanner from "@/pages/badge-scanner";
+import WorkshopManagement from "@/pages/workshop-management";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
