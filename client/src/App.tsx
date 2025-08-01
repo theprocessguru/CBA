@@ -46,6 +46,7 @@ import WorkshopManagement from "@/pages/workshop-management";
 import MyProfile from "@/pages/my-profile";
 import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
 import EventManagement from "@/pages/admin/EventManagement";
+import AISummitSchedule from "@/pages/admin/AISummitSchedule";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
 
@@ -315,6 +316,11 @@ function Router() {
       <Route path="/dashboard/event-management">
         <AdminRoute>
           <EventManagement />
+        </AdminRoute>
+      </Route>
+      <Route path="/dashboard/ai-summit-schedule">
+        <AdminRoute>
+          <AISummitSchedule />
         </AdminRoute>
       </Route>
       
