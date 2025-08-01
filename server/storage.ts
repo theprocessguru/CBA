@@ -71,8 +71,10 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
+  updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string }): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   isUserAdmin(id: string): Promise<boolean>;
+  getUserEventRegistrations(userId: string): Promise<any[]>;
   listUsers(options?: { search?: string; status?: string; limit?: number }): Promise<User[]>;
   suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User>;
   reactivateUser(userId: string): Promise<User>;
@@ -218,6 +220,34 @@ export interface IStorage {
   getSessionRegistrationsBySessionId(sessionId: number): Promise<AISummitSpeakingSessionRegistration[]>;
   getSessionRegistrationsByBadgeId(badgeId: string): Promise<AISummitSpeakingSessionRegistration[]>;
   checkSessionCapacity(sessionId: number): Promise<{ current: number; max: number; available: number }>;
+
+  // General Event Management
+  getAllEvents(): Promise<Event[]>;
+  getEventById(id: number): Promise<Event | undefined>;
+  getPublishedEvents(): Promise<Event[]>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event>;
+  deleteEvent(id: number): Promise<void>;
+
+  // Event Registrations
+  getEventRegistrations(eventId: number): Promise<EventRegistration[]>;
+  getEventRegistrationByTicketId(ticketId: string): Promise<EventRegistration | undefined>;
+  createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration>;
+  updateEventRegistration(id: number, registration: Partial<InsertEventRegistration>): Promise<EventRegistration>;
+  deleteEventRegistration(id: number): Promise<void>;
+  checkInEventRegistration(ticketId: string, checkedInBy: string): Promise<EventRegistration>;
+
+  // Event Sessions
+  getEventSessions(eventId: number): Promise<EventSession[]>;
+  getEventSessionById(id: number): Promise<EventSession | undefined>;
+  createEventSession(session: InsertEventSession): Promise<EventSession>;
+  updateEventSession(id: number, session: Partial<InsertEventSession>): Promise<EventSession>;
+  deleteEventSession(id: number): Promise<void>;
+
+  // Event Session Registrations
+  getEventSessionRegistrations(sessionId: number): Promise<EventSessionRegistration[]>;
+  createEventSessionRegistration(registration: InsertEventSessionRegistration): Promise<EventSessionRegistration>;
+  deleteEventSessionRegistration(sessionId: number, registrationId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -248,6 +278,18 @@ export class DatabaseStorage implements IStorage {
       .set({
         ...userData,
         updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string }): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        ...profileData, 
+        updatedAt: new Date() 
       })
       .where(eq(users.id, id))
       .returning();
@@ -1271,6 +1313,211 @@ export class DatabaseStorage implements IStorage {
     }));
 
     return history.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
+
+  async getUserEventRegistrations(userId: string): Promise<any[]> {
+    const registrations = [];
+
+    // Get attendee registrations with badges
+    const attendees = await db
+      .select({
+        registration: aiSummitRegistrations,
+        badge: aiSummitBadges
+      })
+      .from(aiSummitRegistrations)
+      .leftJoin(aiSummitBadges, eq(aiSummitRegistrations.id, sql`CAST(${aiSummitBadges.participantId} AS INTEGER)`))
+      .where(eq(aiSummitRegistrations.userId, userId));
+
+    for (const { registration, badge } of attendees) {
+      registrations.push({
+        eventName: "First AI Summit Croydon 2025",
+        participantType: "Attendee", 
+        eventDate: "October 1st, 2025",
+        eventTime: "10:00 AM - 4:00 PM",
+        venue: "LSBU London South Bank University Croydon",
+        registrationType: "attendee",
+        badgeId: badge?.badgeId,
+        registrationData: registration
+      });
+    }
+
+    // Get exhibitor registrations with badges
+    const exhibitors = await db
+      .select({
+        registration: aiSummitExhibitorRegistrations,
+        badge: aiSummitBadges
+      })
+      .from(aiSummitExhibitorRegistrations)
+      .leftJoin(aiSummitBadges, eq(aiSummitExhibitorRegistrations.id, sql`CAST(${aiSummitBadges.participantId} AS INTEGER)`))
+      .where(eq(aiSummitExhibitorRegistrations.userId, userId));
+
+    for (const { registration, badge } of exhibitors) {
+      registrations.push({
+        eventName: "First AI Summit Croydon 2025",
+        participantType: registration.speakerInterest ? "Exhibitor & Speaker" : "Exhibitor",
+        eventDate: "October 1st, 2025",
+        eventTime: "10:00 AM - 4:00 PM",
+        venue: "LSBU London South Bank University Croydon",
+        registrationType: "exhibitor",
+        badgeId: badge?.badgeId,
+        registrationData: registration
+      });
+    }
+
+    // Get volunteer registrations with badges
+    const volunteers = await db
+      .select({
+        registration: aiSummitVolunteers,
+        badge: aiSummitBadges
+      })
+      .from(aiSummitVolunteers)
+      .leftJoin(aiSummitBadges, eq(aiSummitVolunteers.id, sql`CAST(${aiSummitBadges.participantId} AS INTEGER)`))
+      .where(eq(aiSummitVolunteers.userId, userId));
+
+    for (const { registration, badge } of volunteers) {
+      registrations.push({
+        eventName: "First AI Summit Croydon 2025",
+        participantType: "Volunteer",
+        eventDate: "October 1st, 2025",
+        eventTime: "9:00 AM - 5:00 PM",
+        venue: "LSBU London South Bank University Croydon",
+        registrationType: "volunteer",
+        badgeId: badge?.badgeId,
+        registrationData: registration
+      });
+    }
+
+    return registrations;
+  }
+
+  // General Event Management Implementation
+  async getAllEvents(): Promise<Event[]> {
+    return await db.select().from(events).orderBy(desc(events.startDate));
+  }
+
+  async getEventById(id: number): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async getPublishedEvents(): Promise<Event[]> {
+    return await db.select().from(events)
+      .where(eq(events.status, 'published'))
+      .orderBy(desc(events.startDate));
+  }
+
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const [newEvent] = await db.insert(events).values(event).returning();
+    return newEvent;
+  }
+
+  async updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event> {
+    const [updatedEvent] = await db
+      .update(events)
+      .set({ ...event, updatedAt: new Date() })
+      .where(eq(events.id, id))
+      .returning();
+    return updatedEvent;
+  }
+
+  async deleteEvent(id: number): Promise<void> {
+    await db.delete(events).where(eq(events.id, id));
+  }
+
+  // Event Registrations Implementation
+  async getEventRegistrations(eventId: number): Promise<EventRegistration[]> {
+    return await db.select().from(eventRegistrations)
+      .where(eq(eventRegistrations.eventId, eventId))
+      .orderBy(desc(eventRegistrations.registrationDate));
+  }
+
+  async getEventRegistrationByTicketId(ticketId: string): Promise<EventRegistration | undefined> {
+    const [registration] = await db.select().from(eventRegistrations)
+      .where(eq(eventRegistrations.ticketId, ticketId));
+    return registration;
+  }
+
+  async createEventRegistration(registration: InsertEventRegistration): Promise<EventRegistration> {
+    const [newRegistration] = await db.insert(eventRegistrations).values(registration).returning();
+    return newRegistration;
+  }
+
+  async updateEventRegistration(id: number, registration: Partial<InsertEventRegistration>): Promise<EventRegistration> {
+    const [updatedRegistration] = await db
+      .update(eventRegistrations)
+      .set(registration)
+      .where(eq(eventRegistrations.id, id))
+      .returning();
+    return updatedRegistration;
+  }
+
+  async deleteEventRegistration(id: number): Promise<void> {
+    await db.delete(eventRegistrations).where(eq(eventRegistrations.id, id));
+  }
+
+  async checkInEventRegistration(ticketId: string, checkedInBy: string): Promise<EventRegistration> {
+    const [updatedRegistration] = await db
+      .update(eventRegistrations)
+      .set({ 
+        status: 'checked_in',
+        checkedInAt: new Date(),
+        checkedInBy 
+      })
+      .where(eq(eventRegistrations.ticketId, ticketId))
+      .returning();
+    return updatedRegistration;
+  }
+
+  // Event Sessions Implementation
+  async getEventSessions(eventId: number): Promise<EventSession[]> {
+    return await db.select().from(eventSessions)
+      .where(eq(eventSessions.eventId, eventId))
+      .orderBy(eventSessions.startTime);
+  }
+
+  async getEventSessionById(id: number): Promise<EventSession | undefined> {
+    const [session] = await db.select().from(eventSessions).where(eq(eventSessions.id, id));
+    return session;
+  }
+
+  async createEventSession(session: InsertEventSession): Promise<EventSession> {
+    const [newSession] = await db.insert(eventSessions).values(session).returning();
+    return newSession;
+  }
+
+  async updateEventSession(id: number, session: Partial<InsertEventSession>): Promise<EventSession> {
+    const [updatedSession] = await db
+      .update(eventSessions)
+      .set(session)
+      .where(eq(eventSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  async deleteEventSession(id: number): Promise<void> {
+    await db.delete(eventSessions).where(eq(eventSessions.id, id));
+  }
+
+  // Event Session Registrations Implementation
+  async getEventSessionRegistrations(sessionId: number): Promise<EventSessionRegistration[]> {
+    return await db.select().from(eventSessionRegistrations)
+      .where(eq(eventSessionRegistrations.sessionId, sessionId))
+      .orderBy(desc(eventSessionRegistrations.registeredAt));
+  }
+
+  async createEventSessionRegistration(registration: InsertEventSessionRegistration): Promise<EventSessionRegistration> {
+    const [newRegistration] = await db.insert(eventSessionRegistrations).values(registration).returning();
+    return newRegistration;
+  }
+
+  async deleteEventSessionRegistration(sessionId: number, registrationId: number): Promise<void> {
+    await db.delete(eventSessionRegistrations)
+      .where(
+        and(
+          eq(eventSessionRegistrations.sessionId, sessionId),
+          eq(eventSessionRegistrations.registrationId, registrationId)
+        )
+      );
   }
 }
 

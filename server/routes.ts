@@ -4113,6 +4113,289 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== USER PROFILE MANAGEMENT ====================
+  
+  // Update user profile
+  app.patch("/api/auth/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      const { firstName, lastName, phone, company, jobTitle, bio } = req.body;
+      
+      const user = await storage.updateUserProfile(userId, {
+        firstName,
+        lastName,
+        phone,
+        company,
+        jobTitle,
+        bio
+      });
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  // Get user's event registrations
+  app.get("/api/my-event-registrations", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+      
+      const registrations = await storage.getUserEventRegistrations(userId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching user event registrations:", error);
+      res.status(500).json({ message: "Failed to fetch event registrations" });
+    }
+  });
+
+  // ==================== GENERAL EVENT MANAGEMENT API ROUTES ====================
+
+  // Get all events (public endpoint)
+  app.get("/api/events", async (req, res) => {
+    try {
+      const events = await storage.getPublishedEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  // Get specific event
+  app.get("/api/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const event = await storage.getEventById(id);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  // Create event (admin only)
+  app.post("/api/events", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const event = await storage.createEvent(req.body);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ message: "Failed to create event" });
+    }
+  });
+
+  // Update event (admin only)
+  app.put("/api/events/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const event = await storage.updateEvent(id, req.body);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
+  // Delete event (admin only)
+  app.delete("/api/events/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteEvent(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+
+  // Get event registrations
+  app.get("/api/events/:id/registrations", isAuthenticated, async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const registrations = await storage.getEventRegistrations(eventId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+      res.status(500).json({ message: "Failed to fetch registrations" });
+    }
+  });
+
+  // Register for event
+  app.post("/api/events/:id/register", isAuthenticated, async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = (req.user as any)?.id;
+      
+      // Generate unique ticket ID
+      const ticketId = `TICKET-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
+      const registration = await storage.createEventRegistration({
+        eventId,
+        userId,
+        ticketId,
+        participantName: req.body.participantName,
+        participantEmail: req.body.participantEmail,
+        participantPhone: req.body.participantPhone,
+        registrationType: req.body.registrationType || 'general',
+        specialRequirements: req.body.specialRequirements,
+        status: 'registered'
+      });
+      
+      res.status(201).json(registration);
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      res.status(500).json({ message: "Failed to register for event" });
+    }
+  });
+
+  // Check in with ticket
+  app.post("/api/events/checkin", isAuthenticated, async (req, res) => {
+    try {
+      const { ticketId } = req.body;
+      const staffMember = (req.user as any)?.email || 'Unknown Staff';
+      
+      const registration = await storage.checkInEventRegistration(ticketId, staffMember);
+      res.json(registration);
+    } catch (error) {
+      console.error("Error checking in:", error);
+      res.status(500).json({ message: "Failed to check in" });
+    }
+  });
+
+  // Get event sessions
+  app.get("/api/events/:id/sessions", async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const sessions = await storage.getEventSessions(eventId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching sessions:", error);
+      res.status(500).json({ message: "Failed to fetch sessions" });
+    }
+  });
+
+  // Create event session (admin only)
+  app.post("/api/events/:id/sessions", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const session = await storage.createEventSession({
+        ...req.body,
+        eventId
+      });
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Error creating session:", error);
+      res.status(500).json({ message: "Failed to create session" });
+    }
+  });
+
+  // Update event session (admin only)
+  app.put("/api/sessions/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const session = await storage.updateEventSession(id, req.body);
+      res.json(session);
+    } catch (error) {
+      console.error("Error updating session:", error);
+      res.status(500).json({ message: "Failed to update session" });
+    }
+  });
+
+  // Delete event session (admin only)
+  app.delete("/api/sessions/:id", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await storage.deleteEventSession(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      res.status(500).json({ message: "Failed to delete session" });
+    }
+  });
+
+  // Register for session
+  app.post("/api/sessions/:id/register", isAuthenticated, async (req, res) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const registrationId = parseInt(req.body.registrationId);
+      
+      const sessionRegistration = await storage.createEventSessionRegistration({
+        sessionId,
+        registrationId
+      });
+      
+      res.status(201).json(sessionRegistration);
+    } catch (error) {
+      console.error("Error registering for session:", error);
+      res.status(500).json({ message: "Failed to register for session" });
+    }
+  });
+
+  // Get session registrations
+  app.get("/api/sessions/:id/registrations", isAuthenticated, async (req, res) => {
+    try {
+      const sessionId = parseInt(req.params.id);
+      const registrations = await storage.getEventSessionRegistrations(sessionId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching session registrations:", error);
+      res.status(500).json({ message: "Failed to fetch session registrations" });
+    }
+  });
+
+  // Generate ticket/badge for event registration
+  app.get("/api/events/ticket/:ticketId", async (req, res) => {
+    try {
+      const { ticketId } = req.params;
+      const registration = await storage.getEventRegistrationByTicketId(ticketId);
+      
+      if (!registration) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+
+      // Get event details
+      const event = await storage.getEventById(registration.eventId);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      res.json({
+        ticketId: registration.ticketId,
+        participantName: registration.participantName,
+        participantEmail: registration.participantEmail,
+        eventName: event.title,
+        eventDate: event.startDate,
+        eventLocation: event.location,
+        registrationType: registration.registrationType,
+        status: registration.status,
+        qrData: JSON.stringify({
+          ticketId: registration.ticketId,
+          eventId: registration.eventId,
+          participantName: registration.participantName,
+          registrationType: registration.registrationType
+        })
+      });
+    } catch (error) {
+      console.error("Error generating ticket:", error);
+      res.status(500).json({ message: "Failed to generate ticket" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

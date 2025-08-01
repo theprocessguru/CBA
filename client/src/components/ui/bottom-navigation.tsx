@@ -42,18 +42,32 @@ const BottomNavigation = () => {
         ))}
         
         {isAuthenticated && (
-          <Link href={dashboardItem.href} asChild>
-            <button
-              className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
-                isActive(dashboardItem.href) 
-                  ? "text-primary bg-primary/10" 
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-              }`}
-            >
-              <dashboardItem.icon size={18} className="mb-1" />
-              <span className="text-xs leading-tight">{dashboardItem.label}</span>
-            </button>
-          </Link>
+          <>
+            <Link href="/my-profile" asChild>
+              <button
+                className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
+                  isActive("/my-profile") 
+                    ? "text-primary bg-primary/10" 
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                <User size={18} className="mb-1" />
+                <span className="text-xs leading-tight">Profile</span>
+              </button>
+            </Link>
+            <Link href={dashboardItem.href} asChild>
+              <button
+                className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
+                  isActive(dashboardItem.href) 
+                    ? "text-primary bg-primary/10" 
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                }`}
+              >
+                <dashboardItem.icon size={18} className="mb-1" />
+                <span className="text-xs leading-tight">{dashboardItem.label}</span>
+              </button>
+            </Link>
+          </>
         )}
       </div>
     </div>

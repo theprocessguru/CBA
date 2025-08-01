@@ -10,11 +10,13 @@ import {
   boolean,
   primaryKey,
   decimal,
+  numeric,
   uuid,
+  unique,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // Session storage table for Replit Auth
 export const sessions = pgTable(
@@ -695,3 +697,108 @@ export type AISummitSpeakingSession = typeof aiSummitSpeakingSessions.$inferSele
 
 export type InsertAISummitSpeakingSessionRegistration = z.infer<typeof insertAISummitSpeakingSessionRegistrationSchema>;
 export type AISummitSpeakingSessionRegistration = typeof aiSummitSessionRegistrations.$inferSelect;
+
+// General Event Management System
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  venue: varchar("venue", { length: 255 }).notNull(),
+  address: text("address"),
+  maxCapacity: integer("max_capacity").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).default('0'),
+  currency: varchar("currency", { length: 3 }).default('GBP'),
+  registrationStartDate: timestamp("registration_start_date").notNull(),
+  registrationEndDate: timestamp("registration_end_date").notNull(),
+  eventType: varchar("event_type", { length: 50 }).notNull(), // workshop, seminar, conference, networking, etc.
+  status: varchar("status", { length: 20 }).default('draft'), // draft, published, cancelled, completed
+  requiresApproval: boolean("requires_approval").default(false),
+  allowWaitlist: boolean("allow_waitlist").default(false),
+  categories: text("categories").array(), // Array of category tags
+  imageUrl: text("image_url"),
+  organizerName: varchar("organizer_name", { length: 255 }),
+  organizerEmail: varchar("organizer_email", { length: 255 }),
+  organizerPhone: varchar("organizer_phone", { length: 20 }),
+  ticketPrefix: varchar("ticket_prefix", { length: 10 }).notNull(), // e.g., "WS2025", "SEM2025"
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("events_start_date_idx").on(table.startDate),
+  index("events_status_idx").on(table.status),
+  index("events_type_idx").on(table.eventType),
+]);
+
+export const eventRegistrations = pgTable("event_registrations", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  ticketId: varchar("ticket_id", { length: 50 }).notNull().unique(), // Generated ticket ID
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  company: varchar("company", { length: 255 }),
+  jobTitle: varchar("job_title", { length: 255 }),
+  dietaryRequirements: text("dietary_requirements"),
+  accessibilityNeeds: text("accessibility_needs"),
+  status: varchar("status", { length: 20 }).default('confirmed'), // confirmed, waitlist, cancelled, checked_in
+  registrationDate: timestamp("registration_date").defaultNow(),
+  qrCode: text("qr_code"), // Base64 encoded QR code
+  additionalData: jsonb("additional_data"), // Flexible field for event-specific data
+  checkedInAt: timestamp("checked_in_at"),
+  checkedInBy: varchar("checked_in_by", { length: 255 }),
+}, (table) => [
+  index("event_registrations_event_idx").on(table.eventId),
+  index("event_registrations_email_idx").on(table.email),
+  index("event_registrations_status_idx").on(table.status),
+  unique("unique_event_email").on(table.eventId, table.email),
+]);
+
+export const eventSessions = pgTable("event_sessions", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  speakerName: varchar("speaker_name", { length: 255 }),
+  speakerBio: text("speaker_bio"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  room: varchar("room", { length: 100 }),
+  maxCapacity: integer("max_capacity"),
+  sessionType: varchar("session_type", { length: 50 }).default('session'), // session, workshop, break, lunch, etc.
+  requiresRegistration: boolean("requires_registration").default(false),
+  materials: text("materials"), // Links to presentation materials
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("event_sessions_event_idx").on(table.eventId),
+  index("event_sessions_start_time_idx").on(table.startTime),
+]);
+
+export const eventSessionRegistrations = pgTable("event_session_registrations", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull().references(() => eventSessions.id, { onDelete: "cascade" }),
+  registrationId: integer("registration_id").notNull().references(() => eventRegistrations.id, { onDelete: "cascade" }),
+  registeredAt: timestamp("registered_at").defaultNow(),
+}, (table) => [
+  index("event_session_registrations_session_idx").on(table.sessionId),
+  index("event_session_registrations_registration_idx").on(table.registrationId),
+  unique("unique_session_attendance").on(table.sessionId, table.registrationId),
+]);
+
+// Event Management Insert Schemas and Types
+export const insertEventSchema = createInsertSchema(events).omit({ id: true });
+export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({ id: true });
+export const insertEventSessionSchema = createInsertSchema(eventSessions).omit({ id: true });
+export const insertEventSessionRegistrationSchema = createInsertSchema(eventSessionRegistrations).omit({ id: true });
+
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+export type Event = typeof events.$inferSelect;
+
+export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
+export type EventRegistration = typeof eventRegistrations.$inferSelect;
+
+export type InsertEventSession = z.infer<typeof insertEventSessionSchema>;
+export type EventSession = typeof eventSessions.$inferSelect;
+
+export type InsertEventSessionRegistration = z.infer<typeof insertEventSessionRegistrationSchema>;
+export type EventSessionRegistration = typeof eventSessionRegistrations.$inferSelect;
