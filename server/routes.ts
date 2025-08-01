@@ -3975,6 +3975,241 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public workshop registration (without requiring existing badge)
+  app.post("/api/ai-summit/workshops/register-public", async (req, res) => {
+    try {
+      const {
+        workshopId,
+        attendeeName,
+        attendeeEmail,
+        attendeeCompany,
+        attendeeJobTitle,
+        experienceLevel,
+        specificInterests,
+        dietaryRequirements,
+        accessibilityNeeds
+      } = req.body;
+
+      // Basic validation
+      if (!workshopId || !attendeeName || !attendeeEmail) {
+        return res.status(400).json({ message: "Workshop ID, name, and email are required" });
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(attendeeEmail)) {
+        return res.status(400).json({ message: "Please provide a valid email address" });
+      }
+
+      // Check if workshop exists and is active
+      const workshop = await storage.getAISummitWorkshopById(parseInt(workshopId));
+      if (!workshop || !workshop.isActive) {
+        return res.status(404).json({ message: "Workshop not found or is not active" });
+      }
+
+      // Check registration deadline
+      if (workshop.registrationDeadline && new Date(workshop.registrationDeadline) < new Date()) {
+        return res.status(400).json({ message: "Registration deadline has passed" });
+      }
+
+      // Check workshop capacity
+      const capacity = await storage.checkWorkshopCapacity(parseInt(workshopId));
+      if (capacity.available <= 0) {
+        return res.status(400).json({ message: "Workshop is full" });
+      }
+
+      // Generate a unique badge ID for this registration
+      const badgeId = `WS-${workshopId}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      // Create badge entry for workshop attendee
+      const badge = await storage.createAISummitBadge({
+        badgeId,
+        participantType: "attendee",
+        participantId: `workshop-${workshopId}`,
+        name: attendeeName,
+        email: attendeeEmail,
+        company: attendeeCompany,
+        jobTitle: attendeeJobTitle,
+        badgeDesign: "standard",
+        qrCodeData: JSON.stringify({
+          badgeId,
+          type: "workshop_attendee",
+          workshopId,
+          name: attendeeName,
+          email: attendeeEmail,
+          registrationType: "workshop_only"
+        }),
+        isActive: true,
+        issuedAt: new Date()
+      });
+
+      // Register for the workshop
+      const registration = await storage.createAISummitWorkshopRegistration({
+        workshopId: parseInt(workshopId),
+        badgeId,
+        attendeeName,
+        attendeeEmail,
+        attendeeCompany,
+        attendeeJobTitle,
+        experienceLevel,
+        specificInterests,
+        dietaryRequirements,
+        accessibilityNeeds,
+        registrationSource: "public",
+        registeredAt: new Date(),
+        checkedIn: false,
+        noShow: false
+      });
+
+      // Send confirmation email with QR code
+      const emailService = getEmailService();
+      if (emailService) {
+        try {
+          await emailService.sendNotificationEmail({
+            to: attendeeEmail,
+            subject: `AI Summit 2025 - Workshop Registration Confirmed: ${workshop.title}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #2563eb;">Workshop Registration Confirmed!</h2>
+                <p>Dear ${attendeeName},</p>
+                <p>You've successfully registered for the workshop at the <strong>First AI Summit Croydon 2025</strong>.</p>
+                
+                <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Workshop Details:</h3>
+                  <p><strong>Workshop:</strong> ${workshop.title}</p>
+                  <p><strong>Facilitator:</strong> ${workshop.facilitator}</p>
+                  <p><strong>Date & Time:</strong> ${new Date(workshop.startTime).toLocaleDateString()} at ${new Date(workshop.startTime).toLocaleTimeString()}</p>
+                  <p><strong>Duration:</strong> ${workshop.duration} minutes</p>
+                  <p><strong>Room:</strong> ${workshop.room}</p>
+                  <p><strong>Your Badge ID:</strong> ${badgeId}</p>
+                </div>
+
+                <div style="background-color: #dbeafe; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Important Instructions:</h3>
+                  <ul>
+                    <li>Bring this confirmation email with you</li>
+                    <li>Arrive 10 minutes early for check-in</li>
+                    <li>Your QR code will be scanned at the workshop entrance</li>
+                    <li>Please notify us of any accessibility needs</li>
+                  </ul>
+                </div>
+
+                ${workshop.prerequisites ? `
+                <div style="background-color: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Prerequisites:</h3>
+                  <p>${workshop.prerequisites}</p>
+                </div>
+                ` : ''}
+
+                ${workshop.materials ? `
+                <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Materials:</h3>
+                  <p>${workshop.materials}</p>
+                </div>
+                ` : ''}
+
+                <p>We look forward to seeing you at the workshop!</p>
+                
+                <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                  <p><strong>Event Details:</strong></p>
+                  <p>📅 October 1st, 2025 | 🕙 10:00 AM - 4:00 PM<br>
+                  📍 LSBU London South Bank University Croydon</p>
+                  <p>Best regards,<br>The Croydon Business Association Event Team</p>
+                </div>
+              </div>
+            `
+          });
+        } catch (emailError) {
+          console.error("Failed to send workshop confirmation email:", emailError);
+          // Don't fail the registration if email fails
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "Successfully registered for workshop! Check your email for confirmation.",
+        registration: {
+          id: registration.id,
+          workshopTitle: workshop.title,
+          badgeId,
+          registeredAt: registration.registeredAt
+        }
+      });
+
+    } catch (error: any) {
+      console.error("Public workshop registration error:", error);
+      res.status(500).json({ message: "Failed to register for workshop: " + error.message });
+    }
+  });
+
+  // Workshop-specific check-in endpoint
+  app.post("/api/ai-summit/workshop-checkin", async (req, res) => {
+    try {
+      const { badgeId, workshopId, checkInType = 'check_in', location, staffMember, notes } = req.body;
+
+      if (!badgeId || !workshopId) {
+        return res.status(400).json({ message: "Badge ID and Workshop ID are required" });
+      }
+
+      // Get the workshop
+      const workshop = await storage.getAISummitWorkshopById(parseInt(workshopId));
+      if (!workshop) {
+        return res.status(404).json({ message: "Workshop not found" });
+      }
+
+      // Get the badge
+      const badge = await storage.getAISummitBadgeById(badgeId);
+      if (!badge) {
+        return res.status(404).json({ message: "Badge not found" });
+      }
+
+      if (!badge.isActive) {
+        return res.status(400).json({ message: "Badge is inactive" });
+      }
+
+      // Check if user is registered for this workshop
+      const registrations = await storage.getWorkshopRegistrationsByBadgeId(badgeId);
+      const workshopRegistration = registrations.find(reg => reg.workshopId === parseInt(workshopId));
+      
+      if (!workshopRegistration) {
+        return res.status(403).json({ 
+          message: "Badge holder is not registered for this workshop" 
+        });
+      }
+
+      // Update registration check-in status
+      if (checkInType === 'check_in') {
+        await storage.updateWorkshopRegistrationCheckIn(workshopRegistration.id, true, new Date());
+      }
+
+      // Record general event check-in/out
+      const checkInResult = await badgeService.processCheckIn(
+        badgeId, 
+        checkInType, 
+        location || `workshop_${workshopId}`,
+        staffMember,
+        notes ? `Workshop: ${workshop.title} - ${notes}` : `Workshop: ${workshop.title}`
+      );
+
+      res.json({
+        ...checkInResult,
+        workshop: {
+          id: workshop.id,
+          title: workshop.title,
+          facilitator: workshop.facilitator,
+          room: workshop.room,
+          startTime: workshop.startTime,
+          endTime: workshop.endTime
+        },
+        registration: workshopRegistration
+      });
+
+    } catch (error: any) {
+      console.error("Workshop check-in error:", error);
+      res.status(500).json({ message: "Failed to process workshop check-in: " + error.message });
+    }
+  });
+
   // AI Summit Speaking Session Management Endpoints
   
   // Create a new speaking session

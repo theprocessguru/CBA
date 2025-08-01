@@ -216,6 +216,7 @@ export interface IStorage {
   getAISummitWorkshopRegistrationById(id: number): Promise<AISummitWorkshopRegistration | undefined>;
   getWorkshopRegistrationsByWorkshopId(workshopId: number): Promise<AISummitWorkshopRegistration[]>;
   getWorkshopRegistrationsByBadgeId(badgeId: string): Promise<AISummitWorkshopRegistration[]>;
+  updateWorkshopRegistrationCheckIn(registrationId: number, checkedIn: boolean, checkedInAt?: Date): Promise<AISummitWorkshopRegistration>;
   checkWorkshopCapacity(workshopId: number): Promise<{ current: number; max: number; available: number }>;
 
   // Speaking session operations
@@ -1052,6 +1053,18 @@ export class DatabaseStorage implements IStorage {
       .from(aiSummitWorkshopRegistrations)
       .where(eq(aiSummitWorkshopRegistrations.badgeId, badgeId))
       .orderBy(aiSummitWorkshopRegistrations.registeredAt);
+  }
+
+  async updateWorkshopRegistrationCheckIn(registrationId: number, checkedIn: boolean, checkedInAt?: Date): Promise<AISummitWorkshopRegistration> {
+    const [registration] = await db
+      .update(aiSummitWorkshopRegistrations)
+      .set({
+        checkedIn,
+        checkedInAt: checkedInAt || new Date()
+      })
+      .where(eq(aiSummitWorkshopRegistrations.id, registrationId))
+      .returning();
+    return registration;
   }
 
   async checkWorkshopCapacity(workshopId: number): Promise<{ current: number; max: number; available: number }> {

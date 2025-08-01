@@ -43,6 +43,8 @@ import About from "@/pages/About";
 import MyTAccounting from "@/pages/myt-accounting";
 import BadgeScanner from "@/pages/badge-scanner";
 import WorkshopManagement from "@/pages/workshop-management";
+import WorkshopRegistration from "@/pages/workshop-registration";
+import WorkshopScanner from "@/pages/workshop-scanner";
 import MyProfile from "@/pages/my-profile";
 import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
 import EventManagement from "@/pages/admin/EventManagement";
@@ -236,6 +238,11 @@ function Router() {
           <AISummit />
         </MainLayout>
       </Route>
+      <Route path="/workshop-registration">
+        <MainLayout>
+          <WorkshopRegistration />
+        </MainLayout>
+      </Route>
       <Route path="/my-profile">
         <MainLayout>
           <MyProfile />
@@ -254,6 +261,11 @@ function Router() {
       <Route path="/admin/badge-scanner">
         <MainLayout>
           <BadgeScanner />
+        </MainLayout>
+      </Route>
+      <Route path="/admin/workshop-scanner">
+        <MainLayout>
+          <WorkshopScanner />
         </MainLayout>
       </Route>
       <Route path="/admin/occupancy">

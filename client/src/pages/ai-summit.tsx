@@ -30,7 +30,8 @@ import {
   UserPlus,
   Building,
   Coffee,
-  Trophy
+  Trophy,
+  BookOpen
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -750,6 +751,12 @@ const AISummit = () => {
                     <UserPlus className="h-5 w-5" />
                     Register FREE - Limited Places
                   </button>
+                  <Link href="/workshop-registration">
+                    <a className="bg-green-500 text-white hover:bg-green-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                      <BookOpen className="h-5 w-5" />
+                      Workshop Registration
+                    </a>
+                  </Link>
                   <button 
                     className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     onClick={() => setShowExhibitorForm(true)}

@@ -414,6 +414,24 @@ const Navbar = () => {
                   📅 AI Summit Schedule
                 </a>
               </Link>
+              <Link href="/admin/badge-scanner">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/admin/badge-scanner') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  🎫 Badge Scanner
+                </a>
+              </Link>
+              <Link href="/admin/workshop-scanner">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/admin/workshop-scanner') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  📝 Workshop Scanner
+                </a>
+              </Link>
             </>
           )}
 
