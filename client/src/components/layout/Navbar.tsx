@@ -128,6 +128,17 @@ const Navbar = () => {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isHomeMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
+
+              <Link href="/membership-benefits">
+                <a className={`border-b-2 ${
+                  isActive('/membership-benefits') 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
+                  Membership
+                </a>
+              </Link>
+
               <Link href="/directory">
                 <a className={`border-b-2 ${
                   isActive('/directory') 
@@ -137,15 +148,7 @@ const Navbar = () => {
                   Directory
                 </a>
               </Link>
-              <Link href="/marketplace">
-                <a className={`border-b-2 ${
-                  isActive('/marketplace') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Marketplace
-                </a>
-              </Link>
+
               <Link href="/events">
                 <a className={`border-b-2 ${
                   isActive('/events') 
@@ -156,13 +159,13 @@ const Navbar = () => {
                 </a>
               </Link>
 
-              <Link href="/membership-benefits">
+              <Link href="/marketplace">
                 <a className={`border-b-2 ${
-                  isActive('/membership-benefits') 
+                  isActive('/marketplace') 
                     ? 'border-primary text-primary' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
                   } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Membership
+                  Marketplace
                 </a>
               </Link>
               
@@ -345,6 +348,20 @@ const Navbar = () => {
             </a>
           </Link>
           
+          {/* Membership Section */}
+          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            Membership
+          </div>
+          <Link href="/membership-benefits">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/membership-benefits') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              Benefits
+            </a>
+          </Link>
+
           {/* Business Section */}
           <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
             Business
@@ -358,15 +375,6 @@ const Navbar = () => {
               Directory
             </a>
           </Link>
-          <Link href="/marketplace">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/marketplace') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Marketplace
-            </a>
-          </Link>
           <Link href="/events">
             <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/events') 
@@ -376,18 +384,13 @@ const Navbar = () => {
               Events
             </a>
           </Link>
-          
-          {/* Membership Section */}
-          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            Membership
-          </div>
-          <Link href="/membership-benefits">
+          <Link href="/marketplace">
             <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/membership-benefits') 
+              isActive('/marketplace') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
               } font-medium text-sm`}>
-              Benefits
+              Marketplace
             </a>
           </Link>
           
