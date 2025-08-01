@@ -8,6 +8,7 @@ import {
   cbaCauses,
   aiSummitRegistrations,
   aiSummitExhibitorRegistrations,
+  aiSummitSpeakerInterests,
   type User,
   type UpsertUser,
   type Business,
@@ -25,6 +26,8 @@ import {
   type InsertAISummitRegistration,
   type AISummitExhibitorRegistration,
   type InsertAISummitExhibitorRegistration,
+  type AISummitSpeakerInterest,
+  type InsertAISummitSpeakerInterest,
   contentReports,
   type ContentReport,
   type InsertContentReport,
@@ -138,6 +141,7 @@ export interface IStorage {
   // AI Summit registration operations
   createAISummitRegistration(registration: InsertAISummitRegistration): Promise<AISummitRegistration>;
   createAISummitExhibitorRegistration(registration: InsertAISummitExhibitorRegistration): Promise<AISummitExhibitorRegistration>;
+  createAISummitSpeakerInterest(interest: InsertAISummitSpeakerInterest): Promise<AISummitSpeakerInterest>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -730,6 +734,14 @@ export class DatabaseStorage implements IStorage {
       .values(registrationData)
       .returning();
     return registration;
+  }
+
+  async createAISummitSpeakerInterest(interestData: InsertAISummitSpeakerInterest): Promise<AISummitSpeakerInterest> {
+    const [interest] = await db
+      .insert(aiSummitSpeakerInterests)
+      .values(interestData)
+      .returning();
+    return interest;
   }
 }
 

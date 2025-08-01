@@ -2888,7 +2888,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         numberOfAttendees,
         previousExhibitor,
         referralSource,
-        agreesToTerms
+        agreesToTerms,
+        attendees
       } = req.body;
 
       // Basic validation
@@ -2906,21 +2907,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please provide a valid email address" });
       }
 
+      // Validate attendees array
+      if (!attendees || !Array.isArray(attendees) || attendees.length === 0) {
+        return res.status(400).json({ message: "At least one attendee is required" });
+      }
+
+      const actualAttendeeCount = attendees.length;
+
       // Validate attendee numbers against space/table selection
-      if (boothRequirements === 'table-2' && numberOfAttendees !== 2) {
+      if (boothRequirements === 'table-2' && actualAttendeeCount !== 2) {
         return res.status(400).json({ message: "Table for 2 people requires exactly 2 attendees" });
       }
       
-      if (boothRequirements === 'table-4' && numberOfAttendees !== 4) {
+      if (boothRequirements === 'table-4' && actualAttendeeCount !== 4) {
         return res.status(400).json({ message: "Table for 4 people requires exactly 4 attendees" });
       }
 
-      if (numberOfAttendees < 2 || numberOfAttendees > 4) {
+      if (actualAttendeeCount < 2 || actualAttendeeCount > 4) {
         return res.status(400).json({ message: "Number of attendees must be between 2-4 people due to venue capacity constraints" });
       }
 
       if (!boothRequirements) {
         return res.status(400).json({ message: "Exhibition space option is required" });
+      }
+
+      // Validate attendee information
+      for (let i = 0; i < attendees.length; i++) {
+        const attendee = attendees[i];
+        if (!attendee.name || !attendee.name.trim()) {
+          return res.status(400).json({ message: `Attendee ${i + 1} name is required` });
+        }
+        if (!attendee.email || !attendee.email.trim()) {
+          return res.status(400).json({ message: `Attendee ${i + 1} email is required` });
+        }
+        // Validate email format for each attendee
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(attendee.email)) {
+          return res.status(400).json({ message: `Please provide a valid email address for attendee ${i + 1}` });
+        }
       }
 
       // Store registration in database
@@ -2938,11 +2962,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         internetNeeds: internetNeeds || false,
         specialRequirements: specialRequirements || null,
         marketingMaterials: marketingMaterials || null,
-        numberOfAttendees: numberOfAttendees || 2,
+        numberOfAttendees: actualAttendeeCount,
         previousExhibitor: previousExhibitor || false,
         referralSource: referralSource || null,
         agreesToTerms: agreesToTerms,
-        registeredAt: new Date()
+        registeredAt: new Date(),
+        attendees: JSON.stringify(attendees)
       });
 
       // Sync with GHL (Go High Level)
@@ -3053,10 +3078,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the registration if email fails
       }
 
+      // Process attendees who are also speakers
+      const speakerAttendees = attendees.filter(attendee => attendee.isSpeaker);
+      const speakerRegistrations = [];
+
+      for (const speakerAttendee of speakerAttendees) {
+        try {
+          // Create speaker interest registration for this attendee
+          const speakerData = {
+            name: speakerAttendee.name,
+            email: speakerAttendee.email,
+            phone: phone || null,
+            company: companyName,
+            jobTitle: speakerAttendee.jobTitle || null,
+            website: website || null,
+            linkedIn: null,
+            bio: speakerAttendee.speakerBio || null,
+            talkTitle: speakerAttendee.presentationTitle || null,
+            talkDescription: speakerAttendee.presentationDescription || null,
+            talkDuration: "30",
+            audienceLevel: "Beginner",
+            speakingExperience: null,
+            previousSpeaking: false,
+            techRequirements: null,
+            availableSlots: [],
+            motivationToSpeak: "Exhibitor also presenting at booth",
+            keyTakeaways: null,
+            interactiveElements: false,
+            handoutsProvided: false,
+            agreesToTerms: true,
+            registeredAt: new Date(),
+            source: "exhibitor_registration"
+          };
+
+          const speakerRegistration = await storage.createAISummitSpeakerInterest(speakerData);
+          speakerRegistrations.push(speakerRegistration);
+
+          // Sync speaker to GHL with appropriate tags
+          try {
+            const ghlService = getGHLService();
+            if (ghlService) {
+              const speakerNameParts = speakerAttendee.name.trim().split(' ');
+              const speakerFirstName = speakerNameParts[0] || '';
+              const speakerLastName = speakerNameParts.slice(1).join(' ') || '';
+
+              const speakerGhlData = {
+                email: speakerAttendee.email,
+                firstName: speakerFirstName,
+                lastName: speakerLastName,
+                phone: phone,
+                companyName: companyName,
+                tags: [
+                  'AI_Summit_2025',
+                  'Speaker_Interest',
+                  'Exhibitor_Speaker',
+                  'Dual_Registration'
+                ],
+                customFields: {
+                  company_name: companyName,
+                  job_title: speakerAttendee.jobTitle,
+                  speaker_bio: speakerAttendee.speakerBio,
+                  presentation_title: speakerAttendee.presentationTitle,
+                  presentation_description: speakerAttendee.presentationDescription,
+                  registration_type: 'Exhibitor_Speaker',
+                  source: 'exhibitor_registration'
+                }
+              };
+
+              await ghlService.upsertContact(speakerGhlData);
+            }
+          } catch (speakerGhlError) {
+            console.error("Failed to sync speaker attendee to GHL:", speakerGhlError);
+          }
+
+        } catch (speakerError) {
+          console.error("Failed to register speaker attendee:", speakerAttendee.name, speakerError);
+          // Continue with other attendees even if one fails
+        }
+      }
+
       res.json({ 
         success: true, 
-        message: "Exhibitor registration successful! We'll contact you within 2 business days with booth details.",
-        registrationId: registration.id
+        message: `Exhibitor registration successful! ${speakerAttendees.length > 0 ? `${speakerAttendees.length} attendee(s) also registered as speakers. ` : ''}We'll contact you within 2 business days with booth details.`,
+        registrationId: registration.id,
+        speakerRegistrations: speakerRegistrations.length
       });
 
     } catch (error: any) {

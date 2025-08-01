@@ -289,6 +289,35 @@ export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_regis
   previousExhibitor: boolean("previous_exhibitor").default(false),
   referralSource: varchar("referral_source"),
   agreesToTerms: boolean("agrees_to_terms").default(false),
+  attendees: text("attendees"), // JSON string containing attendee details
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
+// AI Summit speaker interests table
+export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  website: varchar("website"),
+  linkedIn: varchar("linked_in"),
+  bio: text("bio"),
+  talkTitle: varchar("talk_title"),
+  talkDescription: text("talk_description"),
+  talkDuration: varchar("talk_duration"),
+  audienceLevel: varchar("audience_level"),
+  speakingExperience: text("speaking_experience"),
+  previousSpeaking: boolean("previous_speaking").default(false),
+  techRequirements: text("tech_requirements"),
+  availableSlots: text("available_slots"), // JSON string
+  motivationToSpeak: text("motivation_to_speak"),
+  keyTakeaways: text("key_takeaways"),
+  interactiveElements: boolean("interactive_elements").default(false),
+  handoutsProvided: boolean("handouts_provided").default(false),
+  agreesToTerms: boolean("agrees_to_terms").default(false),
+  source: varchar("source"), // Track source of registration (direct, exhibitor_registration, etc.)
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
@@ -413,6 +442,7 @@ export const insertInteractionSchema = createInsertSchema(interactions).omit({ i
 export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({ id: true });
 export const insertAISummitRegistrationSchema = createInsertSchema(aiSummitRegistrations).omit({ id: true });
 export const insertAISummitExhibitorRegistrationSchema = createInsertSchema(aiSummitExhibitorRegistrations).omit({ id: true });
+export const insertAISummitSpeakerInterestSchema = createInsertSchema(aiSummitSpeakerInterests).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -465,3 +495,6 @@ export type AISummitRegistration = typeof aiSummitRegistrations.$inferSelect;
 
 export type InsertAISummitExhibitorRegistration = z.infer<typeof insertAISummitExhibitorRegistrationSchema>;
 export type AISummitExhibitorRegistration = typeof aiSummitExhibitorRegistrations.$inferSelect;
+
+export type InsertAISummitSpeakerInterest = z.infer<typeof insertAISummitSpeakerInterestSchema>;
+export type AISummitSpeakerInterest = typeof aiSummitSpeakerInterests.$inferSelect;

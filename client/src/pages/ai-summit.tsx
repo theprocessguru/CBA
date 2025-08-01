@@ -66,7 +66,16 @@ const AISummit = () => {
     numberOfAttendees: 2,
     previousExhibitor: false,
     referralSource: "",
-    agreesToTerms: false
+    agreesToTerms: false,
+    attendees: [{
+      name: "",
+      email: "",
+      jobTitle: "",
+      isSpeaker: false,
+      speakerBio: "",
+      presentationTitle: "",
+      presentationDescription: ""
+    }]
   });
 
   const [speakerData, setSpeakerData] = useState({
@@ -301,7 +310,16 @@ const AISummit = () => {
         numberOfAttendees: 2,
         previousExhibitor: false,
         referralSource: "",
-        agreesToTerms: false
+        agreesToTerms: false,
+        attendees: [{
+          name: "",
+          email: "",
+          jobTitle: "",
+          isSpeaker: false,
+          speakerBio: "",
+          presentationTitle: "",
+          presentationDescription: ""
+        }]
       });
     },
     onError: (error) => {
@@ -374,28 +392,41 @@ const AISummit = () => {
     }
     
     // Validate attendee numbers against space/table selection
-    if (exhibitorData.boothRequirements === 'table-2' && exhibitorData.numberOfAttendees !== 2) {
+    const numberOfAttendees = exhibitorData.attendees.length;
+    
+    if (exhibitorData.boothRequirements === 'table-2' && numberOfAttendees !== 2) {
       toast({
         title: "Registration Error",
-        description: "You selected a table for 2 people but indicated " + exhibitorData.numberOfAttendees + " attendees. Please match your space selection with attendee count.",
+        description: "You selected a table for 2 people but have " + numberOfAttendees + " attendees. Please match your space selection with attendee count.",
         variant: "destructive",
       });
       return;
     }
     
-    if (exhibitorData.boothRequirements === 'table-4' && exhibitorData.numberOfAttendees !== 4) {
+    if (exhibitorData.boothRequirements === 'table-4' && numberOfAttendees !== 4) {
       toast({
         title: "Registration Error", 
-        description: "You selected a table for 4 people but indicated " + exhibitorData.numberOfAttendees + " attendees. Please match your space selection with attendee count.",
+        description: "You selected a table for 4 people but have " + numberOfAttendees + " attendees. Please match your space selection with attendee count.",
         variant: "destructive",
       });
       return;
     }
 
-    if (exhibitorData.numberOfAttendees < 2 || exhibitorData.numberOfAttendees > 4) {
+    if (numberOfAttendees < 2 || numberOfAttendees > 4) {
       toast({
         title: "Registration Error",
         description: "Number of attendees must be between 2-4 people due to venue capacity constraints.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate that all attendees have required information
+    const incompleteAttendees = exhibitorData.attendees.filter(attendee => !attendee.name.trim() || !attendee.email.trim());
+    if (incompleteAttendees.length > 0) {
+      toast({
+        title: "Registration Error",
+        description: "Please provide name and email for all attendees.",
         variant: "destructive",
       });
       return;
@@ -410,7 +441,10 @@ const AISummit = () => {
       return;
     }
 
-    exhibitorMutation.mutate(exhibitorData);
+    exhibitorMutation.mutate({
+      ...exhibitorData,
+      numberOfAttendees: exhibitorData.attendees.length
+    });
   };
 
   const handleSpeakerSubmission = (e: React.FormEvent) => {
@@ -438,6 +472,41 @@ const AISummit = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const handleAttendeeChange = (index: number, field: string, value: any) => {
+    setExhibitorData(prev => ({
+      ...prev,
+      attendees: prev.attendees.map((attendee, i) => 
+        i === index ? { ...attendee, [field]: value } : attendee
+      )
+    }));
+  };
+
+  const addAttendee = () => {
+    if (exhibitorData.attendees.length < 4) {
+      setExhibitorData(prev => ({
+        ...prev,
+        attendees: [...prev.attendees, {
+          name: "",
+          email: "",
+          jobTitle: "",
+          isSpeaker: false,
+          speakerBio: "",
+          presentationTitle: "",
+          presentationDescription: ""
+        }]
+      }));
+    }
+  };
+
+  const removeAttendee = (index: number) => {
+    if (exhibitorData.attendees.length > 1) {
+      setExhibitorData(prev => ({
+        ...prev,
+        attendees: prev.attendees.filter((_, i) => i !== index)
+      }));
+    }
   };
 
   const handleSpeakerInputChange = (field: string, value: string | boolean | string[]) => {
@@ -1226,39 +1295,149 @@ const AISummit = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="numberOfAttendees">Number of Staff Attending *</Label>
-                      <Input
-                        id="numberOfAttendees"
-                        type="number"
-                        min="2"
-                        max="4"
-                        value={exhibitorData.numberOfAttendees}
-                        onChange={(e) => handleExhibitorInputChange('numberOfAttendees', parseInt(e.target.value) || 2)}
-                      />
-                      <p className="text-sm text-gray-600 mt-1">
-                        Limited to 2-4 people per space/table allocation due to venue capacity constraints.
-                      </p>
+                  {/* Attendee Management Section */}
+                  <div className="space-y-4 border-t pt-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Attendee Details</h3>
+                      <p className="text-sm text-gray-600">Limited to 2-4 people per space/table</p>
                     </div>
+                    
+                    {exhibitorData.attendees.map((attendee, index) => (
+                      <div key={index} className="p-4 border rounded-lg bg-gray-50 space-y-4">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-gray-900">Attendee {index + 1}</h4>
+                          {exhibitorData.attendees.length > 1 && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeAttendee(index)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor={`attendee-name-${index}`}>Full Name *</Label>
+                            <Input
+                              id={`attendee-name-${index}`}
+                              type="text"
+                              value={attendee.name}
+                              onChange={(e) => handleAttendeeChange(index, 'name', e.target.value)}
+                              placeholder="Enter full name"
+                              required
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`attendee-email-${index}`}>Email Address *</Label>
+                            <Input
+                              id={`attendee-email-${index}`}
+                              type="email"
+                              value={attendee.email}
+                              onChange={(e) => handleAttendeeChange(index, 'email', e.target.value)}
+                              placeholder="Enter email address"
+                              required
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor={`attendee-title-${index}`}>Job Title</Label>
+                            <Input
+                              id={`attendee-title-${index}`}
+                              type="text"
+                              value={attendee.jobTitle}
+                              onChange={(e) => handleAttendeeChange(index, 'jobTitle', e.target.value)}
+                              placeholder="Enter job title"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 pt-6">
+                            <Checkbox
+                              id={`attendee-speaker-${index}`}
+                              checked={attendee.isSpeaker}
+                              onCheckedChange={(checked) => handleAttendeeChange(index, 'isSpeaker', !!checked)}
+                            />
+                            <Label htmlFor={`attendee-speaker-${index}`} className="text-sm font-medium">
+                              This person will also be speaking/presenting
+                            </Label>
+                          </div>
+                        </div>
+                        
+                        {attendee.isSpeaker && (
+                          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                            <h5 className="font-medium text-blue-900">Speaker Information</h5>
+                            <div className="grid grid-cols-1 gap-4">
+                              <div>
+                                <Label htmlFor={`speaker-bio-${index}`}>Speaker Bio</Label>
+                                <Textarea
+                                  id={`speaker-bio-${index}`}
+                                  value={attendee.speakerBio}
+                                  onChange={(e) => handleAttendeeChange(index, 'speakerBio', e.target.value)}
+                                  placeholder="Brief professional bio for this speaker..."
+                                  rows={2}
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor={`presentation-title-${index}`}>Presentation/Workshop Title</Label>
+                                <Input
+                                  id={`presentation-title-${index}`}
+                                  type="text"
+                                  value={attendee.presentationTitle}
+                                  onChange={(e) => handleAttendeeChange(index, 'presentationTitle', e.target.value)}
+                                  placeholder="Title of your presentation or workshop"
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor={`presentation-desc-${index}`}>Presentation Description</Label>
+                                <Textarea
+                                  id={`presentation-desc-${index}`}
+                                  value={attendee.presentationDescription}
+                                  onChange={(e) => handleAttendeeChange(index, 'presentationDescription', e.target.value)}
+                                  placeholder="Describe what you'll be presenting..."
+                                  rows={2}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    
+                    {exhibitorData.attendees.length < 4 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addAttendee}
+                        className="w-full border-dashed"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Add Another Attendee
+                      </Button>
+                    )}
+                  </div>
 
-                    <div>
-                      <Label htmlFor="referralSource">How did you hear about this event?</Label>
-                      <Select value={exhibitorData.referralSource} onValueChange={(value) => handleExhibitorInputChange('referralSource', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="CBA Website">CBA Website</SelectItem>
-                          <SelectItem value="Email Newsletter">Email Newsletter</SelectItem>
-                          <SelectItem value="Social Media">Social Media</SelectItem>
-                          <SelectItem value="Word of Mouth">Word of Mouth</SelectItem>
-                          <SelectItem value="Industry Publication">Industry Publication</SelectItem>
-                          <SelectItem value="Partner Organization">Partner Organization</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div>
+                    <Label htmlFor="referralSource">How did you hear about this event?</Label>
+                    <Select value={exhibitorData.referralSource} onValueChange={(value) => handleExhibitorInputChange('referralSource', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CBA Website">CBA Website</SelectItem>
+                        <SelectItem value="Email Newsletter">Email Newsletter</SelectItem>
+                        <SelectItem value="Social Media">Social Media</SelectItem>
+                        <SelectItem value="Word of Mouth">Word of Mouth</SelectItem>
+                        <SelectItem value="Industry Publication">Industry Publication</SelectItem>
+                        <SelectItem value="Partner Organization">Partner Organization</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-3">
