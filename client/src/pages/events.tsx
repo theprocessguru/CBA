@@ -21,7 +21,7 @@ interface Event {
   endDate: string;
   location: string;
   maxCapacity: number;
-  registrationFee: number;
+  registrationFee: string | number;
   status: string;
   eventType: string;
   tags: string[];
@@ -246,7 +246,7 @@ export default function EventsPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {publishedEvents.map((event) => {
-            const originalPrice = event.registrationFee;
+            const originalPrice = parseFloat(event.registrationFee.toString()) || 0;
             const memberPrice = calculateEventPrice(originalPrice);
             const isRegistered = isUserRegistered(event.id);
             

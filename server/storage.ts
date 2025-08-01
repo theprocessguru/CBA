@@ -61,6 +61,18 @@ import {
   passwordResetTokens,
   type PasswordResetToken,
   type InsertPasswordResetToken,
+  events,
+  eventRegistrations,
+  eventSessions,
+  eventSessionRegistrations,
+  type Event,
+  type InsertEvent,
+  type EventRegistration,
+  type InsertEventRegistration,
+  type EventSession,
+  type InsertEventSession,
+  type EventSessionRegistration,
+  type InsertEventSessionRegistration,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";

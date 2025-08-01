@@ -705,23 +705,12 @@ export const events = pgTable("events", {
   description: text("description"),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
-  venue: varchar("venue", { length: 255 }).notNull(),
-  address: text("address"),
+  location: varchar("location", { length: 255 }).notNull(),
   maxCapacity: integer("max_capacity").notNull(),
-  price: numeric("price", { precision: 10, scale: 2 }).default('0'),
-  currency: varchar("currency", { length: 3 }).default('GBP'),
-  registrationStartDate: timestamp("registration_start_date").notNull(),
-  registrationEndDate: timestamp("registration_end_date").notNull(),
-  eventType: varchar("event_type", { length: 50 }).notNull(), // workshop, seminar, conference, networking, etc.
+  registrationFee: numeric("registration_fee", { precision: 10, scale: 2 }).default('0'),
   status: varchar("status", { length: 20 }).default('draft'), // draft, published, cancelled, completed
-  requiresApproval: boolean("requires_approval").default(false),
-  allowWaitlist: boolean("allow_waitlist").default(false),
-  categories: text("categories").array(), // Array of category tags
-  imageUrl: text("image_url"),
-  organizerName: varchar("organizer_name", { length: 255 }),
-  organizerEmail: varchar("organizer_email", { length: 255 }),
-  organizerPhone: varchar("organizer_phone", { length: 20 }),
-  ticketPrefix: varchar("ticket_prefix", { length: 10 }).notNull(), // e.g., "WS2025", "SEM2025"
+  eventType: varchar("event_type", { length: 50 }).notNull(), // workshop, seminar, conference, networking, etc.
+  tags: text("tags").array(), // Array of category tags
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
