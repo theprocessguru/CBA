@@ -321,6 +321,67 @@ export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
+// AI Summit badges table
+export const aiSummitBadges = pgTable("ai_summit_badges", {
+  id: serial("id").primaryKey(),
+  badgeId: varchar("badge_id").notNull().unique(), // Unique identifier for QR code
+  participantType: varchar("participant_type").notNull(), // attendee, exhibitor, speaker, volunteer, team
+  participantId: varchar("participant_id").notNull(), // Reference to the registration ID
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  badgeDesign: varchar("badge_design").default("standard"), // standard, vip, speaker, volunteer, team
+  qrCodeData: text("qr_code_data").notNull(), // JSON string with encoded badge info
+  isActive: boolean("is_active").default(true),
+  printedAt: timestamp("printed_at"),
+  issuedAt: timestamp("issued_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// AI Summit check-ins table for tracking entry/exit
+export const aiSummitCheckIns = pgTable("ai_summit_check_ins", {
+  id: serial("id").primaryKey(),
+  badgeId: varchar("badge_id").notNull().references(() => aiSummitBadges.badgeId),
+  checkInType: varchar("check_in_type").notNull(), // check_in, check_out
+  checkInTime: timestamp("check_in_time").defaultNow(),
+  checkInLocation: varchar("check_in_location").default("main_entrance"), // main_entrance, exhibition_hall, conference_room
+  checkInMethod: varchar("check_in_method").default("qr_scan"), // qr_scan, manual_entry
+  notes: text("notes"),
+  staffMember: varchar("staff_member"), // Who processed the check-in
+});
+
+// AI Summit volunteers table
+export const aiSummitVolunteers = pgTable("ai_summit_volunteers", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  role: varchar("role").notNull(), // registration_desk, information, technical_support, logistics, security
+  shift: varchar("shift"), // morning, afternoon, full_day
+  experience: text("experience"),
+  availability: text("availability"),
+  emergencyContact: varchar("emergency_contact"),
+  t_shirtSize: varchar("t_shirt_size"),
+  dietaryRequirements: text("dietary_requirements"),
+  agreesToTerms: boolean("agrees_to_terms").default(false),
+  registeredAt: timestamp("registered_at").defaultNow(),
+});
+
+// AI Summit team members table
+export const aiSummitTeamMembers = pgTable("ai_summit_team_members", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  role: varchar("role").notNull(), // organizer, coordinator, technical_lead, marketing, finance, logistics
+  department: varchar("department"), // events, marketing, technical, finance, operations
+  accessLevel: varchar("access_level").default("standard"), // standard, admin, super_admin
+  permissions: text("permissions"), // JSON string of specific permissions
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -443,6 +504,10 @@ export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTo
 export const insertAISummitRegistrationSchema = createInsertSchema(aiSummitRegistrations).omit({ id: true });
 export const insertAISummitExhibitorRegistrationSchema = createInsertSchema(aiSummitExhibitorRegistrations).omit({ id: true });
 export const insertAISummitSpeakerInterestSchema = createInsertSchema(aiSummitSpeakerInterests).omit({ id: true });
+export const insertAISummitBadgeSchema = createInsertSchema(aiSummitBadges).omit({ id: true });
+export const insertAISummitCheckInSchema = createInsertSchema(aiSummitCheckIns).omit({ id: true });
+export const insertAISummitVolunteerSchema = createInsertSchema(aiSummitVolunteers).omit({ id: true });
+export const insertAISummitTeamMemberSchema = createInsertSchema(aiSummitTeamMembers).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -498,3 +563,15 @@ export type AISummitExhibitorRegistration = typeof aiSummitExhibitorRegistration
 
 export type InsertAISummitSpeakerInterest = z.infer<typeof insertAISummitSpeakerInterestSchema>;
 export type AISummitSpeakerInterest = typeof aiSummitSpeakerInterests.$inferSelect;
+
+export type InsertAISummitBadge = z.infer<typeof insertAISummitBadgeSchema>;
+export type AISummitBadge = typeof aiSummitBadges.$inferSelect;
+
+export type InsertAISummitCheckIn = z.infer<typeof insertAISummitCheckInSchema>;
+export type AISummitCheckIn = typeof aiSummitCheckIns.$inferSelect;
+
+export type InsertAISummitVolunteer = z.infer<typeof insertAISummitVolunteerSchema>;
+export type AISummitVolunteer = typeof aiSummitVolunteers.$inferSelect;
+
+export type InsertAISummitTeamMember = z.infer<typeof insertAISummitTeamMemberSchema>;
+export type AISummitTeamMember = typeof aiSummitTeamMembers.$inferSelect;

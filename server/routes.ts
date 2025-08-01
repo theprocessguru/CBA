@@ -5,13 +5,23 @@ import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import multer from "multer";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema, insertContentReportSchema, insertInteractionSchema } from "@shared/schema";
+import { 
+  insertBusinessSchema, 
+  insertProductSchema, 
+  insertOfferSchema, 
+  insertCategorySchema, 
+  insertContentReportSchema, 
+  insertInteractionSchema,
+  insertAISummitVolunteerSchema,
+  insertAISummitTeamMemberSchema 
+} from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
 import { aiAdvancedService } from "./aiAdvancedService";
+import { badgeService } from "./badgeService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
@@ -3157,11 +3167,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Create badges for all exhibitor attendees
+      let badges = [];
+      try {
+        badges = await badgeService.createExhibitorBadges(
+          registration.id.toString(), 
+          attendees, 
+          companyName
+        );
+      } catch (badgeError) {
+        console.error("Failed to create exhibitor badges:", badgeError);
+        // Don't fail the registration if badge creation fails
+      }
+
       res.json({ 
         success: true, 
         message: `Exhibitor registration successful! ${speakerAttendees.length > 0 ? `${speakerAttendees.length} attendee(s) also registered as speakers. ` : ''}We'll contact you within 2 business days with booth details.`,
         registrationId: registration.id,
-        speakerRegistrations: speakerRegistrations.length
+        speakerRegistrations: speakerRegistrations.length,
+        badgesCreated: badges.length
       });
 
     } catch (error: any) {
@@ -3255,6 +3279,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the registration if GHL sync fails
       }
 
+      // Create attendee badge
+      let badge;
+      try {
+        badge = await badgeService.createBadge({
+          participantType: 'attendee',
+          participantId: registration.id.toString(),
+          name,
+          email,
+          company: company || undefined,
+          jobTitle: jobTitle || undefined
+        });
+      } catch (badgeError) {
+        console.error("Failed to create attendee badge:", badgeError);
+        // Don't fail the registration if badge creation fails
+      }
+
       // Send confirmation email if email service is available
       try {
         if (emailService) {
@@ -3273,6 +3313,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <p><strong>Time:</strong> 10:00 AM - 4:00 PM</p>
                   <p><strong>Venue:</strong> LSBU London South Bank University Croydon</p>
                   <p><strong>Admission:</strong> FREE</p>
+                  ${badge ? `<p><strong>Your Badge ID:</strong> ${badge.badgeId}</p>` : ''}
                 </div>
 
                 <p>We're excited to have you join us for this groundbreaking event featuring:</p>
@@ -3436,6 +3477,241 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Speaker interest submission failed. Please try again or contact support." 
       });
+    }
+  });
+
+  // ==================== AI SUMMIT BADGE MANAGEMENT ROUTES ====================
+  
+  // QR Code Check-in/Check-out endpoint
+  app.post("/api/ai-summit/check-in", async (req, res) => {
+    try {
+      const { badgeId, checkInType, location, staffMember, notes } = req.body;
+
+      if (!badgeId || !checkInType) {
+        return res.status(400).json({ message: "Badge ID and check-in type are required" });
+      }
+
+      if (!['check_in', 'check_out'].includes(checkInType)) {
+        return res.status(400).json({ message: "Check-in type must be 'check_in' or 'check_out'" });
+      }
+
+      const result = await badgeService.processCheckIn(
+        badgeId,
+        checkInType,
+        location || 'main_entrance',
+        staffMember,
+        notes
+      );
+
+      if (result.success) {
+        res.json(result);
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error: any) {
+      console.error("Check-in error:", error);
+      res.status(500).json({ message: "Check-in processing failed: " + error.message });
+    }
+  });
+
+  // Get badge information
+  app.get("/api/ai-summit/badge/:badgeId", async (req, res) => {
+    try {
+      const { badgeId } = req.params;
+      const badge = await badgeService.getBadgeInfo(badgeId);
+      
+      if (!badge) {
+        return res.status(404).json({ message: "Badge not found" });
+      }
+
+      res.json(badge);
+    } catch (error: any) {
+      console.error("Get badge error:", error);
+      res.status(500).json({ message: "Failed to get badge information: " + error.message });
+    }
+  });
+
+  // Generate QR code for badge
+  app.get("/api/ai-summit/badge/:badgeId/qr-code", async (req, res) => {
+    try {
+      const { badgeId } = req.params;
+      const qrCodeImage = await badgeService.generateQRCodeImage(badgeId);
+      
+      res.json({ qrCode: qrCodeImage });
+    } catch (error: any) {
+      console.error("QR code generation error:", error);
+      res.status(500).json({ message: "Failed to generate QR code: " + error.message });
+    }
+  });
+
+  // Get all badges (admin only)
+  app.get("/api/ai-summit/badges", isAuthenticated, async (req, res) => {
+    try {
+      const badges = await storage.getAllAISummitBadges();
+      res.json(badges);
+    } catch (error: any) {
+      console.error("Get badges error:", error);
+      res.status(500).json({ message: "Failed to get badges: " + error.message });
+    }
+  });
+
+  // Get badges by participant type
+  app.get("/api/ai-summit/badges/type/:participantType", isAuthenticated, async (req, res) => {
+    try {
+      const { participantType } = req.params;
+      const badges = await storage.getBadgesByParticipantType(participantType);
+      res.json(badges);
+    } catch (error: any) {
+      console.error("Get badges by type error:", error);
+      res.status(500).json({ message: "Failed to get badges by type: " + error.message });
+    }
+  });
+
+  // Get check-in history for a badge
+  app.get("/api/ai-summit/badge/:badgeId/check-ins", isAuthenticated, async (req, res) => {
+    try {
+      const { badgeId } = req.params;
+      const checkIns = await storage.getCheckInsByBadgeId(badgeId);
+      res.json(checkIns);
+    } catch (error: any) {
+      console.error("Get check-ins error:", error);
+      res.status(500).json({ message: "Failed to get check-ins: " + error.message });
+    }
+  });
+
+  // Get attendee statistics
+  app.get("/api/ai-summit/attendee-stats", isAuthenticated, async (req, res) => {
+    try {
+      const stats = await badgeService.getAttendeeStats();
+      res.json(stats);
+    } catch (error: any) {
+      console.error("Get attendee stats error:", error);
+      res.status(500).json({ message: "Failed to get attendee statistics: " + error.message });
+    }
+  });
+
+  // Mark badge as printed
+  app.patch("/api/ai-summit/badge/:badgeId/printed", isAuthenticated, async (req, res) => {
+    try {
+      const { badgeId } = req.params;
+      await badgeService.markBadgeAsPrinted(badgeId);
+      res.json({ success: true, message: "Badge marked as printed" });
+    } catch (error: any) {
+      console.error("Mark badge printed error:", error);
+      res.status(500).json({ message: "Failed to mark badge as printed: " + error.message });
+    }
+  });
+
+  // Deactivate badge
+  app.patch("/api/ai-summit/badge/:badgeId/deactivate", isAuthenticated, async (req, res) => {
+    try {
+      const { badgeId } = req.params;
+      const { reason } = req.body;
+      await badgeService.deactivateBadge(badgeId, reason);
+      res.json({ success: true, message: "Badge deactivated" });
+    } catch (error: any) {
+      console.error("Deactivate badge error:", error);
+      res.status(500).json({ message: "Failed to deactivate badge: " + error.message });
+    }
+  });
+
+  // ==================== VOLUNTEER REGISTRATION ROUTES ====================
+  
+  app.post("/api/ai-summit/volunteer-registration", async (req, res) => {
+    try {
+      const validatedData = insertAISummitVolunteerSchema.parse(req.body);
+      const volunteer = await storage.createAISummitVolunteer(validatedData);
+      
+      // Create volunteer badge
+      const badge = await badgeService.createVolunteerBadge(volunteer.id.toString(), volunteer);
+
+      try {
+        await emailService.sendEmail({
+          to: volunteer.email,
+          subject: "🎉 AI Summit Volunteer Registration Confirmed - Thank You!",
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center;">
+                <h1>🎉 Volunteer Registration Confirmed!</h1>
+              </div>
+              <div style="padding: 20px; background-color: #f9f9f9;">
+                <p>Dear ${volunteer.name},</p>
+                <p>Thank you for volunteering at the <strong>First AI Summit Croydon 2025</strong>!</p>
+                <p><strong>Your Role:</strong> ${volunteer.role}</p>
+                <p><strong>Badge ID:</strong> ${badge.badgeId}</p>
+                <p>We will contact you with more details about your volunteer assignment closer to the event.</p>
+                <p><strong>Event Details:</strong></p>
+                <p>📅 October 1st, 2025 | 🕙 10:00 AM - 4:00 PM<br>
+                📍 LSBU London South Bank University Croydon</p>
+                <p>Best regards,<br>The Croydon Business Association Volunteer Team</p>
+              </div>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error("Failed to send volunteer confirmation email:", emailError);
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Volunteer registration submitted successfully!",
+        badgeId: badge.badgeId
+      });
+
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      console.error("Volunteer registration error:", error);
+      res.status(500).json({ message: "Volunteer registration failed: " + error.message });
+    }
+  });
+
+  // Get all volunteers
+  app.get("/api/ai-summit/volunteers", isAuthenticated, async (req, res) => {
+    try {
+      const volunteers = await storage.getAllAISummitVolunteers();
+      res.json(volunteers);
+    } catch (error: any) {
+      console.error("Get volunteers error:", error);
+      res.status(500).json({ message: "Failed to get volunteers: " + error.message });
+    }
+  });
+
+  // ==================== TEAM MEMBER MANAGEMENT ROUTES ====================
+  
+  app.post("/api/ai-summit/team-member", isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertAISummitTeamMemberSchema.parse(req.body);
+      const teamMember = await storage.createAISummitTeamMember(validatedData);
+      
+      // Create team member badge
+      const badge = await badgeService.createTeamMemberBadge(teamMember.id.toString(), teamMember);
+
+      res.json({ 
+        success: true, 
+        message: "Team member added successfully!",
+        teamMember,
+        badgeId: badge.badgeId
+      });
+
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      console.error("Team member creation error:", error);
+      res.status(500).json({ message: "Failed to create team member: " + error.message });
+    }
+  });
+
+  // Get all team members
+  app.get("/api/ai-summit/team-members", isAuthenticated, async (req, res) => {
+    try {
+      const teamMembers = await storage.getAllAISummitTeamMembers();
+      res.json(teamMembers);
+    } catch (error: any) {
+      console.error("Get team members error:", error);
+      res.status(500).json({ message: "Failed to get team members: " + error.message });
     }
   });
 

@@ -9,6 +9,10 @@ import {
   aiSummitRegistrations,
   aiSummitExhibitorRegistrations,
   aiSummitSpeakerInterests,
+  aiSummitBadges,
+  aiSummitCheckIns,
+  aiSummitVolunteers,
+  aiSummitTeamMembers,
   type User,
   type UpsertUser,
   type Business,
@@ -28,6 +32,14 @@ import {
   type InsertAISummitExhibitorRegistration,
   type AISummitSpeakerInterest,
   type InsertAISummitSpeakerInterest,
+  type AISummitBadge,
+  type InsertAISummitBadge,
+  type AISummitCheckIn,
+  type InsertAISummitCheckIn,
+  type AISummitVolunteer,
+  type InsertAISummitVolunteer,
+  type AISummitTeamMember,
+  type InsertAISummitTeamMember,
   contentReports,
   type ContentReport,
   type InsertContentReport,
@@ -142,6 +154,28 @@ export interface IStorage {
   createAISummitRegistration(registration: InsertAISummitRegistration): Promise<AISummitRegistration>;
   createAISummitExhibitorRegistration(registration: InsertAISummitExhibitorRegistration): Promise<AISummitExhibitorRegistration>;
   createAISummitSpeakerInterest(interest: InsertAISummitSpeakerInterest): Promise<AISummitSpeakerInterest>;
+  
+  // Badge management operations
+  createAISummitBadge(badge: InsertAISummitBadge): Promise<AISummitBadge>;
+  getAISummitBadgeById(badgeId: string): Promise<AISummitBadge | undefined>;
+  updateAISummitBadge(badgeId: string, updates: Partial<InsertAISummitBadge>): Promise<AISummitBadge>;
+  getAllAISummitBadges(): Promise<AISummitBadge[]>;
+  getBadgesByParticipantType(participantType: string): Promise<AISummitBadge[]>;
+  
+  // Check-in operations
+  createAISummitCheckIn(checkIn: InsertAISummitCheckIn): Promise<AISummitCheckIn>;
+  getCheckInsByBadgeId(badgeId: string): Promise<AISummitCheckIn[]>;
+  getAllAISummitCheckIns(): Promise<AISummitCheckIn[]>;
+  
+  // Volunteer operations
+  createAISummitVolunteer(volunteer: InsertAISummitVolunteer): Promise<AISummitVolunteer>;
+  getAISummitVolunteerById(id: number): Promise<AISummitVolunteer | undefined>;
+  getAllAISummitVolunteers(): Promise<AISummitVolunteer[]>;
+  
+  // Team member operations
+  createAISummitTeamMember(teamMember: InsertAISummitTeamMember): Promise<AISummitTeamMember>;
+  getAISummitTeamMemberById(id: number): Promise<AISummitTeamMember | undefined>;
+  getAllAISummitTeamMembers(): Promise<AISummitTeamMember[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -742,6 +776,107 @@ export class DatabaseStorage implements IStorage {
       .values(interestData)
       .returning();
     return interest;
+  }
+
+  // Badge management operations
+  async createAISummitBadge(badgeData: InsertAISummitBadge): Promise<AISummitBadge> {
+    const [badge] = await db
+      .insert(aiSummitBadges)
+      .values(badgeData)
+      .returning();
+    return badge;
+  }
+
+  async getAISummitBadgeById(badgeId: string): Promise<AISummitBadge | undefined> {
+    const [badge] = await db
+      .select()
+      .from(aiSummitBadges)
+      .where(eq(aiSummitBadges.badgeId, badgeId));
+    return badge;
+  }
+
+  async updateAISummitBadge(badgeId: string, updates: Partial<InsertAISummitBadge>): Promise<AISummitBadge> {
+    const [badge] = await db
+      .update(aiSummitBadges)
+      .set(updates)
+      .where(eq(aiSummitBadges.badgeId, badgeId))
+      .returning();
+    return badge;
+  }
+
+  async getAllAISummitBadges(): Promise<AISummitBadge[]> {
+    return await db.select().from(aiSummitBadges).orderBy(desc(aiSummitBadges.createdAt));
+  }
+
+  async getBadgesByParticipantType(participantType: string): Promise<AISummitBadge[]> {
+    return await db
+      .select()
+      .from(aiSummitBadges)
+      .where(eq(aiSummitBadges.participantType, participantType))
+      .orderBy(desc(aiSummitBadges.createdAt));
+  }
+
+  // Check-in operations
+  async createAISummitCheckIn(checkInData: InsertAISummitCheckIn): Promise<AISummitCheckIn> {
+    const [checkIn] = await db
+      .insert(aiSummitCheckIns)
+      .values(checkInData)
+      .returning();
+    return checkIn;
+  }
+
+  async getCheckInsByBadgeId(badgeId: string): Promise<AISummitCheckIn[]> {
+    return await db
+      .select()
+      .from(aiSummitCheckIns)
+      .where(eq(aiSummitCheckIns.badgeId, badgeId))
+      .orderBy(desc(aiSummitCheckIns.checkInTime));
+  }
+
+  async getAllAISummitCheckIns(): Promise<AISummitCheckIn[]> {
+    return await db.select().from(aiSummitCheckIns).orderBy(desc(aiSummitCheckIns.checkInTime));
+  }
+
+  // Volunteer operations
+  async createAISummitVolunteer(volunteerData: InsertAISummitVolunteer): Promise<AISummitVolunteer> {
+    const [volunteer] = await db
+      .insert(aiSummitVolunteers)
+      .values(volunteerData)
+      .returning();
+    return volunteer;
+  }
+
+  async getAISummitVolunteerById(id: number): Promise<AISummitVolunteer | undefined> {
+    const [volunteer] = await db
+      .select()
+      .from(aiSummitVolunteers)
+      .where(eq(aiSummitVolunteers.id, id));
+    return volunteer;
+  }
+
+  async getAllAISummitVolunteers(): Promise<AISummitVolunteer[]> {
+    return await db.select().from(aiSummitVolunteers).orderBy(desc(aiSummitVolunteers.registeredAt));
+  }
+
+  // Team member operations
+  async createAISummitTeamMember(teamMemberData: InsertAISummitTeamMember): Promise<AISummitTeamMember> {
+    const [teamMember] = await db
+      .insert(aiSummitTeamMembers)
+      .values(teamMemberData)
+      .returning();
+    return teamMember;
+  }
+
+  async getAISummitTeamMemberById(id: number): Promise<AISummitTeamMember | undefined> {
+    const [teamMember] = await db
+      .select()
+      .from(aiSummitTeamMembers)
+      .where(eq(aiSummitTeamMembers.id, id));
+    return teamMember;
+  }
+
+  async getAllAISummitTeamMembers(): Promise<AISummitTeamMember[]> {
+    return await db.select().from(aiSummitTeamMembers).orderBy(desc(aiSummitTeamMembers.createdAt));
   }
 }
 

@@ -41,6 +41,7 @@ import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
 import MyTAccounting from "@/pages/myt-accounting";
+import BadgeScanner from "@/pages/badge-scanner";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -226,6 +227,11 @@ function Router() {
       <Route path="/admin/import">
         <MainLayout>
           <AdminDataImport />
+        </MainLayout>
+      </Route>
+      <Route path="/admin/badge-scanner">
+        <MainLayout>
+          <BadgeScanner />
         </MainLayout>
       </Route>
       
