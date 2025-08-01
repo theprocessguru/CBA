@@ -276,6 +276,44 @@ const About = () => {
           </Card>
         </div>
 
+        {/* Developer Attribution */}
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardContent className="p-8 text-center">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold mb-4 text-gray-800">Powered by Innovation</h2>
+              <p className="text-lg mb-4 text-gray-700">
+                This app was built by{" "}
+                <span className="font-bold text-blue-600">Steve Ball - The Process Guru</span>
+                {" "}Founder of{" "}
+                <a 
+                  href="https://mytai.co.uk" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-blue-600 hover:text-blue-800 transition underline"
+                >
+                  MyT AI
+                </a>
+              </p>
+              <p className="text-gray-600 mb-6">
+                Using nothing more than English and Amazing AI called Dave
+              </p>
+              <div className="bg-white p-4 rounded-lg shadow-sm border">
+                <p className="text-sm text-gray-500 mb-2">
+                  Discover how AI can transform your business processes
+                </p>
+                <a 
+                  href="https://mytai.co.uk" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                >
+                  Visit MyT AI →
+                </a>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Call to Action */}
         <Card className="bg-primary text-white">
           <CardContent className="p-8 text-center">

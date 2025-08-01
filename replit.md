@@ -101,6 +101,13 @@ This is a comprehensive business automation platform built with React/TypeScript
 ## Changelog
 ```
 Changelog:
+- August 1, 2025. Developer Attribution & Navigation Enhancement:
+  * Added prominent developer credit for Steve Ball - The Process Guru, Founder of MyT AI
+  * Featured attribution on About page in dedicated "Powered by Innovation" section
+  * Added footer credit with link to mytai.co.uk website
+  * Reorganized top navigation for better user flow: Home → Membership → Directory → Events → Marketplace → AI
+  * Successfully integrated AI-powered chatbot using GoHighLevel with intelligent fallback responses
+  * Improved mobile menu structure to match desktop navigation order
 - August 1, 2025. Registration Calendar System + Venue Capacity Update:
   * Completed full registration calendar system with RegistrationCalendar component
   * Added my-registrations.tsx page for users to view and manage their event registrations

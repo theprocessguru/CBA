@@ -77,12 +77,34 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-neutral-700 pt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center text-neutral-400 text-sm">
+          <div className="flex flex-col md:flex-row justify-between items-center text-neutral-400 text-sm mb-4">
             <p>&copy; {new Date().getFullYear()} Croydon Business Association. All rights reserved.</p>
             <div className="mt-4 md:mt-0 space-x-4">
               <a href="#" className="hover:text-white transition">Privacy Policy</a>
               <a href="#" className="hover:text-white transition">Terms of Service</a>
               <a href="#" className="hover:text-white transition">Cookie Policy</a>
+            </div>
+          </div>
+          
+          {/* Developer Attribution */}
+          <div className="border-t border-neutral-700 pt-4">
+            <div className="text-center text-neutral-500 text-xs">
+              <p className="mb-1">
+                This app was built by{" "}
+                <span className="text-blue-400 font-medium">Steve Ball - The Process Guru</span>
+                {" "}Founder of{" "}
+                <a 
+                  href="https://mytai.co.uk" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition underline font-medium"
+                >
+                  MyT AI
+                </a>
+              </p>
+              <p className="text-neutral-600">
+                Using nothing more than English and Amazing AI called Dave
+              </p>
             </div>
           </div>
         </div>
