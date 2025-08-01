@@ -77,8 +77,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     legacyHeaders: false,
   });
   
-  // Stricter rate limiting for auth endpoints
+  // Moderate rate limiting for auth endpoints (allow checking auth status)
   const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 50, // Allow more requests for auth status checks
+    message: 'Too many auth attempts from this IP, please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  // Stricter rate limiting for sensitive auth operations
+  const strictAuthLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 5, // limit each IP to 5 requests per windowMs
     message: 'Too many auth attempts from this IP, please try again later.',
