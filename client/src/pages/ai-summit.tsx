@@ -165,7 +165,7 @@ const AISummit = () => {
       capacity: "All attendees"
     },
     {
-      time: "10:45 - 11:15",
+      time: "11:00 - 11:30",
       title: "The Future of AI in Small Business",
       type: "talk",
       speaker: "Dr. Sarah Chen",
@@ -173,7 +173,7 @@ const AISummit = () => {
       capacity: "120 people"
     },
     {
-      time: "11:15 - 11:30",
+      time: "11:30 - 11:45",
       title: "Coffee Break & Networking",
       type: "break",
       speaker: "",
@@ -209,7 +209,7 @@ const AISummit = () => {
   // Large Classroom - Workshop sessions with two screens, seats ~65 people
   const classroomSchedule = [
     {
-      time: "10:30 - 11:15",
+      time: "11:00 - 11:45",
       title: "Workshop: AI Tools for Content Creation",
       type: "workshop",
       speaker: "LSBU Students & Volunteers",
@@ -218,7 +218,7 @@ const AISummit = () => {
       requirements: "Bring laptop/tablet"
     },
     {
-      time: "11:30 - 12:15",
+      time: "12:00 - 12:45",
       title: "Workshop: Building Your First AI Chatbot",
       type: "workshop",
       speaker: "CBA AI Experts",
@@ -258,7 +258,16 @@ const AISummit = () => {
   // Large 3rd Floor Space - Micro Business Exhibition
   const exhibitionSchedule = [
     {
-      time: "10:00 - 10:30",
+      time: "10:00 - 10:15",
+      title: "Final Registration & Badge Setup",
+      type: "registration",
+      speaker: "CBA Registration Team",
+      description: "Complete registration, collect lanyards, print badges for latecomers, and prepare for opening ceremony",
+      capacity: "All attendees",
+      features: "Badge printing station available"
+    },
+    {
+      time: "10:15 - 10:45",
       title: "Opening Keynote: AI Revolution in Croydon",
       type: "keynote",
       speaker: "Jose Martinez, CBA Founder",
