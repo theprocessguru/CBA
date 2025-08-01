@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { MEMBERSHIP_TIER_CONFIGS } from "@shared/membershipTiers";
 import BenefitsGrid from "@/components/membership/BenefitsGrid";
-import { Users, Crown, TrendingUp, Settings, Search, Gift, Star } from "lucide-react";
+import { Users, Crown, TrendingUp, Settings, Search, Gift, Star, ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/ui/page-header";
 
 interface MembershipStats {
@@ -39,6 +40,7 @@ interface MemberData {
 const MembershipManagement = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [tierFilter, setTierFilter] = useState("all");
@@ -123,11 +125,20 @@ const MembershipManagement = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 md:px-6">
       <PageHeader 
         title="Membership Management"
         subtitle="Manage member tiers, subscriptions, and benefits"
-      />
+      >
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </PageHeader>
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList>
