@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { ContentReport } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -31,10 +32,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flag, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Flag, Eye, CheckCircle, XCircle, Clock, ArrowLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const ContentReports = () => {
+  const [, navigate] = useLocation();
   const [selectedTab, setSelectedTab] = useState("pending");
   const [reviewingReport, setReviewingReport] = useState<ContentReport | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
@@ -118,7 +120,7 @@ const ContentReports = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 px-4 md:px-6">
         <Skeleton className="h-8 w-64" />
         <div className="grid gap-4">
           {[...Array(5)].map((_, i) => (
@@ -145,10 +147,20 @@ const ContentReports = () => {
         <meta name="description" content="Review and manage content reports from community members." />
       </Helmet>
 
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">Content Reports</h1>
-          <p className="text-neutral-600">Review and manage reports from community members about inappropriate content.</p>
+      <div className="space-y-6 px-4 md:px-6">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <h1 className="text-2xl font-bold text-neutral-900 mb-2">Content Reports</h1>
+            <p className="text-neutral-600">Review and manage reports from community members about inappropriate content.</p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
