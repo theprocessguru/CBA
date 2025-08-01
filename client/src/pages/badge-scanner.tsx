@@ -6,10 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { QrCode, UserCheck, UserX, Clock, MapPin, Users, Activity } from 'lucide-react';
+import { QrCode, UserCheck, UserX, Clock, MapPin, Users, Activity, Building2 } from 'lucide-react';
+import OccupancyDashboard from '@/components/OccupancyDashboard';
 
 interface CheckInResult {
   success: boolean;
@@ -224,11 +226,25 @@ export default function BadgeScanner() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Summit Badge Scanner</h1>
-        <p className="text-gray-600">Check attendees in and out of the event</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">AI Summit Event Management</h1>
+        <p className="text-gray-600">Badge scanning and real-time occupancy monitoring</p>
       </div>
+
+      <Tabs defaultValue="scanner" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="scanner" className="flex items-center gap-2">
+            <QrCode className="h-4 w-4" />
+            Badge Scanner
+          </TabsTrigger>
+          <TabsTrigger value="occupancy" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            Building Occupancy
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="scanner" className="space-y-6">
 
       {/* Statistics Dashboard */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -548,6 +564,12 @@ export default function BadgeScanner() {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="occupancy">
+          <OccupancyDashboard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

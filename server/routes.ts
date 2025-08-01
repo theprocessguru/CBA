@@ -2957,8 +2957,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Create user account for main contact if it doesn't exist
+      let user = await storage.getUserByEmail(email);
+      if (!user) {
+        const [firstName, ...lastNameParts] = contactName.split(' ');
+        const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        user = await storage.upsertUser({
+          id: userId,
+          email,
+          firstName,
+          lastName: lastNameParts.join(' ') || '',
+          isAdmin: false,
+          membershipTier: 'Starter Tier',
+          membershipStatus: 'trial',
+          accountStatus: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
+      // Create user accounts for all attendees
+      for (const attendee of attendees) {
+        let attendeeUser = await storage.getUserByEmail(attendee.email);
+        if (!attendeeUser) {
+          const [attendeeFirstName, ...attendeeLastNameParts] = attendee.name.split(' ');
+          const attendeeUserId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+          await storage.upsertUser({
+            id: attendeeUserId,
+            email: attendee.email,
+            firstName: attendeeFirstName,
+            lastName: attendeeLastNameParts.join(' ') || '',
+            isAdmin: false,
+            membershipTier: 'Starter Tier',
+            membershipStatus: 'trial',
+            accountStatus: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+      }
+
       // Store registration in database
       const registration = await storage.createAISummitExhibitorRegistration({
+        userId: user.id,
         companyName,
         contactName,
         email,
@@ -3222,8 +3263,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please provide a valid email address" });
       }
 
+      // Create user account if it doesn't exist
+      let user = await storage.getUserByEmail(email);
+      if (!user) {
+        const [firstName, ...lastNameParts] = name.split(' ');
+        const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        user = await storage.upsertUser({
+          id: userId,
+          email,
+          firstName,
+          lastName: lastNameParts.join(' ') || '',
+          isAdmin: false,
+          membershipTier: 'Starter Tier',
+          membershipStatus: 'trial',
+          accountStatus: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+
       // Store registration in database
       const registration = await storage.createAISummitRegistration({
+        userId: user.id,
         name,
         email,
         company: company || null,
@@ -3646,7 +3707,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai-summit/volunteer-registration", async (req, res) => {
     try {
       const validatedData = insertAISummitVolunteerSchema.parse(req.body);
-      const volunteer = await storage.createAISummitVolunteer(validatedData);
+      
+      // Create user account if it doesn't exist
+      let user = await storage.getUserByEmail(validatedData.email);
+      if (!user) {
+        const [firstName, ...lastNameParts] = validatedData.name.split(' ');
+        const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        user = await storage.upsertUser({
+          id: userId,
+          email: validatedData.email,
+          firstName,
+          lastName: lastNameParts.join(' ') || '',
+          isAdmin: false,
+          membershipTier: 'Starter Tier',
+          membershipStatus: 'trial',
+          accountStatus: 'active',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+      
+      const volunteer = await storage.createAISummitVolunteer({
+        ...validatedData,
+        userId: user.id
+      });
       
       // Create volunteer badge
       const badge = await badgeService.createVolunteerBadge(volunteer.id.toString(), volunteer);
@@ -3994,6 +4078,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Get participant registrations error:", error);
       res.status(500).json({ message: "Failed to get participant registrations: " + error.message });
+    }
+  });
+
+  // Real-time occupancy tracking endpoints
+  app.get("/api/ai-summit/occupancy", isAuthenticated, async (req, res) => {
+    try {
+      const occupancy = await storage.getCurrentOccupancy();
+      res.json(occupancy);
+    } catch (error: any) {
+      console.error("Get occupancy error:", error);
+      res.status(500).json({ message: "Failed to get occupancy data: " + error.message });
+    }
+  });
+
+  app.get("/api/ai-summit/occupancy/detailed", isAuthenticated, async (req, res) => {
+    try {
+      const detailed = await storage.getDetailedOccupancy();
+      res.json(detailed);
+    } catch (error: any) {
+      console.error("Get detailed occupancy error:", error);
+      res.status(500).json({ message: "Failed to get detailed occupancy data: " + error.message });
+    }
+  });
+
+  app.get("/api/ai-summit/occupancy/history", isAuthenticated, async (req, res) => {
+    try {
+      const { hours = 24 } = req.query;
+      const history = await storage.getOccupancyHistory(parseInt(hours as string));
+      res.json(history);
+    } catch (error: any) {
+      console.error("Get occupancy history error:", error);
+      res.status(500).json({ message: "Failed to get occupancy history: " + error.message });
     }
   });
 

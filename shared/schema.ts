@@ -257,6 +257,7 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 // AI Summit registrations table
 export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id), // Link to user account
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
   company: varchar("company"),
@@ -272,6 +273,7 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
 // AI Summit exhibitor registrations table
 export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_registrations", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id), // Link to user account
   companyName: varchar("company_name").notNull(),
   contactName: varchar("contact_name").notNull(),
   email: varchar("email").notNull(),
@@ -296,6 +298,7 @@ export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_regis
 // AI Summit speaker interests table
 export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id), // Link to user account
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
   phone: varchar("phone"),
@@ -355,6 +358,7 @@ export const aiSummitCheckIns = pgTable("ai_summit_check_ins", {
 // AI Summit volunteers table
 export const aiSummitVolunteers = pgTable("ai_summit_volunteers", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id), // Link to user account
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
   phone: varchar("phone"),

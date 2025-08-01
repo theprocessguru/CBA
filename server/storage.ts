@@ -1106,6 +1106,172 @@ export class DatabaseStorage implements IStorage {
 
     return { current, max, available };
   }
+
+  // Real-time occupancy tracking methods
+  async getCurrentOccupancy(): Promise<{ 
+    totalInBuilding: number; 
+    totalCheckedIn: number; 
+    totalCheckedOut: number; 
+    lastUpdated: Date 
+  }> {
+    // Get the latest check-in record for each badge
+    const latestCheckIns = await db
+      .selectDistinct({
+        badgeId: aiSummitCheckIns.badgeId,
+        checkInType: aiSummitCheckIns.checkInType,
+        timestamp: aiSummitCheckIns.timestamp,
+      })
+      .from(aiSummitCheckIns)
+      .innerJoin(
+        db.select({
+          badgeId: aiSummitCheckIns.badgeId,
+          maxTimestamp: sql<Date>`MAX(${aiSummitCheckIns.timestamp})`.as('maxTimestamp'),
+        })
+        .from(aiSummitCheckIns)
+        .groupBy(aiSummitCheckIns.badgeId)
+        .as('latest'),
+        sql`${aiSummitCheckIns.badgeId} = latest.badge_id AND ${aiSummitCheckIns.timestamp} = latest.max_timestamp`
+      );
+
+    const checkedInCount = latestCheckIns.filter(record => record.checkInType === 'check_in').length;
+    const checkedOutCount = latestCheckIns.filter(record => record.checkInType === 'check_out').length;
+    
+    return {
+      totalInBuilding: checkedInCount,
+      totalCheckedIn: latestCheckIns.filter(record => record.checkInType === 'check_in').length,
+      totalCheckedOut: latestCheckIns.filter(record => record.checkInType === 'check_out').length,
+      lastUpdated: new Date(),
+    };
+  }
+
+  async getDetailedOccupancy(): Promise<{
+    byParticipantType: Record<string, { checkedIn: number; checkedOut: number }>;
+    totalInBuilding: number;
+    recentActivity: Array<{
+      badgeId: string;
+      name: string;
+      participantType: string;
+      checkInType: string;
+      timestamp: Date;
+      staffMember?: string;
+    }>;
+  }> {
+    // Get latest status for each badge with participant details
+    const latestStatusWithDetails = await db
+      .select({
+        badgeId: aiSummitCheckIns.badgeId,
+        checkInType: aiSummitCheckIns.checkInType,
+        timestamp: aiSummitCheckIns.timestamp,
+        staffMember: aiSummitCheckIns.staffMember,
+        name: aiSummitBadges.name,
+        participantType: aiSummitBadges.participantType,
+      })
+      .from(aiSummitCheckIns)
+      .innerJoin(aiSummitBadges, eq(aiSummitCheckIns.badgeId, aiSummitBadges.badgeId))
+      .innerJoin(
+        db.select({
+          badgeId: aiSummitCheckIns.badgeId,
+          maxTimestamp: sql<Date>`MAX(${aiSummitCheckIns.timestamp})`.as('maxTimestamp'),
+        })
+        .from(aiSummitCheckIns)
+        .groupBy(aiSummitCheckIns.badgeId)
+        .as('latest'),
+        sql`${aiSummitCheckIns.badgeId} = latest.badge_id AND ${aiSummitCheckIns.timestamp} = latest.max_timestamp`
+      )
+      .orderBy(desc(aiSummitCheckIns.timestamp));
+
+    // Group by participant type
+    const byParticipantType: Record<string, { checkedIn: number; checkedOut: number }> = {};
+    let totalInBuilding = 0;
+
+    latestStatusWithDetails.forEach(record => {
+      if (!byParticipantType[record.participantType]) {
+        byParticipantType[record.participantType] = { checkedIn: 0, checkedOut: 0 };
+      }
+
+      if (record.checkInType === 'check_in') {
+        byParticipantType[record.participantType].checkedIn++;
+        totalInBuilding++;
+      } else {
+        byParticipantType[record.participantType].checkedOut++;
+      }
+    });
+
+    // Get recent activity (last 50 records)
+    const recentActivity = await db
+      .select({
+        badgeId: aiSummitCheckIns.badgeId,
+        name: aiSummitBadges.name,
+        participantType: aiSummitBadges.participantType,
+        checkInType: aiSummitCheckIns.checkInType,
+        timestamp: aiSummitCheckIns.timestamp,
+        staffMember: aiSummitCheckIns.staffMember,
+      })
+      .from(aiSummitCheckIns)
+      .innerJoin(aiSummitBadges, eq(aiSummitCheckIns.badgeId, aiSummitBadges.badgeId))
+      .orderBy(desc(aiSummitCheckIns.timestamp))
+      .limit(50);
+
+    return {
+      byParticipantType,
+      totalInBuilding,
+      recentActivity,
+    };
+  }
+
+  async getOccupancyHistory(hours: number = 24): Promise<Array<{
+    timestamp: Date;
+    totalInBuilding: number;
+    checkedInCount: number;
+    checkedOutCount: number;
+  }>> {
+    const hoursAgo = new Date(Date.now() - hours * 60 * 60 * 1000);
+    
+    // Get check-in activity grouped by hour
+    const hourlyActivity = await db
+      .select({
+        hour: sql<string>`DATE_TRUNC('hour', ${aiSummitCheckIns.timestamp})`.as('hour'),
+        checkInType: aiSummitCheckIns.checkInType,
+        count: sql<number>`COUNT(*)`.as('count'),
+      })
+      .from(aiSummitCheckIns)
+      .where(sql`${aiSummitCheckIns.timestamp} >= ${hoursAgo}`)
+      .groupBy(sql`DATE_TRUNC('hour', ${aiSummitCheckIns.timestamp})`, aiSummitCheckIns.checkInType)
+      .orderBy(sql`DATE_TRUNC('hour', ${aiSummitCheckIns.timestamp})`);
+
+    // Process into hourly totals
+    const historyMap = new Map<string, { 
+      timestamp: Date; 
+      checkedInCount: number; 
+      checkedOutCount: number; 
+    }>();
+
+    hourlyActivity.forEach(record => {
+      const hourKey = record.hour;
+      if (!historyMap.has(hourKey)) {
+        historyMap.set(hourKey, {
+          timestamp: new Date(record.hour),
+          checkedInCount: 0,
+          checkedOutCount: 0,
+        });
+      }
+
+      const entry = historyMap.get(hourKey)!;
+      if (record.checkInType === 'check_in') {
+        entry.checkedInCount = record.count;
+      } else {
+        entry.checkedOutCount = record.count;
+      }
+    });
+
+    // Calculate running total in building for each hour
+    const history = Array.from(historyMap.values()).map(entry => ({
+      ...entry,
+      totalInBuilding: entry.checkedInCount - entry.checkedOutCount,
+    }));
+
+    return history.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
 }
 
 export const storage = new DatabaseStorage();

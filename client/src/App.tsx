@@ -43,6 +43,8 @@ import About from "@/pages/About";
 import MyTAccounting from "@/pages/myt-accounting";
 import BadgeScanner from "@/pages/badge-scanner";
 import WorkshopManagement from "@/pages/workshop-management";
+import MyProfile from "@/pages/my-profile";
+import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -233,6 +235,11 @@ function Router() {
       <Route path="/admin/badge-scanner">
         <MainLayout>
           <BadgeScanner />
+        </MainLayout>
+      </Route>
+      <Route path="/admin/occupancy">
+        <MainLayout>
+          <OccupancyDashboardPage />
         </MainLayout>
       </Route>
       
