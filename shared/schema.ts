@@ -339,7 +339,6 @@ export const aiSummitBadges = pgTable("ai_summit_badges", {
   jobTitle: varchar("job_title"),
   badgeDesign: varchar("badge_design").default("standard"), // standard, vip, speaker, volunteer, team
   qrCodeData: text("qr_code_data").notNull(), // JSON string with encoded badge info
-  printableBadgeHTML: text("printable_badge_html"), // HTML for A4 printing
   isActive: boolean("is_active").default(true),
   printedAt: timestamp("printed_at"),
   issuedAt: timestamp("issued_at").defaultNow(),
@@ -725,24 +724,20 @@ export const eventRegistrations = pgTable("event_registrations", {
   eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
   userId: varchar("user_id").references(() => users.id), // Link to user account
   ticketId: varchar("ticket_id", { length: 50 }).notNull().unique(), // Generated ticket ID
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull(),
-  phone: varchar("phone", { length: 20 }),
-  company: varchar("company", { length: 255 }),
-  jobTitle: varchar("job_title", { length: 255 }),
-  dietaryRequirements: text("dietary_requirements"),
-  accessibilityNeeds: text("accessibility_needs"),
-  status: varchar("status", { length: 20 }).default('confirmed'), // confirmed, waitlist, cancelled, checked_in
+  participantName: varchar("participant_name", { length: 255 }),
+  participantEmail: varchar("participant_email", { length: 255 }),
+  participantPhone: varchar("participant_phone", { length: 20 }),
+  registrationType: varchar("registration_type", { length: 50 }),
+  specialRequirements: text("special_requirements"),
+  status: varchar("status", { length: 20 }).default('registered'), // registered, checked_in, cancelled
   registrationDate: timestamp("registration_date").defaultNow(),
-  qrCode: text("qr_code"), // Base64 encoded QR code
-  additionalData: jsonb("additional_data"), // Flexible field for event-specific data
-  checkedInAt: timestamp("checked_in_at"),
+  checkInTime: timestamp("check_in_time"),
   checkedInBy: varchar("checked_in_by", { length: 255 }),
 }, (table) => [
   index("event_registrations_event_idx").on(table.eventId),
-  index("event_registrations_email_idx").on(table.email),
+  index("event_registrations_email_idx").on(table.participantEmail),
   index("event_registrations_status_idx").on(table.status),
-  unique("unique_event_email").on(table.eventId, table.email),
+  unique("unique_event_email").on(table.eventId, table.participantEmail),
 ]);
 
 export const eventSessions = pgTable("event_sessions", {

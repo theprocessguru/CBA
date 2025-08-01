@@ -2,6 +2,8 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import multer from "multer";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -13,7 +15,8 @@ import {
   insertContentReportSchema, 
   insertInteractionSchema,
   insertAISummitVolunteerSchema,
-  insertAISummitTeamMemberSchema 
+  insertAISummitTeamMemberSchema,
+  aiSummitRegistrations 
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";

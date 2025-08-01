@@ -101,6 +101,14 @@ This is a comprehensive business automation platform built with React/TypeScript
 ## Changelog
 ```
 Changelog:
+- August 1, 2025. Security Update & Database Schema Fixes:
+  * Updated multer dependency for security compliance
+  * Fixed database schema inconsistencies between eventRegistrations definition and actual database structure
+  * Resolved column name mismatches (name vs participant_name, email vs participant_email)
+  * Added missing database imports (db, eq, aiSummitRegistrations) to routes.ts
+  * Fixed table index definitions to reference correct column names
+  * Application now running successfully on port 5000 after security updates
+  * Multer file upload functionality verified working correctly
 - August 1, 2025. UI/UX Improvements - Back Button & Spacing:
   * Added back button to membership management, user management, and content reports pages for improved navigation
   * Fixed left-side spacing issue with proper padding (px-4 md:px-6) across all admin pages
