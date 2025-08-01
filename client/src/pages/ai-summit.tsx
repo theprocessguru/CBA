@@ -89,6 +89,7 @@ const AISummit = () => {
     website: "",
     linkedIn: "",
     bio: "",
+    sessionType: "talk",
     talkTitle: "",
     talkDescription: "",
     talkDuration: "30",
@@ -466,6 +467,7 @@ const AISummit = () => {
         website: "",
         linkedIn: "",
         bio: "",
+        sessionType: "talk",
         talkTitle: "",
         talkDescription: "",
         talkDuration: "30",
@@ -1928,27 +1930,62 @@ const AISummit = () => {
 
                   {/* Talk Information */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-neutral-800">Proposed Talk Details</h3>
+                    <h3 className="text-lg font-semibold text-neutral-800">Session Details</h3>
                     <div>
-                      <Label htmlFor="talkTitle">Talk Title *</Label>
+                      <Label htmlFor="sessionType">Session Type *</Label>
+                      <Select 
+                        value={speakerData.sessionType || "talk"} 
+                        onValueChange={(value) => handleSpeakerInputChange('sessionType', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select session type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="talk">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Speaking/Presentation</span>
+                              <span className="text-xs text-gray-500">Share knowledge, insights, or case studies</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="workshop">
+                            <div className="flex flex-col">
+                              <span className="font-medium">Workshop/Hands-on Session</span>
+                              <span className="text-xs text-gray-500">Interactive session with practical activities</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="talkTitle">
+                        {speakerData.sessionType === 'workshop' ? 'Workshop Title *' : 'Talk Title *'}
+                      </Label>
                       <Input
                         id="talkTitle"
                         type="text"
                         required
                         value={speakerData.talkTitle}
                         onChange={(e) => handleSpeakerInputChange('talkTitle', e.target.value)}
-                        placeholder="Enter your proposed talk title"
+                        placeholder={speakerData.sessionType === 'workshop' ? 
+                          "Enter your workshop title (e.g., 'Building Your First AI Chatbot')" : 
+                          "Enter your talk title (e.g., 'AI Tools for Small Business Growth')"
+                        }
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="talkDescription">Talk Description *</Label>
+                      <Label htmlFor="talkDescription">
+                        {speakerData.sessionType === 'workshop' ? 'Workshop Description *' : 'Talk Description *'}
+                      </Label>
                       <Textarea
                         id="talkDescription"
                         required
                         value={speakerData.talkDescription}
                         onChange={(e) => handleSpeakerInputChange('talkDescription', e.target.value)}
-                        placeholder="Detailed description of your talk content, key points you'll cover, and learning outcomes for attendees (300-500 words)..."
+                        placeholder={speakerData.sessionType === 'workshop' ? 
+                          "Detailed description of your workshop: What will participants do? What tools/skills will they practice? What will they build or create? (300-500 words)..." :
+                          "Detailed description of your talk content, key points you'll cover, and learning outcomes for attendees (300-500 words)..."
+                        }
                         rows={5}
                       />
                     </div>
@@ -1958,15 +1995,29 @@ const AISummit = () => {
                         <Label htmlFor="talkDuration">Preferred Duration</Label>
                         <Select value={speakerData.talkDuration} onValueChange={(value) => handleSpeakerInputChange('talkDuration', value)}>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select talk duration" />
+                            <SelectValue placeholder="Select duration" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="15">15 minutes</SelectItem>
-                            <SelectItem value="30">30 minutes</SelectItem>
-                            <SelectItem value="45">45 minutes</SelectItem>
-                            <SelectItem value="60">60 minutes</SelectItem>
+                            {speakerData.sessionType === 'workshop' ? (
+                              <>
+                                <SelectItem value="45">45 minutes (recommended for workshops)</SelectItem>
+                                <SelectItem value="60">60 minutes (full workshop)</SelectItem>
+                              </>
+                            ) : (
+                              <>
+                                <SelectItem value="15">15 minutes (lightning talk)</SelectItem>
+                                <SelectItem value="30">30 minutes (standard talk)</SelectItem>
+                                <SelectItem value="45">45 minutes (extended talk)</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {speakerData.sessionType === 'workshop' ? 
+                            "Workshops need more time for hands-on activities" : 
+                            "Remember: 5min room entry + content + 5min Q&A + 5min exit"
+                          }
+                        </p>
                       </div>
                       <div>
                         <Label htmlFor="audienceLevel">Target Audience Level</Label>

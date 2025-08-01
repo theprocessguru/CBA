@@ -3427,6 +3427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         website,
         linkedIn,
         bio,
+        sessionType,
         talkTitle,
         talkDescription,
         talkDuration,
@@ -3528,9 +3529,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Store speaker interest in database
+      const speakerInterest = await storage.createAISummitSpeakerInterest({
+        name,
+        email,
+        phone,
+        company,
+        jobTitle,
+        website,
+        linkedIn,
+        bio,
+        sessionType: sessionType || "talk",
+        talkTitle,
+        talkDescription,
+        talkDuration,
+        audienceLevel,
+        speakingExperience,
+        previousSpeaking,
+        techRequirements,
+        availableSlots: JSON.stringify([]), // Empty array as JSON string
+        motivationToSpeak,
+        keyTakeaways,
+        interactiveElements,
+        handoutsProvided,
+        agreesToTerms,
+        source: "direct",
+        registeredAt: new Date()
+      });
+
       res.json({ 
         success: true, 
-        message: "Speaker interest submitted successfully! Our program committee will review your proposal and contact you soon."
+        message: "Speaker interest submitted successfully! Our program committee will review your proposal and contact you soon.",
+        speakerInterestId: speakerInterest.id
       });
 
     } catch (error: any) {

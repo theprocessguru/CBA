@@ -309,6 +309,7 @@ export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   website: varchar("website"),
   linkedIn: varchar("linked_in"),
   bio: text("bio"),
+  sessionType: varchar("session_type").default("talk"), // talk, workshop
   talkTitle: varchar("talk_title"),
   talkDescription: text("talk_description"),
   talkDuration: varchar("talk_duration"),
