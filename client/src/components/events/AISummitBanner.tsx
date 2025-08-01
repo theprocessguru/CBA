@@ -25,9 +25,11 @@ const AISummitBanner = () => {
           </div>
           
           {/* Main Title */}
-          <h2 className="text-3xl md:text-4xl font-bold mb-2">
-            🚀 First AI Summit Croydon
-          </h2>
+          <Link href="/ai-summit">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 cursor-pointer hover:text-blue-200 transition-colors duration-200">
+              🚀 First AI Summit Croydon
+            </h2>
+          </Link>
           <p className="text-xl md:text-2xl text-blue-100 font-medium">
             Position Yourself at the Forefront of AI Innovation
           </p>
