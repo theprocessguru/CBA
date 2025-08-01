@@ -58,7 +58,7 @@ const AISummit = () => {
     businessDescription: "",
     productsServices: "",
     exhibitionGoals: "",
-    boothRequirements: "Standard",
+    boothRequirements: "",
     electricalNeeds: false,
     internetNeeds: false,
     specialRequirements: "",
@@ -293,7 +293,7 @@ const AISummit = () => {
         businessDescription: "",
         productsServices: "",
         exhibitionGoals: "",
-        boothRequirements: "Standard",
+        boothRequirements: "",
         electricalNeeds: false,
         internetNeeds: false,
         specialRequirements: "",
@@ -733,6 +733,50 @@ const AISummit = () => {
                 <p className="text-lg text-neutral-600">Discover innovative AI startups and connect with entrepreneurs</p>
               </div>
 
+              {/* Exhibition Pricing */}
+              <Card className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-center text-purple-800">Exhibition Pricing</CardTitle>
+                  <p className="text-center text-purple-600">Premium exhibition opportunities for micro businesses</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-white p-4 rounded-lg border border-purple-200">
+                      <h4 className="font-semibold text-gray-800 mb-2">Space Only Options</h4>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        <li>• 2x2 metres: <strong>£588</strong></li>
+                        <li>• 2x3 metres: <strong>£882</strong></li>
+                        <li>• 2x4 metres: <strong>£1,176</strong></li>
+                        <li>• 3x3 metres: <strong>£1,323</strong></li>
+                        <li>• 3x4 metres: <strong>£1,764</strong></li>
+                      </ul>
+                      <p className="text-xs text-gray-500 mt-2">Bring your own pop-up stand</p>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border border-purple-200">
+                      <h4 className="font-semibold text-gray-800 mb-2">Table Options</h4>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        <li>• Table for 2 people: <strong>£882</strong></li>
+                        <li>• Table for 4 people: <strong>£1,764</strong></li>
+                      </ul>
+                      <p className="text-xs text-gray-500 mt-2">Includes table, chairs, and space</p>
+                    </div>
+                    
+                    <div className="bg-white p-4 rounded-lg border border-purple-200">
+                      <h4 className="font-semibold text-gray-800 mb-2">What's Included</h4>
+                      <ul className="text-sm text-gray-600 space-y-1">
+                        <li>• Event access</li>
+                        <li>• Basic amenities</li>
+                        <li>• Promotional opportunities</li>
+                        <li>• Networking access</li>
+                        <li>• Marketing support</li>
+                      </ul>
+                      <p className="text-xs text-purple-600 mt-2 font-medium">Base rate: £147 per m²</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card>
                   <CardHeader>
@@ -776,11 +820,16 @@ const AISummit = () => {
                       Are you an AI startup or business with AI solutions? Showcase your innovation 
                       at our micro business exhibition.
                     </p>
-                    <div className="space-y-2 text-sm text-green-700">
-                      <div>• Free exhibition space for CBA members</div>
+                    <div className="space-y-2 text-sm text-green-700 mb-4">
+                      <div>• Premium exhibition opportunity</div>
                       <div>• Direct access to potential customers</div>
                       <div>• Networking with investors and partners</div>
                       <div>• Exposure to local media and influencers</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border-l-4 border-green-600 mb-4">
+                      <p className="text-sm font-semibold text-gray-800">Exhibition Pricing:</p>
+                      <p className="text-xs text-gray-600">Space from £588 (2x2m) • Tables from £882 (2 people)</p>
+                      <p className="text-xs text-gray-600">£147 per square metre base rate</p>
                     </div>
                     <Button 
                       className="w-full mt-4 bg-green-600 hover:bg-green-700 font-semibold text-white"
@@ -1083,18 +1132,25 @@ const AISummit = () => {
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="boothRequirements">Booth Requirements</Label>
+                    <div className="md:col-span-2">
+                      <Label htmlFor="boothRequirements">Exhibition Space Options</Label>
                       <Select value={exhibitorData.boothRequirements} onValueChange={(value) => handleExhibitorInputChange('boothRequirements', value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select booth type" />
+                          <SelectValue placeholder="Select space option" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Standard">Standard Booth (3x3m)</SelectItem>
-                          <SelectItem value="Premium">Premium Booth (3x6m)</SelectItem>
-                          <SelectItem value="Custom">Custom Requirements</SelectItem>
+                          <SelectItem value="space-2x2">Space Only 2x2 metres (£588)</SelectItem>
+                          <SelectItem value="space-2x3">Space Only 2x3 metres (£882)</SelectItem>
+                          <SelectItem value="space-2x4">Space Only 2x4 metres (£1,176)</SelectItem>
+                          <SelectItem value="space-3x3">Space Only 3x3 metres (£1,323)</SelectItem>
+                          <SelectItem value="space-3x4">Space Only 3x4 metres (£1,764)</SelectItem>
+                          <SelectItem value="table-2">Table for 2 people (£882)</SelectItem>
+                          <SelectItem value="table-4">Table for 4 people (£1,764)</SelectItem>
                         </SelectContent>
                       </Select>
+                      <p className="text-sm text-gray-600 mt-2">
+                        Space-only options allow you to bring your own pop-up stand. All prices include event access and basic amenities.
+                      </p>
                     </div>
                   </div>
 
