@@ -8,9 +8,11 @@ import cbaLogo from "@assets/CBA LOGO.png";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
+  const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const [location] = useLocation();
   const aiMenuRef = useRef<HTMLDivElement>(null);
+  const homeMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location === path;
   const isAiPathActive = () => location.startsWith('/ai-');
@@ -21,20 +23,30 @@ const Navbar = () => {
 
   const toggleAiMenu = () => {
     setIsAiMenuOpen(!isAiMenuOpen);
+    setIsHomeMenuOpen(false); // Close home menu when opening AI menu
   };
 
-  // Close AI menu when clicking outside (but not on menu items)
+  const toggleHomeMenu = () => {
+    setIsHomeMenuOpen(!isHomeMenuOpen);
+    setIsAiMenuOpen(false); // Close AI menu when opening home menu
+  };
+
+  // Close menus when clicking outside (but not on menu items)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
       
       // Don't close if clicking on a submenu link
-      if (target.closest('a[href^="/ai-"]')) {
+      if (target.closest('a[href^="/ai-"]') || target.closest('a[href="/about"]')) {
         return;
       }
       
       if (aiMenuRef.current && !aiMenuRef.current.contains(target)) {
         setIsAiMenuOpen(false);
+      }
+      
+      if (homeMenuRef.current && !homeMenuRef.current.contains(target)) {
+        setIsHomeMenuOpen(false);
       }
     };
 
@@ -44,11 +56,17 @@ const Navbar = () => {
     };
   }, []);
 
-  // Close AI menu when location changes
+  // Close menus when location changes
   useEffect(() => {
     if (location.startsWith('/ai-')) {
       setIsAiMenuOpen(false);
     }
+    if (location === '/about') {
+      setIsHomeMenuOpen(false);
+    }
+    // Close both menus on any navigation
+    setIsAiMenuOpen(false);
+    setIsHomeMenuOpen(false);
   }, [location]);
 
   return (
@@ -96,15 +114,20 @@ const Navbar = () => {
               </Link>
             </div>
             <div className="hidden lg:ml-6 lg:flex lg:space-x-6 lg:items-center lg:h-16">
-              <Link href="/">
-                <a className={`border-b-2 ${
-                  isActive('/') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Home
-                </a>
-              </Link>
+              {/* Home Dropdown Menu */}
+              <div className="relative" ref={homeMenuRef}>
+                <button 
+                  className={`border-b-2 ${
+                    isActive('/') || isActive('/about') 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                    } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
+                  onClick={toggleHomeMenu}
+                >
+                  <span>Home</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isHomeMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
               <Link href="/directory">
                 <a className={`border-b-2 ${
                   isActive('/directory') 
@@ -132,15 +155,7 @@ const Navbar = () => {
                   Events
                 </a>
               </Link>
-              <Link href="/about">
-                <a className={`border-b-2 ${
-                  isActive('/about') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  About
-                </a>
-              </Link>
+
               <Link href="/membership-benefits">
                 <a className={`border-b-2 ${
                   isActive('/membership-benefits') 
@@ -207,6 +222,36 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Home Horizontal Submenu */}
+      {isHomeMenuOpen && (
+        <div className="bg-gray-50 border-t border-gray-200 block relative z-40" onClick={(e) => e.stopPropagation()}>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
+              <Link href="/">
+                <a className={`text-sm font-medium ${
+                  isActive('/') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsHomeMenuOpen(false)}>
+                  Home
+                </a>
+              </Link>
+              <Link href="/about">
+                <a className={`text-sm font-medium ${
+                  isActive('/about') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsHomeMenuOpen(false)}>
+                  About CBA
+                </a>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AI Horizontal Submenu */}
       {isAiMenuOpen && (
@@ -276,58 +321,73 @@ const Navbar = () => {
               🚀 First AI Summit - Oct 1st FREE
             </a>
           </Link>
+          
+          {/* Home Section */}
+          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            Home
+          </div>
           <Link href="/">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
+              } font-medium text-sm`}>
               Home
             </a>
           </Link>
+          <Link href="/about">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/about') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              About CBA
+            </a>
+          </Link>
+          
+          {/* Business Section */}
+          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            Business
+          </div>
           <Link href="/directory">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/directory') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
+              } font-medium text-sm`}>
               Directory
             </a>
           </Link>
           <Link href="/marketplace">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/marketplace') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
+              } font-medium text-sm`}>
               Marketplace
             </a>
           </Link>
           <Link href="/events">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/events') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
+              } font-medium text-sm`}>
               Events
             </a>
           </Link>
-          <Link href="/about">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-              isActive('/about') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
-              About
-            </a>
-          </Link>
+          
+          {/* Membership Section */}
+          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+            Membership
+          </div>
           <Link href="/membership-benefits">
-            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/membership-benefits') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium`}>
-              Membership
+              } font-medium text-sm`}>
+              Benefits
             </a>
           </Link>
           
