@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { User } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -41,10 +42,11 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, UserCheck, UserX, Search, AlertTriangle } from "lucide-react";
+import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const UserManagement = () => {
+  const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [suspendingUser, setSuspendingUser] = useState<User | null>(null);
@@ -135,7 +137,7 @@ const UserManagement = () => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 px-4 md:px-6">
         <Skeleton className="h-8 w-64" />
         <Card>
           <CardHeader>
@@ -162,10 +164,20 @@ const UserManagement = () => {
         <meta name="description" content="Manage user accounts, suspend or reactivate accounts for membership management." />
       </Helmet>
 
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 mb-2">User Management</h1>
-          <p className="text-neutral-600">Manage member accounts, handle suspensions and payment issues.</p>
+      <div className="space-y-6 px-4 md:px-6">
+        <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div>
+            <h1 className="text-2xl font-bold text-neutral-900 mb-2">User Management</h1>
+            <p className="text-neutral-600">Manage member accounts, handle suspensions and payment issues.</p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
         </div>
 
         {/* Filters */}
