@@ -191,6 +191,120 @@ export class GHLService {
       return false;
     }
   }
+
+  // Send message to GHL AI chatbot
+  async sendChatbotMessage(message: string, sessionId: string, contactInfo?: {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  }): Promise<{ response: string; success: boolean }> {
+    try {
+      // If contact info is provided, ensure contact exists in GHL
+      let contactId: string | undefined;
+      
+      if (contactInfo?.email) {
+        try {
+          const contact = await this.upsertContact({
+            email: contactInfo.email,
+            firstName: contactInfo.firstName,
+            lastName: contactInfo.lastName,
+            phone: contactInfo.phone,
+            tags: ['Website_Chatbot_User'],
+            customFields: {
+              chatbot_session: sessionId,
+              first_contact_source: 'Website_Chatbot'
+            }
+          });
+          contactId = contact.id;
+        } catch (error) {
+          console.warn('Failed to create/update contact for chatbot:', error);
+        }
+      }
+
+      // Send message to GHL conversation or automation
+      const response = await this.api.post('/conversations/message', {
+        type: 'chat',
+        message,
+        sessionId,
+        contactId,
+        source: 'website_chatbot',
+        metadata: {
+          timestamp: new Date().toISOString(),
+          userAgent: 'CBA_Website_Chatbot'
+        }
+      });
+
+      // Return the AI response from GHL
+      return {
+        response: response.data.reply || this.getDefaultResponse(message),
+        success: true
+      };
+
+    } catch (error) {
+      console.error('Error sending message to GHL chatbot:', error);
+      
+      // Return intelligent fallback response
+      return {
+        response: this.getDefaultResponse(message),
+        success: false
+      };
+    }
+  }
+
+  // Intelligent fallback responses for common queries
+  private getDefaultResponse(message: string): string {
+    const lowerMessage = message.toLowerCase();
+    
+    // Common business association queries
+    if (lowerMessage.includes('membership') || lowerMessage.includes('join')) {
+      return "Great! I'd love to help you learn about CBA membership. We offer different membership tiers starting from £9.99/month with amazing benefits including networking events, business support, and exclusive member offers. Would you like me to connect you with our membership team?";
+    }
+    
+    if (lowerMessage.includes('event') || lowerMessage.includes('ai summit')) {
+      return "We have exciting events coming up! Our First AI Summit Croydon 2025 is on October 1st from 10 AM-4 PM at LSBU. It's completely FREE for everyone. We also host regular networking events and workshops. Would you like more details about upcoming events?";
+    }
+    
+    if (lowerMessage.includes('business') && lowerMessage.includes('support')) {
+      return "CBA provides comprehensive business support including mentoring, funding guidance, networking opportunities, and access to professional services. Our members get priority access to business advisors and exclusive resources. How can we specifically help your business grow?";
+    }
+    
+    if (lowerMessage.includes('contact') || lowerMessage.includes('phone') || lowerMessage.includes('email')) {
+      return "You can reach us at hello@croydonbusiness.org or visit our contact page for more ways to get in touch. Our team typically responds within 24 hours. Is there something specific I can help you with right now?";
+    }
+    
+    if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+      return "Hello! Welcome to the Croydon Business Association. I'm here to help you with information about membership, events, business support, and more. What would you like to know?";
+    }
+    
+    if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('fee')) {
+      return "Our membership starts at just £9.99/month for Starter level, with Growth+ at £19.99/month, Strategic+ at £39.99/month, and premium tiers up to £199.99/month. Each tier includes increasingly valuable benefits. Would you like me to explain what's included in each level?";
+    }
+    
+    // Default response
+    return "Thank you for your message! I'm here to help with information about CBA membership, events, business support, and services. For detailed assistance, I can connect you with our team at hello@croydonbusiness.org. What specific information can I help you find?";
+  }
+
+  // Track chatbot analytics
+  async trackChatbotInteraction(sessionId: string, message: string, response: string, success: boolean): Promise<void> {
+    try {
+      // This could be used to track chatbot effectiveness
+      // Could be stored in a separate analytics table or sent to GHL as custom fields
+      const analyticsData = {
+        sessionId,
+        message,
+        response,
+        success,
+        timestamp: new Date().toISOString(),
+        source: 'website_chatbot'
+      };
+      
+      // Log for now - could be enhanced to store in database
+      console.log('Chatbot interaction:', analyticsData);
+    } catch (error) {
+      console.error('Error tracking chatbot interaction:', error);
+    }
+  }
 }
 
 // Singleton instance

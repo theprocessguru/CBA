@@ -56,6 +56,7 @@ import MyRegistrations from "@/pages/my-registrations";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
+import GHLChatbot from "@/components/GHLChatbot";
 import { useAuth } from "@/hooks/useAuth";
 
 
@@ -68,6 +69,12 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <BottomNavigation />
+      <GHLChatbot 
+        position="bottom-right"
+        primaryColor="#2563eb"
+        welcomeMessage="👋 Hi! I'm the CBA AI Assistant. How can I help you today?"
+        businessName="Croydon Business Association"
+      />
     </div>
   );
 }

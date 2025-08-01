@@ -25,6 +25,39 @@ import { badgeService } from "./badgeService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
+// Fallback chatbot response function
+function getFallbackChatbotResponse(message: string): string {
+  const lowerMessage = message.toLowerCase();
+  
+  // Common business association queries
+  if (lowerMessage.includes('membership') || lowerMessage.includes('join')) {
+    return "Great! I'd love to help you learn about CBA membership. We offer different membership tiers starting from £9.99/month with amazing benefits including networking events, business support, and exclusive member offers. Would you like me to connect you with our membership team?";
+  }
+  
+  if (lowerMessage.includes('event') || lowerMessage.includes('ai summit')) {
+    return "We have exciting events coming up! Our First AI Summit Croydon 2025 is on October 1st from 10 AM-4 PM at LSBU. It's completely FREE for everyone. We also host regular networking events and workshops. Would you like more details about upcoming events?";
+  }
+  
+  if (lowerMessage.includes('business') && lowerMessage.includes('support')) {
+    return "CBA provides comprehensive business support including mentoring, funding guidance, networking opportunities, and access to professional services. Our members get priority access to business advisors and exclusive resources. How can we specifically help your business grow?";
+  }
+  
+  if (lowerMessage.includes('contact') || lowerMessage.includes('phone') || lowerMessage.includes('email')) {
+    return "You can reach us at hello@croydonbusiness.org or visit our contact page for more ways to get in touch. Our team typically responds within 24 hours. Is there something specific I can help you with right now?";
+  }
+  
+  if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+    return "Hello! Welcome to the Croydon Business Association. I'm here to help you with information about membership, events, business support, and more. What would you like to know?";
+  }
+  
+  if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('fee')) {
+    return "Our membership starts at just £9.99/month for Starter level, with Growth+ at £19.99/month, Strategic+ at £39.99/month, and premium tiers up to £199.99/month. Each tier includes increasingly valuable benefits. Would you like me to explain what's included in each level?";
+  }
+  
+  // Default response
+  return "Thank you for your message! I'm here to help with information about CBA membership, events, business support, and services. For detailed assistance, I can connect you with our team at hello@croydonbusiness.org. What specific information can I help you find?";
+}
+
 // Initialize Stripe
 let stripe: Stripe | null = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -4751,6 +4784,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user registrations:", error);
       res.status(500).json({ message: "Failed to fetch registrations" });
+    }
+  });
+
+  // GoHighLevel Chatbot API endpoint
+  app.post("/api/ghl/chatbot/message", async (req, res) => {
+    try {
+      const { message, sessionId, contactInfo } = req.body;
+      
+      if (!message || !sessionId) {
+        return res.status(400).json({ message: "Message and session ID are required" });
+      }
+
+      const ghlService = getGHLService();
+      
+      if (!ghlService) {
+        // If GHL is not configured, use fallback responses only
+        console.warn("GHL service not available, using fallback responses");
+        const fallbackResponse = getFallbackChatbotResponse(message);
+        return res.json({ response: fallbackResponse, success: false });
+      }
+
+      // Send message to GoHighLevel
+      const result = await ghlService.sendChatbotMessage(message, sessionId, contactInfo);
+      
+      // Track the interaction for analytics
+      await ghlService.trackChatbotInteraction(sessionId, message, result.response, result.success);
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Chatbot API error:", error);
+      const fallbackResponse = getFallbackChatbotResponse(req.body.message || "");
+      res.json({ 
+        response: fallbackResponse, 
+        success: false,
+        error: "Service temporarily unavailable" 
+      });
     }
   });
 
