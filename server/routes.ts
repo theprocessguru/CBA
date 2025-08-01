@@ -2906,6 +2906,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please provide a valid email address" });
       }
 
+      // Validate attendee numbers against space/table selection
+      if (boothRequirements === 'table-2' && numberOfAttendees !== 2) {
+        return res.status(400).json({ message: "Table for 2 people requires exactly 2 attendees" });
+      }
+      
+      if (boothRequirements === 'table-4' && numberOfAttendees !== 4) {
+        return res.status(400).json({ message: "Table for 4 people requires exactly 4 attendees" });
+      }
+
+      if (numberOfAttendees < 2 || numberOfAttendees > 4) {
+        return res.status(400).json({ message: "Number of attendees must be between 2-4 people due to venue capacity constraints" });
+      }
+
+      if (!boothRequirements) {
+        return res.status(400).json({ message: "Exhibition space option is required" });
+      }
+
       // Store registration in database
       const registration = await storage.createAISummitExhibitorRegistration({
         companyName,

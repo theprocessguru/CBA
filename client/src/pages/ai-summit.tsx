@@ -372,6 +372,44 @@ const AISummit = () => {
       });
       return;
     }
+    
+    // Validate attendee numbers against space/table selection
+    if (exhibitorData.boothRequirements === 'table-2' && exhibitorData.numberOfAttendees !== 2) {
+      toast({
+        title: "Registration Error",
+        description: "You selected a table for 2 people but indicated " + exhibitorData.numberOfAttendees + " attendees. Please match your space selection with attendee count.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (exhibitorData.boothRequirements === 'table-4' && exhibitorData.numberOfAttendees !== 4) {
+      toast({
+        title: "Registration Error", 
+        description: "You selected a table for 4 people but indicated " + exhibitorData.numberOfAttendees + " attendees. Please match your space selection with attendee count.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (exhibitorData.numberOfAttendees < 2 || exhibitorData.numberOfAttendees > 4) {
+      toast({
+        title: "Registration Error",
+        description: "Number of attendees must be between 2-4 people due to venue capacity constraints.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!exhibitorData.boothRequirements) {
+      toast({
+        title: "Registration Error",
+        description: "Please select an exhibition space option.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     exhibitorMutation.mutate(exhibitorData);
   };
 
@@ -1133,23 +1171,24 @@ const AISummit = () => {
                     </div>
 
                     <div className="md:col-span-2">
-                      <Label htmlFor="boothRequirements">Exhibition Space Options</Label>
+                      <Label htmlFor="boothRequirements">Exhibition Space Options *</Label>
                       <Select value={exhibitorData.boothRequirements} onValueChange={(value) => handleExhibitorInputChange('boothRequirements', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select space option" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="space-2x2">Space Only 2x2 metres (£588)</SelectItem>
-                          <SelectItem value="space-2x3">Space Only 2x3 metres (£882)</SelectItem>
-                          <SelectItem value="space-2x4">Space Only 2x4 metres (£1,176)</SelectItem>
-                          <SelectItem value="space-3x3">Space Only 3x3 metres (£1,323)</SelectItem>
-                          <SelectItem value="space-3x4">Space Only 3x4 metres (£1,764)</SelectItem>
-                          <SelectItem value="table-2">Table for 2 people (£882)</SelectItem>
-                          <SelectItem value="table-4">Table for 4 people (£1,764)</SelectItem>
+                          <SelectItem value="space-2x2">Space Only 2x2 metres - 2-4 people (£588)</SelectItem>
+                          <SelectItem value="space-2x3">Space Only 2x3 metres - 2-4 people (£882)</SelectItem>
+                          <SelectItem value="space-2x4">Space Only 2x4 metres - 2-4 people (£1,176)</SelectItem>
+                          <SelectItem value="space-3x3">Space Only 3x3 metres - 2-4 people (£1,323)</SelectItem>
+                          <SelectItem value="space-3x4">Space Only 3x4 metres - 2-4 people (£1,764)</SelectItem>
+                          <SelectItem value="table-2">Table for 2 people exactly (£882)</SelectItem>
+                          <SelectItem value="table-4">Table for 4 people exactly (£1,764)</SelectItem>
                         </SelectContent>
                       </Select>
                       <p className="text-sm text-gray-600 mt-2">
-                        Space-only options allow you to bring your own pop-up stand. All prices include event access and basic amenities.
+                        <strong>Space-only:</strong> Bring your own stand (2-4 staff). <strong>Tables:</strong> Fixed seating for exact number.
+                        All prices include event access and basic amenities.
                       </p>
                     </div>
                   </div>
@@ -1189,15 +1228,18 @@ const AISummit = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="numberOfAttendees">Number of Staff Attending</Label>
+                      <Label htmlFor="numberOfAttendees">Number of Staff Attending *</Label>
                       <Input
                         id="numberOfAttendees"
                         type="number"
-                        min="1"
-                        max="10"
+                        min="2"
+                        max="4"
                         value={exhibitorData.numberOfAttendees}
                         onChange={(e) => handleExhibitorInputChange('numberOfAttendees', parseInt(e.target.value) || 2)}
                       />
+                      <p className="text-sm text-gray-600 mt-1">
+                        Limited to 2-4 people per space/table allocation due to venue capacity constraints.
+                      </p>
                     </div>
 
                     <div>
