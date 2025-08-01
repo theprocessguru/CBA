@@ -425,7 +425,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin membership management routes
   app.get('/api/admin/membership-stats', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("Admin stats request - User:", JSON.stringify(req.user, null, 2));
       if (!req.user.isAdmin) {
+        console.log("Admin access denied - isAdmin:", req.user.isAdmin);
         return res.status(403).json({ message: "Admin access required" });
       }
 

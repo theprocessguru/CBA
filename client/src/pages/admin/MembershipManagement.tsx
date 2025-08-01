@@ -43,19 +43,31 @@ const MembershipManagement = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [tierFilter, setTierFilter] = useState("all");
 
-  const { data: stats, isLoading: isLoadingStats } = useQuery<MembershipStats>({
+  const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery<MembershipStats>({
     queryKey: ['/api/admin/membership-stats'],
+    queryFn: async () => {
+      const response = await fetch('/api/admin/membership-stats');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stats: ${response.statusText}`);
+      }
+      return response.json();
+    }
   });
 
-  const { data: members, isLoading: isLoadingMembers } = useQuery<MemberData[]>({
+  const { data: members, isLoading: isLoadingMembers, error: membersError } = useQuery<MemberData[]>({
     queryKey: ['/api/admin/members', searchTerm, statusFilter, tierFilter],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (tierFilter !== 'all') params.append('tier', tierFilter);
       
-      return fetch(`/api/admin/members?${params.toString()}`).then(res => res.json());
+      const response = await fetch(`/api/admin/members?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch members: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
     }
   });
 
@@ -99,7 +111,7 @@ const MembershipManagement = () => {
     }
   };
 
-  const filteredMembers = members?.filter(member => {
+  const filteredMembers = (Array.isArray(members) ? members : []).filter(member => {
     const matchesSearch = !searchTerm || 
       member.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       `${member.firstName} ${member.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
@@ -108,7 +120,7 @@ const MembershipManagement = () => {
     const matchesTier = tierFilter === 'all' || member.membershipTier === tierFilter;
     
     return matchesSearch && matchesStatus && matchesTier;
-  }) || [];
+  });
 
   return (
     <div className="space-y-6">
