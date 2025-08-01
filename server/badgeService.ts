@@ -338,6 +338,22 @@ export class BadgeService {
   }
 
   /**
+   * Get printable badge HTML
+   */
+  async getPrintableBadge(badgeId: string): Promise<string> {
+    const badge = await storage.getAISummitBadgeById(badgeId);
+    if (!badge) {
+      throw new Error('Badge not found');
+    }
+
+    if (!badge.printableBadgeHTML) {
+      throw new Error('Printable badge not available');
+    }
+
+    return badge.printableBadgeHTML;
+  }
+
+  /**
    * Create badges for all attendees from a registration
    */
   async createAttendeeBadges(registrationId: string, attendees: any[]): Promise<AISummitBadge[]> {

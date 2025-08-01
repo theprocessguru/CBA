@@ -172,7 +172,6 @@ export class EmailService {
       };
     }
   }
-  }
 
   public async sendPasswordResetEmail(to: string, resetToken: string, userName?: string): Promise<boolean> {
     if (!this.isConfigured()) {

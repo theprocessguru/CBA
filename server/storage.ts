@@ -13,6 +13,10 @@ import {
   aiSummitCheckIns,
   aiSummitVolunteers,
   aiSummitTeamMembers,
+  aiSummitWorkshops,
+  aiSummitWorkshopRegistrations,
+  aiSummitSpeakingSessions,
+  aiSummitSessionRegistrations,
   type User,
   type UpsertUser,
   type Business,
@@ -40,6 +44,14 @@ import {
   type InsertAISummitVolunteer,
   type AISummitTeamMember,
   type InsertAISummitTeamMember,
+  type AISummitWorkshop,
+  type InsertAISummitWorkshop,
+  type AISummitWorkshopRegistration,
+  type InsertAISummitWorkshopRegistration,
+  type AISummitSpeakingSession,
+  type InsertAISummitSpeakingSession,
+  type AISummitSpeakingSessionRegistration,
+  type InsertAISummitSpeakingSessionRegistration,
   contentReports,
   type ContentReport,
   type InsertContentReport,
@@ -176,6 +188,36 @@ export interface IStorage {
   createAISummitTeamMember(teamMember: InsertAISummitTeamMember): Promise<AISummitTeamMember>;
   getAISummitTeamMemberById(id: number): Promise<AISummitTeamMember | undefined>;
   getAllAISummitTeamMembers(): Promise<AISummitTeamMember[]>;
+
+  // Workshop operations
+  createAISummitWorkshop(workshop: InsertAISummitWorkshop): Promise<AISummitWorkshop>;
+  getAISummitWorkshopById(id: number): Promise<AISummitWorkshop | undefined>;
+  getAllAISummitWorkshops(): Promise<AISummitWorkshop[]>;
+  updateAISummitWorkshop(id: number, workshop: Partial<InsertAISummitWorkshop>): Promise<AISummitWorkshop>;
+  deleteAISummitWorkshop(id: number): Promise<boolean>;
+  getActiveAISummitWorkshops(): Promise<AISummitWorkshop[]>;
+
+  // Workshop registration operations
+  createAISummitWorkshopRegistration(registration: InsertAISummitWorkshopRegistration): Promise<AISummitWorkshopRegistration>;
+  getAISummitWorkshopRegistrationById(id: number): Promise<AISummitWorkshopRegistration | undefined>;
+  getWorkshopRegistrationsByWorkshopId(workshopId: number): Promise<AISummitWorkshopRegistration[]>;
+  getWorkshopRegistrationsByBadgeId(badgeId: string): Promise<AISummitWorkshopRegistration[]>;
+  checkWorkshopCapacity(workshopId: number): Promise<{ current: number; max: number; available: number }>;
+
+  // Speaking session operations
+  createAISummitSpeakingSession(session: InsertAISummitSpeakingSession): Promise<AISummitSpeakingSession>;
+  getAISummitSpeakingSessionById(id: number): Promise<AISummitSpeakingSession | undefined>;
+  getAllAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]>;
+  updateAISummitSpeakingSession(id: number, session: Partial<InsertAISummitSpeakingSession>): Promise<AISummitSpeakingSession>;
+  deleteAISummitSpeakingSession(id: number): Promise<boolean>;
+  getActiveAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]>;
+
+  // Speaking session registration operations
+  createAISummitSpeakingSessionRegistration(registration: InsertAISummitSpeakingSessionRegistration): Promise<AISummitSpeakingSessionRegistration>;
+  getAISummitSpeakingSessionRegistrationById(id: number): Promise<AISummitSpeakingSessionRegistration | undefined>;
+  getSessionRegistrationsBySessionId(sessionId: number): Promise<AISummitSpeakingSessionRegistration[]>;
+  getSessionRegistrationsByBadgeId(badgeId: string): Promise<AISummitSpeakingSessionRegistration[]>;
+  checkSessionCapacity(sessionId: number): Promise<{ current: number; max: number; available: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -877,6 +919,192 @@ export class DatabaseStorage implements IStorage {
 
   async getAllAISummitTeamMembers(): Promise<AISummitTeamMember[]> {
     return await db.select().from(aiSummitTeamMembers).orderBy(desc(aiSummitTeamMembers.createdAt));
+  }
+
+  // Workshop operations
+  async createAISummitWorkshop(workshopData: InsertAISummitWorkshop): Promise<AISummitWorkshop> {
+    const [workshop] = await db
+      .insert(aiSummitWorkshops)
+      .values(workshopData)
+      .returning();
+    return workshop;
+  }
+
+  async getAISummitWorkshopById(id: number): Promise<AISummitWorkshop | undefined> {
+    const [workshop] = await db
+      .select()
+      .from(aiSummitWorkshops)
+      .where(eq(aiSummitWorkshops.id, id));
+    return workshop;
+  }
+
+  async getAllAISummitWorkshops(): Promise<AISummitWorkshop[]> {
+    return await db.select().from(aiSummitWorkshops).orderBy(aiSummitWorkshops.startTime);
+  }
+
+  async updateAISummitWorkshop(id: number, workshopData: Partial<InsertAISummitWorkshop>): Promise<AISummitWorkshop> {
+    const [workshop] = await db
+      .update(aiSummitWorkshops)
+      .set(workshopData)
+      .where(eq(aiSummitWorkshops.id, id))
+      .returning();
+    return workshop;
+  }
+
+  async deleteAISummitWorkshop(id: number): Promise<boolean> {
+    const result = await db
+      .delete(aiSummitWorkshops)
+      .where(eq(aiSummitWorkshops.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getActiveAISummitWorkshops(): Promise<AISummitWorkshop[]> {
+    return await db
+      .select()
+      .from(aiSummitWorkshops)
+      .where(eq(aiSummitWorkshops.isActive, true))
+      .orderBy(aiSummitWorkshops.startTime);
+  }
+
+  // Workshop registration operations
+  async createAISummitWorkshopRegistration(registrationData: InsertAISummitWorkshopRegistration): Promise<AISummitWorkshopRegistration> {
+    const [registration] = await db
+      .insert(aiSummitWorkshopRegistrations)
+      .values(registrationData)
+      .returning();
+    return registration;
+  }
+
+  async getAISummitWorkshopRegistrationById(id: number): Promise<AISummitWorkshopRegistration | undefined> {
+    const [registration] = await db
+      .select()
+      .from(aiSummitWorkshopRegistrations)
+      .where(eq(aiSummitWorkshopRegistrations.id, id));
+    return registration;
+  }
+
+  async getWorkshopRegistrationsByWorkshopId(workshopId: number): Promise<AISummitWorkshopRegistration[]> {
+    return await db
+      .select()
+      .from(aiSummitWorkshopRegistrations)
+      .where(eq(aiSummitWorkshopRegistrations.workshopId, workshopId))
+      .orderBy(aiSummitWorkshopRegistrations.registeredAt);
+  }
+
+  async getWorkshopRegistrationsByBadgeId(badgeId: string): Promise<AISummitWorkshopRegistration[]> {
+    return await db
+      .select()
+      .from(aiSummitWorkshopRegistrations)
+      .where(eq(aiSummitWorkshopRegistrations.badgeId, badgeId))
+      .orderBy(aiSummitWorkshopRegistrations.registeredAt);
+  }
+
+  async checkWorkshopCapacity(workshopId: number): Promise<{ current: number; max: number; available: number }> {
+    const workshop = await this.getAISummitWorkshopById(workshopId);
+    if (!workshop) {
+      throw new Error(`Workshop with id ${workshopId} not found`);
+    }
+
+    const registrations = await this.getWorkshopRegistrationsByWorkshopId(workshopId);
+    const current = registrations.length;
+    const max = workshop.maxCapacity;
+    const available = max - current;
+
+    return { current, max, available };
+  }
+
+  // Speaking session operations
+  async createAISummitSpeakingSession(sessionData: InsertAISummitSpeakingSession): Promise<AISummitSpeakingSession> {
+    const [session] = await db
+      .insert(aiSummitSpeakingSessions)
+      .values(sessionData)
+      .returning();
+    return session;
+  }
+
+  async getAISummitSpeakingSessionById(id: number): Promise<AISummitSpeakingSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(aiSummitSpeakingSessions)
+      .where(eq(aiSummitSpeakingSessions.id, id));
+    return session;
+  }
+
+  async getAllAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]> {
+    return await db.select().from(aiSummitSpeakingSessions).orderBy(aiSummitSpeakingSessions.startTime);
+  }
+
+  async updateAISummitSpeakingSession(id: number, sessionData: Partial<InsertAISummitSpeakingSession>): Promise<AISummitSpeakingSession> {
+    const [session] = await db
+      .update(aiSummitSpeakingSessions)
+      .set(sessionData)
+      .where(eq(aiSummitSpeakingSessions.id, id))
+      .returning();
+    return session;
+  }
+
+  async deleteAISummitSpeakingSession(id: number): Promise<boolean> {
+    const result = await db
+      .delete(aiSummitSpeakingSessions)
+      .where(eq(aiSummitSpeakingSessions.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getActiveAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]> {
+    return await db
+      .select()
+      .from(aiSummitSpeakingSessions)
+      .where(eq(aiSummitSpeakingSessions.isActive, true))
+      .orderBy(aiSummitSpeakingSessions.startTime);
+  }
+
+  // Speaking session registration operations
+  async createAISummitSpeakingSessionRegistration(registrationData: InsertAISummitSpeakingSessionRegistration): Promise<AISummitSpeakingSessionRegistration> {
+    const [registration] = await db
+      .insert(aiSummitSessionRegistrations)
+      .values(registrationData)
+      .returning();
+    return registration;
+  }
+
+  async getAISummitSpeakingSessionRegistrationById(id: number): Promise<AISummitSpeakingSessionRegistration | undefined> {
+    const [registration] = await db
+      .select()
+      .from(aiSummitSessionRegistrations)
+      .where(eq(aiSummitSessionRegistrations.id, id));
+    return registration;
+  }
+
+  async getSessionRegistrationsBySessionId(sessionId: number): Promise<AISummitSpeakingSessionRegistration[]> {
+    return await db
+      .select()
+      .from(aiSummitSessionRegistrations)
+      .where(eq(aiSummitSessionRegistrations.sessionId, sessionId))
+      .orderBy(aiSummitSessionRegistrations.registeredAt);
+  }
+
+  async getSessionRegistrationsByBadgeId(badgeId: string): Promise<AISummitSpeakingSessionRegistration[]> {
+    return await db
+      .select()
+      .from(aiSummitSessionRegistrations)
+      .where(eq(aiSummitSessionRegistrations.badgeId, badgeId))
+      .orderBy(aiSummitSessionRegistrations.registeredAt);
+  }
+
+  async checkSessionCapacity(sessionId: number): Promise<{ current: number; max: number; available: number }> {
+    const session = await this.getAISummitSpeakingSessionById(sessionId);
+    if (!session) {
+      throw new Error(`Speaking session with id ${sessionId} not found`);
+    }
+
+    const registrations = await this.getSessionRegistrationsBySessionId(sessionId);
+    const current = registrations.length;
+    const max = session.maxCapacity;
+    const available = max - current;
+
+    return { current, max, available };
   }
 }
 

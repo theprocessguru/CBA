@@ -35,13 +35,76 @@ interface AttendeeStats {
 
 export default function BadgeScanner() {
   const [badgeId, setBadgeId] = useState('');
-  const [checkInType, setCheckInType] = useState<'check_in' | 'check_out'>('check_in');
+  const [scanMode, setScanMode] = useState<'check_in' | 'check_out'>('check_in');
   const [location, setLocation] = useState('main_entrance');
   const [staffMember, setStaffMember] = useState('');
   const [notes, setNotes] = useState('');
   const [lastResult, setLastResult] = useState<CheckInResult | null>(null);
+  const [accessCode, setAccessCode] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Simple access control - in production, this would be more secure
+  const validateAccess = (code: string) => {
+    const validCodes = ['VOLUNTEER2025', 'STAFF2025', 'ADMIN2025'];
+    return validCodes.includes(code.toUpperCase());
+  };
+
+  const handleAccessSubmit = () => {
+    if (validateAccess(accessCode)) {
+      setIsAuthorized(true);
+      toast({
+        title: "Access Granted",
+        description: "You can now scan attendee badges",
+      });
+    } else {
+      toast({
+        title: "Access Denied", 
+        description: "Invalid access code. Please contact event organizers.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Show access control screen if not authorized
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <QrCode className="h-6 w-6" />
+              Badge Scanner Access
+            </CardTitle>
+            <CardDescription>
+              Enter your volunteer or staff access code to continue
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="accessCode">Access Code</Label>
+              <Input
+                id="accessCode"
+                type="password"
+                placeholder="Enter access code"
+                value={accessCode}
+                onChange={(e) => setAccessCode(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAccessSubmit()}
+              />
+            </div>
+            <Button onClick={handleAccessSubmit} className="w-full">
+              Access Scanner
+            </Button>
+            <div className="text-xs text-gray-500 text-center">
+              Only authorized volunteers and staff can access the badge scanner.
+              Contact event organizers if you need an access code.
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Focus input on mount and after each scan
   useEffect(() => {
@@ -96,6 +159,27 @@ export default function BadgeScanner() {
     },
   });
 
+  // Email badge mutation for sending printable badges
+  const emailBadgeMutation = useMutation({
+    mutationFn: async (data: { badgeId: string; email: string }) => {
+      const response = await apiRequest('POST', '/api/ai-summit/email-badge', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email Sent",
+        description: "Printable badge has been sent successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Email Failed",
+        description: error.message || "Failed to send badge email",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -110,7 +194,7 @@ export default function BadgeScanner() {
 
     checkInMutation.mutate({
       badgeId: badgeId.trim(),
-      checkInType,
+      checkInType: scanMode,
       location,
       staffMember: staffMember || undefined,
       notes: notes || undefined,
@@ -260,35 +344,59 @@ export default function BadgeScanner() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="checkInType">Action</Label>
-                  <Select value={checkInType} onValueChange={(value: 'check_in' | 'check_out') => setCheckInType(value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="check_in">Check In</SelectItem>
-                      <SelectItem value="check_out">Check Out</SelectItem>
-                    </SelectContent>
-                  </Select>
+              {/* Scan Mode Selection - Prominent Buttons */}
+              <div className="space-y-3">
+                <Label>Scan Mode</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    type="button"
+                    variant={scanMode === 'check_in' ? 'default' : 'outline'}
+                    onClick={() => setScanMode('check_in')}
+                    className={`h-16 flex flex-col items-center justify-center space-y-1 ${
+                      scanMode === 'check_in' 
+                        ? 'bg-green-600 hover:bg-green-700 text-white' 
+                        : 'border-green-600 text-green-600 hover:bg-green-50'
+                    }`}
+                  >
+                    <UserCheck className="h-6 w-6" />
+                    <span className="text-sm font-medium">Check In</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={scanMode === 'check_out' ? 'default' : 'outline'}
+                    onClick={() => setScanMode('check_out')}
+                    className={`h-16 flex flex-col items-center justify-center space-y-1 ${
+                      scanMode === 'check_out' 
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                        : 'border-orange-600 text-orange-600 hover:bg-orange-50'
+                    }`}
+                  >
+                    <UserX className="h-6 w-6" />
+                    <span className="text-sm font-medium">Check Out</span>
+                  </Button>
                 </div>
+                <p className="text-sm text-gray-500">
+                  {scanMode === 'check_in' 
+                    ? 'Scanning people into the building' 
+                    : 'Scanning people out of the building'
+                  }
+                </p>
+              </div>
 
-                <div>
-                  <Label htmlFor="location">Location</Label>
-                  <Select value={location} onValueChange={setLocation}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="main_entrance">Main Entrance</SelectItem>
-                      <SelectItem value="exhibition_hall">Exhibition Hall</SelectItem>
-                      <SelectItem value="conference_room">Conference Room</SelectItem>
-                      <SelectItem value="networking_area">Networking Area</SelectItem>
-                      <SelectItem value="registration_desk">Registration Desk</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Select value={location} onValueChange={setLocation}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="main_entrance">Main Entrance</SelectItem>
+                    <SelectItem value="exhibition_hall">Exhibition Hall</SelectItem>
+                    <SelectItem value="conference_room">Conference Room</SelectItem>
+                    <SelectItem value="networking_area">Networking Area</SelectItem>
+                    <SelectItem value="registration_desk">Registration Desk</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
@@ -318,7 +426,7 @@ export default function BadgeScanner() {
                 disabled={checkInMutation.isPending}
               >
                 {checkInMutation.isPending ? 'Processing...' : 
-                 checkInType === 'check_in' ? 'Check In' : 'Check Out'}
+                 scanMode === 'check_in' ? 'Check In' : 'Check Out'}
               </Button>
             </form>
           </CardContent>
@@ -361,6 +469,11 @@ export default function BadgeScanner() {
                         {lastResult.badge.participantType}
                       </Badge>
                     </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Email:</span>
+                      <span className="text-sm">{lastResult.badge.email}</span>
+                    </div>
+                    
                     {lastResult.badge.company && (
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">Company:</span>
@@ -376,6 +489,22 @@ export default function BadgeScanner() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Time:</span>
                       <span className="text-sm">{new Date().toLocaleTimeString()}</span>
+                    </div>
+                    
+                    {/* Email Badge Button */}
+                    <div className="pt-2 border-t">
+                      <Button 
+                        onClick={() => emailBadgeMutation.mutate({
+                          badgeId: lastResult.badge.badgeId,
+                          email: lastResult.badge.email
+                        })}
+                        disabled={emailBadgeMutation.isPending}
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                      >
+                        {emailBadgeMutation.isPending ? 'Sending...' : 'Email Printable Badge'}
+                      </Button>
                     </div>
                   </div>
                 )}

@@ -383,6 +383,105 @@ export const aiSummitTeamMembers = pgTable("ai_summit_team_members", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// AI Summit workshop sessions table
+export const aiSummitWorkshops = pgTable("ai_summit_workshops", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  facilitator: varchar("facilitator").notNull(), // Speaker/facilitator name
+  facilitatorBio: text("facilitator_bio"),
+  facilitatorCompany: varchar("facilitator_company"),
+  duration: integer("duration").notNull(), // Duration in minutes
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  room: varchar("room").notNull(), // Room name/number
+  maxCapacity: integer("max_capacity").notNull(),
+  currentRegistrations: integer("current_registrations").default(0),
+  category: varchar("category").notNull(), // beginner, intermediate, advanced, business, technical
+  tags: text("tags"), // JSON array of tags
+  prerequisites: text("prerequisites"),
+  learningObjectives: text("learning_objectives"),
+  materials: text("materials"), // What attendees should bring or will receive
+  isActive: boolean("is_active").default(true),
+  registrationDeadline: timestamp("registration_deadline"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// AI Summit workshop registrations table
+export const aiSummitWorkshopRegistrations = pgTable("ai_summit_workshop_registrations", {
+  id: serial("id").primaryKey(),
+  workshopId: integer("workshop_id").notNull().references(() => aiSummitWorkshops.id),
+  badgeId: varchar("badge_id").notNull().references(() => aiSummitBadges.badgeId),
+  attendeeName: varchar("attendee_name").notNull(),
+  attendeeEmail: varchar("attendee_email").notNull(),
+  attendeeCompany: varchar("attendee_company"),
+  attendeeJobTitle: varchar("attendee_job_title"),
+  experienceLevel: varchar("experience_level"), // beginner, intermediate, advanced
+  specificInterests: text("specific_interests"), // What they hope to learn
+  dietaryRequirements: text("dietary_requirements"),
+  accessibilityNeeds: text("accessibility_needs"),
+  registrationSource: varchar("registration_source").default("direct"), // direct, badge_holder, exhibitor
+  registeredAt: timestamp("registered_at").defaultNow(),
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  noShow: boolean("no_show").default(false),
+}, (table) => [
+  // Prevent duplicate registrations for same workshop
+  primaryKey(table.workshopId, table.badgeId)
+]);
+
+// AI Summit speaking sessions table (different from speaker interests - these are confirmed sessions)
+export const aiSummitSpeakingSessions = pgTable("ai_summit_speaking_sessions", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  speakerName: varchar("speaker_name").notNull(),
+  speakerBio: text("speaker_bio"),
+  speakerCompany: varchar("speaker_company"),
+  speakerJobTitle: varchar("speaker_job_title"),
+  coSpeakers: text("co_speakers"), // JSON array for multiple speakers
+  sessionType: varchar("session_type").notNull(), // keynote, panel, presentation, demo, fireside_chat
+  duration: integer("duration").notNull(), // Duration in minutes
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  venue: varchar("venue").notNull(), // Main stage, conference room, etc.
+  maxCapacity: integer("max_capacity").notNull(),
+  currentRegistrations: integer("current_registrations").default(0),
+  audienceLevel: varchar("audience_level").notNull(), // all, beginner, intermediate, advanced, business_leaders
+  topics: text("topics"), // JSON array of topic tags
+  keyTakeaways: text("key_takeaways"),
+  isLiveStreamed: boolean("is_live_streamed").default(false),
+  isRecorded: boolean("is_recorded").default(false),
+  requiresRegistration: boolean("requires_registration").default(true),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// AI Summit speaking session registrations table
+export const aiSummitSessionRegistrations = pgTable("ai_summit_session_registrations", {
+  id: serial("id").primaryKey(),
+  sessionId: integer("session_id").notNull().references(() => aiSummitSpeakingSessions.id),
+  badgeId: varchar("badge_id").notNull().references(() => aiSummitBadges.badgeId),
+  attendeeName: varchar("attendee_name").notNull(),
+  attendeeEmail: varchar("attendee_email").notNull(),
+  attendeeCompany: varchar("attendee_company"),
+  attendeeJobTitle: varchar("attendee_job_title"),
+  specificInterests: text("specific_interests"), // What they hope to learn from this session
+  questionsForSpeaker: text("questions_for_speaker"),
+  registrationSource: varchar("registration_source").default("direct"), // direct, badge_holder, exhibitor
+  registeredAt: timestamp("registered_at").defaultNow(),
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  noShow: boolean("no_show").default(false),
+}, (table) => [
+  // Prevent duplicate registrations for same session
+  primaryKey(table.sessionId, table.badgeId)
+]);
+
+
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -509,6 +608,10 @@ export const insertAISummitBadgeSchema = createInsertSchema(aiSummitBadges).omit
 export const insertAISummitCheckInSchema = createInsertSchema(aiSummitCheckIns).omit({ id: true });
 export const insertAISummitVolunteerSchema = createInsertSchema(aiSummitVolunteers).omit({ id: true });
 export const insertAISummitTeamMemberSchema = createInsertSchema(aiSummitTeamMembers).omit({ id: true });
+export const insertAISummitWorkshopSchema = createInsertSchema(aiSummitWorkshops).omit({ id: true });
+export const insertAISummitWorkshopRegistrationSchema = createInsertSchema(aiSummitWorkshopRegistrations).omit({ id: true });
+export const insertAISummitSpeakingSessionSchema = createInsertSchema(aiSummitSpeakingSessions).omit({ id: true });
+export const insertAISummitSpeakingSessionRegistrationSchema = createInsertSchema(aiSummitSessionRegistrations).omit({ id: true });
 
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
@@ -576,3 +679,15 @@ export type AISummitVolunteer = typeof aiSummitVolunteers.$inferSelect;
 
 export type InsertAISummitTeamMember = z.infer<typeof insertAISummitTeamMemberSchema>;
 export type AISummitTeamMember = typeof aiSummitTeamMembers.$inferSelect;
+
+export type InsertAISummitWorkshop = z.infer<typeof insertAISummitWorkshopSchema>;
+export type AISummitWorkshop = typeof aiSummitWorkshops.$inferSelect;
+
+export type InsertAISummitWorkshopRegistration = z.infer<typeof insertAISummitWorkshopRegistrationSchema>;
+export type AISummitWorkshopRegistration = typeof aiSummitWorkshopRegistrations.$inferSelect;
+
+export type InsertAISummitSpeakingSession = z.infer<typeof insertAISummitSpeakingSessionSchema>;
+export type AISummitSpeakingSession = typeof aiSummitSpeakingSessions.$inferSelect;
+
+export type InsertAISummitSpeakingSessionRegistration = z.infer<typeof insertAISummitSpeakingSessionRegistrationSchema>;
+export type AISummitSpeakingSessionRegistration = typeof aiSummitSessionRegistrations.$inferSelect;

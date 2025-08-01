@@ -3482,6 +3482,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== AI SUMMIT BADGE MANAGEMENT ROUTES ====================
   
+  // Email printable badge to participant
+  app.post("/api/ai-summit/email-badge", async (req, res) => {
+    try {
+      const { badgeId, email } = req.body;
+
+      if (!badgeId || !email) {
+        return res.status(400).json({ message: "Badge ID and email are required" });
+      }
+
+      // Get the printable badge HTML
+      const badgeHTML = await badgeService.getPrintableBadge(badgeId);
+      
+      // Send email with printable badge
+      const emailResult = await emailService.sendPrintableBadgeEmail(email, badgeId, badgeHTML);
+      
+      if (emailResult.success) {
+        res.json({ message: "Printable badge sent successfully" });
+      } else {
+        res.status(500).json({ message: emailResult.message });
+      }
+    } catch (error: any) {
+      console.error("Email badge error:", error);
+      res.status(500).json({ message: "Failed to send badge email: " + error.message });
+    }
+  });
+  
   // QR Code Check-in/Check-out endpoint
   app.post("/api/ai-summit/check-in", async (req, res) => {
     try {
@@ -3712,6 +3738,262 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Get team members error:", error);
       res.status(500).json({ message: "Failed to get team members: " + error.message });
+    }
+  });
+
+
+
+  // AI Summit Workshop Management Endpoints
+  
+  // Create a new workshop
+  app.post("/api/ai-summit/workshops", isAuthenticated, async (req, res) => {
+    try {
+      const workshopSchema = insertAISummitWorkshopSchema.extend({
+        startTime: z.string(),
+        endTime: z.string(),
+      });
+      
+      const validated = workshopSchema.parse(req.body);
+      
+      const workshop = await storage.createAISummitWorkshop({
+        ...validated,
+        startTime: new Date(validated.startTime),
+        endTime: new Date(validated.endTime),
+      });
+      
+      res.json({
+        success: true,
+        message: "Workshop created successfully!",
+        workshop
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      console.error("Workshop creation error:", error);
+      res.status(500).json({ message: "Failed to create workshop: " + error.message });
+    }
+  });
+
+  // Get all workshops
+  app.get("/api/ai-summit/workshops", async (req, res) => {
+    try {
+      const workshops = await storage.getAllAISummitWorkshops();
+      res.json(workshops);
+    } catch (error: any) {
+      console.error("Get workshops error:", error);
+      res.status(500).json({ message: "Failed to get workshops: " + error.message });
+    }
+  });
+
+  // Get active workshops
+  app.get("/api/ai-summit/workshops/active", async (req, res) => {
+    try {
+      const workshops = await storage.getActiveAISummitWorkshops();
+      res.json(workshops);
+    } catch (error: any) {
+      console.error("Get active workshops error:", error);
+      res.status(500).json({ message: "Failed to get active workshops: " + error.message });
+    }
+  });
+
+  // Register for a workshop
+  app.post("/api/ai-summit/workshops/:workshopId/register", isAuthenticated, async (req, res) => {
+    try {
+      const { workshopId } = req.params;
+      const { badgeId } = req.body;
+      
+      if (!badgeId) {
+        return res.status(400).json({ message: "Badge ID is required" });
+      }
+
+      // Check workshop capacity
+      const capacity = await storage.checkWorkshopCapacity(parseInt(workshopId));
+      if (capacity.available <= 0) {
+        return res.status(400).json({ message: "Workshop is full" });
+      }
+
+      // Check if already registered
+      const existingRegistrations = await storage.getWorkshopRegistrationsByWorkshopId(parseInt(workshopId));
+      const alreadyRegistered = existingRegistrations.some(reg => reg.badgeId === badgeId);
+      
+      if (alreadyRegistered) {
+        return res.status(400).json({ message: "Already registered for this workshop" });
+      }
+
+      const registration = await storage.createAISummitWorkshopRegistration({
+        workshopId: parseInt(workshopId),
+        badgeId
+      });
+      
+      res.json({
+        success: true,
+        message: "Registered for workshop successfully!",
+        registration
+      });
+    } catch (error: any) {
+      console.error("Workshop registration error:", error);
+      res.status(500).json({ message: "Failed to register for workshop: " + error.message });
+    }
+  });
+
+  // Get workshop registrations
+  app.get("/api/ai-summit/workshops/:workshopId/registrations", isAuthenticated, async (req, res) => {
+    try {
+      const { workshopId } = req.params;
+      const registrations = await storage.getWorkshopRegistrationsByWorkshopId(parseInt(workshopId));
+      res.json(registrations);
+    } catch (error: any) {
+      console.error("Get workshop registrations error:", error);
+      res.status(500).json({ message: "Failed to get workshop registrations: " + error.message });
+    }
+  });
+
+  // Get workshop capacity
+  app.get("/api/ai-summit/workshops/:workshopId/capacity", async (req, res) => {
+    try {
+      const { workshopId } = req.params;
+      const capacity = await storage.checkWorkshopCapacity(parseInt(workshopId));
+      res.json(capacity);
+    } catch (error: any) {
+      console.error("Get workshop capacity error:", error);
+      res.status(500).json({ message: "Failed to get workshop capacity: " + error.message });
+    }
+  });
+
+  // AI Summit Speaking Session Management Endpoints
+  
+  // Create a new speaking session
+  app.post("/api/ai-summit/speaking-sessions", isAuthenticated, async (req, res) => {
+    try {
+      const sessionSchema = insertAISummitSpeakingSessionSchema.extend({
+        startTime: z.string(),
+        endTime: z.string(),
+      });
+      
+      const validated = sessionSchema.parse(req.body);
+      
+      const session = await storage.createAISummitSpeakingSession({
+        ...validated,
+        startTime: new Date(validated.startTime),
+        endTime: new Date(validated.endTime),
+      });
+      
+      res.json({
+        success: true,
+        message: "Speaking session created successfully!",
+        session
+      });
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      console.error("Speaking session creation error:", error);
+      res.status(500).json({ message: "Failed to create speaking session: " + error.message });
+    }
+  });
+
+  // Get all speaking sessions
+  app.get("/api/ai-summit/speaking-sessions", async (req, res) => {
+    try {
+      const sessions = await storage.getAllAISummitSpeakingSessions();
+      res.json(sessions);
+    } catch (error: any) {
+      console.error("Get speaking sessions error:", error);
+      res.status(500).json({ message: "Failed to get speaking sessions: " + error.message });
+    }
+  });
+
+  // Get active speaking sessions
+  app.get("/api/ai-summit/speaking-sessions/active", async (req, res) => {
+    try {
+      const sessions = await storage.getActiveAISummitSpeakingSessions();
+      res.json(sessions);
+    } catch (error: any) {
+      console.error("Get active speaking sessions error:", error);
+      res.status(500).json({ message: "Failed to get active speaking sessions: " + error.message });
+    }
+  });
+
+  // Register for a speaking session
+  app.post("/api/ai-summit/speaking-sessions/:sessionId/register", isAuthenticated, async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const { badgeId } = req.body;
+      
+      if (!badgeId) {
+        return res.status(400).json({ message: "Badge ID is required" });
+      }
+
+      // Check session capacity
+      const capacity = await storage.checkSessionCapacity(parseInt(sessionId));
+      if (capacity.available <= 0) {
+        return res.status(400).json({ message: "Speaking session is full" });
+      }
+
+      // Check if already registered
+      const existingRegistrations = await storage.getSessionRegistrationsBySessionId(parseInt(sessionId));
+      const alreadyRegistered = existingRegistrations.some(reg => reg.badgeId === badgeId);
+      
+      if (alreadyRegistered) {
+        return res.status(400).json({ message: "Already registered for this speaking session" });
+      }
+
+      const registration = await storage.createAISummitSpeakingSessionRegistration({
+        sessionId: parseInt(sessionId),
+        badgeId
+      });
+      
+      res.json({
+        success: true,
+        message: "Registered for speaking session successfully!",
+        registration
+      });
+    } catch (error: any) {
+      console.error("Speaking session registration error:", error);
+      res.status(500).json({ message: "Failed to register for speaking session: " + error.message });
+    }
+  });
+
+  // Get speaking session registrations
+  app.get("/api/ai-summit/speaking-sessions/:sessionId/registrations", isAuthenticated, async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const registrations = await storage.getSessionRegistrationsBySessionId(parseInt(sessionId));
+      res.json(registrations);
+    } catch (error: any) {
+      console.error("Get speaking session registrations error:", error);
+      res.status(500).json({ message: "Failed to get speaking session registrations: " + error.message });
+    }
+  });
+
+  // Get speaking session capacity
+  app.get("/api/ai-summit/speaking-sessions/:sessionId/capacity", async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const capacity = await storage.checkSessionCapacity(parseInt(sessionId));
+      res.json(capacity);
+    } catch (error: any) {
+      console.error("Get speaking session capacity error:", error);
+      res.status(500).json({ message: "Failed to get speaking session capacity: " + error.message });
+    }
+  });
+
+  // Get participant's registrations
+  app.get("/api/ai-summit/registrations/:badgeId", isAuthenticated, async (req, res) => {
+    try {
+      const { badgeId } = req.params;
+      
+      const workshopRegistrations = await storage.getWorkshopRegistrationsByBadgeId(badgeId);
+      const sessionRegistrations = await storage.getSessionRegistrationsByBadgeId(badgeId);
+      
+      res.json({
+        workshops: workshopRegistrations,
+        sessions: sessionRegistrations
+      });
+    } catch (error: any) {
+      console.error("Get participant registrations error:", error);
+      res.status(500).json({ message: "Failed to get participant registrations: " + error.message });
     }
   });
 
