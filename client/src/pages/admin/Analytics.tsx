@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Helmet } from "react-helmet";
+import { useLocation } from "wouter";
 import {
   Card,
   CardContent,
@@ -21,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
   BarChart3, 
@@ -29,10 +31,12 @@ import {
   MousePointer, 
   Users, 
   Phone,
-  Star
+  Star,
+  ArrowLeft
 } from "lucide-react";
 
 const Analytics = () => {
+  const [, setLocation] = useLocation();
   const [timeframe, setTimeframe] = useState("week");
   const [contentType, setContentType] = useState("all");
 
@@ -113,9 +117,20 @@ const Analytics = () => {
 
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-neutral-900 mb-2">Analytics Dashboard</h1>
-            <p className="text-neutral-600">Track member engagement and platform usage.</p>
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setLocation('/admin')}
+              className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Admin
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900 mb-2">Analytics Dashboard</h1>
+              <p className="text-neutral-600">Track member engagement and platform usage.</p>
+            </div>
           </div>
           
           <div className="flex gap-2">
