@@ -476,7 +476,7 @@ const AISummit = () => {
                     onClick={() => setShowExhibitorForm(true)}
                   >
                     <Building className="mr-2 h-5 w-5" />
-                    <span>Exhibit Your Business</span>
+                    Exhibit Your Business
                   </Button>
                   <Button 
                     size="lg" 
@@ -485,7 +485,7 @@ const AISummit = () => {
                     onClick={() => setShowSpeakerForm(true)}
                   >
                     <Mic className="mr-2 h-5 w-5" />
-                    <span>Speak at Summit</span>
+                    Speak at Summit
                   </Button>
                 </div>
               </div>
