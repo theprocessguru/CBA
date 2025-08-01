@@ -222,6 +222,11 @@ function Router() {
           <AISummit />
         </MainLayout>
       </Route>
+      <Route path="/my-profile">
+        <MainLayout>
+          <MyProfile />
+        </MainLayout>
+      </Route>
       <Route path="/admin/ghl">
         <MainLayout>
           <GHLAdmin />
