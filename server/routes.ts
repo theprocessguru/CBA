@@ -1424,6 +1424,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User registration management endpoints
+  
+  // Get user's current registrations
+  app.get('/api/my-registrations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Get user's badge
+      const userBadges = await storage.getBadgesByEmail(req.user.email);
+      if (!userBadges || userBadges.length === 0) {
+        return res.json([]);
+      }
+      
+      const badgeId = userBadges[0].badgeId;
+      
+      // Get workshop registrations
+      const workshopRegistrations = await storage.getWorkshopRegistrationsByBadgeId(badgeId);
+      
+      // Format registrations for calendar
+      const registrations = [];
+      
+      for (const registration of workshopRegistrations) {
+        const workshop = await storage.getAISummitWorkshopById(registration.workshopId);
+        if (workshop) {
+          registrations.push({
+            id: registration.id,
+            type: 'workshop',
+            title: workshop.title,
+            description: workshop.description,
+            startTime: workshop.startTime,
+            endTime: workshop.endTime,
+            location: workshop.room,
+            facilitator: workshop.facilitator,
+            registeredAt: registration.registeredAt,
+            checkedIn: registration.checkedIn,
+            checkedInAt: registration.checkedInAt
+          });
+        }
+      }
+      
+      res.json(registrations);
+    } catch (error: any) {
+      console.error("Error fetching user registrations:", error);
+      res.status(500).json({ message: "Failed to fetch registrations" });
+    }
+  });
+  
+  // Cancel a registration
+  app.delete('/api/my-registrations/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const registrationId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      if (isNaN(registrationId)) {
+        return res.status(400).json({ message: "Invalid registration ID" });
+      }
+      
+      // Get user's badge to verify ownership
+      const userBadges = await storage.getBadgesByEmail(req.user.email);
+      if (!userBadges || userBadges.length === 0) {
+        return res.status(403).json({ message: "No badge found for user" });
+      }
+      
+      const badgeId = userBadges[0].badgeId;
+      
+      // Verify registration belongs to user
+      const registration = await storage.getAISummitWorkshopRegistrationById(registrationId);
+      if (!registration || registration.badgeId !== badgeId) {
+        return res.status(403).json({ message: "Registration not found or not owned by user" });
+      }
+      
+      // Delete the registration (implement in storage)
+      await storage.deleteAISummitWorkshopRegistration(registrationId);
+      
+      res.json({ success: true, message: "Registration cancelled successfully" });
+    } catch (error: any) {
+      console.error("Error cancelling registration:", error);
+      res.status(500).json({ message: "Failed to cancel registration" });
+    }
+  });
+
   // Email configuration routes (admin only)
   app.get('/api/admin/email/status', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

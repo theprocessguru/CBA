@@ -51,6 +51,7 @@ import EventManagement from "@/pages/admin/EventManagement";
 import AISummitSchedule from "@/pages/admin/AISummitSchedule";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
+import MyRegistrations from "@/pages/my-registrations";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -241,6 +242,11 @@ function Router() {
       <Route path="/workshop-registration">
         <MainLayout>
           <WorkshopRegistration />
+        </MainLayout>
+      </Route>
+      <Route path="/my-registrations">
+        <MainLayout>
+          <MyRegistrations />
         </MainLayout>
       </Route>
       <Route path="/my-profile">

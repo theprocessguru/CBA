@@ -757,6 +757,14 @@ const AISummit = () => {
                       Workshop Registration
                     </a>
                   </Link>
+                </div>
+                <div className="pt-2">
+                  <Link href="/my-registrations">
+                    <a className="bg-blue-500 text-white hover:bg-blue-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      My Schedule & Calendar
+                    </a>
+                  </Link>
                   <button 
                     className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     onClick={() => setShowExhibitorForm(true)}

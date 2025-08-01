@@ -218,6 +218,7 @@ export interface IStorage {
   getWorkshopRegistrationsByBadgeId(badgeId: string): Promise<AISummitWorkshopRegistration[]>;
   updateWorkshopRegistrationCheckIn(registrationId: number, checkedIn: boolean, checkedInAt?: Date): Promise<AISummitWorkshopRegistration>;
   checkWorkshopCapacity(workshopId: number): Promise<{ current: number; max: number; available: number }>;
+  deleteAISummitWorkshopRegistration(id: number): Promise<boolean>;
 
   // Speaking session operations
   createAISummitSpeakingSession(session: InsertAISummitSpeakingSession): Promise<AISummitSpeakingSession>;
@@ -1079,6 +1080,14 @@ export class DatabaseStorage implements IStorage {
     const available = max - current;
 
     return { current, max, available };
+  }
+
+  async deleteAISummitWorkshopRegistration(id: number): Promise<boolean> {
+    const result = await db
+      .delete(aiSummitWorkshopRegistrations)
+      .where(eq(aiSummitWorkshopRegistrations.id, id))
+      .returning();
+    return result.length > 0;
   }
 
   // Speaking session operations
