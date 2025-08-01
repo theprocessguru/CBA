@@ -45,6 +45,7 @@ import BadgeScanner from "@/pages/badge-scanner";
 import WorkshopManagement from "@/pages/workshop-management";
 import MyProfile from "@/pages/my-profile";
 import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
+import EventManagement from "@/pages/admin/EventManagement";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -297,6 +298,11 @@ function Router() {
       <Route path="/dashboard/email-settings">
         <AdminRoute>
           <EmailSettings />
+        </AdminRoute>
+      </Route>
+      <Route path="/dashboard/event-management">
+        <AdminRoute>
+          <EventManagement />
         </AdminRoute>
       </Route>
       
