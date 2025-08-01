@@ -75,6 +75,105 @@ export class EmailService {
     return this.transporter !== null && this.config !== null;
   }
 
+  /**
+   * Send printable badge via email
+   */
+  async sendPrintableBadge(
+    recipientEmail: string,
+    recipientName: string,
+    badgeHTML: string,
+    badgeId: string
+  ): Promise<{ success: boolean; message: string }> {
+    if (!this.isConfigured()) {
+      throw new Error('Email service not configured');
+    }
+
+    try {
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: recipientEmail,
+        subject: `Your AI Summit 2025 Badge - Ready to Print`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="margin: 0; font-size: 28px;">AI Summit 2025</h1>
+              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your Printable Badge is Ready!</p>
+            </div>
+            
+            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+              <h2 style="color: #1f2937; margin-top: 0;">Hello ${recipientName}!</h2>
+              
+              <p style="color: #4b5563; line-height: 1.6;">
+                Thank you for registering for the <strong>First AI Summit Croydon 2025</strong>! 
+                Your registration is confirmed and your printable badge is attached to this email.
+              </p>
+              
+              <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">📋 What to do next:</h3>
+                <ol style="color: #4b5563; line-height: 1.8; padding-left: 20px;">
+                  <li><strong>Download and print</strong> the attached badge on A4 paper</li>
+                  <li><strong>Cut out the badge</strong> along the border lines</li>
+                  <li><strong>Attach to clothing</strong> with a pin, clip, or lanyard</li>
+                  <li><strong>Bring to the event</strong> on October 1st, 2025</li>
+                  <li><strong>Present at entrance</strong> for QR code scanning</li>
+                </ol>
+              </div>
+              
+              <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #1e40af; font-weight: 500;">
+                  📅 <strong>Event Details:</strong><br>
+                  Date: October 1st, 2025<br>
+                  Time: 10:00 AM - 4:00 PM<br>
+                  Venue: LSBU London South Bank University Croydon<br>
+                  Badge ID: ${badgeId}
+                </p>
+              </div>
+              
+              <p style="color: #4b5563; line-height: 1.6;">
+                <strong>Lost your badge or need help?</strong> Contact us at 
+                <a href="mailto:info@croydonbusiness.co.uk" style="color: #3b82f6;">info@croydonbusiness.co.uk</a> 
+                or visit the registration desk on the day.
+              </p>
+              
+              <p style="color: #4b5563; line-height: 1.6;">
+                We look forward to seeing you at the AI Summit!
+              </p>
+              
+              <div style="border-top: 1px solid #e5e7eb; margin-top: 30px; padding-top: 20px; text-align: center;">
+                <p style="color: #6b7280; font-size: 14px; margin: 0;">
+                  Best regards,<br>
+                  <strong>Croydon Business Association</strong><br>
+                  AI Summit 2025 Team
+                </p>
+              </div>
+            </div>
+          </div>
+        `,
+        attachments: [
+          {
+            filename: `AI-Summit-2025-Badge-${badgeId}.html`,
+            content: badgeHTML,
+            contentType: 'text/html'
+          }
+        ]
+      };
+
+      await this.transporter!.sendMail(mailOptions);
+      return { 
+        success: true, 
+        message: `Printable badge sent successfully to ${recipientEmail}` 
+      };
+
+    } catch (error: any) {
+      console.error('Email send error:', error);
+      return { 
+        success: false, 
+        message: `Failed to send email: ${error.message}` 
+      };
+    }
+  }
+  }
+
   public async sendPasswordResetEmail(to: string, resetToken: string, userName?: string): Promise<boolean> {
     if (!this.isConfigured()) {
       console.warn('Email service not configured. Password reset token:', resetToken);

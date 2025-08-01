@@ -333,6 +333,7 @@ export const aiSummitBadges = pgTable("ai_summit_badges", {
   jobTitle: varchar("job_title"),
   badgeDesign: varchar("badge_design").default("standard"), // standard, vip, speaker, volunteer, team
   qrCodeData: text("qr_code_data").notNull(), // JSON string with encoded badge info
+  printableBadgeHTML: text("printable_badge_html"), // HTML for A4 printing
   isActive: boolean("is_active").default(true),
   printedAt: timestamp("printed_at"),
   issuedAt: timestamp("issued_at").defaultNow(),

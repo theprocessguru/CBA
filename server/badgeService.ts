@@ -47,6 +47,208 @@ export class BadgeService {
   }
 
   /**
+   * Generate HTML for printable A4 badge
+   */
+  private generatePrintableBadgeHTML(badgeInfo: BadgeInfo, qrCodeDataURL: string): string {
+    const typeColors = {
+      attendee: '#3B82F6', // Blue
+      exhibitor: '#8B5CF6', // Purple  
+      speaker: '#10B981', // Green
+      volunteer: '#F59E0B', // Amber
+      team: '#EF4444' // Red
+    };
+
+    const typeColor = typeColors[badgeInfo.participantType] || '#6B7280';
+
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AI Summit 2025 Badge - ${badgeInfo.name}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        
+        .badge-container {
+            width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            border: 3px solid ${typeColor};
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+        
+        .badge-header {
+            background: linear-gradient(135deg, ${typeColor}, ${typeColor}dd);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .event-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .event-date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .participant-type {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .badge-body {
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .participant-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .participant-details {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .company {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .job-title {
+            font-size: 14px;
+        }
+        
+        .qr-code {
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            width: 120px;
+            height: 120px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .badge-id {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+        
+        .venue-info {
+            background: #f9fafb;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4b5563;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            font-size: 14px;
+            color: #92400e;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #92400e;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .instructions {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="badge-container">
+        <div class="badge-header">
+            <div class="event-title">First AI Summit Croydon 2025</div>
+            <div class="event-date">October 1st, 2025 • LSBU Croydon</div>
+            <div class="participant-type">${badgeInfo.participantType.replace('_', ' ')}</div>
+        </div>
+        
+        <div class="badge-body">
+            <div class="participant-name">${badgeInfo.name}</div>
+            
+            <div class="participant-details">
+                ${badgeInfo.company ? `<div class="company">${badgeInfo.company}</div>` : ''}
+                ${badgeInfo.jobTitle ? `<div class="job-title">${badgeInfo.jobTitle}</div>` : ''}
+            </div>
+            
+            <div class="qr-code">
+                <img src="${qrCodeDataURL}" alt="QR Code for ${badgeInfo.name}" />
+            </div>
+            
+            <div class="badge-id">Badge ID: ${badgeInfo.badgeId}</div>
+            
+            <div class="venue-info">
+                <strong>Venue:</strong> LSBU London South Bank University Croydon<br>
+                <strong>Time:</strong> 10:00 AM - 4:00 PM<br>
+                <strong>Access Level:</strong> ${badgeInfo.accessLevel || 'General Access'}
+            </div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>📋 Badge Instructions</h3>
+        <ul>
+            <li><strong>Print this badge</strong> on A4 paper (preferably white/cream colored)</li>
+            <li><strong>Cut around the badge</strong> following the border lines</li>
+            <li><strong>Bring this badge</strong> to the AI Summit on October 1st, 2025</li>
+            <li><strong>Present at registration</strong> for quick check-in with QR code scanning</li>
+            <li><strong>Wear your badge</strong> throughout the event for easy identification</li>
+            <li><strong>Contact us</strong> if you have any questions: info@croydonbusiness.org</li>
+        </ul>
+        
+        <p><strong>Important:</strong> This badge contains a unique QR code for secure event access. Please keep it safe and do not share with others.</p>
+    </div>
+</body>
+</html>`;
+  }
+
+  /**
    * Create a badge for any type of participant
    */
   async createBadge(participantInfo: Omit<BadgeInfo, 'badgeId' | 'eventDetails'>): Promise<AISummitBadge> {
@@ -60,6 +262,19 @@ export class BadgeService {
 
     // Generate QR code data as JSON string
     const qrCodeData = JSON.stringify(badgeInfo);
+
+    // Generate QR code as data URL for embedding in HTML
+    const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+
+    // Generate printable HTML badge
+    const printableBadgeHTML = this.generatePrintableBadgeHTML(badgeInfo, qrCodeDataURL);
 
     // Determine badge design based on participant type
     let badgeDesign = 'standard';
@@ -90,6 +305,7 @@ export class BadgeService {
       jobTitle: participantInfo.jobTitle || null,
       badgeDesign,
       qrCodeData,
+      printableBadgeHTML,
       isActive: true,
       printedAt: null,
       issuedAt: new Date(),
@@ -312,6 +528,172 @@ export class BadgeService {
       isActive: false,
       notes: reason || 'Badge deactivated'
     });
+  }
+
+  /**
+   * Generate printable badge HTML for A4 printing
+   */
+  generatePrintableBadgeHTML(badgeInfo: BadgeInfo): string {
+    const qrCodeDataUrl = QRCode.toDataURL(JSON.stringify(badgeInfo));
+    
+    // Badge color based on participant type
+    const badgeColors = {
+      attendee: { bg: '#3B82F6', text: '#FFFFFF' },
+      exhibitor: { bg: '#8B5CF6', text: '#FFFFFF' },
+      speaker: { bg: '#EF4444', text: '#FFFFFF' },
+      volunteer: { bg: '#10B981', text: '#FFFFFF' },
+      team: { bg: '#F59E0B', text: '#FFFFFF' }
+    };
+
+    const colors = badgeColors[badgeInfo.participantType] || badgeColors.attendee;
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>AI Summit 2025 Badge - ${badgeInfo.name}</title>
+      <style>
+        @page { 
+          size: A4; 
+          margin: 20mm; 
+        }
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 0; 
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .badge-container {
+          width: 85mm;
+          height: 54mm;
+          border: 2px solid #000;
+          border-radius: 8px;
+          background: white;
+          padding: 8px;
+          margin: 20px auto;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          page-break-inside: avoid;
+        }
+        .badge-header {
+          background: ${colors.bg};
+          color: ${colors.text};
+          text-align: center;
+          padding: 6px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        .participant-type {
+          background: ${colors.bg};
+          color: ${colors.text};
+          font-size: 10px;
+          padding: 2px 6px;
+          border-radius: 3px;
+          text-transform: uppercase;
+          font-weight: bold;
+          display: inline-block;
+          margin-bottom: 6px;
+        }
+        .name {
+          font-size: 14px;
+          font-weight: bold;
+          margin-bottom: 4px;
+          text-align: center;
+        }
+        .details {
+          font-size: 10px;
+          text-align: center;
+          margin-bottom: 8px;
+          line-height: 1.2;
+        }
+        .qr-section {
+          text-align: center;
+          margin-top: 8px;
+        }
+        .qr-code {
+          width: 60px;
+          height: 60px;
+        }
+        .badge-id {
+          font-size: 8px;
+          text-align: center;
+          margin-top: 4px;
+          color: #666;
+        }
+        .instructions {
+          max-width: 400px;
+          margin: 30px auto;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .instructions h3 {
+          margin-top: 0;
+          color: #1a73e8;
+        }
+        .instructions ol {
+          padding-left: 20px;
+        }
+        .instructions li {
+          margin-bottom: 8px;
+        }
+        @media print {
+          .instructions { page-break-before: always; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="badge-container">
+        <div class="badge-header">
+          FIRST AI SUMMIT CROYDON 2025
+        </div>
+        
+        <div class="participant-type">
+          ${badgeInfo.participantType.toUpperCase()}
+        </div>
+        
+        <div class="name">
+          ${badgeInfo.name}
+        </div>
+        
+        <div class="details">
+          ${badgeInfo.company ? `${badgeInfo.company}<br>` : ''}
+          ${badgeInfo.jobTitle ? `${badgeInfo.jobTitle}<br>` : ''}
+          October 1st, 2025<br>
+          LSBU Croydon
+        </div>
+        
+        <div class="qr-section">
+          <img src="${qrCodeDataUrl}" alt="QR Code" class="qr-code">
+        </div>
+        
+        <div class="badge-id">
+          ID: ${badgeInfo.badgeId}
+        </div>
+      </div>
+      
+      <div class="instructions">
+        <h3>Badge Printing Instructions</h3>
+        <ol>
+          <li><strong>Print this page</strong> on A4 paper using your home or office printer</li>
+          <li><strong>Cut out the badge</strong> along the border lines</li>
+          <li><strong>Attach to clothing</strong> using a pin, clip, or lanyard</li>
+          <li><strong>Bring to the event</strong> on October 1st, 2025</li>
+          <li><strong>Present at entrance</strong> for QR code scanning and check-in</li>
+        </ol>
+        
+        <p><strong>Important:</strong> Your QR code contains your unique registration information. Keep your badge safe and bring it to the AI Summit for entry.</p>
+        
+        <p><strong>Lost your badge?</strong> Contact us at info@croydonbusiness.co.uk or visit the registration desk on the day.</p>
+      </div>
+    </body>
+    </html>`;
   }
 
   /**
