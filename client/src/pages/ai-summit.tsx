@@ -29,7 +29,8 @@ import {
   Gift,
   UserPlus,
   Building,
-  Coffee
+  Coffee,
+  Trophy
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -153,76 +154,161 @@ const AISummit = () => {
     }
   ];
 
-  const schedule = [
+  // Second Floor Auditorium - Main speaking opportunities with large presentation screen
+  const auditoriumSchedule = [
     {
       time: "9:30 - 10:00",
       title: "Registration & Welcome Coffee",
       type: "registration",
       speaker: "CBA Team",
-      description: "Network with fellow attendees and collect your summit materials"
+      description: "Network with fellow attendees and collect your summit materials",
+      capacity: "All attendees"
     },
     {
       time: "10:00 - 10:30",
       title: "Opening Keynote: AI Revolution in Croydon",
       type: "keynote",
       speaker: "Jose Martinez, CBA Founder",
-      description: "How Croydon is becoming the AI capital of South London"
+      description: "How Croydon is becoming the AI capital of South London",
+      capacity: "120 people"
     },
     {
       time: "10:30 - 11:15",
       title: "The Future of AI in Small Business",
       type: "talk",
       speaker: "Dr. Sarah Chen",
-      description: "Practical AI applications that every small business can implement"
+      description: "Practical AI applications that every small business can implement",
+      capacity: "120 people"
     },
     {
       time: "11:15 - 11:30",
       title: "Coffee Break & Networking",
       type: "break",
       speaker: "",
-      description: "Connect with other entrepreneurs and AI enthusiasts"
-    },
-    {
-      time: "11:30 - 12:15",
-      title: "Workshop: AI Tools for Content Creation",
-      type: "workshop",
-      speaker: "LSBU Students & Volunteers",
-      description: "Hands-on session with ChatGPT, Midjourney, and business AI tools"
+      description: "Connect with other entrepreneurs and AI enthusiasts",
+      capacity: "All attendees"
     },
     {
       time: "12:15 - 13:00",
       title: "Implementing AI on a Budget",
       type: "talk",
       speaker: "Marcus Johnson",
-      description: "Real-world case studies of affordable AI implementation"
-    },
-    {
-      time: "13:00 - 14:00",
-      title: "Lunch & Micro Business Exhibition",
-      type: "exhibition",
-      speaker: "",
-      description: "Explore AI startups and connect with innovative businesses"
-    },
-    {
-      time: "14:00 - 14:45",
-      title: "Workshop: AI for Customer Service",
-      type: "workshop",
-      speaker: "CBA AI Experts",
-      description: "Build your first chatbot and automate customer interactions"
+      description: "Real-world case studies of affordable AI implementation",
+      capacity: "120 people"
     },
     {
       time: "14:45 - 15:30",
       title: "Responsible AI for Business",
       type: "talk",
       speaker: "Dr. Priya Patel",
-      description: "Ethics, compliance, and best practices for AI adoption"
+      description: "Ethics, compliance, and best practices for AI adoption",
+      capacity: "120 people"
     },
     {
       time: "15:30 - 16:00",
       title: "Panel Discussion & Closing",
       type: "panel",
       speaker: "All Speakers + CBA Team",
-      description: "Q&A session and next steps for AI adoption in Croydon"
+      description: "Q&A session and next steps for AI adoption in Croydon",
+      capacity: "120 people"
+    }
+  ];
+
+  // Large Classroom - Workshop sessions with two screens, seats ~65 people
+  const classroomSchedule = [
+    {
+      time: "10:30 - 11:15",
+      title: "Workshop: AI Tools for Content Creation",
+      type: "workshop",
+      speaker: "LSBU Students & Volunteers",
+      description: "Hands-on session with ChatGPT, Midjourney, and business AI tools",
+      capacity: "30 people",
+      requirements: "Bring laptop/tablet"
+    },
+    {
+      time: "11:30 - 12:15",
+      title: "Workshop: Building Your First AI Chatbot",
+      type: "workshop",
+      speaker: "CBA AI Experts",
+      description: "Build your first chatbot and automate customer interactions",
+      capacity: "25 people",
+      requirements: "Basic computer skills"
+    },
+    {
+      time: "13:30 - 14:15",
+      title: "Workshop: AI for Data Analysis",
+      type: "workshop",
+      speaker: "Dr. Michael Roberts",
+      description: "Use AI to analyze business data and make informed decisions",
+      capacity: "20 people",
+      requirements: "Excel knowledge helpful"
+    },
+    {
+      time: "14:30 - 15:15",
+      title: "Workshop: AI Marketing Automation",
+      type: "workshop",
+      speaker: "Sarah Thompson",
+      description: "Automate your marketing with AI tools and strategies",
+      capacity: "25 people",
+      requirements: "Bring business ideas"
+    },
+    {
+      time: "15:30 - 16:00",
+      title: "Workshop Showcase & Networking",
+      type: "showcase",
+      speaker: "All Workshop Leaders",
+      description: "Share your workshop creations and connect with participants",
+      capacity: "65 people",
+      requirements: "None"
+    }
+  ];
+
+  // Large 3rd Floor Space - Micro Business Exhibition
+  const exhibitionSchedule = [
+    {
+      time: "10:00 - 16:00",
+      title: "Micro Business AI Exhibition",
+      type: "exhibition",
+      speaker: "AI Startups & Tech Companies",
+      description: "Explore innovative AI solutions from local and emerging businesses",
+      capacity: "Open format",
+      features: "20+ exhibition booths"
+    },
+    {
+      time: "12:00 - 13:00",
+      title: "Exhibition Lunch Hour",
+      type: "networking",
+      speaker: "All Exhibitors",
+      description: "Lunch networking with exhibitors and attendees",
+      capacity: "Open format",
+      features: "Food & refreshments available"
+    },
+    {
+      time: "13:15 - 13:45",
+      title: "Exhibitor Spotlight Sessions",
+      type: "demo",
+      speaker: "Selected Exhibitors",
+      description: "15-minute product demos and business pitches",
+      capacity: "Standing room",
+      features: "Live demonstrations"
+    },
+    {
+      time: "14:00 - 14:30",
+      title: "AI Innovation Showcase",
+      type: "demo",
+      speaker: "Local AI Innovators",
+      description: "Showcase of cutting-edge AI applications and tools",
+      capacity: "Standing room",
+      features: "Interactive displays"
+    },
+    {
+      time: "15:00 - 15:45",
+      title: "Business Speed Networking",
+      type: "networking",
+      speaker: "All Attendees",
+      description: "Connect with AI entrepreneurs, investors, and potential partners",
+      capacity: "All participants",
+      features: "Structured networking"
     }
   ];
 
@@ -261,6 +347,10 @@ const AISummit = () => {
       case 'break': return <Coffee className="h-5 w-5 text-orange-600" />;
       case 'exhibition': return <Building className="h-5 w-5 text-red-600" />;
       case 'panel': return <Users className="h-5 w-5 text-indigo-600" />;
+      case 'registration': return <UserPlus className="h-5 w-5 text-blue-600" />;
+      case 'networking': return <Users className="h-5 w-5 text-green-600" />;
+      case 'demo': return <Lightbulb className="h-5 w-5 text-yellow-600" />;
+      case 'showcase': return <Trophy className="h-5 w-5 text-purple-600" />;
       default: return <Calendar className="h-5 w-5 text-gray-600" />;
     }
   };
@@ -593,6 +683,10 @@ const AISummit = () => {
       case 'break': return 'bg-orange-50 border-orange-200';
       case 'exhibition': return 'bg-red-50 border-red-200';
       case 'panel': return 'bg-indigo-50 border-indigo-200';
+      case 'registration': return 'bg-sky-50 border-sky-200';
+      case 'networking': return 'bg-emerald-50 border-emerald-200';
+      case 'demo': return 'bg-yellow-50 border-yellow-200';
+      case 'showcase': return 'bg-violet-50 border-violet-200';
       default: return 'bg-gray-50 border-gray-200';
     }
   };
@@ -797,36 +891,146 @@ const AISummit = () => {
             <TabsContent value="schedule" className="space-y-6">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-neutral-900 mb-2">Event Schedule</h2>
-                <p className="text-lg text-neutral-600">Full day program from 10 AM to 4 PM</p>
+                <p className="text-lg text-neutral-600">Three venues running simultaneously from 10 AM to 4 PM</p>
               </div>
 
-              <div className="space-y-4">
-                {schedule.map((session, index) => (
-                  <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex-shrink-0">
-                          {getSessionIcon(session.type)}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
-                            <h3 className="text-lg font-semibold text-neutral-900">{session.title}</h3>
-                            <Badge variant="outline" className="w-fit">
-                              {session.time}
-                            </Badge>
+              {/* Venue Tabs */}
+              <Tabs defaultValue="auditorium" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="auditorium">
+                    <div className="text-center">
+                      <div className="font-medium">2nd Floor Auditorium</div>
+                      <div className="text-xs opacity-75">Main Talks • 120 seats</div>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="classroom">
+                    <div className="text-center">
+                      <div className="font-medium">Large Classroom</div>
+                      <div className="text-xs opacity-75">Workshops • 65 seats</div>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="exhibition">
+                    <div className="text-center">
+                      <div className="font-medium">3rd Floor Space</div>
+                      <div className="text-xs opacity-75">Micro Expo • Open format</div>
+                    </div>
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Auditorium Schedule */}
+                <TabsContent value="auditorium" className="space-y-4">
+                  <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg mb-4">
+                    <h3 className="text-lg font-semibold text-purple-900 mb-2">Second Floor Auditorium</h3>
+                    <p className="text-sm text-purple-800">Main speaking opportunities with large presentation screen. Capacity: 120 people</p>
+                  </div>
+                  {auditoriumSchedule.map((session, index) => (
+                    <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            {getSessionIcon(session.type)}
                           </div>
-                          {session.speaker && (
-                            <p className="text-sm font-medium text-neutral-700 mb-1">
-                              Speaker: {session.speaker}
-                            </p>
-                          )}
-                          <p className="text-sm text-neutral-600">{session.description}</p>
+                          <div className="flex-1">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                              <h3 className="text-lg font-semibold text-neutral-900">{session.title}</h3>
+                              <Badge variant="outline" className="w-fit">
+                                {session.time}
+                              </Badge>
+                            </div>
+                            {session.speaker && (
+                              <p className="text-sm font-medium text-neutral-700 mb-1">
+                                Speaker: {session.speaker}
+                              </p>
+                            )}
+                            <p className="text-sm text-neutral-600">{session.description}</p>
+                            {session.capacity && (
+                              <p className="text-xs text-neutral-500 mt-2">Capacity: {session.capacity}</p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </TabsContent>
+
+                {/* Classroom Schedule */}
+                <TabsContent value="classroom" className="space-y-4">
+                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-4 rounded-lg mb-4">
+                    <h3 className="text-lg font-semibold text-green-900 mb-2">Large Classroom</h3>
+                    <p className="text-sm text-green-800">Workshop sessions with two screens, seats around 65 people. Hands-on activities.</p>
+                  </div>
+                  {classroomSchedule.map((session, index) => (
+                    <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            {getSessionIcon(session.type)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                              <h3 className="text-lg font-semibold text-neutral-900">{session.title}</h3>
+                              <Badge variant="outline" className="w-fit">
+                                {session.time}
+                              </Badge>
+                            </div>
+                            {session.speaker && (
+                              <p className="text-sm font-medium text-neutral-700 mb-1">
+                                Speaker: {session.speaker}
+                              </p>
+                            )}
+                            <p className="text-sm text-neutral-600">{session.description}</p>
+                            {session.capacity && (
+                              <p className="text-xs text-neutral-500 mt-1">Capacity: {session.capacity}</p>
+                            )}
+                            {session.requirements && (
+                              <p className="text-xs text-orange-600 mt-1">Requirements: {session.requirements}</p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </TabsContent>
+
+                {/* Exhibition Schedule */}
+                <TabsContent value="exhibition" className="space-y-4">
+                  <div className="bg-gradient-to-r from-red-100 to-pink-100 p-4 rounded-lg mb-4">
+                    <h3 className="text-lg font-semibold text-red-900 mb-2">Large 3rd Floor Space</h3>
+                    <p className="text-sm text-red-800">Micro Business Exhibition with open format. Interactive displays and networking.</p>
+                  </div>
+                  {exhibitionSchedule.map((session, index) => (
+                    <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0">
+                            {getSessionIcon(session.type)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
+                              <h3 className="text-lg font-semibold text-neutral-900">{session.title}</h3>
+                              <Badge variant="outline" className="w-fit">
+                                {session.time}
+                              </Badge>
+                            </div>
+                            {session.speaker && (
+                              <p className="text-sm font-medium text-neutral-700 mb-1">
+                                Speaker: {session.speaker}
+                              </p>
+                            )}
+                            <p className="text-sm text-neutral-600">{session.description}</p>
+                            {session.capacity && (
+                              <p className="text-xs text-neutral-500 mt-1">Format: {session.capacity}</p>
+                            )}
+                            {session.features && (
+                              <p className="text-xs text-blue-600 mt-1">Features: {session.features}</p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </TabsContent>
+              </Tabs>
             </TabsContent>
 
             <TabsContent value="speakers" className="space-y-6">
