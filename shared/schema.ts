@@ -723,6 +723,7 @@ export const events = pgTable("events", {
 export const eventRegistrations = pgTable("event_registrations", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id), // Link to user account
   ticketId: varchar("ticket_id", { length: 50 }).notNull().unique(), // Generated ticket ID
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),

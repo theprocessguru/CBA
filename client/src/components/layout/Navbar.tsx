@@ -200,11 +200,18 @@ const Navbar = () => {
               <Search className="h-5 w-5" />
             </button>
             {isAuthenticated ? (
-              <Link href="/dashboard">
-                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap ml-2">
-                  Dashboard
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link href="/my-profile">
+                  <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
+                    My QR Code
+                  </Button>
+                </Link>
+                <Link href="/dashboard">
+                  <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                    Dashboard
+                  </Button>
+                </Link>
+              </div>
             ) : (
               <Link href="/login">
                 <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap ml-2">

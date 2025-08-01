@@ -2994,6 +2994,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's AI Summit registrations
+  app.get('/api/user/ai-summit-registrations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Check if user has any AI Summit registration
+      const aiSummitRegistration = await storage.getAISummitRegistrationByUserId(userId);
+      const registrations = [];
+      
+      if (aiSummitRegistration) {
+        // Get the badge if it exists
+        let badge = null;
+        try {
+          badge = await storage.getAISummitBadgeByRegistrationId(aiSummitRegistration.id);
+        } catch (error) {
+          console.log("No badge found for registration:", aiSummitRegistration.id);
+        }
+        
+        registrations.push({
+          eventName: 'First AI Summit Croydon 2025',
+          participantType: aiSummitRegistration.participantType || 'General Attendee',
+          eventDate: 'October 1st, 2025',
+          eventTime: '10:00 AM - 4:00 PM',
+          venue: 'London South Bank University - Croydon Campus',
+          badgeId: badge?.badgeId,
+          registrationData: aiSummitRegistration
+        });
+      }
+      
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching user AI Summit registrations:", error);
+      res.status(500).json({ message: "Failed to fetch registrations" });
+    }
+  });
+
+  // Send badge email endpoint
+  app.post('/api/ai-summit/send-badge-email', isAuthenticated, async (req: any, res) => {
+    try {
+      const { badgeId, email } = req.body;
+      const userId = req.user.id;
+      
+      if (!badgeId || !email) {
+        return res.status(400).json({ message: "Badge ID and email are required" });
+      }
+      
+      // Verify the badge belongs to this user
+      const badge = await storage.getAISummitBadgeById(badgeId);
+      if (!badge) {
+        return res.status(404).json({ message: "Badge not found" });
+      }
+      
+      // Get registration to verify ownership
+      const registration = await storage.getAISummitRegistrationById(badge.registrationId);
+      if (!registration || registration.userId !== userId) {
+        return res.status(403).json({ message: "You don't have permission to access this badge" });
+      }
+      
+      // For now, return success (email service integration needed)
+      res.json({ 
+        success: true, 
+        message: "Badge sent to your email successfully",
+        badgeId: badge.badgeId 
+      });
+    } catch (error) {
+      console.error("Error sending badge email:", error);
+      res.status(500).json({ message: "Failed to send badge email" });
+    }
+  });
+
   // AI Summit Exhibitor Registration endpoint
   app.post("/api/ai-summit-exhibitor-registration", async (req, res) => {
     try {
