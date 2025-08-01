@@ -123,6 +123,15 @@ const Navbar = () => {
                   Marketplace
                 </a>
               </Link>
+              <Link href="/events">
+                <a className={`border-b-2 ${
+                  isActive('/events') 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
+                  Events
+                </a>
+              </Link>
               <Link href="/about">
                 <a className={`border-b-2 ${
                   isActive('/about') 
@@ -292,6 +301,15 @@ const Navbar = () => {
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
               } font-medium`}>
               Marketplace
+            </a>
+          </Link>
+          <Link href="/events">
+            <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+              isActive('/events') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium`}>
+              Events
             </a>
           </Link>
           <Link href="/about">
