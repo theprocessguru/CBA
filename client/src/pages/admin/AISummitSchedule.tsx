@@ -43,7 +43,7 @@ interface ScheduleItem {
 }
 
 const VENUES = [
-  { value: "auditorium", label: "2nd Floor Auditorium", capacity: 120 },
+  { value: "auditorium", label: "2nd Floor Auditorium", capacity: 80 },
   { value: "classroom", label: "Large Classroom", capacity: 65 },
   { value: "exhibition", label: "3rd Floor Exhibition", capacity: 200 }
 ];

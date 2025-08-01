@@ -101,6 +101,14 @@ This is a comprehensive business automation platform built with React/TypeScript
 ## Changelog
 ```
 Changelog:
+- August 1, 2025. Registration Calendar System + Venue Capacity Update:
+  * Completed full registration calendar system with RegistrationCalendar component
+  * Added my-registrations.tsx page for users to view and manage their event registrations
+  * Created backend API endpoints for registration management and calendar functionality
+  * Added "My Schedule & Calendar" button to AI Summit page for easy access
+  * Updated second floor auditorium capacity from 120 to 80 people as per venue specifications
+  * Enhanced session management with registration tracking and cancellation capabilities
+  * Integrated mini calendar to prevent double bookings across venue floors
 - July 31, 2025. Navigation Enhancement + MyT Accounting Pricing Updates:
   * Added tagline "UK's Leading AI-Powered Business Association" under CBA logo
   * Fixed login button z-index layering issue - no longer hidden by menu elements

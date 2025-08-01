@@ -170,9 +170,9 @@ const AISummit = () => {
       time: "11:00 - 11:30",
       title: "The Future of AI in Small Business",
       type: "talk",
-      speaker: "Dr. Sarah Chen",
+      speaker: "Dr. Sarah Chen",  
       description: "Practical AI applications that every small business can implement",
-      capacity: "120 people"
+      capacity: "80 people"
     },
     {
       time: "11:30 - 11:45",
@@ -188,7 +188,7 @@ const AISummit = () => {
       type: "talk",
       speaker: "Marcus Johnson",
       description: "Real-world case studies of affordable AI implementation",
-      capacity: "120 people"
+      capacity: "80 people"
     },
     {
       time: "14:45 - 15:30",
@@ -196,7 +196,7 @@ const AISummit = () => {
       type: "talk",
       speaker: "Dr. Priya Patel",
       description: "Ethics, compliance, and best practices for AI adoption",
-      capacity: "120 people"
+      capacity: "80 people"
     },
     {
       time: "15:30 - 16:00",
@@ -927,7 +927,7 @@ const AISummit = () => {
                   <TabsTrigger value="auditorium">
                     <div className="text-center">
                       <div className="font-medium">2nd Floor Auditorium</div>
-                      <div className="text-xs opacity-75">Main Talks • 120 seats</div>
+                      <div className="text-xs opacity-75">Main Talks • 80 seats</div>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger value="classroom">
