@@ -1053,7 +1053,7 @@ const AISummit = () => {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold transition-all duration-200"
                   onClick={() => setShowSpeakerForm(true)}
                 >
                   <Mic className="mr-2 h-5 w-5" />
@@ -1062,23 +1062,14 @@ const AISummit = () => {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="border-white text-white hover:bg-white/10 font-semibold"
-                  onClick={() => setShowVolunteerForm(true)}
-                >
-                  <UserPlus className="mr-2 h-5 w-5" />
-                  <span>Volunteer with Us</span>
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/10 font-semibold"
+                  className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold transition-all duration-200"
                   onClick={() => setShowVolunteerForm(true)}
                 >
                   <UserPlus className="mr-2 h-5 w-5" />
                   <span>Volunteer with Us</span>
                 </Button>
                 <Link to="/membership-benefits">
-                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 font-semibold">
+                  <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold transition-all duration-200">
                     <Users className="mr-2 h-5 w-5" />
                     <span>Join CBA Membership</span>
                   </Button>
