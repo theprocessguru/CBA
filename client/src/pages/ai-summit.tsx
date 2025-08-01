@@ -461,32 +461,27 @@ const AISummit = () => {
               </div>
               <div className="pt-4 space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button 
-                    size="lg" 
-                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 font-semibold"
+                  <button 
+                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     onClick={() => setShowRegistrationForm(true)}
                   >
-                    <UserPlus className="mr-2 h-5 w-5" />
-                    <span>Register FREE - Limited Places</span>
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold"
+                    <UserPlus className="h-5 w-5" />
+                    Register FREE - Limited Places
+                  </button>
+                  <button 
+                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     onClick={() => setShowExhibitorForm(true)}
                   >
-                    <Building className="mr-2 h-5 w-5" />
+                    <Building className="h-5 w-5" />
                     Exhibit Your Business
-                  </Button>
-                  <Button 
-                    size="lg" 
-                    variant="outline"
-                    className="border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold"
+                  </button>
+                  <button 
+                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     onClick={() => setShowSpeakerForm(true)}
                   >
-                    <Mic className="mr-2 h-5 w-5" />
+                    <Mic className="h-5 w-5" />
                     Speak at Summit
-                  </Button>
+                  </button>
                 </div>
               </div>
             </div>
