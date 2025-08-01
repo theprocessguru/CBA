@@ -187,6 +187,7 @@ export interface IStorage {
   updateAISummitBadge(badgeId: string, updates: Partial<InsertAISummitBadge>): Promise<AISummitBadge>;
   getAllAISummitBadges(): Promise<AISummitBadge[]>;
   getBadgesByParticipantType(participantType: string): Promise<AISummitBadge[]>;
+  getBadgesByEmail(email: string): Promise<AISummitBadge[]>;
   
   // Check-in operations
   createAISummitCheckIn(checkIn: InsertAISummitCheckIn): Promise<AISummitCheckIn>;
@@ -911,6 +912,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(aiSummitBadges)
       .where(eq(aiSummitBadges.participantType, participantType))
+      .orderBy(desc(aiSummitBadges.createdAt));
+  }
+
+  async getBadgesByEmail(email: string): Promise<AISummitBadge[]> {
+    return await db
+      .select()
+      .from(aiSummitBadges)
+      .where(eq(aiSummitBadges.email, email))
       .orderBy(desc(aiSummitBadges.createdAt));
   }
 

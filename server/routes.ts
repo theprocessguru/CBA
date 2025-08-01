@@ -3424,6 +3424,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Summit Registration endpoint
+  // Check user's AI Summit registration status
+  app.get('/api/my-ai-summit-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userEmail = req.user.email;
+      
+      // Check if user has an AI Summit registration
+      const registrations = await db
+        .select()
+        .from(aiSummitRegistrations)
+        .where(eq(aiSummitRegistrations.email, userEmail));
+      
+      // Check if user has a badge
+      const badges = await storage.getBadgesByEmail(userEmail);
+      
+      res.json({
+        isRegistered: registrations.length > 0,
+        hasBadge: badges.length > 0,
+        registrationId: registrations[0]?.id || null,
+        badgeId: badges[0]?.badgeId || null,
+        participantType: badges[0]?.participantType || null
+      });
+    } catch (error) {
+      console.error("Error checking AI Summit registration status:", error);
+      res.status(500).json({ message: "Failed to check registration status" });
+    }
+  });
+
   app.post("/api/ai-summit-registration", async (req, res) => {
     try {
       const { 

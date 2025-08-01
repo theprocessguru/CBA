@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { 
   Calendar, 
@@ -40,6 +40,13 @@ const AISummit = () => {
   const { user, isAuthenticated } = useAuth();
   const [selectedSession, setSelectedSession] = useState("");
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+
+  // Check registration status
+  const { data: registrationStatus, refetch: refetchStatus } = useQuery({
+    queryKey: ['/api/my-ai-summit-status'],
+    enabled: isAuthenticated,
+    retry: false,
+  });
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
   const [showSpeakerForm, setShowSpeakerForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
@@ -409,6 +416,8 @@ const AISummit = () => {
         accessibilityNeeds: "",
         comments: ""
       });
+      // Refresh registration status
+      refetchStatus();
     },
     onError: (error) => {
       toast({
@@ -765,18 +774,49 @@ const AISummit = () => {
               <div className="pt-4 space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button 
-                    className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                    onClick={() => setShowRegistrationForm(true)}
+                    className={`${
+                      registrationStatus?.isRegistered 
+                        ? "bg-green-500 text-white hover:bg-green-600 cursor-default" 
+                        : "bg-white text-blue-600 hover:bg-blue-50"
+                    } text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2`}
+                    onClick={() => !registrationStatus?.isRegistered && setShowRegistrationForm(true)}
+                    disabled={registrationStatus?.isRegistered}
                   >
-                    <UserPlus className="h-5 w-5" />
-                    Register FREE - Limited Places
+                    {registrationStatus?.isRegistered ? (
+                      <>
+                        <UserPlus className="h-5 w-5" />
+                        ✓ Registered for AI Summit 
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-5 w-5" />
+                        Register FREE - Limited Places
+                      </>
+                    )}
                   </button>
-                  <Link href="/workshop-registration">
-                    <a className="bg-green-500 text-white hover:bg-green-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
-                      <BookOpen className="h-5 w-5" />
-                      Workshop Registration
-                    </a>
-                  </Link>
+                  {registrationStatus?.isRegistered ? (
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Link href="/my-qr-code">
+                        <a className="bg-purple-600 text-white hover:bg-purple-700 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                          <Star className="h-5 w-5" />
+                          My QR Code
+                        </a>
+                      </Link>
+                      <Link href="/my-registrations">
+                        <a className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                          <Calendar className="h-5 w-5" />
+                          My Schedule
+                        </a>
+                      </Link>
+                    </div>
+                  ) : (
+                    <Link href="/workshop-registration">
+                      <a className="bg-green-500 text-white hover:bg-green-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        <BookOpen className="h-5 w-5" />
+                        Workshop Registration
+                      </a>
+                    </Link>
+                  )}
                 </div>
                 <div className="pt-2">
                   <Link href="/my-registrations">
@@ -915,11 +955,16 @@ const AISummit = () => {
                     Free admission but places are limited. Register now to guarantee your attendance.
                   </p>
                   <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 font-semibold"
-                    onClick={() => setShowRegistrationForm(true)}
+                    className={`w-full font-semibold ${
+                      registrationStatus?.isRegistered 
+                        ? "bg-green-500 hover:bg-green-600 cursor-default" 
+                        : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                    onClick={() => !registrationStatus?.isRegistered && setShowRegistrationForm(true)}
+                    disabled={registrationStatus?.isRegistered}
                   >
                     <UserPlus className="mr-2 h-4 w-4" />
-                    <span>Register Now</span>
+                    <span>{registrationStatus?.isRegistered ? "✓ Registered" : "Register Now"}</span>
                   </Button>
                 </CardContent>
               </Card>
@@ -1287,11 +1332,16 @@ const AISummit = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   size="lg" 
-                  className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
-                  onClick={() => setShowRegistrationForm(true)}
+                  className={`font-semibold ${
+                    registrationStatus?.isRegistered 
+                      ? "bg-green-500 text-white hover:bg-green-600 cursor-default" 
+                      : "bg-white text-blue-600 hover:bg-blue-50"
+                  }`}
+                  onClick={() => !registrationStatus?.isRegistered && setShowRegistrationForm(true)}
+                  disabled={registrationStatus?.isRegistered}
                 >
                   <UserPlus className="mr-2 h-5 w-5" />
-                  <span>Register for FREE</span>
+                  <span>{registrationStatus?.isRegistered ? "✓ Registered for FREE" : "Register for FREE"}</span>
                 </Button>
                 <Button 
                   size="lg" 
