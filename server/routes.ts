@@ -3073,8 +3073,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { registrationId } = req.params;
       const userId = req.user.id;
       
-      // Get the registration and verify ownership
-      const registration = await storage.getAISummitRegistrationById(parseInt(registrationId));
+      // Get the registration and verify ownership using direct database query
+      const registrations = await db
+        .select()
+        .from(aiSummitRegistrations)
+        .where(eq(aiSummitRegistrations.id, parseInt(registrationId)));
+      
+      const registration = registrations[0];
       if (!registration || registration.userId !== userId) {
         return res.status(403).json({ message: "Registration not found or not owned by user" });
       }
