@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -36,6 +37,7 @@ import {
 import { Link } from "wouter";
 
 const AISummit = () => {
+  const { user, isAuthenticated } = useAuth();
   const [selectedSession, setSelectedSession] = useState("");
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
@@ -52,6 +54,24 @@ const AISummit = () => {
     accessibilityNeeds: "",
     comments: ""
   });
+
+  // Auto-populate form when user data is available
+  useEffect(() => {
+    if (user && showRegistrationForm) {
+      setRegistrationData(prev => ({
+        ...prev,
+        name: user.firstName + " " + user.lastName || "",
+        email: user.email || "",
+        company: prev.company || "",
+        jobTitle: prev.jobTitle || "",
+        phoneNumber: prev.phoneNumber || "",
+        businessType: prev.businessType || "Technology",
+        aiInterest: prev.aiInterest || "Learning about AI for small business",
+        accessibilityNeeds: prev.accessibilityNeeds || "None",
+        comments: prev.comments || ""
+      }));
+    }
+  }, [user, showRegistrationForm]);
   const [exhibitorData, setExhibitorData] = useState({
     companyName: "",
     contactName: "",
