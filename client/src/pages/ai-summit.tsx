@@ -38,6 +38,7 @@ const AISummit = () => {
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
   const [showSpeakerForm, setShowSpeakerForm] = useState(false);
+  const [showVolunteerForm, setShowVolunteerForm] = useState(false);
   const [registrationData, setRegistrationData] = useState({
     name: "",
     email: "",
@@ -99,6 +100,20 @@ const AISummit = () => {
     keyTakeaways: "",
     interactiveElements: false,
     handoutsProvided: false,
+    agreesToTerms: false
+  });
+
+  const [volunteerData, setVolunteerData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    role: "",
+    shift: "",
+    experience: "",
+    availability: "",
+    emergencyContact: "",
+    tShirtSize: "",
+    dietaryRequirements: "",
     agreesToTerms: false
   });
   
@@ -375,6 +390,40 @@ const AISummit = () => {
     },
   });
 
+  const volunteerMutation = useMutation({
+    mutationFn: async (data: typeof volunteerData) => {
+      const response = await apiRequest("POST", "/api/ai-summit/volunteer-registration", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Volunteer Registration Successful!",
+        description: "Thank you for volunteering! We'll contact you with more details about your role and schedule.",
+      });
+      setShowVolunteerForm(false);
+      setVolunteerData({
+        name: "",
+        email: "",
+        phone: "",
+        role: "",
+        shift: "",
+        experience: "",
+        availability: "",
+        emergencyContact: "",
+        tShirtSize: "",
+        dietaryRequirements: "",
+        agreesToTerms: false
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Volunteer Registration Failed",
+        description: error instanceof Error ? error.message : "Failed to register as volunteer. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     registerMutation.mutate(registrationData);
@@ -460,6 +509,19 @@ const AISummit = () => {
     speakerMutation.mutate(speakerData);
   };
 
+  const handleVolunteerRegistration = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!volunteerData.agreesToTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please agree to the volunteer terms and conditions.",
+        variant: "destructive",
+      });
+      return;
+    }
+    volunteerMutation.mutate(volunteerData);
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setRegistrationData(prev => ({
       ...prev,
@@ -511,6 +573,13 @@ const AISummit = () => {
 
   const handleSpeakerInputChange = (field: string, value: string | boolean | string[]) => {
     setSpeakerData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleVolunteerInputChange = (field: string, value: string | boolean) => {
+    setVolunteerData(prev => ({
       ...prev,
       [field]: value
     }));
@@ -588,6 +657,13 @@ const AISummit = () => {
                   >
                     <Mic className="h-5 w-5" />
                     Speak at Summit
+                  </button>
+                  <button 
+                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                    onClick={() => setShowVolunteerForm(true)}
+                  >
+                    <UserPlus className="h-5 w-5" />
+                    Volunteer with Us
                   </button>
                 </div>
               </div>
@@ -982,6 +1058,24 @@ const AISummit = () => {
                 >
                   <Mic className="mr-2 h-5 w-5" />
                   <span>Speak at Summit</span>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10 font-semibold"
+                  onClick={() => setShowVolunteerForm(true)}
+                >
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  <span>Volunteer with Us</span>
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10 font-semibold"
+                  onClick={() => setShowVolunteerForm(true)}
+                >
+                  <UserPlus className="mr-2 h-5 w-5" />
+                  <span>Volunteer with Us</span>
                 </Button>
                 <Link to="/membership-benefits">
                   <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 font-semibold">
@@ -1795,6 +1889,407 @@ const AISummit = () => {
                       disabled={speakerMutation.isPending || !speakerData.agreesToTerms}
                     >
                       {speakerMutation.isPending ? "Submitting..." : "Submit Speaker Interest"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Volunteer Registration Form Modal */}
+        {showVolunteerForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neutral-900">Volunteer Registration - AI Summit 2025</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowVolunteerForm(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleVolunteerRegistration} className="space-y-4">
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Personal Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerName">Full Name *</Label>
+                        <Input
+                          id="volunteerName"
+                          type="text"
+                          required
+                          value={volunteerData.name}
+                          onChange={(e) => handleVolunteerInputChange('name', e.target.value)}
+                          placeholder="Your full name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="volunteerEmail">Email Address *</Label>
+                        <Input
+                          id="volunteerEmail"
+                          type="email"
+                          required
+                          value={volunteerData.email}
+                          onChange={(e) => handleVolunteerInputChange('email', e.target.value)}
+                          placeholder="your.email@example.com"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerPhone">Phone Number *</Label>
+                        <Input
+                          id="volunteerPhone"
+                          type="tel"
+                          required
+                          value={volunteerData.phone}
+                          onChange={(e) => handleVolunteerInputChange('phone', e.target.value)}
+                          placeholder="Your contact number"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="emergencyContact">Emergency Contact *</Label>
+                        <Input
+                          id="emergencyContact"
+                          type="text"
+                          required
+                          value={volunteerData.emergencyContact}
+                          onChange={(e) => handleVolunteerInputChange('emergencyContact', e.target.value)}
+                          placeholder="Name and phone number"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Volunteer Role & Availability */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Volunteer Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerRole">Preferred Role *</Label>
+                        <select
+                          id="volunteerRole"
+                          required
+                          value={volunteerData.role}
+                          onChange={(e) => handleVolunteerInputChange('role', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select a role</option>
+                          <option value="registration">Registration & Check-in</option>
+                          <option value="usher">Event Usher</option>
+                          <option value="technical">Technical Support</option>
+                          <option value="catering">Catering Support</option>
+                          <option value="speaker-assistant">Speaker Assistant</option>
+                          <option value="general">General Support</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="volunteerShift">Preferred Shift *</Label>
+                        <select
+                          id="volunteerShift"
+                          required
+                          value={volunteerData.shift}
+                          onChange={(e) => handleVolunteerInputChange('shift', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select a shift</option>
+                          <option value="full-day">Full Day (9:00 AM - 5:00 PM)</option>
+                          <option value="morning">Morning (9:00 AM - 1:00 PM)</option>
+                          <option value="afternoon">Afternoon (1:00 PM - 5:00 PM)</option>
+                          <option value="setup">Setup (8:00 AM - 10:00 AM)</option>
+                          <option value="cleanup">Cleanup (4:00 PM - 6:00 PM)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="volunteerExperience">Previous Volunteer Experience</Label>
+                      <Textarea
+                        id="volunteerExperience"
+                        value={volunteerData.experience}
+                        onChange={(e) => handleVolunteerInputChange('experience', e.target.value)}
+                        placeholder="Tell us about any previous volunteer or event experience..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="volunteerAvailability">Additional Availability Notes</Label>
+                      <Textarea
+                        id="volunteerAvailability"
+                        value={volunteerData.availability}
+                        onChange={(e) => handleVolunteerInputChange('availability', e.target.value)}
+                        placeholder="Any specific availability constraints or preferences..."
+                        rows={2}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Practical Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Practical Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="tShirtSize">T-Shirt Size *</Label>
+                        <select
+                          id="tShirtSize"
+                          required
+                          value={volunteerData.tShirtSize}
+                          onChange={(e) => handleVolunteerInputChange('tShirtSize', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="">Select size</option>
+                          <option value="XS">XS</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="XXL">XXL</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="dietaryRequirements">Dietary Requirements</Label>
+                        <Input
+                          id="dietaryRequirements"
+                          type="text"
+                          value={volunteerData.dietaryRequirements}
+                          onChange={(e) => handleVolunteerInputChange('dietaryRequirements', e.target.value)}
+                          placeholder="Any dietary restrictions or allergies"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-green-50 rounded-lg">
+                    <Checkbox
+                      id="volunteerAgreesToTerms"
+                      checked={volunteerData.agreesToTerms}
+                      onCheckedChange={(checked) => handleVolunteerInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="volunteerAgreesToTerms" className="text-sm">
+                      I agree to volunteer at the AI Summit 2025 and understand the commitment involved. I will receive a confirmation email with further details. *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowVolunteerForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      disabled={volunteerMutation.isPending || !volunteerData.agreesToTerms}
+                    >
+                      {volunteerMutation.isPending ? "Submitting..." : "Register as Volunteer"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Volunteer Registration Form Modal */}
+        {showVolunteerForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neutral-900">Volunteer Registration - AI Summit 2025</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowVolunteerForm(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleVolunteerRegistration} className="space-y-4">
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Personal Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerName">Full Name *</Label>
+                        <Input
+                          id="volunteerName"
+                          type="text"
+                          required
+                          value={volunteerData.name}
+                          onChange={(e) => handleVolunteerInputChange('name', e.target.value)}
+                          placeholder="Your full name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="volunteerEmail">Email Address *</Label>
+                        <Input
+                          id="volunteerEmail"
+                          type="email"
+                          required
+                          value={volunteerData.email}
+                          onChange={(e) => handleVolunteerInputChange('email', e.target.value)}
+                          placeholder="your.email@example.com"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="volunteerPhone">Phone Number *</Label>
+                      <Input
+                        id="volunteerPhone"
+                        type="tel"
+                        required
+                        value={volunteerData.phone}
+                        onChange={(e) => handleVolunteerInputChange('phone', e.target.value)}
+                        placeholder="Your contact number"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Volunteer Preferences */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Volunteer Preferences</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerRole">Preferred Role</Label>
+                        <select
+                          id="volunteerRole"
+                          value={volunteerData.role}
+                          onChange={(e) => handleVolunteerInputChange('role', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select a role...</option>
+                          <option value="registration">Registration & Check-in</option>
+                          <option value="tech-support">Technical Support</option>
+                          <option value="speaker-assistance">Speaker Assistance</option>
+                          <option value="general-support">General Event Support</option>
+                          <option value="networking">Networking Facilitation</option>
+                          <option value="photography">Photography/Social Media</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="volunteerShift">Preferred Shift</Label>
+                        <select
+                          id="volunteerShift"
+                          value={volunteerData.shift}
+                          onChange={(e) => handleVolunteerInputChange('shift', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select a shift...</option>
+                          <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+                          <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                          <option value="full-day">Full Day (8:00 AM - 4:00 PM)</option>
+                          <option value="setup">Setup Only (8:00 AM - 10:00 AM)</option>
+                          <option value="cleanup">Cleanup Only (4:00 PM - 6:00 PM)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="volunteerExperience">Previous Volunteer Experience</Label>
+                      <Textarea
+                        id="volunteerExperience"
+                        value={volunteerData.experience}
+                        onChange={(e) => handleVolunteerInputChange('experience', e.target.value)}
+                        placeholder="Tell us about any previous volunteer experience at events or relevant skills..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Additional Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Additional Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="tShirtSize">T-Shirt Size</Label>
+                        <select
+                          id="tShirtSize"
+                          value={volunteerData.tShirtSize}
+                          onChange={(e) => handleVolunteerInputChange('tShirtSize', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select size...</option>
+                          <option value="XS">XS</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="XXL">XXL</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="emergencyContact">Emergency Contact</Label>
+                        <Input
+                          id="emergencyContact"
+                          type="text"
+                          value={volunteerData.emergencyContact}
+                          onChange={(e) => handleVolunteerInputChange('emergencyContact', e.target.value)}
+                          placeholder="Name and phone number"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="volunteerAvailability">Availability & Special Notes</Label>
+                      <Textarea
+                        id="volunteerAvailability"
+                        value={volunteerData.availability}
+                        onChange={(e) => handleVolunteerInputChange('availability', e.target.value)}
+                        placeholder="Any specific availability constraints or special notes..."
+                        rows={2}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="dietaryRequirements">Dietary Requirements (for volunteer lunch)</Label>
+                      <Input
+                        id="dietaryRequirements"
+                        type="text"
+                        value={volunteerData.dietaryRequirements}
+                        onChange={(e) => handleVolunteerInputChange('dietaryRequirements', e.target.value)}
+                        placeholder="Any dietary restrictions or preferences"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-green-50 rounded-lg">
+                    <Checkbox
+                      id="volunteerAgreesToTerms"
+                      checked={volunteerData.agreesToTerms}
+                      onCheckedChange={(checked) => handleVolunteerInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="volunteerAgreesToTerms" className="text-sm">
+                      I agree to volunteer at the AI Summit 2025 and understand the responsibilities and commitment required *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowVolunteerForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      disabled={volunteerMutation.isPending || !volunteerData.agreesToTerms}
+                    >
+                      {volunteerMutation.isPending ? "Submitting..." : "Register as Volunteer"}
                     </Button>
                   </div>
                 </form>
