@@ -1468,6 +1468,12 @@ export class DatabaseStorage implements IStorage {
     return updatedRegistration;
   }
 
+  async getUserEventRegistrations(userId: string): Promise<EventRegistration[]> {
+    return await db.select().from(eventRegistrations)
+      .where(eq(eventRegistrations.userId, userId))
+      .orderBy(desc(eventRegistrations.registrationDate));
+  }
+
   // Event Sessions Implementation
   async getEventSessions(eventId: number): Promise<EventSession[]> {
     return await db.select().from(eventSessions)

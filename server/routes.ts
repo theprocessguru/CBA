@@ -4396,6 +4396,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's event registrations
+  app.get("/api/user/event-registrations", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id;
+      const registrations = await storage.getUserEventRegistrations(userId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching user registrations:", error);
+      res.status(500).json({ message: "Failed to fetch registrations" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -46,6 +46,8 @@ import WorkshopManagement from "@/pages/workshop-management";
 import MyProfile from "@/pages/my-profile";
 import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
 import EventManagement from "@/pages/admin/EventManagement";
+import EventsPage from "@/pages/events";
+import MyBenefitsPage from "@/pages/my-benefits";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -156,6 +158,16 @@ function Router() {
       <Route path="/offers">
         <MainLayout>
           <OffersPage />
+        </MainLayout>
+      </Route>
+      <Route path="/events">
+        <MainLayout>
+          <EventsPage />
+        </MainLayout>
+      </Route>
+      <Route path="/my-benefits">
+        <MainLayout>
+          <MyBenefitsPage />
         </MainLayout>
       </Route>
       <Route path="/about">
