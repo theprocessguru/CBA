@@ -35,6 +35,8 @@ import AIEnterprise from "@/pages/ai-enterprise";
 import AIAnalytics from "@/pages/ai-analytics";
 import AISummit from "@/pages/ai-summit";
 import GHLAdmin from "@/pages/ghl-admin";
+import DataImport from "@/pages/data-import";
+import AdminDataImport from "@/pages/admin/import";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
@@ -219,6 +221,11 @@ function Router() {
       <Route path="/admin/ghl">
         <MainLayout>
           <GHLAdmin />
+        </MainLayout>
+      </Route>
+      <Route path="/admin/import">
+        <MainLayout>
+          <AdminDataImport />
         </MainLayout>
       </Route>
       

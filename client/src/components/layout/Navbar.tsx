@@ -362,6 +362,33 @@ const Navbar = () => {
               AI Analytics
             </a>
           </Link>
+          
+          {/* Admin Section */}
+          {user?.isAdmin && (
+            <>
+              <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider border-t border-neutral-200 mt-2 pt-4">
+                Admin Tools
+              </div>
+              <Link href="/admin/import">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/admin/import') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  📁 Data Import
+                </a>
+              </Link>
+              <Link href="/admin/ghl">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/admin/ghl') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  ⚙️ GHL Admin
+                </a>
+              </Link>
+            </>
+          )}
 
         </div>
         <div className="pt-4 pb-3 border-t border-neutral-200">

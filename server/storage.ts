@@ -53,6 +53,7 @@ export interface IStorage {
   // Business operations
   getBusinessById(id: number): Promise<Business | undefined>;
   getBusinessByUserId(userId: string): Promise<Business | undefined>;
+  getBusinessByEmail(email: string): Promise<Business | undefined>;
   createBusiness(business: InsertBusiness): Promise<Business>;
   updateBusiness(id: number, business: Partial<InsertBusiness>): Promise<Business>;
   listBusinesses(options?: { categoryId?: number, search?: string, limit?: number }): Promise<Business[]>;
@@ -245,6 +246,11 @@ export class DatabaseStorage implements IStorage {
 
   async getBusinessByUserId(userId: string): Promise<Business | undefined> {
     const [business] = await db.select().from(businesses).where(eq(businesses.userId, userId));
+    return business;
+  }
+
+  async getBusinessByEmail(email: string): Promise<Business | undefined> {
+    const [business] = await db.select().from(businesses).where(eq(businesses.email, email));
     return business;
   }
 

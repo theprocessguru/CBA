@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import multer from "multer";
 import * as Papa from "papaparse";
+import * as XLSX from "xlsx";
 import { insertBusinessSchema, insertProductSchema, insertOfferSchema, insertCategorySchema, insertContentReportSchema, insertInteractionSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -22,7 +23,7 @@ if (process.env.STRIPE_SECRET_KEY) {
   });
 }
 
-// Setup multer for file uploads
+// Setup multer for file uploads - images
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
@@ -32,6 +33,28 @@ const upload = multer({
       cb(null, true);
     } else {
       cb(new Error('Only image files are allowed!'));
+    }
+  }
+});
+
+// Setup multer for data import files
+const dataUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    // Allow CSV and Excel files
+    const allowedTypes = [
+      'text/csv',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    if (allowedTypes.includes(file.mimetype) || 
+        file.originalname.endsWith('.csv') || 
+        file.originalname.endsWith('.xlsx') || 
+        file.originalname.endsWith('.xls')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV and Excel files are allowed!'));
     }
   }
 });
@@ -968,6 +991,187 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GHL Integration routes
   
   // Test GHL connection
+  // Data Import routes (admin only)
+  
+  // Parse CSV or Excel file and return preview
+  const parseFileData = (buffer: Buffer, filename: string) => {
+    const extension = filename.split('.').pop()?.toLowerCase();
+    
+    if (extension === 'csv') {
+      // Parse CSV
+      const csvString = buffer.toString('utf-8');
+      const result = Papa.parse(csvString, {
+        header: false,
+        skipEmptyLines: true,
+      });
+      
+      if (result.errors.length > 0) {
+        throw new Error(`CSV parsing error: ${result.errors[0].message}`);
+      }
+      
+      const [headers, ...rows] = result.data as string[][];
+      return { headers, rows, totalRows: rows.length };
+    } else if (extension === 'xlsx' || extension === 'xls') {
+      // Parse Excel
+      const workbook = XLSX.read(buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
+      
+      if (data.length === 0) {
+        throw new Error('Excel file is empty');
+      }
+      
+      const [headers, ...rows] = data;
+      return { headers, rows, totalRows: rows.length };
+    } else {
+      throw new Error('Unsupported file format');
+    }
+  };
+
+  // Map row data to business object using field mappings
+  const mapRowToBusiness = (row: any[], headers: string[], mappings: any, userId: string) => {
+    const business: any = { userId };
+    
+    headers.forEach((header, index) => {
+      const dbField = mappings[header];
+      if (!dbField || !row[index]) return;
+      
+      const value = String(row[index]).trim();
+      if (!value) return;
+      
+      if (dbField.includes('.')) {
+        // Handle nested fields like socialMedia.facebook
+        const [parent, child] = dbField.split('.');
+        if (!business[parent]) business[parent] = {};
+        business[parent][child] = value;
+      } else {
+        // Handle simple fields
+        switch (dbField) {
+          case 'employeeCount':
+            business[dbField] = parseInt(value) || 0;
+            break;
+          case 'foundedYear':
+            business[dbField] = parseInt(value) || new Date().getFullYear();
+            break;
+          default:
+            business[dbField] = value;
+        }
+      }
+    });
+    
+    // Ensure required fields have defaults
+    if (!business.name) return null;
+    if (!business.description) business.description = '';
+    if (!business.employeeCount) business.employeeCount = 1;
+    if (!business.foundedYear) business.foundedYear = new Date().getFullYear();
+    
+    return business;
+  };
+
+  // Preview uploaded file
+  app.post('/api/data-import/preview', isAuthenticated, isAdmin, dataUpload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const fileData = parseFileData(req.file.buffer, req.file.originalname);
+      
+      // Return preview with limited rows (first 5 for display)
+      res.json({
+        headers: fileData.headers,
+        rows: fileData.rows.slice(0, 5),
+        totalRows: fileData.totalRows
+      });
+    } catch (error) {
+      console.error('Error previewing file:', error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : 'Failed to parse file' 
+      });
+    }
+  });
+
+  // Import data from uploaded file
+  app.post('/api/data-import/import', isAuthenticated, isAdmin, dataUpload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const mappings = JSON.parse(req.body.mappings || '{}');
+      const userId = (req as any).user.id;
+      
+      const fileData = parseFileData(req.file.buffer, req.file.originalname);
+      
+      let imported = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      // Process each row
+      for (let i = 0; i < fileData.rows.length; i++) {
+        try {
+          const businessData = mapRowToBusiness(fileData.rows[i], fileData.headers, mappings, userId);
+          
+          if (!businessData) {
+            skipped++;
+            continue;
+          }
+
+          // Check for duplicate email
+          if (businessData.email) {
+            const existingBusiness = await storage.getBusinessByEmail(businessData.email);
+            if (existingBusiness) {
+              skipped++;
+              continue;
+            }
+          }
+
+          // Validate business data
+          const validatedData = insertBusinessSchema.parse(businessData);
+          
+          // Create business
+          const newBusiness = await storage.createBusiness(validatedData);
+          imported++;
+
+          // Auto-sync to GHL if enabled
+          const ghlService = getGHLService();
+          if (ghlService && businessData.email) {
+            try {
+              await ghlService.syncBusinessMember({
+                email: businessData.email,
+                firstName: '',
+                lastName: '',
+                businessName: businessData.name,
+                membershipTier: 'Standard'
+              });
+            } catch (ghlError) {
+              console.error(`Failed to sync business ${businessData.email} to GHL:`, ghlError);
+            }
+          }
+        } catch (error) {
+          console.error(`Error processing row ${i + 1}:`, error);
+          errors.push(`Row ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          skipped++;
+        }
+      }
+
+      res.json({
+        imported,
+        skipped,
+        errors: errors.slice(0, 10), // Limit errors shown
+        totalProcessed: fileData.totalRows
+      });
+    } catch (error) {
+      console.error('Error importing data:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : 'Failed to import data' 
+      });
+    }
+  });
+
+  // GHL (Go High Level) integration routes
+  
   app.get('/api/ghl/test', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const ghlService = getGHLService();
