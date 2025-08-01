@@ -71,7 +71,7 @@ export interface IStorage {
   createOffer(offer: InsertOffer): Promise<Offer>;
   updateOffer(id: number, offer: Partial<InsertOffer>): Promise<Offer>;
   deleteOffer(id: number): Promise<boolean>;
-  listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean }): Promise<Offer[]>;
+  listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean, includeMemberOnly?: boolean }): Promise<Offer[]>;
   
   // Category operations
   getCategoryById(id: number): Promise<Category | undefined>;
@@ -378,7 +378,7 @@ export class DatabaseStorage implements IStorage {
     return result.length > 0;
   }
 
-  async listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean }): Promise<Offer[]> {
+  async listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean, includeMemberOnly?: boolean }): Promise<Offer[]> {
     let whereConditions = [
       eq(offers.isActive, true),
       or(
@@ -394,8 +394,8 @@ export class DatabaseStorage implements IStorage {
     // Filter by visibility based on options
     if (options?.membersOnly) {
       whereConditions.push(eq(offers.memberOnlyDiscount, true));
-    } else if (options?.includePublic && !options?.membersOnly) {
-      // For public API, exclude member-only offers
+    } else if (options?.includePublic && !options?.includeMemberOnly) {
+      // For public API, exclude member-only offers unless specifically included
       whereConditions.push(eq(offers.memberOnlyDiscount, false));
     }
 

@@ -225,13 +225,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Get public offers (excludes member-only offers)
+  // Get offers (includes member-only offers for authenticated users)
   app.get('/api/offers', async (req, res) => {
     try {
       const { limit } = req.query;
+      const isAuthenticated = req.isAuthenticated && req.isAuthenticated();
+      
       const options = {
         limit: limit ? parseInt(limit as string) : undefined,
-        includePublic: true
+        includePublic: true,
+        includeMemberOnly: isAuthenticated  // Show member-only offers to authenticated users
       };
       
       const offers = await storage.listActiveOffers(options);
