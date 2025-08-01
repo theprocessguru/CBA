@@ -28,6 +28,30 @@ const HeroSection = () => {
                 </Button>
               </Link>
             </div>
+            
+            {/* Personal Message from CBA */}
+            <div className="mt-8 p-6 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg shadow-sm">
+              <div className="text-center">
+                <p className="text-gray-700 mb-3 leading-relaxed">
+                  <span className="font-semibold text-gray-900">The CBA proudly thanks our Executive Board Member</span>
+                  {" "}<span className="font-bold text-blue-600">Steve Ball - The Process Guru</span>{" "}
+                  for creating this incredible platform that transforms how we connect and serve our business community.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <p className="text-sm text-gray-600">
+                    Discover the future of business automation
+                  </p>
+                  <a 
+                    href="https://mytai.co.uk" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  >
+                    Visit MyT AI →
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="relative h-80">
             <img 
