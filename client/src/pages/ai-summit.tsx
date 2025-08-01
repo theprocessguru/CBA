@@ -165,15 +165,7 @@ const AISummit = () => {
       capacity: "All attendees"
     },
     {
-      time: "10:00 - 10:30",
-      title: "Opening Keynote: AI Revolution in Croydon",
-      type: "keynote",
-      speaker: "Jose Martinez, CBA Founder",
-      description: "How Croydon is becoming the AI capital of South London",
-      capacity: "120 people"
-    },
-    {
-      time: "10:30 - 11:15",
+      time: "10:45 - 11:15",
       title: "The Future of AI in Small Business",
       type: "talk",
       speaker: "Dr. Sarah Chen",
@@ -266,7 +258,16 @@ const AISummit = () => {
   // Large 3rd Floor Space - Micro Business Exhibition
   const exhibitionSchedule = [
     {
-      time: "10:00 - 16:00",
+      time: "10:00 - 10:30",
+      title: "Opening Keynote: AI Revolution in Croydon",
+      type: "keynote",
+      speaker: "Jose Martinez, CBA Founder",
+      description: "How Croydon is becoming the AI capital of South London - Main opening speech for all attendees",
+      capacity: "All attendees",
+      features: "Main opening ceremony"
+    },
+    {
+      time: "10:30 - 16:00",
       title: "Micro Business AI Exhibition",
       type: "exhibition",
       speaker: "AI Startups & Tech Companies",
