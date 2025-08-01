@@ -34,6 +34,7 @@ import AIStrategy from "@/pages/ai-strategy";
 import AIEnterprise from "@/pages/ai-enterprise";
 import AIAnalytics from "@/pages/ai-analytics";
 import AISummit from "@/pages/ai-summit";
+import GHLAdmin from "@/pages/ghl-admin";
 import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
@@ -213,6 +214,11 @@ function Router() {
       <Route path="/ai-summit">
         <MainLayout>
           <AISummit />
+        </MainLayout>
+      </Route>
+      <Route path="/admin/ghl">
+        <MainLayout>
+          <GHLAdmin />
         </MainLayout>
       </Route>
       
