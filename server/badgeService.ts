@@ -549,8 +549,15 @@ export class BadgeService {
   /**
    * Generate printable badge HTML for A4 printing
    */
-  generatePrintableBadgeHTML(badgeInfo: BadgeInfo): string {
-    const qrCodeDataUrl = QRCode.toDataURL(JSON.stringify(badgeInfo));
+  async generatePrintableBadgeHTML(badgeInfo: BadgeInfo): Promise<string> {
+    const qrCodeDataUrl = await QRCode.toDataURL(JSON.stringify(badgeInfo), {
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
     
     // Badge color based on participant type
     const badgeColors = {

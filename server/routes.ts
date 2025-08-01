@@ -24,7 +24,7 @@ import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
 import { aiAdvancedService } from "./aiAdvancedService";
-import { badgeService } from "./badgeService";
+import { badgeService, type BadgeInfo } from "./badgeService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
@@ -3064,6 +3064,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending badge email:", error);
       res.status(500).json({ message: "Failed to send badge email" });
+    }
+  });
+
+  // Download badge endpoint
+  app.get('/api/download-badge/:registrationId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { registrationId } = req.params;
+      const userId = req.user.id;
+      
+      // Get the registration and verify ownership
+      const registration = await storage.getAISummitRegistrationById(parseInt(registrationId));
+      if (!registration || registration.userId !== userId) {
+        return res.status(403).json({ message: "Registration not found or not owned by user" });
+      }
+      
+      // Get the badge for this registration
+      const badge = await storage.getAISummitBadgeByRegistrationId(parseInt(registrationId));
+      if (!badge) {
+        return res.status(404).json({ message: "Badge not found for this registration" });
+      }
+      
+      // Generate the badge HTML using the badge service
+      const badgeInfo: BadgeInfo = {
+        badgeId: badge.badgeId,
+        participantType: badge.participantType as 'attendee' | 'exhibitor' | 'speaker' | 'volunteer' | 'team',
+        participantId: badge.participantId || registration.id.toString(),
+        name: badge.participantName,
+        email: registration.email,
+        company: badge.company || '',
+        jobTitle: badge.jobTitle || '',
+        eventDetails: {
+          eventName: 'First AI Summit Croydon 2025',
+          eventDate: 'October 1st, 2025',
+          venue: 'LSBU London South Bank University Croydon'
+        },
+        accessLevel: badge.accessLevel || 'General Access'
+      };
+      
+      const badgeHTML = await badgeService.generatePrintableBadgeHTML(badgeInfo);
+      
+      // Set response headers for PDF download
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', `attachment; filename="ai-summit-badge-${registrationId}.html"`);
+      res.send(badgeHTML);
+      
+    } catch (error) {
+      console.error("Error downloading badge:", error);
+      res.status(500).json({ message: "Failed to download badge" });
     }
   });
 
