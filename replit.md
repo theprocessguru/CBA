@@ -6,6 +6,9 @@ This platform is a comprehensive business automation solution designed to help b
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+- **Badge Printing Format Updated (August 2025)**: Changed badge dimensions from A4 page size to standard badge holder format (102mm x 76mm). All badges now print at proper size for badge holders with compact, professional layout optimized for wearing at events. User confirmed this works perfectly.
+
 ## System Architecture
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript, built with Vite.
@@ -30,7 +33,7 @@ Preferred communication style: Simple, everyday language.
 - **Membership System**: Five-tier membership system (Starter, Growth, Strategic, Patron, Partner) with over 245 practical business benefits including networking, support, training, discounts, and AI tools. Includes an automated membership limit enforcement system with real-time usage tracking and upgrade prompts.
 - **Event Management**: Registration calendar system, venue capacity management, and a comprehensive volunteer profile system with enhanced scanner functionality to display volunteer-specific information.
 - **AI Services**: Simplified AI service add-on pricing (AI Basics, AI Professional) focusing on practical tools like content writing, chatbots, and document processing. Includes HMRC compliance warning system and income threshold checker.
-- **Badge System**: Comprehensive badge generation and download functionality with QR codes, supporting multiple participant roles for complex events.
+- **Badge System**: Comprehensive badge generation and download functionality with QR codes, supporting multiple participant roles for complex events. Badges optimized for standard badge holders (102mm x 76mm) instead of full A4 pages, with compact professional layout suitable for event wearing.
 
 ## External Dependencies
 - **Database**: Neon PostgreSQL serverless database.
