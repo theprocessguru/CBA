@@ -274,6 +274,8 @@ export async function setupLocalAuth(app: Express) {
       res.status(500).json({ valid: false, message: "Failed to validate token" });
     }
   });
+
+
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {

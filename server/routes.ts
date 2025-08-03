@@ -3166,13 +3166,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create/update user in database
       await storage.upsertUser(adminUserData);
 
-      // Set session
+      // Set session to match the auth middleware structure
+      (req as any).session.userId = adminUserData.id;
       (req as any).session.user = adminUserData;
       
-      // Force session save and respond
-      (req as any).session.save((err: any) => {
-        if (err) {
-          console.error('Session save error:', err);
+      // Force session save
+      (req as any).session.save((saveErr: any) => {
+        if (saveErr) {
+          console.error('Session save error:', saveErr);
           return res.status(500).json({ message: 'Session save failed' });
         }
         console.log('Admin session saved successfully:', adminUserData.email);
