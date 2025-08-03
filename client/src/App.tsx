@@ -63,6 +63,7 @@ import AdminLogin from "@/pages/admin-login";
 import QuickLogin from "@/pages/quick-login";
 import ScannerManagement from "@/pages/admin/scanner-management";
 import MultiRoleDemo from "@/pages/multi-role-demo";
+import MobileBadgePage from "@/pages/mobile-badge";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -426,6 +427,9 @@ function Router() {
         <MainLayout>
           <MultiRoleDemo />
         </MainLayout>
+      </Route>
+      <Route path="/mobile-badge">
+        <MobileBadgePage />
       </Route>
       
       {/* Fallback to 404 */}

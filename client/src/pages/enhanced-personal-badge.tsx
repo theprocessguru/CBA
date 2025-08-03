@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, User, QrCode, MapPin, Clock, Users, TrendingUp, BarChart3, Download, CheckCircle, XCircle, AlertCircle, Eye } from "lucide-react";
+import { Calendar, User, QrCode, MapPin, Clock, Users, TrendingUp, BarChart3, Download, CheckCircle, XCircle, AlertCircle, Eye, Smartphone } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { apiRequest } from "@/lib/queryClient";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
@@ -495,15 +495,25 @@ export default function EnhancedPersonalBadge() {
                             <span>Printed: {badgeEvent.badgePrinted ? "Yes" : "No"}</span>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => downloadBadgeMutation.mutate(badgeEvent.id)}
-                          disabled={downloadBadgeMutation.isPending}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open('/mobile-badge', '_blank')}
+                          >
+                            <Smartphone className="h-4 w-4 mr-2" />
+                            Mobile
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadBadgeMutation.mutate(badgeEvent.id)}
+                            disabled={downloadBadgeMutation.isPending}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
