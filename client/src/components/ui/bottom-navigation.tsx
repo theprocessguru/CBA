@@ -15,6 +15,11 @@ const BottomNavigation = () => {
     { href: "/membership", icon: Crown, label: "Join" },
   ];
 
+  // Add scanner for authenticated users in main nav
+  const authNavItems = isAuthenticated 
+    ? [...navItems.slice(0, 2), { href: "/organizer-scanner", icon: QrCode, label: "Scanner" }, ...navItems.slice(2)]
+    : navItems;
+
   const dashboardItem = { href: "/dashboard", icon: Building, label: "Dashboard" };
 
   const isActive = (path: string) => {
@@ -26,7 +31,7 @@ const BottomNavigation = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden">
       <div className="flex justify-around py-1 px-2">
-        {navItems.map((item) => (
+        {authNavItems.map((item) => (
           <Link key={item.href} href={item.href} asChild>
             <button
               className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
