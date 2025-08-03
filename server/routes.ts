@@ -22,6 +22,18 @@ import {
   eventBadgeAssignments,
   insertPersonalBadgeSchema,
   insertEventBadgeAssignmentSchema,
+  insertCBAEventSchema,
+  insertCBAEventRegistrationSchema,
+  insertEventAttendanceAnalyticsSchema,
+  insertPersonalBadgeEventSchema,
+  insertGHLAutomationLogSchema,
+  insertEventFeedbackSchema,
+  cbaEvents,
+  cbaEventRegistrations,
+  eventAttendanceAnalytics,
+  personalBadgeEvents,
+  ghlAutomationLogs,
+  eventFeedback,
   users
 } from "@shared/schema";
 import { z } from "zod";
@@ -5212,6 +5224,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error downloading personal badge:', error);
       res.status(500).json({ message: "Failed to download badge" });
+    }
+  });
+
+  // ===========================
+  // Enhanced CBA Event Management API Routes
+  // ===========================
+
+  // Get all CBA events
+  app.get('/api/cba-events', async (req: Request, res: Response) => {
+    try {
+      const events = await db.select().from(cbaEvents).where(eq(cbaEvents.isActive, true));
+      res.json(events);
+    } catch (error: any) {
+      console.error("Error fetching CBA events:", error);
+      res.status(500).json({ message: "Failed to fetch events: " + error.message });
+    }
+  });
+
+  // Create personal badge event linking
+  app.post('/api/personal-badge-events', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const validatedData = validateRequest(insertPersonalBadgeEventSchema, req.body);
+      
+      // Get user's personal badge
+      const [personalBadge] = await db.select().from(personalBadges)
+        .where(eq(personalBadges.userId, userId));
+      
+      if (!personalBadge) {
+        return res.status(404).json({ message: "Personal badge not found. Create a personal badge first." });
+      }
+
+      // Add the personal badge ID to the data
+      const badgeEventData = {
+        ...validatedData,
+        personalBadgeId: personalBadge.id
+      };
+
+      const [badgeEvent] = await db.insert(personalBadgeEvents)
+        .values(badgeEventData)
+        .returning();
+
+      res.json(badgeEvent);
+    } catch (error: any) {
+      console.error("Error creating personal badge event:", error);
+      res.status(500).json({ message: "Failed to create badge event: " + error.message });
+    }
+  });
+
+  // Get personal badge events for current user
+  app.get('/api/personal-badge-events', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Get user's personal badge
+      const [personalBadge] = await db.select().from(personalBadges)
+        .where(eq(personalBadges.userId, userId));
+      
+      if (!personalBadge) {
+        return res.json([]);
+      }
+
+      // Get badge events with event details
+      const badgeEvents = await db.select({
+        id: personalBadgeEvents.id,
+        personalBadgeId: personalBadgeEvents.personalBadgeId,
+        eventId: personalBadgeEvents.eventId,
+        roleAtEvent: personalBadgeEvents.roleAtEvent,
+        badgeDesign: personalBadgeEvents.badgeDesign,
+        customFields: personalBadgeEvents.customFields,
+        qrCodeData: personalBadgeEvents.qrCodeData,
+        checkedIn: personalBadgeEvents.checkedIn,
+        checkedInAt: personalBadgeEvents.checkedInAt,
+        checkedOut: personalBadgeEvents.checkedOut,
+        checkedOutAt: personalBadgeEvents.checkedOutAt,
+        badgePrinted: personalBadgeEvents.badgePrinted,
+        badgePrintedAt: personalBadgeEvents.badgePrintedAt,
+        isActive: personalBadgeEvents.isActive,
+        event: cbaEvents
+      })
+      .from(personalBadgeEvents)
+      .innerJoin(cbaEvents, eq(personalBadgeEvents.eventId, cbaEvents.id))
+      .where(eq(personalBadgeEvents.personalBadgeId, personalBadge.id));
+
+      res.json(badgeEvents);
+    } catch (error: any) {
+      console.error("Error fetching personal badge events:", error);
+      res.status(500).json({ message: "Failed to fetch badge events: " + error.message });
+    }
+  });
+
+  // Get event registrations for current user
+  app.get('/api/my-event-registrations', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const registrations = await db.select({
+        id: cbaEventRegistrations.id,
+        eventId: cbaEventRegistrations.eventId,
+        participantName: cbaEventRegistrations.participantName,
+        participantEmail: cbaEventRegistrations.participantEmail,
+        registrationStatus: cbaEventRegistrations.registrationStatus,
+        checkedIn: cbaEventRegistrations.checkedIn,
+        checkedInAt: cbaEventRegistrations.checkedInAt,
+        noShow: cbaEventRegistrations.noShow,
+        feedbackRating: cbaEventRegistrations.feedbackRating,
+        registeredAt: cbaEventRegistrations.registeredAt,
+        event: cbaEvents
+      })
+      .from(cbaEventRegistrations)
+      .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
+      .where(eq(cbaEventRegistrations.userId, userId));
+
+      res.json(registrations);
+    } catch (error: any) {
+      console.error("Error fetching user registrations:", error);
+      res.status(500).json({ message: "Failed to fetch registrations: " + error.message });
+    }
+  });
+
+  // Get attendance analytics for current user
+  app.get('/api/my-attendance-analytics', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user?.email) {
+        return res.status(404).json({ message: "User email not found" });
+      }
+
+      const analytics = await db.select()
+        .from(eventAttendanceAnalytics)
+        .where(eq(eventAttendanceAnalytics.userEmail, user.email));
+
+      res.json(analytics);
+    } catch (error: any) {
+      console.error("Error fetching attendance analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics: " + error.message });
     }
   });
 

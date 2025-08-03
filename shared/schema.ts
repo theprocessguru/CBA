@@ -517,7 +517,152 @@ export const aiSummitSessionRegistrations = pgTable("ai_summit_session_registrat
   primaryKey(table.sessionId, table.badgeId)
 ]);
 
+// CBA Events management system
+export const cbaEvents = pgTable("cba_events", {
+  id: serial("id").primaryKey(),
+  eventName: varchar("event_name").notNull(),
+  eventSlug: varchar("event_slug").notNull(), // URL-friendly identifier
+  description: text("description"),
+  eventType: varchar("event_type").notNull(), // workshop, networking, summit, webinar, social
+  eventDate: timestamp("event_date").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  venue: varchar("venue").notNull(),
+  venueAddress: text("venue_address"),
+  maxCapacity: integer("max_capacity").notNull(),
+  currentRegistrations: integer("current_registrations").default(0),
+  registrationDeadline: timestamp("registration_deadline"),
+  isActive: boolean("is_active").default(true),
+  isFeatured: boolean("is_featured").default(false),
+  requiresApproval: boolean("requires_approval").default(false),
+  registrationFee: integer("registration_fee").default(0), // in pence
+  memberPrice: integer("member_price").default(0), // special member pricing
+  isRecurring: boolean("is_recurring").default(false),
+  recurringPattern: varchar("recurring_pattern"), // weekly, monthly, etc.
+  tags: text("tags"), // JSON array of event tags
+  imageUrl: text("image_url"),
+  ghlWorkflowId: varchar("ghl_workflow_id"), // GoHighLevel workflow ID for automation
+  ghlTagName: varchar("ghl_tag_name"), // GHL tag for attendees
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
+// Event registrations with enhanced tracking  
+export const cbaEventRegistrations = pgTable("cba_event_registrations", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => cbaEvents.id),
+  userId: varchar("user_id").references(() => users.id),
+  personalBadgeId: integer("personal_badge_id").references(() => personalBadges.id),
+  participantName: varchar("participant_name").notNull(),
+  participantEmail: varchar("participant_email").notNull(),
+  participantPhone: varchar("participant_phone"),
+  participantCompany: varchar("participant_company"),
+  participantJobTitle: varchar("participant_job_title"),
+  membershipTier: varchar("membership_tier"),
+  registrationSource: varchar("registration_source").default("website"), // website, referral, social, email
+  specialRequirements: text("special_requirements"),
+  dietaryRequirements: text("dietary_requirements"),
+  accessibilityNeeds: text("accessibility_needs"),
+  networkingInterests: text("networking_interests"),
+  registrationStatus: varchar("registration_status").default("confirmed"), // pending, confirmed, cancelled, waitlist
+  paymentStatus: varchar("payment_status").default("not_required"), // not_required, pending, paid, refunded
+  paymentAmount: integer("payment_amount").default(0),
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  checkedOut: boolean("checked_out").default(false),
+  checkedOutAt: timestamp("checked_out_at"),
+  noShow: boolean("no_show").default(false),
+  feedbackRating: integer("feedback_rating"), // 1-5 rating
+  feedbackComments: text("feedback_comments"),
+  ghlContactId: varchar("ghl_contact_id"), // GoHighLevel contact ID
+  ghlTagsApplied: text("ghl_tags_applied"), // JSON array of applied GHL tags
+  registeredAt: timestamp("registered_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Prevent duplicate registrations for same event
+  index("event_registrations_unique_idx").on(table.eventId, table.participantEmail)
+]);
+
+// Event attendance analytics for GoHighLevel integration
+export const eventAttendanceAnalytics = pgTable("event_attendance_analytics", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => cbaEvents.id),
+  userId: varchar("user_id").references(() => users.id),
+  userEmail: varchar("user_email").notNull(),
+  attendancePattern: varchar("attendance_pattern"), // regular, occasional, first_time, no_show_pattern
+  totalEventsRegistered: integer("total_events_registered").default(0),
+  totalEventsAttended: integer("total_events_attended").default(0),
+  totalNoShows: integer("total_no_shows").default(0),
+  attendanceRate: decimal("attendance_rate", { precision: 5, scale: 2 }).default("0"),
+  lastEventAttended: timestamp("last_event_attended"),
+  missedEventWorkflowTriggered: boolean("missed_event_workflow_triggered").default(false),
+  missedEventWorkflowDate: timestamp("missed_event_workflow_date"),
+  ghlWorkflowsTriggered: text("ghl_workflows_triggered"), // JSON array of triggered workflows
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Enhanced personal badge events linking
+export const personalBadgeEvents = pgTable("personal_badge_events", {
+  id: serial("id").primaryKey(),
+  personalBadgeId: integer("personal_badge_id").notNull().references(() => personalBadges.id),
+  eventId: integer("event_id").notNull().references(() => cbaEvents.id),
+  roleAtEvent: varchar("role_at_event").default("attendee"), // attendee, speaker, exhibitor, volunteer, organizer
+  badgeDesign: varchar("badge_design").default("standard"), // standard, speaker, vip, organizer
+  customFields: text("custom_fields"), // JSON for event-specific badge customization
+  qrCodeData: text("qr_code_data").notNull(), // Event-specific QR data
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  checkedOut: boolean("checked_out").default(false),
+  checkedOutAt: timestamp("checked_out_at"),
+  badgePrinted: boolean("badge_printed").default(false),
+  badgePrintedAt: timestamp("badge_printed_at"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  // Ensure one badge per event per person
+  index("badge_event_unique_idx").on(table.personalBadgeId, table.eventId)
+]);
+
+// GoHighLevel automation tracking
+export const ghlAutomationLogs = pgTable("ghl_automation_logs", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => cbaEvents.id),
+  userId: varchar("user_id").references(() => users.id),
+  userEmail: varchar("user_email").notNull(),
+  automationType: varchar("automation_type").notNull(), // registration_confirmation, reminder, no_show_followup, feedback_request
+  workflowId: varchar("workflow_id").notNull(), // GHL workflow ID
+  triggerReason: varchar("trigger_reason").notNull(), // registered, checked_in, no_show, event_ended
+  status: varchar("status").default("pending"), // pending, sent, delivered, failed
+  ghlResponse: text("ghl_response"), // JSON response from GHL API
+  retryCount: integer("retry_count").default(0),
+  lastRetryAt: timestamp("last_retry_at"),
+  completedAt: timestamp("completed_at"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event feedback and ratings
+export const eventFeedback = pgTable("event_feedback", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => cbaEvents.id),
+  userId: varchar("user_id").references(() => users.id),
+  participantEmail: varchar("participant_email").notNull(),
+  overallRating: integer("overall_rating").notNull(), // 1-5 stars
+  contentQuality: integer("content_quality"), // 1-5 stars
+  organizationRating: integer("organization_rating"), // 1-5 stars
+  networkingValue: integer("networking_value"), // 1-5 stars
+  venueRating: integer("venue_rating"), // 1-5 stars
+  wouldRecommend: boolean("would_recommend"),
+  mostValuable: text("most_valuable"), // What was most valuable
+  improvements: text("improvements"), // Suggestions for improvement
+  futureTopics: text("future_topics"), // Topics they'd like to see
+  additionalComments: text("additional_comments"),
+  isAnonymous: boolean("is_anonymous").default(false),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+});
 
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
@@ -650,6 +795,14 @@ export const insertAISummitWorkshopRegistrationSchema = createInsertSchema(aiSum
 export const insertAISummitSpeakingSessionSchema = createInsertSchema(aiSummitSpeakingSessions).omit({ id: true });
 export const insertAISummitSpeakingSessionRegistrationSchema = createInsertSchema(aiSummitSessionRegistrations).omit({ id: true });
 
+// Enhanced Event System Schemas
+export const insertCBAEventSchema = createInsertSchema(cbaEvents).omit({ id: true });
+export const insertCBAEventRegistrationSchema = createInsertSchema(cbaEventRegistrations).omit({ id: true });
+export const insertEventAttendanceAnalyticsSchema = createInsertSchema(eventAttendanceAnalytics).omit({ id: true });
+export const insertPersonalBadgeEventSchema = createInsertSchema(personalBadgeEvents).omit({ id: true });
+export const insertGHLAutomationLogSchema = createInsertSchema(ghlAutomationLogs).omit({ id: true });
+export const insertEventFeedbackSchema = createInsertSchema(eventFeedback).omit({ id: true });
+
 // Type definitions
 export type UpsertUser = z.infer<typeof upsertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -739,7 +892,26 @@ export type AISummitSpeakingSession = typeof aiSummitSpeakingSessions.$inferSele
 export type InsertAISummitSpeakingSessionRegistration = z.infer<typeof insertAISummitSpeakingSessionRegistrationSchema>;
 export type AISummitSpeakingSessionRegistration = typeof aiSummitSessionRegistrations.$inferSelect;
 
-// General Event Management System
+// Enhanced Event System Types
+export type InsertCBAEvent = z.infer<typeof insertCBAEventSchema>;
+export type CBAEvent = typeof cbaEvents.$inferSelect;
+
+export type InsertCBAEventRegistration = z.infer<typeof insertCBAEventRegistrationSchema>;
+export type CBAEventRegistration = typeof cbaEventRegistrations.$inferSelect;
+
+export type InsertEventAttendanceAnalytics = z.infer<typeof insertEventAttendanceAnalyticsSchema>;
+export type EventAttendanceAnalytics = typeof eventAttendanceAnalytics.$inferSelect;
+
+export type InsertPersonalBadgeEvent = z.infer<typeof insertPersonalBadgeEventSchema>;
+export type PersonalBadgeEvent = typeof personalBadgeEvents.$inferSelect;
+
+export type InsertGHLAutomationLog = z.infer<typeof insertGHLAutomationLogSchema>;
+export type GHLAutomationLog = typeof ghlAutomationLogs.$inferSelect;
+
+export type InsertEventFeedback = z.infer<typeof insertEventFeedbackSchema>;
+export type EventFeedback = typeof eventFeedback.$inferSelect;
+
+// Legacy Event Management System (keeping for existing registrations)
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),

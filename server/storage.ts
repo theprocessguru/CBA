@@ -73,6 +73,24 @@ import {
   type InsertEventSession,
   type EventSessionRegistration,
   type InsertEventSessionRegistration,
+  cbaEvents,
+  cbaEventRegistrations,
+  eventAttendanceAnalytics,
+  personalBadgeEvents,
+  ghlAutomationLogs,
+  eventFeedback,
+  type CBAEvent,
+  type InsertCBAEvent,
+  type CBAEventRegistration,
+  type InsertCBAEventRegistration,
+  type EventAttendanceAnalytics,
+  type InsertEventAttendanceAnalytics,
+  type PersonalBadgeEvent,
+  type InsertPersonalBadgeEvent,
+  type GHLAutomationLog,
+  type InsertGHLAutomationLog,
+  type EventFeedback,
+  type InsertEventFeedback,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
@@ -263,6 +281,69 @@ export interface IStorage {
   getEventSessionRegistrations(sessionId: number): Promise<EventSessionRegistration[]>;
   createEventSessionRegistration(registration: InsertEventSessionRegistration): Promise<EventSessionRegistration>;
   deleteEventSessionRegistration(sessionId: number, registrationId: number): Promise<void>;
+
+  // Enhanced CBA Event Management operations
+  createCBAEvent(event: InsertCBAEvent): Promise<CBAEvent>;
+  getCBAEventById(id: number): Promise<CBAEvent | undefined>;
+  getCBAEventBySlug(slug: string): Promise<CBAEvent | undefined>;
+  getAllCBAEvents(): Promise<CBAEvent[]>;
+  getActiveCBAEvents(): Promise<CBAEvent[]>;
+  getFeaturedCBAEvents(): Promise<CBAEvent[]>;
+  updateCBAEvent(id: number, event: Partial<InsertCBAEvent>): Promise<CBAEvent>;
+  deleteCBAEvent(id: number): Promise<boolean>;
+  getCBAEventsByType(eventType: string): Promise<CBAEvent[]>;
+  getCBAEventsByDateRange(startDate: Date, endDate: Date): Promise<CBAEvent[]>;
+
+  // CBA Event Registration operations
+  createCBAEventRegistration(registration: InsertCBAEventRegistration): Promise<CBAEventRegistration>;
+  getCBAEventRegistrationById(id: number): Promise<CBAEventRegistration | undefined>;
+  getCBAEventRegistrationsByEventId(eventId: number): Promise<CBAEventRegistration[]>;
+  getCBAEventRegistrationsByUserId(userId: string): Promise<CBAEventRegistration[]>;
+  updateCBAEventRegistration(id: number, registration: Partial<InsertCBAEventRegistration>): Promise<CBAEventRegistration>;
+  deleteCBAEventRegistration(id: number): Promise<boolean>;
+  checkInCBAEventRegistration(registrationId: number, checkInTime?: Date): Promise<CBAEventRegistration>;
+  checkOutCBAEventRegistration(registrationId: number, checkOutTime?: Date): Promise<CBAEventRegistration>;
+  markCBAEventRegistrationNoShow(registrationId: number): Promise<CBAEventRegistration>;
+  getCBAEventCapacity(eventId: number): Promise<{ current: number; max: number; available: number }>;
+
+  // Event Attendance Analytics operations
+  createEventAttendanceAnalytics(analytics: InsertEventAttendanceAnalytics): Promise<EventAttendanceAnalytics>;
+  getEventAttendanceAnalyticsByUserId(userId: string): Promise<EventAttendanceAnalytics[]>;
+  getEventAttendanceAnalyticsByEventId(eventId: number): Promise<EventAttendanceAnalytics[]>;
+  updateEventAttendanceAnalytics(id: number, analytics: Partial<InsertEventAttendanceAnalytics>): Promise<EventAttendanceAnalytics>;
+  getAttendancePatternsByUser(userEmail: string): Promise<EventAttendanceAnalytics[]>;
+  getRegularAttendees(threshold?: number): Promise<EventAttendanceAnalytics[]>;
+  getNoShowPatterns(threshold?: number): Promise<EventAttendanceAnalytics[]>;
+
+  // Personal Badge Event Linking operations
+  createPersonalBadgeEvent(badgeEvent: InsertPersonalBadgeEvent): Promise<PersonalBadgeEvent>;
+  getPersonalBadgeEventById(id: number): Promise<PersonalBadgeEvent | undefined>;
+  getPersonalBadgeEventsByBadgeId(badgeId: number): Promise<PersonalBadgeEvent[]>;
+  getPersonalBadgeEventsByEventId(eventId: number): Promise<PersonalBadgeEvent[]>;
+  updatePersonalBadgeEvent(id: number, badgeEvent: Partial<InsertPersonalBadgeEvent>): Promise<PersonalBadgeEvent>;
+  deletePersonalBadgeEvent(id: number): Promise<boolean>;
+  checkInPersonalBadgeEvent(id: number, checkInTime?: Date): Promise<PersonalBadgeEvent>;
+  checkOutPersonalBadgeEvent(id: number, checkOutTime?: Date): Promise<PersonalBadgeEvent>;
+  markBadgePrinted(id: number, printedTime?: Date): Promise<PersonalBadgeEvent>;
+
+  // GoHighLevel Automation operations
+  createGHLAutomationLog(log: InsertGHLAutomationLog): Promise<GHLAutomationLog>;
+  getGHLAutomationLogById(id: number): Promise<GHLAutomationLog | undefined>;
+  getGHLAutomationLogsByEventId(eventId: number): Promise<GHLAutomationLog[]>;
+  getGHLAutomationLogsByUserId(userId: string): Promise<GHLAutomationLog[]>;
+  updateGHLAutomationLog(id: number, log: Partial<InsertGHLAutomationLog>): Promise<GHLAutomationLog>;
+  getFailedGHLAutomations(): Promise<GHLAutomationLog[]>;
+  retryGHLAutomation(id: number): Promise<GHLAutomationLog>;
+
+  // Event Feedback operations
+  createEventFeedback(feedback: InsertEventFeedback): Promise<EventFeedback>;
+  getEventFeedbackById(id: number): Promise<EventFeedback | undefined>;
+  getEventFeedbackByEventId(eventId: number): Promise<EventFeedback[]>;
+  getEventFeedbackByUserId(userId: string): Promise<EventFeedback[]>;
+  updateEventFeedback(id: number, feedback: Partial<InsertEventFeedback>): Promise<EventFeedback>;
+  deleteEventFeedback(id: number): Promise<boolean>;
+  getEventRatingStats(eventId: number): Promise<{ averageRating: number; totalResponses: number; ratingBreakdown: any }>;
+  getEventFeedbackSummary(eventId: number): Promise<{ ratings: any; comments: string[]; improvements: string[] }>;
 }
 
 export class DatabaseStorage implements IStorage {

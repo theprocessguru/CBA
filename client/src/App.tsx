@@ -54,6 +54,7 @@ import MyBenefitsPage from "@/pages/my-benefits";
 import MyRegistrations from "@/pages/my-registrations";
 import MyQRCodeSimple from "@/pages/my-qr-code-simple";
 import MyPersonalBadge from "@/pages/my-personal-badge";
+import EnhancedPersonalBadge from "@/pages/enhanced-personal-badge";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -266,6 +267,11 @@ function Router() {
       <Route path="/my-personal-badge">
         <MainLayout>
           <MyPersonalBadge />
+        </MainLayout>
+      </Route>
+      <Route path="/enhanced-personal-badge">
+        <MainLayout>
+          <EnhancedPersonalBadge />
         </MainLayout>
       </Route>
       <Route path="/my-profile">

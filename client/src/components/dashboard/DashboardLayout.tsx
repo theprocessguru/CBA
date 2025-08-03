@@ -197,6 +197,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </a>
               </Link>
               
+              <Link href="/enhanced-personal-badge">
+                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  location === '/enhanced-personal-badge' 
+                    ? 'bg-primary text-white' 
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}>
+                  <QrCode className={`mr-3 h-4 w-4 ${
+                    location === '/enhanced-personal-badge' ? 'text-white' : 'text-neutral-500'
+                  }`} />
+                  Enhanced Event Badges
+                </a>
+              </Link>
+              
               <Link href="/my-qr-code">
                 <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                   location === '/my-qr-code' 
