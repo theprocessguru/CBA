@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shield, UserCheck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
+import { queryClient } from '@/lib/queryClient';
 import { Helmet } from 'react-helmet';
 import { apiRequest } from '@/lib/queryClient';
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
-  const { refetch } = useAuth();
+  // Remove unused refetch
 
   const adminLoginMutation = useMutation({
     mutationFn: async () => {
@@ -23,11 +23,13 @@ export default function AdminLoginPage() {
         description: `Logged in as ${data.user.firstName} ${data.user.lastName}`,
       });
       
-      // Refresh auth state
-      refetch();
+      // Clear auth cache and redirect
+      queryClient.removeQueries({ queryKey: ['/api/auth/user'] });
       
-      // Redirect to dashboard or scanner
-      window.location.href = '/create-volunteer';
+      // Redirect to volunteer creation page
+      setTimeout(() => {
+        window.location.href = '/create-volunteer';
+      }, 1000);
     },
     onError: (error: any) => {
       toast({

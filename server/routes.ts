@@ -3150,7 +3150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin login endpoint for testing
   app.post('/api/admin-login', async (req, res) => {
     try {
-      const adminUser = {
+      // Create admin user data with all required fields
+      const adminUserData = {
         id: 'admin-test-user',
         email: 'admin@cba.org.uk',
         firstName: 'Admin',
@@ -3162,9 +3163,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         participantType: 'team'
       };
 
-      // Store in session
-      (req as any).session.user = adminUser;
-      res.json({ success: true, user: adminUser });
+      // Create/update user in database
+      await storage.upsertUser(adminUserData);
+
+      // Set session
+      (req as any).session.user = adminUserData;
+      
+      // Force session save and respond
+      (req as any).session.save((err: any) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: 'Session save failed' });
+        }
+        console.log('Admin session saved successfully:', adminUserData.email);
+        res.json({ success: true, user: adminUserData });
+      });
     } catch (error) {
       console.error('Error with admin login:', error);
       res.status(500).json({ message: 'Admin login failed' });
