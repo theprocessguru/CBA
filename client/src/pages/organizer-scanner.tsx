@@ -71,7 +71,7 @@ export default function OrganizerScannerPage() {
   });
 
   // AI Summit sessions for quick assignment
-  const { data: aiSummitSessions = [] } = useQuery({
+  const { data: aiSummitSessions = [] } = useQuery<any[]>({
     queryKey: ['/api/ai-summit/sessions'],
     enabled: isAuthenticated
   });
@@ -182,7 +182,7 @@ export default function OrganizerScannerPage() {
       badgeId: scannedAttendee.badgeId,
       eventId: actualEventId,
       eventType,
-      assignedBy: user?.name || 'Event Organizer',
+      assignedBy: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Event Organizer',
       notes: notes.trim() || undefined
     });
   };
@@ -238,7 +238,11 @@ export default function OrganizerScannerPage() {
               <div className="text-center">
                 {isScanning ? (
                   <div className="space-y-4">
-                    <QRScanner onScan={handleQRScan} />
+                    <QRScanner 
+                      isActive={isScanning}
+                      onScan={handleQRScan} 
+                      onClose={() => setIsScanning(false)}
+                    />
                     <Button 
                       variant="outline" 
                       onClick={() => setIsScanning(false)}
@@ -363,7 +367,7 @@ export default function OrganizerScannerPage() {
                     {/* CBA Events */}
                     {events.length > 0 && (
                       <>
-                        <SelectItem value="" disabled>CBA Events</SelectItem>
+                        <SelectItem value="cba-events-header" disabled>CBA Events</SelectItem>
                         {events.map(event => (
                           <SelectItem key={event.id} value={event.id.toString()}>
                             <div className="flex flex-col">
@@ -378,9 +382,9 @@ export default function OrganizerScannerPage() {
                     )}
                     
                     {/* AI Summit Sessions */}
-                    {aiSummitSessions.length > 0 && (
+                    {Array.isArray(aiSummitSessions) && aiSummitSessions.length > 0 && (
                       <>
-                        <SelectItem value="" disabled>AI Summit Sessions</SelectItem>
+                        <SelectItem value="ai-summit-header" disabled>AI Summit Sessions</SelectItem>
                         {aiSummitSessions.map((session: any) => (
                           <SelectItem key={`session-${session.id}`} value={`session-${session.id}`}>
                             <div className="flex flex-col">
