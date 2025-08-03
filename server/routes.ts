@@ -5221,7 +5221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           membershipTier: userData.membershipTier,
           company: userData.company,
           type: 'personal_badge'
-        }
+        },
+        qrHandle: badgeData.qrHandle // Store qrHandle separately for easy access
       });
 
       res.setHeader('Content-Type', 'text/html');
@@ -5638,21 +5639,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user-by-qr/:qrHandle', isAuthenticated, async (req: any, res) => {
     try {
       const { qrHandle } = req.params;
-      const [user] = await db.select().from(users).where(eq(users.qrHandle, qrHandle));
       
-      if (!user) {
-        return res.status(404).json({ message: "User not found with this QR handle" });
+      // Try to find user by qrHandle first
+      let user = await db.select().from(users).where(eq(users.qrHandle, qrHandle.toLowerCase())).limit(1);
+      
+      // If not found by qrHandle, try by user ID (for backward compatibility)
+      if (user.length === 0) {
+        user = await db.select().from(users).where(eq(users.id, qrHandle)).limit(1);
       }
+      
+      if (user.length === 0) {
+        return res.status(404).json({ message: "User not found with this QR handle or ID" });
+      }
+      
+      const userData = user[0];
       
       // Return safe user data for scanning
       res.json({
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        company: user.company,
-        jobTitle: user.jobTitle,
-        qrHandle: user.qrHandle,
-        title: user.title
+        id: userData.id,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        company: userData.company,
+        jobTitle: userData.jobTitle,
+        qrHandle: userData.qrHandle,
+        title: userData.title
       });
     } catch (error) {
       console.error("Error fetching user by QR handle:", error);

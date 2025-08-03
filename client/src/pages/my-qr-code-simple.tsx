@@ -113,8 +113,8 @@ export default function MyQRCodeSimple() {
           </div>
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">My AI Summit Badge</h1>
-            <p className="text-gray-600 mt-2">Your QR code for event entry and activities</p>
+            <h1 className="text-3xl font-bold text-gray-900">My QR Code Badge</h1>
+            <p className="text-gray-600 mt-2">Your scannable QR code for networking and event activities</p>
           </div>
 
           <Card className="mb-6">
@@ -127,9 +127,26 @@ export default function MyQRCodeSimple() {
             <CardContent className="space-y-6">
               <div className="text-center">
                 <div className="bg-white p-8 rounded-lg border-2 border-dashed border-gray-300 inline-block">
-                  <QrCode className="h-32 w-32 text-gray-800 mx-auto mb-4" />
-                  <div className="text-lg font-semibold">Badge ID: AIS2025-TEST-001</div>
-                  <Badge className="mt-2">General Attendee</Badge>
+                  {user?.qrHandle ? (
+                    <div className="flex flex-col items-center">
+                      <img 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${user.qrHandle}`} 
+                        alt="Personal QR Code"
+                        className="w-32 h-32 mb-4"
+                      />
+                      <div className="text-lg font-semibold">QR Handle: {user.qrHandle}</div>
+                      <Badge className="mt-2">CBA Member</Badge>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <QrCode className="h-32 w-32 text-gray-400 mx-auto mb-4" />
+                      <div className="text-sm text-gray-500">No QR code available</div>
+                      <p className="text-xs text-gray-400 mt-2">Create a personal badge to get your QR code</p>
+                      <Link href="/my-personal-badge">
+                        <Button className="mt-4" size="sm">Create Personal Badge</Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -160,31 +177,42 @@ export default function MyQRCodeSimple() {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={sendBadgeEmail}
-                  className="flex items-center gap-2"
-                >
-                  <Mail className="h-4 w-4" />
-                  Email Badge
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={downloadBadge}
-                  disabled={!summitStatus?.registrationId}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  Download Badge
-                </Button>
+                {user?.qrHandle ? (
+                  <>
+                    <Button 
+                      onClick={sendBadgeEmail}
+                      className="flex items-center gap-2"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Email QR Code
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={downloadBadge}
+                      disabled={!summitStatus?.registrationId}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Badge
+                    </Button>
+                  </>
+                ) : (
+                  <Link href="/my-personal-badge">
+                    <Button className="flex items-center gap-2">
+                      <QrCode className="h-4 w-4" />
+                      Create Your QR Code
+                    </Button>
+                  </Link>
+                )}
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Event Instructions</h4>
+                <h4 className="font-semibold text-blue-900 mb-2">QR Code Instructions</h4>
                 <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Present this QR code at registration desk</li>
-                  <li>• Keep your badge visible during the event</li>
-                  <li>• Use QR code for workshop check-ins</li>
-                  <li>• Network with other attendees and exhibitors</li>
+                  <li>• Other members can scan this QR code to connect with you</li>
+                  <li>• Use the Event Scanner to scan other members' QR codes</li>
+                  <li>• Your QR code contains your unique handle: {user?.qrHandle || 'Not set'}</li>
+                  <li>• Build your professional network through QR code scanning</li>
                 </ul>
               </div>
 

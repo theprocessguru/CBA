@@ -50,8 +50,9 @@ export class BadgeService {
    * Generate HTML for personal badge with QR handle
    */
   async generatePersonalBadgeHTML(badgeData: any): Promise<string> {
-    // Generate QR code for personal badge
-    const qrCodeDataURL = await QRCode.toDataURL(JSON.stringify(badgeData.qrCodeData), {
+    // Generate QR code for personal badge - use qrHandle for scanning compatibility
+    const qrCodeData = badgeData.qrCodeData.qrHandle || badgeData.qrHandle || JSON.stringify(badgeData.qrCodeData);
+    const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
       width: 300,
       margin: 2,
       color: {
@@ -493,14 +494,8 @@ export class BadgeService {
       eventDetails: this.eventInfo
     };
 
-    // Generate QR code
-    const qrCodeData = JSON.stringify({
-      badgeId,
-      type: 'ai_summit_badge',
-      participantType: participantInfo.participantType,
-      name: participantInfo.name,
-      eventId: 'ai-summit-2025'
-    });
+    // Generate QR code - include participant ID for scanning compatibility
+    const qrCodeData = participantInfo.participantId; // Use participant ID directly for scanning
 
     const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
       width: 300,
