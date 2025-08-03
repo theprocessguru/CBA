@@ -83,7 +83,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <Footer />
       <BottomNavigation />
       <PWAInstaller />
-      <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-40 mb-20 md:mb-0">
+      <div className="fixed right-4 bottom-20 md:bottom-4 z-40">
         <GHLChatbot 
           position="bottom-right"
           primaryColor="#2563eb"
