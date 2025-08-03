@@ -284,6 +284,8 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   aiInterest: varchar("ai_interest"),
   accessibilityNeeds: varchar("accessibility_needs"),
   comments: text("comments"),
+  participantRoles: text("participant_roles").notNull().default('["attendee"]'), // JSON array of roles: attendee, exhibitor, speaker, organizer, volunteer, team
+  customRole: varchar("custom_role"), // For custom role descriptions
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
@@ -359,8 +361,9 @@ export const eventBadgeAssignments = pgTable("event_badge_assignments", {
   badgeId: varchar("badge_id").notNull().references(() => personalBadges.badgeId),
   eventId: varchar("event_id").notNull(), // e.g., "ai-summit-2025", "networking-nov-2025"
   eventName: varchar("event_name").notNull(), // e.g., "First AI Summit Croydon 2025"
-  roleType: varchar("role_type").notNull(), // guest, member, exhibitor, speaker, organizer, vip
-  badgeColor: varchar("badge_color").notNull(), // blue, green, red, gold, purple based on role
+  participantRoles: text("participant_roles").notNull().default('["attendee"]'), // JSON array of roles: attendee, exhibitor, speaker, organizer, volunteer, team
+  primaryRole: varchar("primary_role").notNull().default("attendee"), // Main role for display purposes
+  badgeColor: varchar("badge_color").notNull(), // blue, green, red, gold, purple based on primary role
   accessLevel: varchar("access_level").notNull(), // basic, premium, vip, staff, admin
   isActive: boolean("is_active").default(true),
   assignedAt: timestamp("assigned_at").defaultNow(),
@@ -370,8 +373,9 @@ export const eventBadgeAssignments = pgTable("event_badge_assignments", {
 export const aiSummitBadges = pgTable("ai_summit_badges", {
   id: serial("id").primaryKey(),
   badgeId: varchar("badge_id").notNull().unique(), // Unique identifier for QR code
-  participantType: varchar("participant_type").notNull(), // attendee, exhibitor, speaker, volunteer, team, special_guest, other
-  customRole: varchar("custom_role"), // For 'other' participant type - custom role name
+  participantRoles: text("participant_roles").notNull().default('["attendee"]'), // JSON array of roles: attendee, exhibitor, speaker, organizer, volunteer, team
+  primaryRole: varchar("primary_role").notNull().default("attendee"), // Main role for badge design
+  customRole: varchar("custom_role"), // For custom role descriptions
   participantId: varchar("participant_id").notNull(), // Reference to the registration ID
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
