@@ -17,7 +17,8 @@ import {
   BarChart3,
   ArrowLeft,
   Home,
-  Crown
+  Crown,
+  Calendar
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -179,6 +180,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     location === '/dashboard/member-directory' ? 'text-white' : 'text-neutral-500'
                   }`} />
                   Member Directory
+                </a>
+              </Link>
+              
+              <Link href="/my-qr-code-simple">
+                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  location === '/my-qr-code-simple' 
+                    ? 'bg-primary text-white' 
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}>
+                  <Calendar className={`mr-3 h-4 w-4 ${
+                    location === '/my-qr-code-simple' ? 'text-white' : 'text-neutral-500'
+                  }`} />
+                  My Events & Badges
                 </a>
               </Link>
               
