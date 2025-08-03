@@ -664,6 +664,47 @@ export const eventFeedback = pgTable("event_feedback", {
   submittedAt: timestamp("submitted_at").defaultNow(),
 });
 
+// Event Scanners table - Track team members and volunteers who can scan
+export const eventScanners = pgTable('event_scanners', {
+  id: serial('id').primaryKey(),
+  userId: text('user_id').notNull().references(() => users.id),
+  eventId: integer('event_id').references(() => cbaEvents.id),
+  scannerRole: text('scanner_role').notNull(), // 'team_member', 'volunteer', 'organizer'
+  isActive: boolean('is_active').default(true),
+  assignedBy: text('assigned_by').references(() => users.id),
+  assignedAt: timestamp('assigned_at').defaultNow(),
+  totalScansCompleted: integer('total_scans_completed').default(0)
+});
+
+// Scan History table - Log every scan interaction
+export const scanHistory = pgTable('scan_history', {
+  id: serial('id').primaryKey(),
+  scannerId: text('scanner_id').notNull().references(() => users.id), // Who did the scanning
+  scannedUserId: text('scanned_user_id').notNull().references(() => users.id), // Who was scanned
+  eventId: integer('event_id').references(() => cbaEvents.id),
+  personalBadgeEventId: integer('personal_badge_event_id').references(() => personalBadgeEvents.id),
+  scanType: text('scan_type').notNull(), // 'check_in', 'check_out', 'verification', 'networking'
+  scanLocation: text('scan_location'), // Where the scan happened (entrance, workshop room, etc.)
+  scanNotes: text('scan_notes'), // Optional notes about the scan
+  deviceInfo: text('device_info'), // Scanner device information
+  scanTimestamp: timestamp('scan_timestamp').defaultNow(),
+  isValidScan: boolean('is_valid_scan').default(true),
+  duplicateScanFlag: boolean('duplicate_scan_flag').default(false)
+});
+
+// Scan Sessions table - Track scanning sessions for analytics
+export const scanSessions = pgTable('scan_sessions', {
+  id: serial('id').primaryKey(),
+  scannerId: text('scanner_id').notNull().references(() => users.id),
+  eventId: integer('event_id').references(() => cbaEvents.id),
+  sessionStart: timestamp('session_start').defaultNow(),
+  sessionEnd: timestamp('session_end'),
+  totalScans: integer('total_scans').default(0),
+  uniqueScans: integer('unique_scans').default(0),
+  duplicateScans: integer('duplicate_scans').default(0),
+  sessionNotes: text('session_notes')
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -910,6 +951,20 @@ export type GHLAutomationLog = typeof ghlAutomationLogs.$inferSelect;
 
 export type InsertEventFeedback = z.infer<typeof insertEventFeedbackSchema>;
 export type EventFeedback = typeof eventFeedback.$inferSelect;
+
+// Scanning system schemas
+export const insertEventScannerSchema = createInsertSchema(eventScanners).omit({ id: true });
+export const insertScanHistorySchema = createInsertSchema(scanHistory).omit({ id: true });
+export const insertScanSessionSchema = createInsertSchema(scanSessions).omit({ id: true });
+
+export type InsertEventScanner = z.infer<typeof insertEventScannerSchema>;
+export type EventScanner = typeof eventScanners.$inferSelect;
+
+export type InsertScanHistory = z.infer<typeof insertScanHistorySchema>;
+export type ScanHistory = typeof scanHistory.$inferSelect;
+
+export type InsertScanSession = z.infer<typeof insertScanSessionSchema>;
+export type ScanSession = typeof scanSessions.$inferSelect;
 
 // Legacy Event Management System (keeping for existing registrations)
 export const events = pgTable("events", {

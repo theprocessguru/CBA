@@ -79,6 +79,9 @@ import {
   personalBadgeEvents,
   ghlAutomationLogs,
   eventFeedback,
+  eventScanners,
+  scanHistory,
+  scanSessions,
   type CBAEvent,
   type InsertCBAEvent,
   type CBAEventRegistration,
@@ -91,6 +94,12 @@ import {
   type InsertGHLAutomationLog,
   type EventFeedback,
   type InsertEventFeedback,
+  type EventScanner,
+  type InsertEventScanner,
+  type ScanHistory,
+  type InsertScanHistory,
+  type ScanSession,
+  type InsertScanSession,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
@@ -344,6 +353,35 @@ export interface IStorage {
   deleteEventFeedback(id: number): Promise<boolean>;
   getEventRatingStats(eventId: number): Promise<{ averageRating: number; totalResponses: number; ratingBreakdown: any }>;
   getEventFeedbackSummary(eventId: number): Promise<{ ratings: any; comments: string[]; improvements: string[] }>;
+  
+  // Event scanning system operations
+  // Scanner management
+  createEventScanner(scanner: InsertEventScanner): Promise<EventScanner>;
+  getEventScannersByEventId(eventId: number): Promise<EventScanner[]>;
+  getEventScannersByUserId(userId: string): Promise<EventScanner[]>;
+  updateEventScanner(id: number, scanner: Partial<InsertEventScanner>): Promise<EventScanner>;
+  deactivateEventScanner(id: number): Promise<EventScanner>;
+  
+  // Scan history logging
+  createScanRecord(scan: InsertScanHistory): Promise<ScanHistory>;
+  getScanHistoryByEventId(eventId: number): Promise<ScanHistory[]>;
+  getScanHistoryByScannerId(scannerId: string): Promise<ScanHistory[]>;
+  getScanHistoryByScannedUserId(scannedUserId: string): Promise<ScanHistory[]>;
+  getDuplicateScans(eventId: number, scannedUserId: string): Promise<ScanHistory[]>;
+  getScanHistoryBetweenUsers(scannerId: string, scannedUserId: string): Promise<ScanHistory[]>;
+  
+  // Scan session management
+  createScanSession(session: InsertScanSession): Promise<ScanSession>;
+  getScanSessionsByScannerId(scannerId: string): Promise<ScanSession[]>;
+  getActiveScanSession(scannerId: string, eventId: number): Promise<ScanSession | undefined>;
+  endScanSession(sessionId: number, totalScans: number, uniqueScans: number, duplicateScans: number): Promise<ScanSession>;
+  updateScanSession(id: number, session: Partial<InsertScanSession>): Promise<ScanSession>;
+  
+  // Scan analytics
+  getScanAnalyticsByEvent(eventId: number): Promise<any>;
+  getScanAnalyticsByScanner(scannerId: string): Promise<any>;
+  getTopScanners(eventId?: number, limit?: number): Promise<any[]>;
+  getMostScannedAttendees(eventId: number, limit?: number): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1648,6 +1686,240 @@ export class DatabaseStorage implements IStorage {
           eq(eventSessionRegistrations.registrationId, registrationId)
         )
       );
+  }
+
+  // Event Scanning System Implementation
+  // Scanner management
+  async createEventScanner(scanner: InsertEventScanner): Promise<EventScanner> {
+    const [newScanner] = await db.insert(eventScanners).values(scanner).returning();
+    return newScanner;
+  }
+
+  async getEventScannersByEventId(eventId: number): Promise<EventScanner[]> {
+    return await db.select().from(eventScanners)
+      .where(and(eq(eventScanners.eventId, eventId), eq(eventScanners.isActive, true)))
+      .orderBy(desc(eventScanners.assignedAt));
+  }
+
+  async getEventScannersByUserId(userId: string): Promise<EventScanner[]> {
+    return await db.select().from(eventScanners)
+      .where(and(eq(eventScanners.userId, userId), eq(eventScanners.isActive, true)))
+      .orderBy(desc(eventScanners.assignedAt));
+  }
+
+  async updateEventScanner(id: number, scanner: Partial<InsertEventScanner>): Promise<EventScanner> {
+    const [updatedScanner] = await db
+      .update(eventScanners)
+      .set(scanner)
+      .where(eq(eventScanners.id, id))
+      .returning();
+    return updatedScanner;
+  }
+
+  async deactivateEventScanner(id: number): Promise<EventScanner> {
+    const [deactivatedScanner] = await db
+      .update(eventScanners)
+      .set({ isActive: false })
+      .where(eq(eventScanners.id, id))
+      .returning();
+    return deactivatedScanner;
+  }
+
+  // Scan history logging
+  async createScanRecord(scan: InsertScanHistory): Promise<ScanHistory> {
+    // Check for duplicate scans within the last 5 minutes
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const recentScans = await db.select().from(scanHistory)
+      .where(
+        and(
+          eq(scanHistory.scannerId, scan.scannerId),
+          eq(scanHistory.scannedUserId, scan.scannedUserId),
+          scan.eventId ? eq(scanHistory.eventId, scan.eventId) : undefined,
+          gte(scanHistory.scanTimestamp, fiveMinutesAgo)
+        )
+      );
+
+    const isDuplicate = recentScans.length > 0;
+
+    const [newScan] = await db.insert(scanHistory).values({
+      ...scan,
+      duplicateScanFlag: isDuplicate
+    }).returning();
+
+    // Update scanner's total scans
+    if (scan.eventId) {
+      await db
+        .update(eventScanners)
+        .set({ 
+          totalScansCompleted: sql`${eventScanners.totalScansCompleted} + 1`
+        })
+        .where(
+          and(
+            eq(eventScanners.userId, scan.scannerId),
+            eq(eventScanners.eventId, scan.eventId)
+          )
+        );
+    }
+
+    return newScan;
+  }
+
+  async getScanHistoryByEventId(eventId: number): Promise<ScanHistory[]> {
+    return await db.select().from(scanHistory)
+      .where(eq(scanHistory.eventId, eventId))
+      .orderBy(desc(scanHistory.scanTimestamp));
+  }
+
+  async getScanHistoryByScannerId(scannerId: string): Promise<ScanHistory[]> {
+    return await db.select().from(scanHistory)
+      .where(eq(scanHistory.scannerId, scannerId))
+      .orderBy(desc(scanHistory.scanTimestamp));
+  }
+
+  async getScanHistoryByScannedUserId(scannedUserId: string): Promise<ScanHistory[]> {
+    return await db.select().from(scanHistory)
+      .where(eq(scanHistory.scannedUserId, scannedUserId))
+      .orderBy(desc(scanHistory.scanTimestamp));
+  }
+
+  async getDuplicateScans(eventId: number, scannedUserId: string): Promise<ScanHistory[]> {
+    return await db.select().from(scanHistory)
+      .where(
+        and(
+          eq(scanHistory.eventId, eventId),
+          eq(scanHistory.scannedUserId, scannedUserId),
+          eq(scanHistory.duplicateScanFlag, true)
+        )
+      )
+      .orderBy(desc(scanHistory.scanTimestamp));
+  }
+
+  async getScanHistoryBetweenUsers(scannerId: string, scannedUserId: string): Promise<ScanHistory[]> {
+    return await db.select().from(scanHistory)
+      .where(
+        and(
+          eq(scanHistory.scannerId, scannerId),
+          eq(scanHistory.scannedUserId, scannedUserId)
+        )
+      )
+      .orderBy(desc(scanHistory.scanTimestamp));
+  }
+
+  // Scan session management
+  async createScanSession(session: InsertScanSession): Promise<ScanSession> {
+    const [newSession] = await db.insert(scanSessions).values(session).returning();
+    return newSession;
+  }
+
+  async getScanSessionsByScannerId(scannerId: string): Promise<ScanSession[]> {
+    return await db.select().from(scanSessions)
+      .where(eq(scanSessions.scannerId, scannerId))
+      .orderBy(desc(scanSessions.sessionStart));
+  }
+
+  async getActiveScanSession(scannerId: string, eventId: number): Promise<ScanSession | undefined> {
+    const [session] = await db.select().from(scanSessions)
+      .where(
+        and(
+          eq(scanSessions.scannerId, scannerId),
+          eq(scanSessions.eventId, eventId),
+          isNull(scanSessions.sessionEnd)
+        )
+      )
+      .orderBy(desc(scanSessions.sessionStart));
+    return session;
+  }
+
+  async endScanSession(sessionId: number, totalScans: number, uniqueScans: number, duplicateScans: number): Promise<ScanSession> {
+    const [updatedSession] = await db
+      .update(scanSessions)
+      .set({
+        sessionEnd: new Date(),
+        totalScans,
+        uniqueScans,
+        duplicateScans
+      })
+      .where(eq(scanSessions.id, sessionId))
+      .returning();
+    return updatedSession;
+  }
+
+  async updateScanSession(id: number, session: Partial<InsertScanSession>): Promise<ScanSession> {
+    const [updatedSession] = await db
+      .update(scanSessions)
+      .set(session)
+      .where(eq(scanSessions.id, id))
+      .returning();
+    return updatedSession;
+  }
+
+  // Scan analytics
+  async getScanAnalyticsByEvent(eventId: number): Promise<any> {
+    const analytics = await db
+      .select({
+        totalScans: sql<number>`count(*)`,
+        uniqueScannedUsers: sql<number>`count(distinct ${scanHistory.scannedUserId})`,
+        totalScanners: sql<number>`count(distinct ${scanHistory.scannerId})`,
+        duplicateScans: sql<number>`count(*) filter (where ${scanHistory.duplicateScanFlag} = true)`,
+        checkIns: sql<number>`count(*) filter (where ${scanHistory.scanType} = 'check_in')`,
+        checkOuts: sql<number>`count(*) filter (where ${scanHistory.scanType} = 'check_out')`,
+        verifications: sql<number>`count(*) filter (where ${scanHistory.scanType} = 'verification')`,
+        networking: sql<number>`count(*) filter (where ${scanHistory.scanType} = 'networking')`
+      })
+      .from(scanHistory)
+      .where(eq(scanHistory.eventId, eventId));
+
+    return analytics[0];
+  }
+
+  async getScanAnalyticsByScanner(scannerId: string): Promise<any> {
+    const analytics = await db
+      .select({
+        totalScans: sql<number>`count(*)`,
+        uniqueScannedUsers: sql<number>`count(distinct ${scanHistory.scannedUserId})`,
+        duplicateScans: sql<number>`count(*) filter (where ${scanHistory.duplicateScanFlag} = true)`,
+        sessionsCount: sql<number>`(select count(*) from ${scanSessions} where ${scanSessions.scannerId} = ${scannerId})`,
+        avgScansPerSession: sql<number>`(select avg(${scanSessions.totalScans}) from ${scanSessions} where ${scanSessions.scannerId} = ${scannerId})`
+      })
+      .from(scanHistory)
+      .where(eq(scanHistory.scannerId, scannerId));
+
+    return analytics[0];
+  }
+
+  async getTopScanners(eventId?: number, limit: number = 10): Promise<any[]> {
+    let query = db
+      .select({
+        scannerId: scanHistory.scannerId,
+        totalScans: sql<number>`count(*)`,
+        uniqueScannedUsers: sql<number>`count(distinct ${scanHistory.scannedUserId})`,
+        duplicateScans: sql<number>`count(*) filter (where ${scanHistory.duplicateScanFlag} = true)`
+      })
+      .from(scanHistory)
+      .groupBy(scanHistory.scannerId)
+      .orderBy(desc(sql`count(*)`))
+      .limit(limit);
+
+    if (eventId) {
+      query = query.where(eq(scanHistory.eventId, eventId));
+    }
+
+    return await query;
+  }
+
+  async getMostScannedAttendees(eventId: number, limit: number = 10): Promise<any[]> {
+    return await db
+      .select({
+        scannedUserId: scanHistory.scannedUserId,
+        totalScans: sql<number>`count(*)`,
+        uniqueScanners: sql<number>`count(distinct ${scanHistory.scannerId})`,
+        lastScannedAt: sql<Date>`max(${scanHistory.scanTimestamp})`
+      })
+      .from(scanHistory)
+      .where(eq(scanHistory.eventId, eventId))
+      .groupBy(scanHistory.scannedUserId)
+      .orderBy(desc(sql`count(*)`))
+      .limit(limit);
   }
 }
 

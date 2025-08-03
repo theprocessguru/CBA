@@ -28,12 +28,18 @@ import {
   insertPersonalBadgeEventSchema,
   insertGHLAutomationLogSchema,
   insertEventFeedbackSchema,
+  insertEventScannerSchema,
+  insertScanHistorySchema,
+  insertScanSessionSchema,
   cbaEvents,
   cbaEventRegistrations,
   eventAttendanceAnalytics,
   personalBadgeEvents,
   ghlAutomationLogs,
   eventFeedback,
+  eventScanners,
+  scanHistory,
+  scanSessions,
   users
 } from "@shared/schema";
 import { z } from "zod";
@@ -5375,6 +5381,282 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching attendance analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics: " + error.message });
+    }
+  });
+
+  // Event Scanning System API Routes
+  
+  // Scanner Management Routes
+  app.post('/api/event-scanners', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const scannerData = validateRequest(insertEventScannerSchema, req.body);
+      const scanner = await storage.createEventScanner(scannerData);
+      res.json(scanner);
+    } catch (error) {
+      console.error("Error creating event scanner:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to create scanner" 
+      });
+    }
+  });
+
+  app.get('/api/event-scanners/event/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const scanners = await storage.getEventScannersByEventId(eventId);
+      res.json(scanners);
+    } catch (error) {
+      console.error("Error fetching event scanners:", error);
+      res.status(500).json({ message: "Failed to fetch scanners" });
+    }
+  });
+
+  app.get('/api/my-scanner-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const scanners = await storage.getEventScannersByUserId(userId);
+      res.json(scanners);
+    } catch (error) {
+      console.error("Error fetching scanner assignments:", error);
+      res.status(500).json({ message: "Failed to fetch assignments" });
+    }
+  });
+
+  app.put('/api/event-scanners/:id/deactivate', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const scannerId = parseInt(req.params.id);
+      const scanner = await storage.deactivateEventScanner(scannerId);
+      res.json(scanner);
+    } catch (error) {
+      console.error("Error deactivating scanner:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to deactivate scanner" 
+      });
+    }
+  });
+
+  // Scan Logging Routes
+  app.post('/api/scan-record', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerId = req.user.id;
+      const scanData = validateRequest(insertScanHistorySchema, {
+        ...req.body,
+        scannerId,
+        deviceInfo: req.headers['user-agent'] || 'Unknown device'
+      });
+      
+      const scan = await storage.createScanRecord(scanData);
+      
+      // Get scan analytics for response
+      const analytics = scan.eventId ? await storage.getScanAnalyticsByEvent(scan.eventId) : null;
+      
+      res.json({ 
+        scan, 
+        analytics,
+        isDuplicate: scan.duplicateScanFlag 
+      });
+    } catch (error) {
+      console.error("Error recording scan:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to record scan" 
+      });
+    }
+  });
+
+  app.get('/api/scan-history/event/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const history = await storage.getScanHistoryByEventId(eventId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching scan history:", error);
+      res.status(500).json({ message: "Failed to fetch history" });
+    }
+  });
+
+  app.get('/api/my-scan-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerId = req.user.id;
+      const history = await storage.getScanHistoryByScannerId(scannerId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching scan history:", error);
+      res.status(500).json({ message: "Failed to fetch history" });
+    }
+  });
+
+  app.get('/api/scan-history/scanned/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannedUserId = req.params.userId;
+      const history = await storage.getScanHistoryByScannedUserId(scannedUserId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching scan history:", error);
+      res.status(500).json({ message: "Failed to fetch history" });
+    }
+  });
+
+  app.get('/api/scan-duplicates/event/:eventId/user/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const scannedUserId = req.params.userId;
+      const duplicates = await storage.getDuplicateScans(eventId, scannedUserId);
+      res.json(duplicates);
+    } catch (error) {
+      console.error("Error fetching duplicate scans:", error);
+      res.status(500).json({ message: "Failed to fetch duplicates" });
+    }
+  });
+
+  // Scan Session Management Routes
+  app.post('/api/scan-session/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerId = req.user.id;
+      const { eventId, sessionNotes } = req.body;
+      
+      // Check for existing active session
+      const activeSession = await storage.getActiveScanSession(scannerId, eventId);
+      if (activeSession) {
+        return res.status(400).json({ 
+          message: "Active scan session already exists for this event",
+          activeSession 
+        });
+      }
+      
+      const sessionData = validateRequest(insertScanSessionSchema, {
+        scannerId,
+        eventId,
+        sessionNotes
+      });
+      
+      const session = await storage.createScanSession(sessionData);
+      res.json(session);
+    } catch (error) {
+      console.error("Error starting scan session:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to start session" 
+      });
+    }
+  });
+
+  app.post('/api/scan-session/:sessionId/end', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessionId = parseInt(req.params.sessionId);
+      const { totalScans, uniqueScans, duplicateScans } = req.body;
+      
+      const session = await storage.endScanSession(sessionId, totalScans, uniqueScans, duplicateScans);
+      res.json(session);
+    } catch (error) {
+      console.error("Error ending scan session:", error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : "Failed to end session" 
+      });
+    }
+  });
+
+  app.get('/api/my-scan-sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerId = req.user.id;
+      const sessions = await storage.getScanSessionsByScannerId(scannerId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching scan sessions:", error);
+      res.status(500).json({ message: "Failed to fetch sessions" });
+    }
+  });
+
+  app.get('/api/scan-session/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerId = req.user.id;
+      const { eventId } = req.query;
+      
+      if (!eventId) {
+        return res.status(400).json({ message: "Event ID is required" });
+      }
+      
+      const session = await storage.getActiveScanSession(scannerId, parseInt(eventId as string));
+      res.json(session || null);
+    } catch (error) {
+      console.error("Error fetching active session:", error);
+      res.status(500).json({ message: "Failed to fetch active session" });
+    }
+  });
+
+  // Scan Analytics Routes
+  app.get('/api/scan-analytics/event/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const analytics = await storage.getScanAnalyticsByEvent(eventId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching scan analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get('/api/scan-analytics/scanner/:scannerId', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerId = req.params.scannerId;
+      const analytics = await storage.getScanAnalyticsByScanner(scannerId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching scanner analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get('/api/top-scanners', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId, limit } = req.query;
+      const topScanners = await storage.getTopScanners(
+        eventId ? parseInt(eventId as string) : undefined,
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(topScanners);
+    } catch (error) {
+      console.error("Error fetching top scanners:", error);
+      res.status(500).json({ message: "Failed to fetch top scanners" });
+    }
+  });
+
+  app.get('/api/most-scanned-attendees/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const { limit } = req.query;
+      const mostScanned = await storage.getMostScannedAttendees(
+        eventId,
+        limit ? parseInt(limit as string) : undefined
+      );
+      res.json(mostScanned);
+    } catch (error) {
+      console.error("Error fetching most scanned attendees:", error);
+      res.status(500).json({ message: "Failed to fetch data" });
+    }
+  });
+
+  // QR Code Scanning Interface Route
+  app.get('/api/user-by-qr/:qrHandle', isAuthenticated, async (req: any, res) => {
+    try {
+      const { qrHandle } = req.params;
+      const [user] = await db.select().from(users).where(eq(users.qrHandle, qrHandle));
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found with this QR handle" });
+      }
+      
+      // Return safe user data for scanning
+      res.json({
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        company: user.company,
+        jobTitle: user.jobTitle,
+        qrHandle: user.qrHandle,
+        title: user.title
+      });
+    } catch (error) {
+      console.error("Error fetching user by QR handle:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 

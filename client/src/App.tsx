@@ -55,6 +55,7 @@ import MyRegistrations from "@/pages/my-registrations";
 import MyQRCodeSimple from "@/pages/my-qr-code-simple";
 import MyPersonalBadge from "@/pages/my-personal-badge";
 import EnhancedPersonalBadge from "@/pages/enhanced-personal-badge";
+import EventScanner from "@/pages/event-scanner";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -258,6 +259,13 @@ function Router() {
         <MainLayout>
           <MyRegistrations />
         </MainLayout>
+      </Route>
+      <Route path="/event-scanner">
+        <ProtectedRoute>
+          <MainLayout>
+            <EventScanner />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       <Route path="/my-qr-code">
         <MainLayout>
