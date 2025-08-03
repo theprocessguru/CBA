@@ -336,120 +336,125 @@ export class BadgeService {
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f8f9fa;
+            padding: 0;
+            background: white;
+            width: 96mm;
+            height: 70mm;
+            overflow: hidden;
         }
         
         .badge-container {
-            width: 400px;
-            margin: 0 auto;
+            width: 96mm;
+            height: 70mm;
             background: white;
-            border-radius: 15px;
-            border: 3px solid ${typeColor};
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-            overflow: hidden;
-            page-break-inside: avoid;
+            border-radius: 8px;
+            padding: 4mm;
+            box-sizing: border-box;
+            text-align: center;
+            border: 2px solid ${typeColor};
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         
         .badge-header {
             background: linear-gradient(135deg, ${typeColor}, ${typeColor}dd);
             color: white;
-            padding: 20px;
-            text-align: center;
+            padding: 3mm;
+            border-radius: 4px;
+            margin-bottom: 2mm;
+            flex-shrink: 0;
         }
         
         .event-title {
-            font-size: 20px;
+            font-size: 10pt;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 1mm;
+            line-height: 1.1;
         }
         
         .event-date {
-            font-size: 14px;
+            font-size: 7pt;
             opacity: 0.9;
+            line-height: 1.1;
         }
         
         .participant-type {
             background: rgba(255,255,255,0.2);
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 1mm 2mm;
+            border-radius: 3mm;
+            font-size: 6pt;
             font-weight: bold;
             text-transform: uppercase;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 1mm;
+            line-height: 1.1;
         }
         
         .badge-body {
-            padding: 30px;
-            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 1mm 0;
         }
         
         .participant-name {
-            font-size: 24px;
+            font-size: 9pt;
             font-weight: bold;
             color: #1a1a1a;
-            margin-bottom: 10px;
+            margin-bottom: 0.5mm;
+            line-height: 1.1;
         }
         
         .participant-details {
-            font-size: 14px;
+            font-size: 6pt;
             color: #666;
-            margin-bottom: 20px;
-            line-height: 1.4;
+            margin-bottom: 1mm;
+            line-height: 1.1;
         }
         
         .qr-section {
-            margin: 20px 0;
+            margin: 1mm 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .qr-code {
-            width: 120px;
-            height: 120px;
-            border: 2px solid ${typeColor};
-            border-radius: 10px;
-            padding: 10px;
+            width: 20mm;
+            height: 20mm;
+            border: 1px solid ${typeColor};
+            border-radius: 2mm;
+            padding: 1mm;
             background: white;
         }
         
         .badge-id {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 20px;
-            font-size: 12px;
+            border-radius: 2mm;
+            padding: 1mm;
+            margin-top: 1mm;
+            font-size: 5pt;
             color: #666;
             font-family: 'Courier New', monospace;
+            line-height: 1.1;
+            flex-shrink: 0;
         }
         
         .instructions {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #666;
-        }
-        
-        .instructions h3 {
-            color: ${typeColor};
-            margin-top: 0;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
+            display: none; /* Hidden for badge holder format */
         }
         
         @media print {
-            .instructions { 
-                page-break-before: always; 
+            body { 
+                background: white; 
+            }
+            .badge-container {
+                border: 2px solid ${typeColor};
             }
         }
     </style>
@@ -534,8 +539,8 @@ export class BadgeService {
     const qrCodeData = participantInfo.participantId; // Use participant ID directly for scanning
 
     const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
-      width: 300,
-      margin: 2,
+      width: 150,
+      margin: 1,
       color: {
         dark: '#000000',
         light: '#FFFFFF'
@@ -601,8 +606,8 @@ export class BadgeService {
 
     // Generate QR code for the badge
     const qrCodeDataURL = await QRCode.toDataURL(badge.qrCodeData, {
-      width: 200,
-      margin: 2
+      width: 150,
+      margin: 1
     });
 
     const badgeInfo: BadgeInfo = {
