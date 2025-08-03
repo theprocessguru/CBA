@@ -130,12 +130,15 @@ export default function MyQRCodeSimple() {
                   {user?.qrHandle ? (
                     <div className="flex flex-col items-center">
                       <img 
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${user.qrHandle}`} 
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(user.qrHandle)}&format=png&margin=1`} 
                         alt="Personal QR Code"
-                        className="w-32 h-32 mb-4"
+                        className="w-48 h-48 mb-4 border-2 border-gray-200 rounded-lg p-2 bg-white"
                       />
                       <div className="text-lg font-semibold">QR Handle: {user.qrHandle}</div>
                       <Badge className="mt-2">CBA Member</Badge>
+                      <p className="text-xs text-gray-500 mt-2 text-center max-w-sm">
+                        Event organizers can scan this QR code to assign you to events instantly
+                      </p>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center">

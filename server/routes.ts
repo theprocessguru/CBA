@@ -3021,6 +3021,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Event Organizer Scanner APIs
+
+  // Attendee lookup for organizer scanner
+  app.get('/api/attendee-lookup/:badgeId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { badgeId } = req.params;
+      
+      // First try AI Summit badges
+      const aiSummitBadge = await storage.getAISummitBadgeByBadgeId(badgeId);
+      if (aiSummitBadge) {
+        return res.json({
+          badgeId: aiSummitBadge.badgeId,
+          name: aiSummitBadge.name,
+          email: aiSummitBadge.email,
+          participantType: aiSummitBadge.participantType,
+          customRole: aiSummitBadge.customRole,
+          company: aiSummitBadge.company,
+          jobTitle: aiSummitBadge.jobTitle,
+          source: 'ai_summit'
+        });
+      }
+      
+      // Try by QR handle (personal badges)
+      const users = await storage.getAllUsers();
+      const userByHandle = users.find(u => u.qrHandle === badgeId);
+      if (userByHandle) {
+        return res.json({
+          badgeId: userByHandle.qrHandle,
+          name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.name,
+          email: userByHandle.email,
+          participantType: 'attendee',
+          company: userByHandle.company,
+          jobTitle: userByHandle.jobTitle,
+          source: 'qr_handle'
+        });
+      }
+      
+      res.status(404).json({ message: 'Attendee not found' });
+    } catch (error) {
+      console.error('Error looking up attendee:', error);
+      res.status(500).json({ message: 'Failed to lookup attendee' });
+    }
+  });
+
+  // Assign attendee to event
+  app.post('/api/assign-to-event', isAuthenticated, async (req: any, res) => {
+    try {
+      const { badgeId, eventId, eventType, assignedBy, notes } = req.body;
+      
+      // Create assignment record
+      const assignment = {
+        id: Date.now(),
+        badgeId,
+        eventId: parseInt(eventId),
+        eventType: eventType || 'cba_event',
+        assignedBy,
+        assignedAt: new Date().toISOString(),
+        notes,
+        status: 'assigned'
+      };
+      
+      // Log assignment for now (can be extended to store in database)
+      console.log('Event assignment:', assignment);
+      
+      res.json({
+        success: true,
+        assignment,
+        message: 'Attendee successfully assigned to event'
+      });
+    } catch (error) {
+      console.error('Error assigning attendee to event:', error);
+      res.status(500).json({ message: 'Failed to assign attendee to event' });
+    }
+  });
+
+  // Get active events for selection
+  app.get('/api/cba-events/active', isAuthenticated, async (req: any, res) => {
+    try {
+      // Return sample active events
+      const events = [
+        {
+          id: 1,
+          eventName: "Monthly Networking Breakfast",
+          eventDate: "2025-08-15",
+          eventTime: "08:00 AM",
+          venue: "Croydon Business Centre",
+          status: "active"
+        },
+        {
+          id: 2,
+          eventName: "Digital Marketing Workshop", 
+          eventDate: "2025-08-22",
+          eventTime: "02:00 PM",
+          venue: "Business Hub Croydon",
+          status: "active"
+        }
+      ];
+      res.json(events);
+    } catch (error) {
+      console.error('Error fetching active events:', error);
+      res.status(500).json({ message: 'Failed to fetch events' });
+    }
+  });
+
+  // AI Summit sessions for assignment
+  app.get('/api/ai-summit/sessions', isAuthenticated, async (req: any, res) => {
+    try {
+      const sessions = [
+        { id: 1, title: 'Opening Keynote', sessionTime: '10:00 AM', room: 'Main Auditorium' },
+        { id: 2, title: 'AI for Small Business Workshop', sessionTime: '11:30 AM', room: 'Workshop Room A' },
+        { id: 3, title: 'Panel Discussion: Future of AI', sessionTime: '2:00 PM', room: 'Main Auditorium' },
+        { id: 4, title: 'Networking Session', sessionTime: '3:30 PM', room: 'Exhibition Hall' }
+      ];
+      res.json(sessions);
+    } catch (error) {
+      console.error('Error fetching AI Summit sessions:', error);
+      res.status(500).json({ message: 'Failed to fetch sessions' });
+    }
+  });
+
   // Get user's AI Summit registrations
   app.get('/api/user/ai-summit-registrations', isAuthenticated, async (req: any, res) => {
     try {
