@@ -69,6 +69,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import GHLChatbot from "@/components/GHLChatbot";
+import PWAInstaller from "@/components/PWAInstaller";
 import { useAuth } from "@/hooks/useAuth";
 
 
@@ -81,6 +82,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       </main>
       <Footer />
       <BottomNavigation />
+      <PWAInstaller />
       <GHLChatbot 
         position="bottom-right"
         primaryColor="#2563eb"
