@@ -3069,7 +3069,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: aiSummitBadge.name,
           email: aiSummitBadge.email,
           participantType: aiSummitBadge.participantType,
-          customRole: aiSummitBadge.customRole,
           company: aiSummitBadge.company,
           jobTitle: aiSummitBadge.jobTitle,
           source: 'ai_summit'

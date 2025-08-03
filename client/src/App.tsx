@@ -83,12 +83,14 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <Footer />
       <BottomNavigation />
       <PWAInstaller />
-      <GHLChatbot 
-        position="bottom-right"
-        primaryColor="#2563eb"
-        welcomeMessage="👋 Hi! I'm the CBA AI Assistant. How can I help you today?"
-        businessName="Croydon Business Association"
-      />
+      <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-40 mb-20 md:mb-0">
+        <GHLChatbot 
+          position="bottom-right"
+          primaryColor="#2563eb"
+          welcomeMessage="👋 Hi! I'm the CBA AI Assistant. How can I help you today?"
+          businessName="Croydon Business Association"
+        />
+      </div>
     </div>
   );
 }
