@@ -35,6 +35,7 @@ import {
   BookOpen
 } from "lucide-react";
 import { Link } from "wouter";
+import { ParticipantTypeSelector } from "@/components/forms/ParticipantTypeSelector";
 
 const AISummit = () => {
   const { user, isAuthenticated } = useAuth();
@@ -53,6 +54,8 @@ const AISummit = () => {
   const [registrationData, setRegistrationData] = useState({
     name: "",
     email: "",
+    participantType: "attendee",
+    customRole: "",
     company: "",
     jobTitle: "",
     phoneNumber: "",
@@ -101,6 +104,8 @@ const AISummit = () => {
       name: "",
       email: "",
       jobTitle: "",
+      participantType: "exhibitor",
+      customRole: "",
       isSpeaker: false,
       speakerBio: "",
       presentationTitle: "",
@@ -685,6 +690,8 @@ const AISummit = () => {
           name: "",
           email: "",
           jobTitle: "",
+          participantType: "exhibitor",
+          customRole: "",
           isSpeaker: false,
           speakerBio: "",
           presentationTitle: "",
@@ -1474,6 +1481,20 @@ const AISummit = () => {
                     </div>
                   </div>
 
+                  <ParticipantTypeSelector
+                    value={registrationData.participantType}
+                    customRole={registrationData.customRole}
+                    onValueChange={(type, customRole) => {
+                      setRegistrationData(prev => ({
+                        ...prev,
+                        participantType: type,
+                        customRole: customRole || ""
+                      }));
+                    }}
+                    label="Your Role at the Event"
+                    required
+                  />
+
                   <div>
                     <Label htmlFor="aiInterest">AI Interest/Focus Area</Label>
                     <Select value={registrationData.aiInterest} onValueChange={(value) => handleInputChange('aiInterest', value)}>
@@ -1738,17 +1759,27 @@ const AISummit = () => {
                               placeholder="Enter job title"
                             />
                           </div>
-                          
-                          <div className="flex items-center space-x-2 pt-6">
-                            <Checkbox
-                              id={`attendee-speaker-${index}`}
-                              checked={attendee.isSpeaker}
-                              onCheckedChange={(checked) => handleAttendeeChange(index, 'isSpeaker', !!checked)}
-                            />
-                            <Label htmlFor={`attendee-speaker-${index}`} className="text-sm font-medium">
-                              This person will also be speaking/presenting
-                            </Label>
-                          </div>
+                        </div>
+                        
+                        <ParticipantTypeSelector
+                          value={attendee.participantType || "exhibitor"}
+                          customRole={attendee.customRole || ""}
+                          onValueChange={(type, customRole) => {
+                            handleAttendeeChange(index, 'participantType', type);
+                            handleAttendeeChange(index, 'customRole', customRole || '');
+                          }}
+                          label={`Role for ${attendee.name || `Attendee ${index + 1}`}`}
+                        />
+                        
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`attendee-speaker-${index}`}
+                            checked={attendee.isSpeaker}
+                            onCheckedChange={(checked) => handleAttendeeChange(index, 'isSpeaker', !!checked)}
+                          />
+                          <Label htmlFor={`attendee-speaker-${index}`} className="text-sm font-medium">
+                            This person will also be speaking/presenting
+                          </Label>
                         </div>
                         
                         {attendee.isSpeaker && (

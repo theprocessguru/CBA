@@ -362,7 +362,8 @@ export const eventBadgeAssignments = pgTable("event_badge_assignments", {
 export const aiSummitBadges = pgTable("ai_summit_badges", {
   id: serial("id").primaryKey(),
   badgeId: varchar("badge_id").notNull().unique(), // Unique identifier for QR code
-  participantType: varchar("participant_type").notNull(), // attendee, exhibitor, speaker, volunteer, team
+  participantType: varchar("participant_type").notNull(), // attendee, exhibitor, speaker, volunteer, team, special_guest, other
+  customRole: varchar("custom_role"), // For 'other' participant type - custom role name
   participantId: varchar("participant_id").notNull(), // Reference to the registration ID
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),

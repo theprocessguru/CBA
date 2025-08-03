@@ -9,7 +9,8 @@ import type {
 
 export interface BadgeInfo {
   badgeId: string;
-  participantType: 'attendee' | 'exhibitor' | 'speaker' | 'volunteer' | 'team';
+  participantType: 'attendee' | 'exhibitor' | 'speaker' | 'volunteer' | 'team' | 'special_guest' | 'other';
+  customRole?: string;
   participantId: string;
   name: string;
   email: string;
@@ -287,7 +288,9 @@ export class BadgeService {
       exhibitor: '#8B5CF6', // Purple  
       speaker: '#10B981', // Green
       volunteer: '#F59E0B', // Amber
-      team: '#EF4444' // Red
+      team: '#EF4444', // Red
+      special_guest: '#DC2626', // Deep Red
+      other: '#6B7280' // Gray
     };
 
     const typeColor = typeColors[badgeInfo.participantType] || '#6B7280';
@@ -430,7 +433,12 @@ export class BadgeService {
         <div class="badge-header">
             <div class="event-title">FIRST AI SUMMIT CROYDON 2025</div>
             <div class="event-date">${badgeInfo.eventDetails.eventDate} • ${badgeInfo.eventDetails.venue}</div>
-            <div class="participant-type">${badgeInfo.participantType}</div>
+            <div class="participant-type">${badgeInfo.participantType === 'other' && badgeInfo.customRole 
+              ? badgeInfo.customRole.toUpperCase() 
+              : badgeInfo.participantType === 'special_guest' 
+                ? 'SPECIAL GUEST'
+                : badgeInfo.participantType.toUpperCase()
+            }</div>
         </div>
         
         <div class="badge-body">
@@ -474,7 +482,8 @@ export class BadgeService {
    * Create a badge for event participants
    */
   async createParticipantBadge(participantId: string, participantInfo: {
-    participantType: 'attendee' | 'exhibitor' | 'speaker' | 'volunteer' | 'team';
+    participantType: 'attendee' | 'exhibitor' | 'speaker' | 'volunteer' | 'team' | 'special_guest' | 'other';
+    customRole?: string; // For 'other' participant type
     name: string;
     email: string;
     company?: string;
@@ -486,6 +495,7 @@ export class BadgeService {
     const badgeInfo: BadgeInfo = {
       badgeId,
       participantType: participantInfo.participantType,
+      customRole: participantInfo.customRole,
       participantId: participantInfo.participantId,
       name: participantInfo.name,
       email: participantInfo.email,
@@ -524,6 +534,12 @@ export class BadgeService {
       case 'team':
         badgeDesign = 'team';
         break;
+      case 'special_guest':
+        badgeDesign = 'vip';
+        break;
+      case 'other':
+        badgeDesign = 'standard';
+        break;
       default:
         badgeDesign = 'standard';
     }
@@ -531,6 +547,7 @@ export class BadgeService {
     const badgeData: InsertAISummitBadge = {
       badgeId,
       participantType: participantInfo.participantType,
+      customRole: participantInfo.customRole || null,
       participantId: participantInfo.participantId,
       name: participantInfo.name,
       email: participantInfo.email,
