@@ -341,85 +341,93 @@ export class BadgeService {
         
         .participant-type {
             background: rgba(255,255,255,0.2);
-            color: white;
-            padding: 8px 16px;
+            padding: 5px 15px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: bold;
             text-transform: uppercase;
-            display: inline-block;
             margin-top: 10px;
+            display: inline-block;
         }
         
         .badge-body {
-            padding: 30px;
+            padding: 25px;
             text-align: center;
         }
         
         .participant-name {
             font-size: 24px;
             font-weight: bold;
-            color: #1a1a1a;
+            color: #1f2937;
             margin-bottom: 10px;
         }
         
         .participant-details {
-            font-size: 14px;
-            color: #666;
+            color: #6b7280;
             margin-bottom: 20px;
-            line-height: 1.4;
         }
         
-        .qr-section {
-            margin: 20px 0;
+        .company {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .job-title {
+            font-size: 14px;
         }
         
         .qr-code {
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
             width: 120px;
             height: 120px;
-            border: 2px solid ${typeColor};
-            border-radius: 10px;
-            padding: 10px;
-            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
         }
         
         .badge-id {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 20px;
-            font-size: 12px;
-            color: #666;
             font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+        }
+        
+        .venue-info {
+            background: #f9fafb;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #4b5563;
         }
         
         .instructions {
             margin-top: 30px;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
             font-size: 14px;
-            line-height: 1.5;
-            color: #666;
+            color: #92400e;
         }
         
         .instructions h3 {
-            color: ${typeColor};
             margin-top: 0;
-        }
-        
-        .instructions ol {
-            padding-left: 20px;
-        }
-        
-        .instructions li {
-            margin-bottom: 8px;
+            color: #92400e;
         }
         
         @media print {
-            .instructions { 
-                page-break-before: always; 
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .instructions {
+                page-break-before: always;
             }
         }
     </style>
@@ -427,83 +435,68 @@ export class BadgeService {
 <body>
     <div class="badge-container">
         <div class="badge-header">
-            <div class="event-title">FIRST AI SUMMIT CROYDON 2025</div>
-            <div class="event-date">${badgeInfo.eventDetails.eventDate} • ${badgeInfo.eventDetails.venue}</div>
-            <div class="participant-type">${badgeInfo.participantType}</div>
+            <div class="event-title">First AI Summit Croydon 2025</div>
+            <div class="event-date">October 1st, 2025 • LSBU Croydon</div>
+            <div class="participant-type">${badgeInfo.participantType.replace('_', ' ')}</div>
         </div>
         
         <div class="badge-body">
             <div class="participant-name">${badgeInfo.name}</div>
             
             <div class="participant-details">
-                ${badgeInfo.company ? `${badgeInfo.company}<br>` : ''}
-                ${badgeInfo.jobTitle ? `${badgeInfo.jobTitle}<br>` : ''}
-                ${badgeInfo.email}
+                ${badgeInfo.company ? `<div class="company">${badgeInfo.company}</div>` : ''}
+                ${badgeInfo.jobTitle ? `<div class="job-title">${badgeInfo.jobTitle}</div>` : ''}
             </div>
             
-            <div class="qr-section">
-                <img src="${qrCodeDataURL}" alt="QR Code" class="qr-code">
+            <div class="qr-code">
+                <img src="${qrCodeDataURL}" alt="QR Code for ${badgeInfo.name}" />
             </div>
             
-            <div class="badge-id">
-                Badge ID: ${badgeInfo.badgeId}
+            <div class="badge-id">Badge ID: ${badgeInfo.badgeId}</div>
+            
+            <div class="venue-info">
+                <strong>Venue:</strong> LSBU London South Bank University Croydon<br>
+                <strong>Time:</strong> 10:00 AM - 4:00 PM<br>
+                <strong>Access Level:</strong> ${badgeInfo.accessLevel || 'General Access'}
             </div>
         </div>
     </div>
     
     <div class="instructions">
-        <h3>Badge Printing Instructions</h3>
-        <ol>
-            <li><strong>Print this page</strong> on A4 paper using your home or office printer</li>
-            <li><strong>Cut out the badge</strong> along the border lines</li>
-            <li><strong>Attach to clothing</strong> using a pin, clip, or lanyard</li>
-            <li><strong>Bring to the event</strong> on ${badgeInfo.eventDetails.eventDate}</li>
-            <li><strong>Present at entrance</strong> for QR code scanning and check-in</li>
-        </ol>
+        <h3>📋 Badge Instructions</h3>
+        <ul>
+            <li><strong>Print this badge</strong> on A4 paper (preferably white/cream colored)</li>
+            <li><strong>Cut around the badge</strong> following the border lines</li>
+            <li><strong>Bring this badge</strong> to the AI Summit on October 1st, 2025</li>
+            <li><strong>Present at registration</strong> for quick check-in with QR code scanning</li>
+            <li><strong>Wear your badge</strong> throughout the event for easy identification</li>
+            <li><strong>Contact us</strong> if you have any questions: info@croydonbusiness.org</li>
+        </ul>
         
-        <p><strong>Important:</strong> Your QR code contains your unique registration information. Keep your badge safe and bring it to the AI Summit for entry.</p>
-        
-        <p><strong>Lost your badge?</strong> Contact us at info@croydonbusiness.co.uk or visit the registration desk on the day.</p>
+        <p><strong>Important:</strong> This badge contains a unique QR code for secure event access. Please keep it safe and do not share with others.</p>
     </div>
 </body>
 </html>`;
   }
 
   /**
-   * Create a badge for event participants
+   * Create a badge for any type of participant
    */
-  async createParticipantBadge(participantId: string, participantInfo: {
-    participantType: 'attendee' | 'exhibitor' | 'speaker' | 'volunteer' | 'team';
-    name: string;
-    email: string;
-    company?: string;
-    jobTitle?: string;
-    participantId: string;
-  }): Promise<AISummitBadge> {
+  async createBadge(participantInfo: Omit<BadgeInfo, 'badgeId' | 'eventDetails'>): Promise<AISummitBadge> {
     const badgeId = this.generateBadgeId();
-
+    
     const badgeInfo: BadgeInfo = {
+      ...participantInfo,
       badgeId,
-      participantType: participantInfo.participantType,
-      participantId: participantInfo.participantId,
-      name: participantInfo.name,
-      email: participantInfo.email,
-      company: participantInfo.company,
-      jobTitle: participantInfo.jobTitle,
       eventDetails: this.eventInfo
     };
 
-    // Generate QR code
-    const qrCodeData = JSON.stringify({
-      badgeId,
-      type: 'ai_summit_badge',
-      participantType: participantInfo.participantType,
-      name: participantInfo.name,
-      eventId: 'ai-summit-2025'
-    });
+    // Generate QR code data as JSON string
+    const qrCodeData = JSON.stringify(badgeInfo);
 
+    // Generate QR code as data URL for embedding in HTML
     const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
-      width: 300,
+      width: 200,
       margin: 2,
       color: {
         dark: '#000000',
@@ -553,6 +546,28 @@ export class BadgeService {
   }
 
   /**
+   * Generate QR code image as base64 data URL
+   */
+  async generateQRCodeImage(badgeId: string): Promise<string> {
+    const badge = await storage.getAISummitBadgeById(badgeId);
+    if (!badge) {
+      throw new Error('Badge not found');
+    }
+
+    // Generate QR code with badge ID for scanning
+    const qrCodeUrl = await QRCode.toDataURL(badge.badgeId, {
+      width: 256,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+
+    return qrCodeUrl;
+  }
+
+  /**
    * Get printable badge HTML
    */
   async getPrintableBadge(badgeId: string): Promise<string> {
@@ -561,162 +576,169 @@ export class BadgeService {
       throw new Error('Badge not found');
     }
 
-    // Generate QR code for the badge
-    const qrCodeDataURL = await QRCode.toDataURL(badge.qrCodeData, {
-      width: 200,
-      margin: 2
-    });
+    if (!badge.printableBadgeHTML) {
+      throw new Error('Printable badge not available');
+    }
 
-    const badgeInfo: BadgeInfo = {
-      badgeId: badge.badgeId,
-      participantType: badge.participantType as any,
-      participantId: badge.participantId,
-      name: badge.name,
-      email: badge.email,
-      company: badge.company || undefined,
-      jobTitle: badge.jobTitle || undefined,
-      eventDetails: this.eventInfo
-    };
-
-    return this.generatePrintableBadgeHTML(badgeInfo, qrCodeDataURL);
+    return badge.printableBadgeHTML;
   }
 
   /**
-   * Create badge for attendee registration
+   * Create badges for all attendees from a registration
    */
-  async createAttendeeBadge(registrationId: string, attendeeInfo: any): Promise<AISummitBadge> {
-    return this.createParticipantBadge(registrationId, {
-      participantType: 'attendee',
-      name: attendeeInfo.name,
-      email: attendeeInfo.email,
-      company: attendeeInfo.company,
-      jobTitle: attendeeInfo.jobTitle,
-      participantId: registrationId
-    });
+  async createAttendeeBadges(registrationId: string, attendees: any[]): Promise<AISummitBadge[]> {
+    const badges: AISummitBadge[] = [];
+
+    for (let i = 0; i < attendees.length; i++) {
+      const attendee = attendees[i];
+      const badge = await this.createBadge({
+        participantType: 'attendee',
+        participantId: `${registrationId}-attendee-${i + 1}`,
+        name: attendee.name,
+        email: attendee.email,
+        company: attendee.company,
+        jobTitle: attendee.jobTitle
+      });
+      badges.push(badge);
+    }
+
+    return badges;
   }
 
   /**
-   * Create badge for exhibitor registration
+   * Create badges for exhibitor attendees (can be both exhibitor and speaker)
    */
-  async createExhibitorBadge(registrationId: string, exhibitorInfo: any): Promise<AISummitBadge> {
-    return this.createParticipantBadge(registrationId, {
-      participantType: 'exhibitor',
-      name: exhibitorInfo.contactName,
-      email: exhibitorInfo.contactEmail,
-      company: exhibitorInfo.companyName,
-      jobTitle: exhibitorInfo.contactJobTitle,
-      participantId: registrationId
-    });
-  }
+  async createExhibitorBadges(registrationId: string, attendees: any[], companyName: string): Promise<AISummitBadge[]> {
+    const badges: AISummitBadge[] = [];
 
-  /**
-   * Create badge for speaker
-   */
-  async createSpeakerBadge(speakerId: string, speakerInfo: any): Promise<AISummitBadge> {
-    return this.createParticipantBadge(speakerId, {
-      participantType: 'speaker',
-      name: speakerInfo.name,
-      email: speakerInfo.email,
-      company: speakerInfo.company,
-      jobTitle: speakerInfo.jobTitle,
-      participantId: speakerId
-    });
-  }
-
-  /**
-   * Create badge for volunteer
-   */
-  async createVolunteerBadge(volunteerId: string, volunteerInfo: any): Promise<AISummitBadge> {
-    return this.createParticipantBadge(volunteerId, {
-      participantType: 'volunteer',
-      name: volunteerInfo.name,
-      email: volunteerInfo.email,
-      company: undefined,
-      jobTitle: volunteerInfo.role,
-      participantId: volunteerId
-    });
-  }
-
-  /**
-   * Create badge for team member
-   */
-  async createTeamBadge(teamMemberId: string, teamMemberInfo: any): Promise<AISummitBadge> {
-    return this.createParticipantBadge(teamMemberId, {
-      participantType: 'team',
-      name: teamMemberInfo.name,
-      email: teamMemberInfo.email,
-      company: 'CBA Team',
-      jobTitle: teamMemberInfo.role,
-      participantId: teamMemberId
-    });
-  }
-
-  /**
-   * Process check-in/check-out for a badge
-   */
-  async processCheckIn(badgeId: string, checkInType: 'check_in' | 'check_out' = 'check_in', 
-                      location: string = 'main_entrance', staffMember?: string): Promise<CheckInResult> {
-    try {
-      const badge = await storage.getAISummitBadgeById(badgeId);
+    for (let i = 0; i < attendees.length; i++) {
+      const attendee = attendees[i];
       
+      // Create exhibitor badge
+      const exhibitorBadge = await this.createBadge({
+        participantType: 'exhibitor',
+        participantId: `${registrationId}-exhibitor-${i + 1}`,
+        name: attendee.name,
+        email: attendee.email,
+        company: companyName,
+        jobTitle: attendee.jobTitle
+      });
+      badges.push(exhibitorBadge);
+
+      // If attendee is also a speaker, create speaker badge
+      if (attendee.isSpeaker) {
+        const speakerBadge = await this.createBadge({
+          participantType: 'speaker',
+          participantId: `${registrationId}-speaker-${i + 1}`,
+          name: attendee.name,
+          email: attendee.email,
+          company: companyName,
+          jobTitle: attendee.jobTitle
+        });
+        badges.push(speakerBadge);
+      }
+    }
+
+    return badges;
+  }
+
+  /**
+   * Create speaker badge
+   */
+  async createSpeakerBadge(speakerRegistrationId: string, speakerData: any): Promise<AISummitBadge> {
+    return await this.createBadge({
+      participantType: 'speaker',
+      participantId: speakerRegistrationId,
+      name: speakerData.name,
+      email: speakerData.email,
+      company: speakerData.company,
+      jobTitle: speakerData.jobTitle
+    });
+  }
+
+  /**
+   * Create volunteer badge
+   */
+  async createVolunteerBadge(volunteerRegistrationId: string, volunteerData: any): Promise<AISummitBadge> {
+    return await this.createBadge({
+      participantType: 'volunteer',
+      participantId: volunteerRegistrationId,
+      name: volunteerData.name,
+      email: volunteerData.email,
+      jobTitle: volunteerData.role
+    });
+  }
+
+  /**
+   * Create team member badge
+   */
+  async createTeamMemberBadge(teamMemberId: string, teamMemberData: any): Promise<AISummitBadge> {
+    return await this.createBadge({
+      participantType: 'team',
+      participantId: teamMemberId,
+      name: teamMemberData.name,
+      email: teamMemberData.email,
+      jobTitle: teamMemberData.role,
+      accessLevel: teamMemberData.accessLevel,
+      permissions: teamMemberData.permissions ? JSON.parse(teamMemberData.permissions) : []
+    });
+  }
+
+  /**
+   * Process check-in/check-out from QR code scan
+   */
+  async processCheckIn(
+    badgeId: string, 
+    checkInType: 'check_in' | 'check_out',
+    location: string = 'main_entrance',
+    staffMember?: string,
+    notes?: string
+  ): Promise<CheckInResult> {
+    try {
+      // Get badge information
+      const badge = await storage.getAISummitBadgeById(badgeId);
       if (!badge) {
         return {
           success: false,
           checkInType,
-          message: 'Badge not found. Please verify the badge ID and try again.'
+          message: 'Invalid badge ID. Badge not found.'
         };
       }
 
       if (!badge.isActive) {
         return {
           success: false,
+          badge,
           checkInType,
-          message: 'This badge has been deactivated. Please contact support.'
+          message: 'Badge is inactive. Please contact registration desk.'
         };
       }
 
-      // Get previous check-ins for this badge
-      const previousCheckIns = await storage.getAISummitCheckInsByBadgeId(badgeId);
-      const lastCheckIn = previousCheckIns[previousCheckIns.length - 1];
-      
-      // Determine if this is a valid check-in/out sequence
-      if (checkInType === 'check_in' && lastCheckIn?.checkInType === 'check_in') {
-        return {
-          success: false,
-          checkInType,
-          message: 'Already checked in. Please check out first before checking in again.'
-        };
-      }
-      
-      if (checkInType === 'check_out' && (!lastCheckIn || lastCheckIn.checkInType === 'check_out')) {
-        return {
-          success: false,
-          checkInType,
-          message: 'Not currently checked in. Please check in first.'
-        };
-      }
+      // Check if this is the first check-in for this badge
+      const previousCheckIns = await storage.getCheckInsByBadgeId(badgeId);
+      const isFirstCheckIn = previousCheckIns.length === 0;
 
-      // Record the check-in/out
+      // Create check-in record
       const checkInData: InsertAISummitCheckIn = {
         badgeId,
         checkInType,
         checkInTime: new Date(),
         checkInLocation: location,
         checkInMethod: 'qr_scan',
-        staffMember: staffMember || 'System'
+        notes: notes || null,
+        staffMember: staffMember || null
       };
 
       await storage.createAISummitCheckIn(checkInData);
 
-      const isFirstCheckIn = checkInType === 'check_in' && previousCheckIns.filter(c => c.checkInType === 'check_in').length === 0;
+      const actionWord = checkInType === 'check_in' ? 'checked in' : 'checked out';
+      const welcomeMessage = isFirstCheckIn ? 'Welcome to the AI Summit!' : '';
 
       return {
         success: true,
         badge,
         checkInType,
-        message: checkInType === 'check_in' 
-          ? `Welcome${isFirstCheckIn ? ' to your first visit' : ' back'}, ${badge.name}!`
-          : `Goodbye, ${badge.name}! Thanks for attending.`,
+        message: `${badge.name} successfully ${actionWord}. ${welcomeMessage}`.trim(),
         isFirstCheckIn
       };
 
@@ -751,6 +773,174 @@ export class BadgeService {
     await storage.updateAISummitBadge(badgeId, { 
       isActive: false
     });
+  }
+}
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#FFFFFF'
+      }
+    });
+    
+    // Badge color based on participant type
+    const badgeColors = {
+      attendee: { bg: '#3B82F6', text: '#FFFFFF' },
+      exhibitor: { bg: '#8B5CF6', text: '#FFFFFF' },
+      speaker: { bg: '#EF4444', text: '#FFFFFF' },
+      volunteer: { bg: '#10B981', text: '#FFFFFF' },
+      team: { bg: '#F59E0B', text: '#FFFFFF' }
+    };
+
+    const colors = badgeColors[badgeInfo.participantType] || badgeColors.attendee;
+
+    return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>AI Summit 2025 Badge - ${badgeInfo.name}</title>
+      <style>
+        @page { 
+          size: A4; 
+          margin: 20mm; 
+        }
+        body { 
+          font-family: Arial, sans-serif; 
+          margin: 0; 
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+        .badge-container {
+          width: 85mm;
+          height: 54mm;
+          border: 2px solid #000;
+          border-radius: 8px;
+          background: white;
+          padding: 8px;
+          margin: 20px auto;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          page-break-inside: avoid;
+        }
+        .badge-header {
+          background: ${colors.bg};
+          color: ${colors.text};
+          text-align: center;
+          padding: 6px;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        .participant-type {
+          background: ${colors.bg};
+          color: ${colors.text};
+          font-size: 10px;
+          padding: 2px 6px;
+          border-radius: 3px;
+          text-transform: uppercase;
+          font-weight: bold;
+          display: inline-block;
+          margin-bottom: 6px;
+        }
+        .name {
+          font-size: 14px;
+          font-weight: bold;
+          margin-bottom: 4px;
+          text-align: center;
+        }
+        .details {
+          font-size: 10px;
+          text-align: center;
+          margin-bottom: 8px;
+          line-height: 1.2;
+        }
+        .qr-section {
+          text-align: center;
+          margin-top: 8px;
+        }
+        .qr-code {
+          width: 60px;
+          height: 60px;
+        }
+        .badge-id {
+          font-size: 8px;
+          text-align: center;
+          margin-top: 4px;
+          color: #666;
+        }
+        .instructions {
+          max-width: 400px;
+          margin: 30px auto;
+          padding: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .instructions h3 {
+          margin-top: 0;
+          color: #1a73e8;
+        }
+        .instructions ol {
+          padding-left: 20px;
+        }
+        .instructions li {
+          margin-bottom: 8px;
+        }
+        @media print {
+          .instructions { page-break-before: always; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="badge-container">
+        <div class="badge-header">
+          FIRST AI SUMMIT CROYDON 2025
+        </div>
+        
+        <div class="participant-type">
+          ${badgeInfo.participantType.toUpperCase()}
+        </div>
+        
+        <div class="name">
+          ${badgeInfo.name}
+        </div>
+        
+        <div class="details">
+          ${badgeInfo.company ? `${badgeInfo.company}<br>` : ''}
+          ${badgeInfo.jobTitle ? `${badgeInfo.jobTitle}<br>` : ''}
+          October 1st, 2025<br>
+          LSBU Croydon
+        </div>
+        
+        <div class="qr-section">
+          <img src="${qrCodeDataUrl}" alt="QR Code" class="qr-code">
+        </div>
+        
+        <div class="badge-id">
+          ID: ${badgeInfo.badgeId}
+        </div>
+      </div>
+      
+      <div class="instructions">
+        <h3>Badge Printing Instructions</h3>
+        <ol>
+          <li><strong>Print this page</strong> on A4 paper using your home or office printer</li>
+          <li><strong>Cut out the badge</strong> along the border lines</li>
+          <li><strong>Attach to clothing</strong> using a pin, clip, or lanyard</li>
+          <li><strong>Bring to the event</strong> on October 1st, 2025</li>
+          <li><strong>Present at entrance</strong> for QR code scanning and check-in</li>
+        </ol>
+        
+        <p><strong>Important:</strong> Your QR code contains your unique registration information. Keep your badge safe and bring it to the AI Summit for entry.</p>
+        
+        <p><strong>Lost your badge?</strong> Contact us at info@croydonbusiness.co.uk or visit the registration desk on the day.</p>
+      </div>
+    </body>
+    </html>`;
   }
 
   /**

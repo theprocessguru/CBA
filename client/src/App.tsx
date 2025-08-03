@@ -53,6 +53,7 @@ import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
 import MyRegistrations from "@/pages/my-registrations";
 import MyQRCodeSimple from "@/pages/my-qr-code-simple";
+import MyPersonalBadge from "@/pages/my-personal-badge";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -260,6 +261,11 @@ function Router() {
       <Route path="/my-qr-code">
         <MainLayout>
           <MyQRCodeSimple />
+        </MainLayout>
+      </Route>
+      <Route path="/my-personal-badge">
+        <MainLayout>
+          <MyPersonalBadge />
         </MainLayout>
       </Route>
       <Route path="/my-profile">

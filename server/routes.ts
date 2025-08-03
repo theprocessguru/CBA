@@ -17,7 +17,12 @@ import {
   insertAISummitVolunteerSchema,
   insertAISummitTeamMemberSchema,
   aiSummitRegistrations,
-  aiSummitBadges
+  aiSummitBadges,
+  personalBadges,
+  eventBadgeAssignments,
+  insertPersonalBadgeSchema,
+  insertEventBadgeAssignmentSchema,
+  users
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -4981,6 +4986,232 @@ export async function registerRoutes(app: Express): Promise<Server> {
         success: false,
         error: "Service temporarily unavailable" 
       });
+    }
+  });
+
+  // Personal Badge System
+  
+  // Get user's personal badge
+  app.get('/api/my-personal-badge', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      
+      const badge = await db
+        .select()
+        .from(personalBadges)
+        .where(eq(personalBadges.userId, userId))
+        .limit(1);
+      
+      if (badge.length === 0) {
+        return res.status(404).json({ message: "No personal badge found" });
+      }
+      
+      res.json(badge[0]);
+    } catch (error) {
+      console.error('Error fetching personal badge:', error);
+      res.status(500).json({ message: "Failed to fetch personal badge" });
+    }
+  });
+
+  // Get user's badge profile
+  app.get('/api/my-badge-profile', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+      
+      if (user.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const userData = user[0];
+      res.json({
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        title: userData.title || '',
+        company: userData.company || '',
+        jobTitle: userData.jobTitle || '',
+        phone: userData.phone || '',
+        bio: userData.bio || '',
+        qrHandle: userData.qrHandle || '',
+        membershipTier: userData.membershipTier || 'Starter Tier'
+      });
+    } catch (error) {
+      console.error('Error fetching badge profile:', error);
+      res.status(500).json({ message: "Failed to fetch badge profile" });
+    }
+  });
+
+  // Create personal badge
+  app.post('/api/create-personal-badge', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      const { firstName, lastName, title, company, jobTitle, phone, bio, qrHandle } = req.body;
+      
+      if (!qrHandle) {
+        return res.status(400).json({ message: "QR handle is required" });
+      }
+
+      // Check if QR handle is already taken
+      const existingHandle = await db
+        .select()
+        .from(personalBadges)
+        .where(eq(personalBadges.qrHandle, qrHandle.toLowerCase()))
+        .limit(1);
+      
+      if (existingHandle.length > 0) {
+        return res.status(400).json({ message: "QR handle is already taken" });
+      }
+
+      // Update user profile
+      await db
+        .update(users)
+        .set({
+          firstName: firstName || null,
+          lastName: lastName || null,
+          title: title || null,
+          company: company || null,
+          jobTitle: jobTitle || null,
+          phone: phone || null,
+          bio: bio || null,
+          qrHandle: qrHandle.toLowerCase(),
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      // Create personal badge
+      const badgeId = `CBA-${qrHandle.toUpperCase()}`;
+      const badge = await db
+        .insert(personalBadges)
+        .values({
+          userId: userId,
+          badgeId: badgeId,
+          qrHandle: qrHandle.toLowerCase(),
+          isActive: true
+        })
+        .returning();
+
+      // Create initial event assignment for AI Summit
+      await db
+        .insert(eventBadgeAssignments)
+        .values({
+          badgeId: badgeId,
+          eventId: 'ai-summit-2025',
+          eventName: 'First AI Summit Croydon 2025',
+          roleType: 'member',
+          badgeColor: 'green',
+          accessLevel: 'premium',
+          isActive: true
+        });
+
+      res.json(badge[0]);
+    } catch (error) {
+      console.error('Error creating personal badge:', error);
+      res.status(500).json({ message: "Failed to create personal badge" });
+    }
+  });
+
+  // Update badge profile
+  app.put('/api/update-badge-profile', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      const { firstName, lastName, title, company, jobTitle, phone, bio, qrHandle } = req.body;
+      
+      // Update user profile
+      await db
+        .update(users)
+        .set({
+          firstName: firstName || null,
+          lastName: lastName || null,
+          title: title || null,
+          company: company || null,
+          jobTitle: jobTitle || null,
+          phone: phone || null,
+          bio: bio || null,
+          qrHandle: qrHandle ? qrHandle.toLowerCase() : null,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      // If QR handle changed, update personal badge
+      if (qrHandle) {
+        await db
+          .update(personalBadges)
+          .set({
+            qrHandle: qrHandle.toLowerCase(),
+            updatedAt: new Date()
+          })
+          .where(eq(personalBadges.userId, userId));
+      }
+
+      res.json({ message: "Profile updated successfully" });
+    } catch (error) {
+      console.error('Error updating badge profile:', error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Download personal badge
+  app.get('/api/download-personal-badge/:badgeId', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { badgeId } = req.params;
+      const userId = req.user.id;
+      
+      // Get personal badge and verify ownership
+      const badge = await db
+        .select()
+        .from(personalBadges)
+        .where(eq(personalBadges.badgeId, badgeId))
+        .limit(1);
+      
+      if (badge.length === 0 || badge[0].userId !== userId) {
+        return res.status(403).json({ message: "Badge not found or not owned by user" });
+      }
+
+      // Get user profile
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1);
+
+      if (user.length === 0) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const userData = user[0];
+      const badgeData = badge[0];
+
+      // Generate badge HTML with QR code and styling
+      const badgeHtml = await badgeService.generatePersonalBadgeHTML({
+        badgeId: badgeData.badgeId,
+        qrHandle: badgeData.qrHandle,
+        name: `${userData.firstName} ${userData.lastName}`.trim(),
+        title: userData.title,
+        company: userData.company,
+        jobTitle: userData.jobTitle,
+        phone: userData.phone,
+        membershipTier: userData.membershipTier,
+        qrCodeData: {
+          badgeId: badgeData.badgeId,
+          qrHandle: badgeData.qrHandle,
+          name: `${userData.firstName} ${userData.lastName}`.trim(),
+          membershipTier: userData.membershipTier,
+          company: userData.company,
+          type: 'personal_badge'
+        }
+      });
+
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', `attachment; filename="personal-badge-${badgeData.qrHandle}.html"`);
+      res.send(badgeHtml);
+    } catch (error) {
+      console.error('Error downloading personal badge:', error);
+      res.status(500).json({ message: "Failed to download badge" });
     }
   });
 

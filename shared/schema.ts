@@ -50,6 +50,13 @@ export const users = pgTable("users", {
   suspensionReason: text("suspension_reason"),
   suspendedAt: timestamp("suspended_at"),
   suspendedBy: varchar("suspended_by").references(() => users.id),
+  // Personal Badge System
+  qrHandle: varchar("qr_handle").unique(), // e.g., "theprocessguru"
+  title: varchar("title"), // e.g., "Mayor", "Executive Mayor", "CEO", "Founder"
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  phone: varchar("phone"),
+  bio: text("bio"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -325,6 +332,30 @@ export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   agreesToTerms: boolean("agrees_to_terms").default(false),
   source: varchar("source"), // Track source of registration (direct, exhibitor_registration, etc.)
   registeredAt: timestamp("registered_at").defaultNow(),
+});
+
+// Personal Badges - Reusable across all events with role-based styling
+export const personalBadges = pgTable("personal_badges", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: varchar("badge_id").unique().notNull(), // User's unique badge ID like "CBA-THEPROCESSGURU"
+  qrHandle: varchar("qr_handle").unique().notNull(), // Custom handle like "theprocessguru"
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event Badge Assignments - Links personal badges to specific events with roles
+export const eventBadgeAssignments = pgTable("event_badge_assignments", {
+  id: serial("id").primaryKey(),
+  badgeId: varchar("badge_id").notNull().references(() => personalBadges.badgeId),
+  eventId: varchar("event_id").notNull(), // e.g., "ai-summit-2025", "networking-nov-2025"
+  eventName: varchar("event_name").notNull(), // e.g., "First AI Summit Croydon 2025"
+  roleType: varchar("role_type").notNull(), // guest, member, exhibitor, speaker, organizer, vip
+  badgeColor: varchar("badge_color").notNull(), // blue, green, red, gold, purple based on role
+  accessLevel: varchar("access_level").notNull(), // basic, premium, vip, staff, admin
+  isActive: boolean("is_active").default(true),
+  assignedAt: timestamp("assigned_at").defaultNow(),
 });
 
 // AI Summit badges table
@@ -676,6 +707,16 @@ export type AISummitSpeakerInterest = typeof aiSummitSpeakerInterests.$inferSele
 
 export type InsertAISummitBadge = z.infer<typeof insertAISummitBadgeSchema>;
 export type AISummitBadge = typeof aiSummitBadges.$inferSelect;
+
+// Personal Badge System Schemas
+export const insertPersonalBadgeSchema = createInsertSchema(personalBadges).omit({ id: true });
+export const insertEventBadgeAssignmentSchema = createInsertSchema(eventBadgeAssignments).omit({ id: true });
+
+export type InsertPersonalBadge = z.infer<typeof insertPersonalBadgeSchema>;
+export type PersonalBadge = typeof personalBadges.$inferSelect;
+
+export type InsertEventBadgeAssignment = z.infer<typeof insertEventBadgeAssignmentSchema>;
+export type EventBadgeAssignment = typeof eventBadgeAssignments.$inferSelect;
 
 export type InsertAISummitCheckIn = z.infer<typeof insertAISummitCheckInSchema>;
 export type AISummitCheckIn = typeof aiSummitCheckIns.$inferSelect;

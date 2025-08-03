@@ -18,7 +18,8 @@ import {
   ArrowLeft,
   Home,
   Crown,
-  Calendar
+  Calendar,
+  QrCode
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -180,6 +181,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     location === '/dashboard/member-directory' ? 'text-white' : 'text-neutral-500'
                   }`} />
                   Member Directory
+                </a>
+              </Link>
+              
+              <Link href="/my-personal-badge">
+                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  location === '/my-personal-badge' 
+                    ? 'bg-primary text-white' 
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}>
+                  <QrCode className={`mr-3 h-4 w-4 ${
+                    location === '/my-personal-badge' ? 'text-white' : 'text-neutral-500'
+                  }`} />
+                  My Personal Badge
                 </a>
               </Link>
               
