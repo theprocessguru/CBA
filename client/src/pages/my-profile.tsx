@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { EventAttendanceHistory } from "@/components/profile/EventAttendanceHistory";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
@@ -341,63 +342,12 @@ const MyProfile = () => {
           </TabsContent>
 
           <TabsContent value="events" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Event Registrations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {registrationsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin w-6 h-6 border-4 border-primary border-t-transparent rounded-full"></div>
-                  </div>
-                ) : registrations && (registrations as any).length > 0 ? (
-                  <div className="space-y-4">
-                    {(registrations as any).map((registration: any, index: number) => (
-                      <div key={index} className="border rounded-lg p-4 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold text-lg">{registration.eventName}</h3>
-                          <Badge variant="outline">{registration.participantType}</Badge>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            <span>{registration.eventDate}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4" />
-                            <span>{registration.eventTime}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            <span>{registration.venue}</span>
-                          </div>
-                        </div>
-                        {registration.badgeId && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Ticket className="h-4 w-4 text-green-600" />
-                            <span className="text-green-600 font-medium">Badge ID: {registration.badgeId}</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 space-y-4">
-                    <Users className="h-12 w-12 text-gray-400 mx-auto" />
-                    <p className="text-gray-600">No event registrations found.</p>
-                    <p className="text-sm text-gray-500">When you register for events, they'll appear here.</p>
-                    <Link href="/ai-summit">
-                      <Button variant="outline">
-                        Register for AI Summit
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Event Attendance History Component */}
+            <EventAttendanceHistory 
+              userId={(profile as any)?.id} 
+              showTitle={true} 
+              compact={false} 
+            />
           </TabsContent>
         </Tabs>
       </div>

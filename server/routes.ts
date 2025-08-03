@@ -5660,6 +5660,359 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Event Attendance History Route
+  app.get('/api/user-attendance-history/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get user's event registrations
+      const registrations = await db.select({
+        registrationId: cbaEventRegistrations.id,
+        eventId: cbaEventRegistrations.eventId,
+        registrationDate: cbaEventRegistrations.registeredAt,
+        attendanceStatus: cbaEventRegistrations.attendanceStatus,
+        checkInTime: cbaEventRegistrations.checkInTime,
+        checkOutTime: cbaEventRegistrations.checkOutTime,
+        eventName: cbaEvents.eventName,
+        eventDate: cbaEvents.eventDate,
+        location: cbaEvents.location,
+        eventType: cbaEvents.eventType
+      })
+      .from(cbaEventRegistrations)
+      .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
+      .where(eq(cbaEventRegistrations.userId, userId))
+      .orderBy(desc(cbaEvents.eventDate));
+
+      // Get scan analytics for each event
+      const attendanceHistory = [];
+      
+      for (const registration of registrations) {
+        // Count scans given (as scanner)
+        const scansGiven = await db.select({ count: sql<number>`count(*)` })
+          .from(scanHistory)
+          .where(
+            and(
+              eq(scanHistory.scannerId, userId),
+              eq(scanHistory.eventId, registration.eventId)
+            )
+          );
+
+        // Count scans received (as scanned user)
+        const scansReceived = await db.select({ count: sql<number>`count(*)` })
+          .from(scanHistory)
+          .where(
+            and(
+              eq(scanHistory.scannedUserId, userId),
+              eq(scanHistory.eventId, registration.eventId)
+            )
+          );
+
+        attendanceHistory.push({
+          ...registration,
+          scansGiven: scansGiven[0]?.count || 0,
+          scansReceived: scansReceived[0]?.count || 0
+        });
+      }
+
+      res.json(attendanceHistory);
+    } catch (error) {
+      console.error("Error fetching user attendance history:", error);
+      res.status(500).json({ message: "Failed to fetch attendance history" });
+    }
+  });
+
+  // Event Scanner Assignment Routes
+  app.get('/api/my-scanner-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const assignments = await db.select()
+        .from(eventScanners)
+        .where(
+          and(
+            eq(eventScanners.userId, userId),
+            eq(eventScanners.isActive, true)
+          )
+        );
+      
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching scanner assignments:", error);
+      res.status(500).json({ message: "Failed to fetch assignments" });
+    }
+  });
+
+  app.get('/api/my-scan-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const history = await db.select()
+        .from(scanHistory)
+        .where(eq(scanHistory.scannerId, userId))
+        .orderBy(desc(scanHistory.scanTimestamp))
+        .limit(50);
+      
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching scan history:", error);
+      res.status(500).json({ message: "Failed to fetch scan history" });
+    }
+  });
+
+  app.get('/api/scan-session/active/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      const userId = req.user.id;
+      
+      const [session] = await db.select()
+        .from(scanSessions)
+        .where(
+          and(
+            eq(scanSessions.scannerId, userId),
+            eq(scanSessions.eventId, parseInt(eventId)),
+            eq(scanSessions.isActive, true)
+          )
+        );
+      
+      res.json(session || null);
+    } catch (error) {
+      console.error("Error fetching active session:", error);
+      res.status(500).json({ message: "Failed to fetch session" });
+    }
+  });
+
+  app.post('/api/scan-session/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.body;
+      const userId = req.user.id;
+      
+      // End any existing active sessions for this scanner/event
+      await db.update(scanSessions)
+        .set({ isActive: false, sessionEnd: new Date() })
+        .where(
+          and(
+            eq(scanSessions.scannerId, userId),
+            eq(scanSessions.eventId, eventId),
+            eq(scanSessions.isActive, true)
+          )
+        );
+      
+      // Create new session
+      const [session] = await db.insert(scanSessions)
+        .values({
+          scannerId: userId,
+          eventId,
+          sessionStart: new Date(),
+          isActive: true
+        })
+        .returning();
+      
+      res.json(session);
+    } catch (error) {
+      console.error("Error starting scan session:", error);
+      res.status(500).json({ message: "Failed to start session" });
+    }
+  });
+
+  app.post('/api/scan-session/end', isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      const userId = req.user.id;
+      
+      await db.update(scanSessions)
+        .set({ isActive: false, sessionEnd: new Date() })
+        .where(
+          and(
+            eq(scanSessions.id, sessionId),
+            eq(scanSessions.scannerId, userId)
+          )
+        );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error ending scan session:", error);
+      res.status(500).json({ message: "Failed to end session" });
+    }
+  });
+
+  app.post('/api/scan-record', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scannedUserId, eventId, sessionId } = req.body;
+      const scannerId = req.user.id;
+      
+      // Check for duplicate scan within last 30 minutes
+      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+      const [existingScan] = await db.select()
+        .from(scanHistory)
+        .where(
+          and(
+            eq(scanHistory.scannerId, scannerId),
+            eq(scanHistory.scannedUserId, scannedUserId),
+            eq(scanHistory.eventId, eventId),
+            gte(scanHistory.scanTimestamp, thirtyMinutesAgo)
+          )
+        );
+      
+      const isDuplicate = !!existingScan;
+      
+      // Insert scan record
+      const [scanRecord] = await db.insert(scanHistory)
+        .values({
+          scannerId,
+          scannedUserId,
+          eventId,
+          sessionId,
+          scanTimestamp: new Date(),
+          duplicateScanFlag: isDuplicate
+        })
+        .returning();
+      
+      res.json({ ...scanRecord, isDuplicate });
+    } catch (error) {
+      console.error("Error recording scan:", error);
+      res.status(500).json({ message: "Failed to record scan" });
+    }
+  });
+
+  // Admin Scanner Management Routes
+  app.get('/api/event-scanners/event/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      const scanners = await db.select()
+        .from(eventScanners)
+        .where(eq(eventScanners.eventId, parseInt(eventId)));
+      
+      res.json(scanners);
+    } catch (error) {
+      console.error("Error fetching event scanners:", error);
+      res.status(500).json({ message: "Failed to fetch scanners" });
+    }
+  });
+
+  app.post('/api/event-scanners', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId, eventId, scannerRole, permissions } = req.body;
+      
+      const [scanner] = await db.insert(eventScanners)
+        .values({
+          userId,
+          eventId,
+          scannerRole,
+          permissions,
+          assignedAt: new Date(),
+          isActive: true,
+          totalScansCompleted: 0
+        })
+        .returning();
+      
+      res.json(scanner);
+    } catch (error) {
+      console.error("Error assigning scanner:", error);
+      res.status(500).json({ message: "Failed to assign scanner" });
+    }
+  });
+
+  app.put('/api/event-scanners/:scannerId/deactivate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scannerId } = req.params;
+      
+      await db.update(eventScanners)
+        .set({ isActive: false })
+        .where(eq(eventScanners.id, parseInt(scannerId)));
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deactivating scanner:", error);
+      res.status(500).json({ message: "Failed to deactivate scanner" });
+    }
+  });
+
+  app.get('/api/scan-analytics/event/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      // Get scan statistics for the event
+      const [totalScans] = await db.select({ count: sql<number>`count(*)` })
+        .from(scanHistory)
+        .where(eq(scanHistory.eventId, parseInt(eventId)));
+      
+      const [uniqueScannedUsers] = await db.select({ count: sql<number>`count(distinct ${scanHistory.scannedUserId})` })
+        .from(scanHistory)
+        .where(eq(scanHistory.eventId, parseInt(eventId)));
+      
+      const [totalScanners] = await db.select({ count: sql<number>`count(*)` })
+        .from(eventScanners)
+        .where(
+          and(
+            eq(eventScanners.eventId, parseInt(eventId)),
+            eq(eventScanners.isActive, true)
+          )
+        );
+      
+      const [duplicateScans] = await db.select({ count: sql<number>`count(*)` })
+        .from(scanHistory)
+        .where(
+          and(
+            eq(scanHistory.eventId, parseInt(eventId)),
+            eq(scanHistory.duplicateScanFlag, true)
+          )
+        );
+      
+      res.json({
+        totalScans: totalScans.count || 0,
+        uniqueScannedUsers: uniqueScannedUsers.count || 0,
+        totalScanners: totalScanners.count || 0,
+        duplicateScans: duplicateScans.count || 0
+      });
+    } catch (error) {
+      console.error("Error fetching scan analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  app.get('/api/scan-analytics/scanner/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Get scanner statistics
+      const [totalScans] = await db.select({ count: sql<number>`count(*)` })
+        .from(scanHistory)
+        .where(eq(scanHistory.scannerId, userId));
+      
+      const [uniqueScannedUsers] = await db.select({ count: sql<number>`count(distinct ${scanHistory.scannedUserId})` })
+        .from(scanHistory)
+        .where(eq(scanHistory.scannerId, userId));
+      
+      const [duplicateScans] = await db.select({ count: sql<number>`count(*)` })
+        .from(scanHistory)
+        .where(
+          and(
+            eq(scanHistory.scannerId, userId),
+            eq(scanHistory.duplicateScanFlag, true)
+          )
+        );
+      
+      const [sessionsCount] = await db.select({ count: sql<number>`count(*)` })
+        .from(scanSessions)
+        .where(eq(scanSessions.scannerId, userId));
+      
+      const avgScansPerSession = sessionsCount.count > 0 ? 
+        Math.round((totalScans.count || 0) / sessionsCount.count) : 0;
+      
+      res.json({
+        totalScans: totalScans.count || 0,
+        uniqueScannedUsers: uniqueScannedUsers.count || 0,
+        duplicateScans: duplicateScans.count || 0,
+        sessionsCount: sessionsCount.count || 0,
+        avgScansPerSession
+      });
+    } catch (error) {
+      console.error("Error fetching scanner analytics:", error);
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

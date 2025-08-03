@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'wouter';
+import { cn } from '@/lib/utils';
 
 interface EventScanner {
   id: number;
@@ -67,7 +68,12 @@ export default function ScannerManagementPage() {
   });
 
   // Fetch scan analytics for selected event
-  const { data: scanAnalytics } = useQuery({
+  const { data: scanAnalytics = {} } = useQuery<{
+    totalScans?: number;
+    uniqueScannedUsers?: number;
+    totalScanners?: number;
+    duplicateScans?: number;
+  }>({
     queryKey: ['/api/scan-analytics/event', selectedEventId],
     enabled: !!selectedEventId
   });
