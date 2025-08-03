@@ -1,228 +1,41 @@
 # Business Automation Platform
 
 ## Overview
-
-This is a comprehensive business automation platform built with React/TypeScript frontend and Express backend. The platform helps businesses automate their operations, manage workflows, track performance, and streamline processes for improved efficiency and productivity.
-
-## System Architecture
-
-### Frontend Architecture
-- **Framework**: React 18 with TypeScript
-- **Build Tool**: Vite for fast development and optimized builds
-- **Styling**: Tailwind CSS with custom design system
-- **UI Components**: Radix UI primitives with shadcn/ui component library
-- **State Management**: TanStack Query for server state, React hooks for local state
-- **Routing**: Wouter for lightweight client-side routing
-- **Forms**: React Hook Form with Zod validation
-
-### Backend Architecture
-- **Runtime**: Node.js with Express.js framework
-- **Language**: TypeScript with ES modules
-- **Database**: PostgreSQL via Neon serverless
-- **ORM**: Drizzle ORM for type-safe database operations
-- **Authentication**: Dual authentication system (Replit OAuth + local auth with bcrypt)
-- **Session Management**: Express sessions with PostgreSQL store
-
-### Data Storage Solutions
-- **Primary Database**: PostgreSQL hosted on Neon serverless platform
-- **Session Storage**: PostgreSQL sessions table
-- **File Storage**: Base64 encoded images stored directly in database
-- **Schema Management**: Drizzle Kit for migrations and schema management
-
-## Key Components
-
-### Authentication & Authorization
-- **Dual Auth System**: Supports both Replit OAuth and traditional email/password
-- **Session Management**: Secure HTTP-only cookies with PostgreSQL session store
-- **Role-Based Access**: Admin and user roles with different permissions
-- **Password Reset**: Email-based password recovery system
-
-### Business Process Management
-- **Workflow Automation**: Automated business process execution
-- **Task Management**: Structured task and activity tracking
-- **Performance Analytics**: Business metrics and KPI monitoring
-- **Integration Hub**: Connect with external business tools and APIs
-
-### User Interface
-- **Responsive Design**: Mobile-first approach with desktop enhancements
-- **Component Library**: Consistent UI components across the application
-- **Mobile Navigation**: Bottom navigation bar for mobile users
-- **Admin Interface**: Specialized admin panels for system management
-
-### Automation Features
-- **Process Builder**: Visual workflow creation and management
-- **Notification System**: Automated alerts and communication
-- **Data Import/Export**: Bulk data processing capabilities
-- **Reporting Dashboard**: Real-time business insights and analytics
-
-## Data Flow
-
-1. **Authentication Flow**: Users authenticate via Replit OAuth or local registration
-2. **Process Setup**: Authenticated users create and configure automation workflows
-3. **Task Execution**: System automatically executes defined business processes
-4. **Monitoring**: Real-time tracking of automation performance and results
-5. **Analytics**: Generate insights and reports on business efficiency
-6. **Admin Oversight**: Administrators manage users and system configuration
-
-## External Dependencies
-
-### Core Dependencies
-- **Database**: Neon PostgreSQL serverless database
-- **Email Service**: Configurable SMTP (NodeMailer) and SendGrid integration
-- **Payment Processing**: Stripe integration for subscription management
-- **External APIs**: Integration capabilities for third-party business tools
-
-### Development Tools
-- **TypeScript**: Type safety across frontend and backend
-- **ESBuild**: Fast production builds
-- **Tailwind CSS**: Utility-first styling framework
-- **Zod**: Runtime type validation and schema definition
-
-## Deployment Strategy
-
-### Environment Configuration
-- **Development**: Local development with hot reloading via Vite
-- **Production**: Containerized deployment on Replit autoscale infrastructure
-- **Database**: Serverless PostgreSQL with connection pooling
-- **Static Assets**: Served via Express with Vite build output
-
-### Build Process
-1. **Frontend Build**: Vite compiles React app to static assets
-2. **Backend Build**: ESBuild bundles server code with external packages
-3. **Database Migration**: Drizzle Kit manages schema changes
-4. **Deployment**: Replit handles container orchestration and scaling
-
-### Performance Optimizations
-- **Connection Pooling**: Optimized database connections for serverless
-- **Caching Strategy**: Query caching with TanStack Query
-- **Bundle Splitting**: Vite automatically splits code for optimal loading
-- **Real-time Updates**: WebSocket integration for live process monitoring
-
-## Changelog
-```
-Changelog:
-- August 3, 2025. Multiple Participant Role System Implementation:
-  * COMPLETED: Built comprehensive multiple role selection system for event participants
-  * Participants can now be exhibitor, speaker, AND organizer simultaneously instead of single roles
-  * Updated database schema: added participant_roles JSON field and primary_role field to support multiple roles
-  * Created MultiRoleSelector component allowing users to select up to 4 different roles per event
-  * Built AttendeeRoleDisplay component showing all participant roles with proper visual indicators
-  * Enhanced scanner system to display all roles when organizers scan attendee QR codes
-  * Added primary role designation for badge display while maintaining full role visibility in scanner
-  * Updated badge service to handle multiple roles with "+2" indicators for participants with multiple roles
-  * Custom role support: participants can add specific titles like "AI Research Coordinator"
-  * Demo page created at /multi-role-demo showing full functionality of the multiple role system
-  * System ready for deployment with flexible participant role management for complex events
-- August 3, 2025. Automated Membership Limit Enforcement System Implementation:
-  * COMPLETED: Built comprehensive membership limit monitoring and enforcement system
-  * Created LimitService and MembershipLimitChecker classes for real-time usage tracking
-  * Added automated limit checking to product creation endpoint with proper error handling
-  * Implemented LimitsWidget component for real-time limit dashboard display
-  * Added /api/my/limits endpoint for users to monitor their membership usage
-  * System now automatically prevents users from exceeding tier limits with clear upgrade messages
-  * Built React hooks (useLimits) for frontend limit checking and user experience enhancement
-  * Limits are now enforced in real-time: when users try to create products/businesses/offers beyond their tier limits, they receive immediate feedback with upgrade suggestions
-  * Dashboard shows percentage usage, warnings at 80% capacity, and blocking at 100% with clear upgrade paths
-  * Ready for full deployment with automated "you have reached your limit" messaging
-- August 3, 2025. Volunteer Profile System & Enhanced Scanner Implementation:
-  * COMPLETED: Comprehensive volunteer profile system with university/student information capture
-  * Added volunteer-specific database fields: university, student_id, course, year_of_study, community_role, volunteer_experience, participant_type
-  * Built volunteer creation form with educational context (university, course, year of study)
-  * Enhanced organizer scanner to display volunteer-specific information when scanning QR codes
-  * Fixed authentication system to properly handle admin sessions and permissions
-  * Created admin login functionality for managing volunteer profiles and testing scanner features
-  * Scanner now displays university, course, year of study, and community role for volunteer participants
-  * Integrated volunteer data into event assignment system for proper tracking of student volunteers
-  * System ready for full volunteer scanning and event management with educational context
-- August 1, 2025. Security Update & Badge Download Fix:
-  * Updated multer dependency for security compliance
-  * Fixed database schema inconsistencies between eventRegistrations definition and actual database structure
-  * Resolved column name mismatches (name vs participant_name, email vs participant_email)
-  * Added missing database imports (db, eq, aiSummitRegistrations) to routes.ts
-  * Fixed table index definitions to reference correct column names
-  * FIXED: Badge download functionality - added missing /api/download-badge/:registrationId endpoint
-  * Added proper async QR code generation in badgeService.generatePrintableBadgeHTML method
-  * Implemented download badge functionality in my-qr-code-simple.tsx page with proper authentication
-  * Application now running successfully on port 5000 with working badge downloads
-- August 1, 2025. UI/UX Improvements - Back Button & Spacing:
-  * Added back button to membership management, user management, and content reports pages for improved navigation
-  * Fixed left-side spacing issue with proper padding (px-4 md:px-6) across all admin pages
-  * Enhanced user experience with consistent navigation patterns and header layouts
-  * Back buttons navigate properly to dashboard instead of causing 404 errors
-  * Implemented consistent admin page layout with proper responsive design for all admin sections
-- August 1, 2025. Developer Attribution & Navigation Enhancement:
-  * Added prominent developer credit for Steve Ball - The Process Guru, Founder of MyT AI
-  * Featured attribution on About page in dedicated "Powered by Innovation" section
-  * Added footer credit with link to mytai.co.uk website
-  * Reorganized top navigation for better user flow: Home → Membership → Directory → Events → Marketplace → AI
-  * Successfully integrated AI-powered chatbot using GoHighLevel with intelligent fallback responses
-  * Improved mobile menu structure to match desktop navigation order
-- August 1, 2025. Registration Calendar System + Venue Capacity Update:
-  * Completed full registration calendar system with RegistrationCalendar component
-  * Added my-registrations.tsx page for users to view and manage their event registrations
-  * Created backend API endpoints for registration management and calendar functionality
-  * Added "My Schedule & Calendar" button to AI Summit page for easy access
-  * Updated second floor auditorium capacity from 120 to 80 people as per venue specifications
-  * Enhanced session management with registration tracking and cancellation capabilities
-  * Integrated mini calendar to prevent double bookings across venue floors
-- July 31, 2025. Navigation Enhancement + MyT Accounting Pricing Updates:
-  * Added tagline "UK's Leading AI-Powered Business Association" under CBA logo
-  * Fixed login button z-index layering issue - no longer hidden by menu elements
-  * Updated MyT Accounting pricing to Standard/Plus/Pro at £5/£10/£15 (50% CBA discount)
-  * Corrected AI analytics document limits: 75/150/300 documents per month respectively
-  * Enhanced navigation with proper layering and improved mobile responsiveness
-- July 31, 2025. MyT Accounting & Bookkeeping Software Integration + Premium AI Service Pricing:
-  * Added comprehensive MyT Accounting software page with AI document scanning capabilities
-  * Implemented HMRC compliance warning system for businesses earning over £50,000
-  * Created income threshold checker widget for automatic compliance alerts
-  * Updated navigation to prominently feature MyT Accounting software
-  * Enhanced membership benefits page with MyT Accounting software highlight
-  * Added mobile-responsive MyT Accounting page with pricing tiers and CBA member discounts
-  * Integrated IncomeWarningWidget into dashboard for member compliance tracking
-  * Updated navigation structure with improved AI menu organization and horizontal submenus
-  * Positioned MyT Accounting as core CBA member benefit with 35% discount structure
-  * MAJOR UPDATE: Simplified AI service add-on pricing structure for small businesses
-  * Reduced to 2 practical AI tiers: AI Basics (£29.99), AI Professional (£79.99)
-  * Removed excessive AI features that were overwhelming for small business owners
-  * Streamlined benefits back to approximately 280 total across all categories
-  * AI services now focused on practical tools: content writing, chatbots, document processing
-  * BREAKTHROUGH: Created First AI Summit Croydon 2025 event page - October 1st, 10 AM-4 PM
-  * Positioned CBA as AI experts with inaugural free educational event at LSBU Croydon
-  * Comprehensive summit with speakers, workshops, micro business exhibition
-  * Prominently featured AI Summit in navigation to drive registrations and establish AI leadership
-  * Event designed to educate, motivate, develop, inspire, and empower entrepreneurs and residents
-
-- July 31, 2025. CORRECTED: Practical Business Benefits System Implementation:
-  * Completely rebuilt membership benefits with 245+ practical business-focused benefits
-  * Removed impractical "omnipotent" and "reality manipulation" AI features that were inappropriate
-  * Focused on genuine business value: networking, support, training, discounts, AI tools, automation
-  * Maintained MyT Accounting, AI, and Automation services as core offerings with 50% member discounts
-  * Created 6 dedicated AI pages: Services, Tools, Automation, Strategy, Enterprise, Analytics
-  * Built practical AI backend service with real API endpoints for small business operations
-  * Implemented working AI content generation, document processing, and basic analytics
-  * Focused on small business needs: content creation, customer service, basic automation
-  * Removed overwhelming features like consciousness research, reality manipulation, divine computing
-  * Progressive AI access: Starter (basic tools), Growth+ (business automation), Strategic+ (advanced tools), Patron+ (premium features), Partner (full business suite)
-  * AI services now appropriate for local businesses, restaurants, shops, and service providers
-
-- July 28, 2025. Comprehensive Membership Benefits System Implementation:
-  * Created detailed 80+ business association benefits across 10 categories
-  * Implemented 5-tier membership system (Starter, Growth, Strategic, Patron, Partner)
-  * Added comprehensive benefits comparison interface for admins
-  * Built benefits grid component with category-based organization
-  * Enhanced membership management with usage limits and tier restrictions
-  * Added membership benefits public page with pricing comparison
-  * Maintained original CBA branding as requested by user
-
-- July 23, 2025. Initial setup as business automation platform
-- Copied from CBA member directory application with complete functionality
-- Updated branding and messaging for business automation focus
-- Modified home page and hero section for automation platform
-- Retained all technical infrastructure: authentication, database, security
-- Ready for customization with automation-specific features
-```
+This platform is a comprehensive business automation solution designed to help businesses automate operations, manage workflows, track performance, and streamline processes to improve efficiency and productivity. Its vision is to be the UK's leading AI-powered business association, offering practical AI tools and automation services tailored for small businesses, with ambitions to educate, motivate, develop, inspire, and empower entrepreneurs.
 
 ## User Preferences
-```
 Preferred communication style: Simple, everyday language.
-```
+
+## System Architecture
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript, built with Vite.
+- **Styling**: Tailwind CSS with a custom design system, using Radix UI primitives and shadcn/ui components.
+- **State Management**: TanStack Query for server state, React hooks for local state.
+- **Routing**: Wouter for lightweight client-side routing.
+- **Forms**: React Hook Form with Zod validation.
+- **UI/UX Decisions**: Mobile-first responsive design, consistent component library, bottom navigation for mobile, specialized admin interfaces, back button navigation for improved user flow, consistent padding across admin pages.
+
+### Backend Architecture
+- **Runtime**: Node.js with Express.js.
+- **Language**: TypeScript with ES modules.
+- **Database**: PostgreSQL via Neon serverless, managed with Drizzle ORM for type-safe operations and Drizzle Kit for migrations.
+- **Authentication**: Dual system supporting Replit OAuth and traditional email/password with bcrypt.
+- **Session Management**: Express sessions with PostgreSQL store.
+- **Data Storage**: PostgreSQL for primary data and sessions; base64 encoded images stored directly in the database.
+
+### Core Features
+- **Authentication & Authorization**: Dual authentication, secure HTTP-only cookies, PostgreSQL session store, role-based access (admin/user), and email-based password recovery.
+- **Business Process Management**: Workflow automation, task management, performance analytics, and integration capabilities for external tools.
+- **Automation Features**: Visual process builder, automated notification system, data import/export, and real-time reporting dashboards.
+- **Membership System**: Five-tier membership system (Starter, Growth, Strategic, Patron, Partner) with over 245 practical business benefits including networking, support, training, discounts, and AI tools. Includes an automated membership limit enforcement system with real-time usage tracking and upgrade prompts.
+- **Event Management**: Registration calendar system, venue capacity management, and a comprehensive volunteer profile system with enhanced scanner functionality to display volunteer-specific information.
+- **AI Services**: Simplified AI service add-on pricing (AI Basics, AI Professional) focusing on practical tools like content writing, chatbots, and document processing. Includes HMRC compliance warning system and income threshold checker.
+- **Badge System**: Comprehensive badge generation and download functionality with QR codes, supporting multiple participant roles for complex events.
+
+## External Dependencies
+- **Database**: Neon PostgreSQL serverless database.
+- **Email Service**: Configurable SMTP (NodeMailer) and SendGrid integration.
+- **Payment Processing**: Stripe integration for subscription management.
+- **AI Chatbot**: GoHighLevel for AI-powered chatbot with intelligent fallback responses.
+- **Third-party APIs**: General integration capabilities for external business tools.
+- **Development Tools (used in project)**: TypeScript, ESBuild, Tailwind CSS, Zod.
