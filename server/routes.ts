@@ -3147,6 +3147,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin login endpoint for testing
+  app.post('/api/admin-login', async (req, res) => {
+    try {
+      const adminUser = {
+        id: 'admin-test-user',
+        email: 'admin@cba.org.uk',
+        firstName: 'Admin',
+        lastName: 'User',
+        isAdmin: true,
+        membershipTier: 'Partner',
+        membershipStatus: 'active',
+        qrHandle: 'ADMIN-CBA-2025',
+        participantType: 'team'
+      };
+
+      // Store in session
+      (req as any).session.user = adminUser;
+      res.json({ success: true, user: adminUser });
+    } catch (error) {
+      console.error('Error with admin login:', error);
+      res.status(500).json({ message: 'Admin login failed' });
+    }
+  });
+
   // Create volunteer test user
   app.post('/api/create-volunteer-user', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
