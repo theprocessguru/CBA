@@ -54,8 +54,8 @@ export class BadgeService {
     // Generate QR code for personal badge - use qrHandle for scanning compatibility
     const qrCodeData = badgeData.qrCodeData.qrHandle || badgeData.qrHandle || JSON.stringify(badgeData.qrCodeData);
     const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
-      width: 300,
-      margin: 2,
+      width: 150,
+      margin: 1,
       color: {
         dark: '#000000',
         light: '#FFFFFF'
@@ -80,152 +80,178 @@ export class BadgeService {
     <title>CBA Personal Badge - ${badgeData.name}</title>
     <style>
         @page {
-            size: A4;
-            margin: 20mm;
+            size: 102mm 76mm; /* Standard badge holder size */
+            margin: 3mm;
         }
         
         body {
             font-family: 'Arial', sans-serif;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 0;
+            background: white;
+            width: 96mm;
+            height: 70mm;
+            overflow: hidden;
         }
         
         .badge-container {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
+            width: 96mm;
+            height: 70mm;
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 4mm;
+            box-sizing: border-box;
             text-align: center;
-            border: 3px solid ${badgeColor};
+            border: 2px solid ${badgeColor};
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
         
         .header {
             background: ${badgeColor};
             color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 25px;
+            padding: 3mm;
+            border-radius: 4px;
+            margin-bottom: 2mm;
+            flex-shrink: 0;
         }
         
         .cba-logo {
-            font-size: 24px;
+            font-size: 10pt;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 1mm;
+            line-height: 1.1;
         }
         
         .badge-type {
             background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 1mm 2mm;
+            border-radius: 3mm;
+            font-size: 7pt;
             font-weight: 600;
+            line-height: 1.1;
         }
         
         .qr-section {
-            margin: 25px 0;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 1mm 0;
         }
         
         .qr-code {
-            width: 200px;
-            height: 200px;
-            margin: 0 auto 15px;
-            border: 3px solid ${badgeColor};
-            border-radius: 15px;
-            padding: 10px;
+            width: 20mm;
+            height: 20mm;
+            margin: 0 auto 1mm;
+            border: 1px solid ${badgeColor};
+            border-radius: 2mm;
+            padding: 1mm;
             background: white;
         }
         
         .qr-handle {
-            font-size: 18px;
+            font-size: 6pt;
             font-weight: bold;
             color: ${badgeColor};
             background: rgba(59, 130, 246, 0.1);
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 1mm 2mm;
+            border-radius: 2mm;
             display: inline-block;
+            line-height: 1.1;
         }
         
         .name-section {
-            margin: 20px 0;
+            margin: 1mm 0;
+            flex-shrink: 0;
         }
         
         .name {
-            font-size: 28px;
+            font-size: 9pt;
             font-weight: bold;
             color: #1f2937;
-            margin-bottom: 10px;
+            margin-bottom: 0.5mm;
+            line-height: 1.1;
         }
         
         .title {
-            font-size: 16px;
+            font-size: 7pt;
             color: #9333EA;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 0.5mm;
+            line-height: 1.1;
         }
         
         .job-title {
-            font-size: 14px;
+            font-size: 6pt;
             color: #6b7280;
-            margin-bottom: 5px;
+            margin-bottom: 0.5mm;
+            line-height: 1.1;
         }
         
         .company {
-            font-size: 16px;
+            font-size: 7pt;
             color: #374151;
             font-weight: 500;
-            margin-bottom: 10px;
+            margin-bottom: 0.5mm;
+            line-height: 1.1;
         }
         
         .contact-info {
-            font-size: 14px;
+            font-size: 6pt;
             color: #6b7280;
-            margin-bottom: 15px;
+            margin-bottom: 1mm;
+            line-height: 1.1;
         }
         
         .badge-id {
             background: #f9fafb;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 12px;
-            margin: 20px 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 2mm;
+            padding: 1mm;
+            margin: 1mm 0;
+            flex-shrink: 0;
         }
         
         .badge-id-label {
-            font-size: 12px;
+            font-size: 5pt;
             color: #6b7280;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.3pt;
+            line-height: 1.1;
         }
         
         .badge-id-value {
-            font-size: 16px;
+            font-size: 6pt;
             font-weight: bold;
             color: #1f2937;
             font-family: 'Courier New', monospace;
+            line-height: 1.1;
         }
         
         .footer {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-            font-size: 12px;
+            margin-top: 1mm;
+            padding-top: 1mm;
+            border-top: 1px solid #e5e7eb;
+            font-size: 5pt;
             color: #6b7280;
+            line-height: 1.1;
+            flex-shrink: 0;
         }
         
         .membership-tier {
             background: ${badgeColor};
             color: white;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
+            padding: 1mm 2mm;
+            border-radius: 2mm;
+            font-size: 6pt;
             font-weight: 600;
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 0.5mm;
+            line-height: 1.1;
         }
         
         @media print {
@@ -303,8 +329,8 @@ export class BadgeService {
     <title>AI Summit 2025 Badge - ${badgeInfo.name}</title>
     <style>
         @page {
-            size: A4;
-            margin: 20mm;
+            size: 102mm 76mm; /* Standard badge holder size */
+            margin: 3mm;
         }
         
         body {
