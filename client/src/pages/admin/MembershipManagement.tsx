@@ -124,6 +124,14 @@ const MembershipManagement = () => {
     return matchesSearch && matchesStatus && matchesTier;
   });
 
+  // Add error boundary for debugging
+  if (statsError) {
+    console.error('Stats error:', statsError);
+  }
+  if (membersError) {
+    console.error('Members error:', membersError);
+  }
+
   return (
     <div className="space-y-6 px-4 md:px-6">
       <PageHeader 
@@ -149,8 +157,16 @@ const MembershipManagement = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {isLoadingStats ? (
+            <div className="text-center py-8">Loading statistics...</div>
+          ) : statsError ? (
+            <div className="text-center py-8 text-red-600">
+              Error loading statistics: {statsError.message}
+            </div>
+          ) : (
+            <>
+              {/* Statistics Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -231,6 +247,8 @@ const MembershipManagement = () => {
               </div>
             </CardContent>
           </Card>
+            </>
+          )}
         </TabsContent>
 
         <TabsContent value="members" className="space-y-6">

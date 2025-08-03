@@ -119,11 +119,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
     );
   }
 
-  console.log('AdminRoute - User object:', user);
-  console.log('AdminRoute - isAdmin check:', user?.isAdmin);
-
-  if (!user || !user.isAdmin) {
-    console.log('AdminRoute - Access denied, showing NotFound');
+  if (!user || !(user as any).isAdmin) {
     return <NotFound />;
   }
 
