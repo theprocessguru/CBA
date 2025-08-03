@@ -183,14 +183,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </a>
               </Link>
               
-              <Link href="/my-qr-code-simple">
+              <Link href="/my-qr-code">
                 <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/my-qr-code-simple' 
+                  location === '/my-qr-code' 
                     ? 'bg-primary text-white' 
                     : 'text-neutral-700 hover:bg-neutral-100'
                 }`}>
                   <Calendar className={`mr-3 h-4 w-4 ${
-                    location === '/my-qr-code-simple' ? 'text-white' : 'text-neutral-500'
+                    location === '/my-qr-code' ? 'text-white' : 'text-neutral-500'
                   }`} />
                   My Events & Badges
                 </a>
