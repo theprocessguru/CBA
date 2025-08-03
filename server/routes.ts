@@ -5293,7 +5293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create personal badge
-  app.post('/api/create-personal-badge', isAuthenticated, async (req: Request, res: Response) => {
+  app.post('/api/create-personal-badge', isAuthenticated, async (req: any, res: Response) => {
     try {
       const userId = req.user.id;
       const { firstName, lastName, title, company, jobTitle, phone, bio, qrHandle } = req.body;
@@ -5341,20 +5341,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .returning();
 
-      // Create initial event assignment for AI Summit
+      // Create initial event assignment for AI Summit with multiple roles support
       await db
         .insert(eventBadgeAssignments)
         .values({
           badgeId: badgeId,
           eventId: 'ai-summit-2025',
           eventName: 'First AI Summit Croydon 2025',
-          roleType: 'member',
-          badgeColor: 'green',
-          accessLevel: 'premium',
+          participantRoles: '["attendee"]',
+          primaryRole: 'attendee',
+          badgeColor: '#3B82F6',
+          accessLevel: 'basic',
           isActive: true
         });
 
-      res.json(badge[0]);
+      res.json({
+        success: true,
+        badgeId: badgeId,
+        qrHandle: qrHandle.toLowerCase()
+      });
     } catch (error) {
       console.error('Error creating personal badge:', error);
       res.status(500).json({ message: "Failed to create personal badge" });
@@ -5362,7 +5367,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update badge profile
-  app.put('/api/update-badge-profile', isAuthenticated, async (req: Request, res: Response) => {
+  app.put('/api/update-badge-profile', isAuthenticated, async (req: any, res: Response) => {
     try {
       const userId = req.user.id;
       const { firstName, lastName, title, company, jobTitle, phone, bio, qrHandle } = req.body;
