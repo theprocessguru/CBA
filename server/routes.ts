@@ -49,6 +49,7 @@ import { emailService } from "./emailService";
 import { aiService } from "./aiService";
 import { aiAdvancedService } from "./aiAdvancedService";
 import { badgeService, type BadgeInfo } from "./badgeService";
+import { LimitService } from "./limitService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
@@ -606,6 +607,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Get user's membership limits dashboard
+  app.get('/api/my/limits', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const dashboard = await LimitService.getUserLimitsDashboard(userId);
+      res.json(dashboard);
+    } catch (error) {
+      console.error("Error fetching user limits:", error);
+      res.status(500).json({ message: "Failed to fetch limits dashboard" });
+    }
+  });
+  
   // Get member's products
   app.get('/api/my/products', isAuthenticated, async (req: any, res) => {
     try {
@@ -634,10 +647,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Business profile not found" });
       }
       
+      // Check membership limits before creating product
+      const limitCheck = await LimitService.canUserPerformAction(userId, 'productListings', 1);
+      
+      if (!limitCheck.allowed) {
+        return res.status(403).json({ 
+          message: limitCheck.message,
+          limitExceeded: true,
+          currentUsage: limitCheck.currentUsage,
+          limit: limitCheck.limit,
+          upgradeMessage: limitCheck.upgradeMessage
+        });
+      }
+      
       const productData = validateRequest(insertProductSchema, { ...req.body, businessId: business.id });
       const product = await storage.createProduct(productData);
       
-      res.json(product);
+      res.json({
+        ...product,
+        limitInfo: {
+          remaining: limitCheck.remaining - 1,
+          limit: limitCheck.limit,
+          message: `Product created successfully. You have ${limitCheck.remaining - 1} product listings remaining.`
+        }
+      });
     } catch (error) {
       console.error("Error creating product:", error);
       res.status(400).json({ message: error instanceof Error ? error.message : "Failed to create product" });
