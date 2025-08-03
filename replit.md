@@ -8,6 +8,7 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 - **Badge Printing Format Updated (August 2025)**: Changed badge dimensions from A4 page size to standard badge holder format (102mm x 76mm). All badges now print at proper size for badge holders with compact, professional layout optimized for wearing at events. User confirmed this works perfectly.
+- **Password Visibility Toggle Added (August 2025)**: Added show/hide password functionality to all login and registration forms to help users with dysgraphia and improve general accessibility. Users can now see their password text while typing to verify correct input.
 
 ## System Architecture
 ### Frontend Architecture
