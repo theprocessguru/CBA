@@ -415,18 +415,16 @@ const Navbar = () => {
             </a>
           </Link>
           
-          {/* Scanner for all authenticated users */}
-          {isAuthenticated && (
-            <Link href="/organizer-scanner">
-              <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-                isActive('/organizer-scanner') 
-                  ? 'border-primary text-primary bg-neutral-100' 
-                  : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                } font-medium text-sm`}>
-                🔍 Badge Scanner
-              </a>
-            </Link>
-          )}
+          {/* QR Scanner - Prominent for all users */}
+          <Link href="/organizer-scanner">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/organizer-scanner') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              📱 QR Code Scanner
+            </a>
+          </Link>
           
           {/* AI Section Header */}
           <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">

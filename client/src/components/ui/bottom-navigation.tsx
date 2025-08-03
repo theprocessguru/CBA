@@ -9,16 +9,11 @@ const BottomNavigation = () => {
 
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
+    { href: "/organizer-scanner", icon: QrCode, label: "QR Scanner" },
     { href: "/directory", icon: Users, label: "Directory" },
-    { href: "/marketplace", icon: Store, label: "Marketplace" },
-    { href: "/offers", icon: Tag, label: "Offers" },
+    { href: "/marketplace", icon: Store, label: "Shop" },
     { href: "/membership", icon: Crown, label: "Join" },
   ];
-
-  // Add scanner for authenticated users in main nav
-  const authNavItems = isAuthenticated 
-    ? [...navItems.slice(0, 2), { href: "/organizer-scanner", icon: QrCode, label: "Scanner" }, ...navItems.slice(2)]
-    : navItems;
 
   const dashboardItem = { href: "/dashboard", icon: Building, label: "Dashboard" };
 
@@ -31,35 +26,30 @@ const BottomNavigation = () => {
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 md:hidden">
       <div className="flex justify-around py-1 px-2">
-        {authNavItems.map((item) => (
+        {navItems.map((item) => (
           <Link key={item.href} href={item.href} asChild>
             <button
               className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
                 isActive(item.href) 
                   ? "text-primary bg-primary/10" 
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                  : item.href === "/organizer-scanner"
+                    ? "text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               }`}
             >
-              <item.icon size={18} className="mb-1" />
-              <span className="text-xs leading-tight">{item.label}</span>
+              <item.icon 
+                size={item.href === "/organizer-scanner" ? 20 : 18} 
+                className={`mb-1 ${item.href === "/organizer-scanner" ? "text-blue-600" : ""}`} 
+              />
+              <span className={`text-xs leading-tight ${item.href === "/organizer-scanner" ? "font-semibold" : ""}`}>
+                {item.label}
+              </span>
             </button>
           </Link>
         ))}
         
         {isAuthenticated && (
           <>
-            <Link href="/organizer-scanner" asChild>
-              <button
-                className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
-                  isActive("/organizer-scanner") 
-                    ? "text-primary bg-primary/10" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                }`}
-              >
-                <QrCode size={18} className="mb-1" />
-                <span className="text-xs leading-tight">Scanner</span>
-              </button>
-            </Link>
             <Link href="/mobile-badge" asChild>
               <button
                 className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
