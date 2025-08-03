@@ -43,6 +43,13 @@ export default function TestQRCodesPage() {
       company: "CBA Staff"
     },
     {
+      name: "Test Volunteer",
+      email: "volunteer@test.com",
+      qrHandle: "VOLUNTEER-TEST-2025",
+      participantType: "volunteer",
+      company: "London South Bank University - Student"
+    },
+    {
       name: "Victoria Collins",
       email: "vcollins@mayor.gov.uk",
       qrHandle: "CBA-VICTORIA-2025",
@@ -154,6 +161,7 @@ export default function TestQRCodesPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <ol className="list-decimal list-inside space-y-2 text-gray-700">
+              <li>Create a volunteer profile using the <Link href="/create-volunteer" className="text-blue-600 hover:underline">Create Volunteer</Link> form</li>
               <li>Open the <Link href="/organizer-scanner" className="text-blue-600 hover:underline">Organizer Scanner</Link> in a new tab</li>
               <li>Click "Start QR Code Scanner" to activate the camera</li>
               <li>Hold your phone/device camera up to one of the QR codes above</li>

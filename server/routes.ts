@@ -3051,9 +3051,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           badgeId: userByHandle.qrHandle,
           name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.name,
           email: userByHandle.email,
-          participantType: 'attendee',
+          participantType: userByHandle.participantType || 'attendee',
           company: userByHandle.company,
           jobTitle: userByHandle.jobTitle,
+          university: userByHandle.university,
+          studentId: userByHandle.studentId,
+          course: userByHandle.course,
+          yearOfStudy: userByHandle.yearOfStudy,
+          communityRole: userByHandle.communityRole,
+          volunteerExperience: userByHandle.volunteerExperience,
           source: 'qr_handle'
         });
       }
@@ -3138,6 +3144,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching AI Summit sessions:', error);
       res.status(500).json({ message: 'Failed to fetch sessions' });
+    }
+  });
+
+  // Create volunteer test user
+  app.post('/api/create-volunteer-user', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const volunteerData = {
+        id: `volunteer-${Date.now()}`,
+        email: req.body.email || 'volunteer@test.com',
+        firstName: req.body.firstName || 'Test',
+        lastName: req.body.lastName || 'Volunteer',
+        qrHandle: req.body.qrHandle || `VOLUNTEER-${Date.now()}`,
+        participantType: 'volunteer',
+        university: req.body.university || 'London South Bank University',
+        studentId: req.body.studentId || 'LSBU12345',
+        course: req.body.course || 'Computer Science',
+        yearOfStudy: req.body.yearOfStudy || '2nd Year',
+        communityRole: req.body.communityRole || 'Student Volunteer',
+        volunteerExperience: req.body.volunteerExperience || 'Event support, community outreach',
+        phone: req.body.phone,
+        bio: req.body.bio || 'Enthusiastic student volunteer helping with events and community initiatives.',
+        isAdmin: false,
+        membershipTier: 'Starter Tier',
+        membershipStatus: 'active'
+      };
+
+      const user = await storage.upsertUser(volunteerData);
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error('Error creating volunteer user:', error);
+      res.status(500).json({ message: 'Failed to create volunteer user' });
     }
   });
 

@@ -36,6 +36,12 @@ interface AttendeeInfo {
   customRole?: string;
   company?: string;
   jobTitle?: string;
+  university?: string;
+  studentId?: string;
+  course?: string;
+  yearOfStudy?: string;
+  communityRole?: string;
+  volunteerExperience?: string;
 }
 
 interface EventOption {
@@ -305,6 +311,30 @@ export default function OrganizerScannerPage() {
                       <div className="flex justify-between">
                         <span className="text-gray-600">Company:</span>
                         <span className="text-xs">{scannedAttendee.company}</span>
+                      </div>
+                    )}
+                    {scannedAttendee.university && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">University:</span>
+                        <span className="text-xs">{scannedAttendee.university}</span>
+                      </div>
+                    )}
+                    {scannedAttendee.course && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Course:</span>
+                        <span className="text-xs">{scannedAttendee.course}</span>
+                      </div>
+                    )}
+                    {scannedAttendee.yearOfStudy && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Year:</span>
+                        <span className="text-xs">{scannedAttendee.yearOfStudy}</span>
+                      </div>
+                    )}
+                    {scannedAttendee.communityRole && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Role:</span>
+                        <span className="text-xs">{scannedAttendee.communityRole}</span>
                       </div>
                     )}
                   </div>

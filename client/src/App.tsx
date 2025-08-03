@@ -58,6 +58,7 @@ import EnhancedPersonalBadge from "@/pages/enhanced-personal-badge";
 import EventScanner from "@/pages/event-scanner";
 import OrganizerScanner from "@/pages/organizer-scanner";
 import TestQRCodes from "@/pages/test-qr-codes";
+import CreateVolunteer from "@/pages/create-volunteer";
 import ScannerManagement from "@/pages/admin/scanner-management";
 
 import Navbar from "@/components/layout/Navbar";
@@ -280,6 +281,11 @@ function Router() {
       <Route path="/test-qr-codes">
         <MainLayout>
           <TestQRCodes />
+        </MainLayout>
+      </Route>
+      <Route path="/create-volunteer">
+        <MainLayout>
+          <CreateVolunteer />
         </MainLayout>
       </Route>
       <Route path="/my-qr-code">

@@ -57,6 +57,14 @@ export const users = pgTable("users", {
   jobTitle: varchar("job_title"),
   phone: varchar("phone"),
   bio: text("bio"),
+  participantType: varchar("participant_type").default("attendee"), // attendee, volunteer, speaker, etc.
+  // Volunteer/Student specific fields
+  university: varchar("university"),
+  studentId: varchar("student_id"),
+  course: varchar("course"),
+  yearOfStudy: varchar("year_of_study"),
+  communityRole: varchar("community_role"),
+  volunteerExperience: text("volunteer_experience"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
