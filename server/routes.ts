@@ -3056,81 +3056,335 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Event Organizer Scanner APIs
 
-  // Attendee lookup for organizer scanner
+  // Attendee lookup for organizer scanner with status
   app.get('/api/attendee-lookup/:badgeId', isAuthenticated, async (req: any, res) => {
     try {
       const { badgeId } = req.params;
+      const { includeStatus, eventId } = req.query;
+      
+      let attendeeData = null;
+      let scannedUserId = null;
       
       // First try AI Summit badges
       const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
       if (aiSummitBadge) {
-        return res.json({
+        // Get registration to find user
+        try {
+          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.registrationId);
+          if (registration) {
+            scannedUserId = registration.userId;
+          }
+        } catch (e) {
+          console.log('Registration not found for badge');
+        }
+        
+        attendeeData = {
           badgeId: aiSummitBadge.badgeId,
-          name: aiSummitBadge.name,
+          name: aiSummitBadge.participantName || aiSummitBadge.name,
           email: aiSummitBadge.email,
           participantType: aiSummitBadge.participantType,
           company: aiSummitBadge.company,
           jobTitle: aiSummitBadge.jobTitle,
+          customRole: aiSummitBadge.customRole,
           source: 'ai_summit'
-        });
+        };
+      } else {
+        // Try by QR handle (personal badges)
+        const users = await storage.getAllUsers();
+        const userByHandle = users.find(u => u.qrHandle === badgeId);
+        if (userByHandle) {
+          scannedUserId = userByHandle.id;
+          attendeeData = {
+            badgeId: userByHandle.qrHandle,
+            name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.name,
+            email: userByHandle.email,
+            participantType: userByHandle.participantType || 'attendee',
+            company: userByHandle.company,
+            jobTitle: userByHandle.jobTitle,
+            university: userByHandle.university,
+            studentId: userByHandle.studentId,
+            course: userByHandle.course,
+            yearOfStudy: userByHandle.yearOfStudy,
+            communityRole: userByHandle.communityRole,
+            volunteerExperience: userByHandle.volunteerExperience,
+            source: 'qr_handle'
+          };
+        }
+      }
+
+      if (!attendeeData) {
+        return res.status(404).json({ message: 'Attendee not found' });
+      }
+
+      // Add status information if requested
+      if (includeStatus === 'true' && eventId && scannedUserId) {
+        try {
+          // Get recent scans for this user and event
+          const recentScans = await db
+            .select()
+            .from(scanHistory)
+            .where(eq(scanHistory.scannedUserId, scannedUserId));
+
+          const eventScans = recentScans.filter(scan => 
+            scan.eventId?.toString() === eventId.toString()
+          ).sort((a, b) => new Date(a.scanTimestamp).getTime() - new Date(b.scanTimestamp).getTime());
+
+          // Determine current status
+          let currentStatus = 'unknown';
+          let lastScanTime = null;
+          let sessionCount = 0;
+          let totalSessionTime = 0;
+
+          if (eventScans.length > 0) {
+            const lastScan = eventScans[eventScans.length - 1];
+            currentStatus = lastScan.scanType === 'check_in' ? 'checked_in' : 
+                          lastScan.scanType === 'check_out' ? 'checked_out' : 'verified';
+            lastScanTime = lastScan.scanTimestamp;
+
+            // Count sessions and calculate total time
+            sessionCount = eventScans.filter(scan => scan.scanType === 'check_in').length;
+
+            for (let i = 0; i < eventScans.length - 1; i++) {
+              const scan = eventScans[i];
+              const nextScan = eventScans[i + 1];
+              
+              if (scan.scanType === 'check_in' && nextScan.scanType === 'check_out') {
+                const sessionTime = (new Date(nextScan.scanTimestamp).getTime() - 
+                                   new Date(scan.scanTimestamp).getTime()) / (1000 * 60);
+                totalSessionTime += sessionTime;
+              }
+            }
+          }
+
+          attendeeData.currentStatus = currentStatus;
+          attendeeData.lastScanTime = lastScanTime;
+          attendeeData.totalSessionTime = totalSessionTime;
+          attendeeData.sessionCount = sessionCount;
+        } catch (error) {
+          console.error('Error fetching status:', error);
+        }
       }
       
-      // Try by QR handle (personal badges)
-      const users = await storage.getAllUsers();
-      const userByHandle = users.find(u => u.qrHandle === badgeId);
-      if (userByHandle) {
-        return res.json({
-          badgeId: userByHandle.qrHandle,
-          name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.name,
-          email: userByHandle.email,
-          participantType: userByHandle.participantType || 'attendee',
-          company: userByHandle.company,
-          jobTitle: userByHandle.jobTitle,
-          university: userByHandle.university,
-          studentId: userByHandle.studentId,
-          course: userByHandle.course,
-          yearOfStudy: userByHandle.yearOfStudy,
-          communityRole: userByHandle.communityRole,
-          volunteerExperience: userByHandle.volunteerExperience,
-          source: 'qr_handle'
-        });
-      }
-      
-      res.status(404).json({ message: 'Attendee not found' });
+      res.json(attendeeData);
     } catch (error) {
       console.error('Error looking up attendee:', error);
       res.status(500).json({ message: 'Failed to lookup attendee' });
     }
   });
 
-  // Assign attendee to event
-  app.post('/api/assign-to-event', isAuthenticated, async (req: any, res) => {
+  // Process scan (check-in/check-out/verification)
+  app.post('/api/process-scan', isAuthenticated, async (req: any, res) => {
     try {
-      const { badgeId, eventId, eventType, assignedBy, notes } = req.body;
+      const { badgeId, eventId, scanType, scanLocation, notes } = req.body;
       
-      // Create assignment record
-      const assignment = {
-        id: Date.now(),
-        badgeId,
+      if (!badgeId || !eventId || !scanType) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Find the user by badge ID
+      let scannedUser = null;
+      try {
+        const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
+        if (aiSummitBadge) {
+          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.registrationId);
+          if (registration) {
+            scannedUser = await storage.getUserById(registration.userId);
+          }
+        }
+      } catch (error) {
+        console.log('Badge not found in AI Summit, checking users...');
+      }
+
+      if (!scannedUser) {
+        const userByHandle = await storage.getUserByQRHandle(badgeId);
+        if (userByHandle) {
+          scannedUser = userByHandle;
+        }
+      }
+
+      if (!scannedUser) {
+        return res.status(404).json({ message: 'User not found for badge ID' });
+      }
+
+      // Calculate session duration if this is a check-out
+      let sessionDuration = null;
+      if (scanType === 'check_out') {
+        // Find the most recent check-in for this user and event
+        const recentScans = await db
+          .select()
+          .from(scanHistory)
+          .where(eq(scanHistory.scannedUserId, scannedUser.id))
+          .orderBy(scanHistory.scanTimestamp);
+        
+        const lastCheckIn = recentScans
+          .filter(scan => scan.scanType === 'check_in' && scan.eventId?.toString() === eventId)
+          .pop();
+        
+        if (lastCheckIn) {
+          const checkInTime = new Date(lastCheckIn.scanTimestamp);
+          const checkOutTime = new Date();
+          sessionDuration = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60); // minutes
+        }
+      }
+
+      // Create scan record
+      const scanRecord = await db.insert(scanHistory).values({
+        scannerId: req.user.id,
+        scannedUserId: scannedUser.id,
         eventId: parseInt(eventId),
-        eventType: eventType || 'cba_event',
-        assignedBy,
-        assignedAt: new Date().toISOString(),
-        notes,
-        status: 'assigned'
-      };
-      
-      // Log assignment for now (can be extended to store in database)
-      console.log('Event assignment:', assignment);
-      
+        scanType: scanType,
+        scanLocation: scanLocation || 'Unknown',
+        scanNotes: notes,
+        scanTimestamp: new Date(),
+        isValidScan: true,
+        duplicateScanFlag: false
+      }).returning();
+
       res.json({
         success: true,
-        assignment,
-        message: 'Attendee successfully assigned to event'
+        id: scanRecord[0].id,
+        badgeId,
+        scanType,
+        scanLocation,
+        scanTimestamp: scanRecord[0].scanTimestamp,
+        sessionDuration,
+        message: `Successfully processed ${scanType.replace('_', ' ')} for ${scannedUser.firstName} ${scannedUser.lastName}`
       });
     } catch (error) {
-      console.error('Error assigning attendee to event:', error);
-      res.status(500).json({ message: 'Failed to assign attendee to event' });
+      console.error('Error processing scan:', error);
+      res.status(500).json({ message: 'Failed to process scan' });
+    }
+  });
+
+  // Start scanning session
+  app.post('/api/start-scan-session', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.body;
+      
+      if (!eventId) {
+        return res.status(400).json({ message: 'Event ID is required' });
+      }
+
+      const session = await db.insert(scanSessions).values({
+        scannerId: req.user.id,
+        eventId: parseInt(eventId),
+        sessionStart: new Date(),
+        totalScans: 0,
+        uniqueScans: 0,
+        duplicateScans: 0
+      }).returning();
+
+      res.json({
+        success: true,
+        id: session[0].id,
+        scannerId: session[0].scannerId,
+        eventId: session[0].eventId,
+        sessionStart: session[0].sessionStart,
+        totalScans: 0,
+        uniqueScans: 0
+      });
+    } catch (error) {
+      console.error('Error starting scan session:', error);
+      res.status(500).json({ message: 'Failed to start scan session' });
+    }
+  });
+
+  // End scanning session
+  app.post('/api/end-scan-session', isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: 'Session ID is required' });
+      }
+
+      // Update session end time
+      await db
+        .update(scanSessions)
+        .set({ sessionEnd: new Date() })
+        .where(eq(scanSessions.id, sessionId));
+
+      res.json({
+        success: true,
+        message: 'Scan session ended successfully'
+      });
+    } catch (error) {
+      console.error('Error ending scan session:', error);
+      res.status(500).json({ message: 'Failed to end scan session' });
+    }
+  });
+
+  // Get recent scan history for event
+  app.get('/api/scan-history/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      const { limit = 50 } = req.query;
+      
+      const scans = await db
+        .select({
+          id: scanHistory.id,
+          badgeId: scanHistory.badgeId,
+          scanType: scanHistory.scanType,
+          scanLocation: scanHistory.scanLocation,
+          scanTimestamp: scanHistory.scanTimestamp,
+          scanNotes: scanHistory.scanNotes,
+          scannedUserId: scanHistory.scannedUserId,
+          eventId: scanHistory.eventId
+        })
+        .from(scanHistory)
+        .where(eq(scanHistory.eventId, parseInt(eventId)))
+        .orderBy(scanHistory.scanTimestamp)
+        .limit(parseInt(limit));
+
+      // Enrich with user and event details
+      const enrichedScans = await Promise.all(scans.map(async (scan) => {
+        let attendeeName = 'Unknown';
+        let eventName = 'Unknown Event';
+        
+        // Get attendee name
+        try {
+          const user = await storage.getUserById(scan.scannedUserId);
+          if (user) {
+            attendeeName = `${user.firstName} ${user.lastName}`.trim() || user.name || user.email;
+          }
+        } catch (error) {
+          // Try to get name from badge lookup
+          try {
+            const response = await fetch(`http://localhost:5000/api/attendee-lookup/${scan.badgeId}`, {
+              headers: { Authorization: req.headers.authorization }
+            });
+            if (response.ok) {
+              const attendee = await response.json();
+              attendeeName = attendee.name;
+            }
+          } catch (lookupError) {
+            console.log('Could not lookup attendee name');
+          }
+        }
+
+        // Get event name
+        try {
+          const events = await storage.getAllCBAEvents();
+          const event = events.find(e => e.id.toString() === eventId);
+          if (event) {
+            eventName = event.eventName;
+          }
+        } catch (error) {
+          console.log('Could not lookup event name');
+        }
+
+        return {
+          ...scan,
+          attendeeName,
+          eventName,
+          badgeId: scan.badgeId || `USER-${scan.scannedUserId}`
+        };
+      }));
+
+      res.json(enrichedScans);
+    } catch (error) {
+      console.error('Error fetching scan history:', error);
+      res.status(500).json({ message: 'Failed to fetch scan history' });
     }
   });
 

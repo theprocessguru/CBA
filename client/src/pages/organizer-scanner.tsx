@@ -42,6 +42,21 @@ interface AttendeeInfo {
   yearOfStudy?: string;
   communityRole?: string;
   volunteerExperience?: string;
+  currentStatus?: 'checked_in' | 'checked_out' | 'unknown';
+  lastScanTime?: string;
+  totalSessionTime?: number; // in minutes
+  sessionCount?: number;
+}
+
+interface ScanRecord {
+  id: number;
+  attendeeName: string;
+  badgeId: string;
+  scanType: 'check_in' | 'check_out' | 'verification';
+  scanLocation: string;
+  scanTimestamp: string;
+  eventName: string;
+  sessionDuration?: number;
 }
 
 interface EventOption {
@@ -60,7 +75,10 @@ export default function OrganizerScannerPage() {
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [manualBadgeId, setManualBadgeId] = useState('');
   const [notes, setNotes] = useState('');
-  const [scanHistory, setScanHistory] = useState<any[]>([]);
+  const [scanHistory, setScanHistory] = useState<ScanRecord[]>([]);
+  const [scanType, setScanType] = useState<'check_in' | 'check_out' | 'verification'>('check_in');
+  const [scanLocation, setScanLocation] = useState('Main Entrance');
+  const [activeSession, setActiveSession] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -76,15 +94,29 @@ export default function OrganizerScannerPage() {
     enabled: isAuthenticated
   });
 
-  // Look up attendee by badge ID
+  // Fetch recent scan history for selected event
+  const { data: recentScanHistory = [] } = useQuery<ScanRecord[]>({
+    queryKey: ['/api/scan-history', selectedEventId],
+    enabled: isAuthenticated && !!selectedEventId,
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Look up attendee by badge ID with current status
   const lookupMutation = useMutation({
     mutationFn: async (badgeId: string) => {
-      const response = await apiRequest('GET', `/api/attendee-lookup/${badgeId}`);
+      const response = await apiRequest('GET', `/api/attendee-lookup/${badgeId}?includeStatus=true&eventId=${selectedEventId}`);
       return response.json();
     },
     onSuccess: (data) => {
       setScannedAttendee(data);
       setManualBadgeId('');
+      
+      // Auto-suggest scan type based on current status
+      if (data.currentStatus === 'checked_in') {
+        setScanType('check_out');
+      } else {
+        setScanType('check_in');
+      }
     },
     onError: (error: any) => {
       toast({
@@ -96,32 +128,51 @@ export default function OrganizerScannerPage() {
     },
   });
 
-  // Assign attendee to event
-  const assignMutation = useMutation({
+  // Process scan (check-in/check-out/verification)
+  const processScanMutation = useMutation({
     mutationFn: async (data: {
       badgeId: string;
       eventId: string;
-      eventType: 'cba_event' | 'ai_summit_session';
-      assignedBy: string;
+      scanType: 'check_in' | 'check_out' | 'verification';
+      scanLocation: string;
       notes?: string;
     }) => {
-      const response = await apiRequest('POST', '/api/assign-to-event', data);
+      const response = await apiRequest('POST', '/api/process-scan', data);
       return response.json();
     },
     onSuccess: (data) => {
+      const actionText = scanType === 'check_in' ? 'checked in' : 
+                       scanType === 'check_out' ? 'checked out' : 'verified';
+      
       toast({
-        title: "Successfully Assigned",
-        description: `${scannedAttendee?.name} has been assigned to the event`,
+        title: `Successfully ${actionText}`,
+        description: data.sessionDuration ? 
+          `${scannedAttendee?.name} ${actionText}. Session duration: ${Math.round(data.sessionDuration)} minutes` :
+          `${scannedAttendee?.name} ${actionText}`,
       });
       
       // Add to scan history
       setScanHistory(prev => [{
-        ...data,
-        attendeeName: scannedAttendee?.name,
-        timestamp: new Date().toISOString()
-      }, ...prev.slice(0, 9)]);
+        id: data.id,
+        attendeeName: scannedAttendee?.name || 'Unknown',
+        badgeId: data.badgeId,
+        scanType: data.scanType,
+        scanLocation: data.scanLocation,
+        scanTimestamp: data.scanTimestamp,
+        eventName: events.find(e => e.id.toString() === selectedEventId)?.eventName || 'Unknown Event',
+        sessionDuration: data.sessionDuration
+      }, ...prev.slice(0, 19)]);
 
-      // Clear form
+      // Update session analytics
+      if (activeSession) {
+        setActiveSession(prev => ({
+          ...prev,
+          totalScans: prev.totalScans + 1,
+          uniqueScans: data.isNewAttendee ? prev.uniqueScans + 1 : prev.uniqueScans
+        }));
+      }
+
+      // Clear form and refresh attendee status
       setScannedAttendee(null);
       setSelectedEventId('');
       setNotes('');
@@ -164,7 +215,7 @@ export default function OrganizerScannerPage() {
     lookupMutation.mutate(manualBadgeId.trim());
   };
 
-  const handleAssignToEvent = () => {
+  const handleProcessScan = () => {
     if (!scannedAttendee || !selectedEventId) {
       toast({
         title: "Missing Information",
@@ -174,18 +225,44 @@ export default function OrganizerScannerPage() {
       return;
     }
 
-    // Determine event type based on selected event
-    const eventType = selectedEventId.startsWith('session-') ? 'ai_summit_session' : 'cba_event';
-    const actualEventId = selectedEventId.replace('session-', '');
-
-    assignMutation.mutate({
+    processScanMutation.mutate({
       badgeId: scannedAttendee.badgeId,
-      eventId: actualEventId,
-      eventType,
-      assignedBy: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Event Organizer',
+      eventId: selectedEventId,
+      scanType,
+      scanLocation,
       notes: notes.trim() || undefined
     });
   };
+
+  // Start scanning session
+  const startSessionMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      const response = await apiRequest('POST', '/api/start-scan-session', { eventId });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setActiveSession(data);
+      toast({
+        title: "Scanning Session Started",
+        description: `Now tracking attendance for ${events.find(e => e.id.toString() === selectedEventId)?.eventName}`,
+      });
+    }
+  });
+
+  // End scanning session
+  const endSessionMutation = useMutation({
+    mutationFn: async (sessionId: number) => {
+      const response = await apiRequest('POST', '/api/end-scan-session', { sessionId });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Scanning Session Ended",
+        description: "Session analytics have been saved",
+      });
+      setActiveSession(null);
+    }
+  });
 
   if (!isAuthenticated) {
     return (
@@ -347,13 +424,18 @@ export default function OrganizerScannerPage() {
             </CardContent>
           </Card>
 
-          {/* Event Assignment Section */}
+          {/* Attendance Tracking Section */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <UserPlus className="h-5 w-5" />
-                Event Assignment
+                <Clock className="h-5 w-5" />
+                Attendance Tracking
               </CardTitle>
+              {activeSession && (
+                <div className="text-sm text-green-600 font-medium">
+                  📊 Session Active: {activeSession.totalScans} scans, {activeSession.uniqueScans} unique
+                </div>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Event Selection */}
@@ -361,10 +443,9 @@ export default function OrganizerScannerPage() {
                 <Label htmlFor="event-select">Select Event</Label>
                 <Select value={selectedEventId} onValueChange={setSelectedEventId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Choose an event to assign attendee" />
+                    <SelectValue placeholder="Choose an event to track attendance" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* CBA Events */}
                     {events.length > 0 && (
                       <>
                         <SelectItem value="cba-events-header" disabled>CBA Events</SelectItem>
@@ -380,23 +461,106 @@ export default function OrganizerScannerPage() {
                         ))}
                       </>
                     )}
-                    
-                    {/* AI Summit Sessions */}
-                    {Array.isArray(aiSummitSessions) && aiSummitSessions.length > 0 && (
-                      <>
-                        <SelectItem value="ai-summit-header" disabled>AI Summit Sessions</SelectItem>
-                        {aiSummitSessions.map((session: any) => (
-                          <SelectItem key={`session-${session.id}`} value={`session-${session.id}`}>
-                            <div className="flex flex-col">
-                              <span>{session.title}</span>
-                              <span className="text-xs text-gray-500">
-                                {session.sessionTime} • {session.room}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </>
-                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Session Controls */}
+              {selectedEventId && (
+                <div className="flex gap-2">
+                  {!activeSession ? (
+                    <Button 
+                      onClick={() => startSessionMutation.mutate(selectedEventId)}
+                      disabled={startSessionMutation.isPending}
+                      className="flex-1"
+                    >
+                      {startSessionMutation.isPending ? 'Starting...' : '▶️ Start Session'}
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => endSessionMutation.mutate(activeSession.id)}
+                      disabled={endSessionMutation.isPending}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      {endSessionMutation.isPending ? 'Ending...' : '⏹️ End Session'}
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* Current Attendee Status */}
+              {scannedAttendee && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium">{scannedAttendee.name}</span>
+                    <Badge variant={scannedAttendee.currentStatus === 'checked_in' ? 'default' : 'secondary'}>
+                      {scannedAttendee.currentStatus === 'checked_in' ? '✅ Checked In' : 
+                       scannedAttendee.currentStatus === 'checked_out' ? '🚪 Checked Out' : '❓ Unknown'}
+                    </Badge>
+                  </div>
+                  
+                  {scannedAttendee.lastScanTime && (
+                    <p className="text-xs text-gray-600 mb-2">
+                      Last scan: {new Date(scannedAttendee.lastScanTime).toLocaleString()}
+                    </p>
+                  )}
+                  
+                  {scannedAttendee.totalSessionTime && (
+                    <p className="text-xs text-gray-600 mb-2">
+                      Total time today: {Math.round(scannedAttendee.totalSessionTime)} minutes
+                    </p>
+                  )}
+                  
+                  {scannedAttendee.sessionCount && scannedAttendee.sessionCount > 1 && (
+                    <p className="text-xs text-orange-600">
+                      ⚠️ Multiple sessions: {scannedAttendee.sessionCount} entries/exits
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Scan Controls */}
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant={scanType === 'check_in' ? 'default' : 'outline'}
+                  onClick={() => setScanType('check_in')}
+                  className="text-xs"
+                >
+                  ➡️ Check In
+                </Button>
+                <Button
+                  variant={scanType === 'check_out' ? 'default' : 'outline'}
+                  onClick={() => setScanType('check_out')}
+                  className="text-xs"
+                >
+                  ⬅️ Check Out
+                </Button>
+                <Button
+                  variant={scanType === 'verification' ? 'default' : 'outline'}
+                  onClick={() => setScanType('verification')}
+                  className="text-xs"
+                >
+                  ✓ Verify
+                </Button>
+              </div>
+
+              {/* Scan Location */}
+              <div className="space-y-2">
+                <Label htmlFor="scan-location">Scan Location</Label>
+                <Select value={scanLocation} onValueChange={setScanLocation}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Main Entrance">🚪 Main Entrance</SelectItem>
+                    <SelectItem value="Registration Desk">📝 Registration Desk</SelectItem>
+                    <SelectItem value="Workshop Room A">🏫 Workshop Room A</SelectItem>
+                    <SelectItem value="Workshop Room B">🏫 Workshop Room B</SelectItem>
+                    <SelectItem value="Conference Hall">🎯 Conference Hall</SelectItem>
+                    <SelectItem value="Networking Area">🤝 Networking Area</SelectItem>
+                    <SelectItem value="Exhibition Area">🎪 Exhibition Area</SelectItem>
+                    <SelectItem value="Break Area">☕ Break Area</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -408,26 +572,28 @@ export default function OrganizerScannerPage() {
                   id="notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Add any notes about this assignment..."
-                  rows={3}
+                  placeholder="Add any notes about this scan..."
+                  rows={2}
                 />
               </div>
 
-              {/* Assign Button */}
+              {/* Process Scan Button */}
               <Button 
-                onClick={handleAssignToEvent}
-                disabled={!scannedAttendee || !selectedEventId || assignMutation.isPending}
+                onClick={handleProcessScan}
+                disabled={!scannedAttendee || !selectedEventId || processScanMutation.isPending}
                 className="w-full"
                 size="lg"
               >
-                {assignMutation.isPending ? 'Assigning...' : 'Assign to Event'}
+                {processScanMutation.isPending ? 'Processing...' : 
+                 scanType === 'check_in' ? '➡️ Process Check-In' :
+                 scanType === 'check_out' ? '⬅️ Process Check-Out' : '✓ Process Verification'}
               </Button>
 
-              {/* Assignment Status */}
+              {/* Ready Status */}
               {scannedAttendee && selectedEventId && (
-                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-800">
-                    <strong>Ready to assign:</strong> {scannedAttendee.name} to selected event
+                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    <strong>Ready to process:</strong> {scanType.replace('_', ' ')} for {scannedAttendee.name} at {scanLocation}
                   </p>
                 </div>
               )}
@@ -435,35 +601,64 @@ export default function OrganizerScannerPage() {
           </Card>
         </div>
 
-        {/* Recent Assignments */}
-        {scanHistory.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Recent Assignments
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        {/* Scan History */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Recent Scans
+              {(recentScanHistory.length > 0 || scanHistory.length > 0) && (
+                <Badge variant="secondary">{recentScanHistory.length || scanHistory.length}</Badge>
+              )}
+            </CardTitle>
+            {selectedEventId && (
+              <p className="text-sm text-gray-600">
+                Showing scans for {events.find(e => e.id.toString() === selectedEventId)?.eventName || 'selected event'}
+              </p>
+            )}
+          </CardHeader>
+          <CardContent>
+            {(!recentScanHistory.length && !scanHistory.length) ? (
+              <div className="text-center py-8 text-gray-500">
+                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No scans recorded yet</p>
+                <p className="text-sm">
+                  {selectedEventId ? 'Start scanning attendees to track attendance' : 'Select an event to view scan history'}
+                </p>
+              </div>
+            ) : (
               <div className="space-y-3">
-                {scanHistory.map((assignment, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                {/* Show recent scans from API first, then local scans */}
+                {[...recentScanHistory, ...scanHistory].slice(0, 20).map((scan, index) => (
+                  <div key={scan.id || `local-${index}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <User className="h-4 w-4 text-gray-500" />
+                      <div className={`w-3 h-3 rounded-full ${
+                        scan.scanType === 'check_in' ? 'bg-green-500' :
+                        scan.scanType === 'check_out' ? 'bg-red-500' : 'bg-blue-500'
+                      }`} />
                       <div>
-                        <div className="font-medium">{assignment.attendeeName}</div>
-                        <div className="text-sm text-gray-500">
-                          Assigned to event at {new Date(assignment.timestamp).toLocaleTimeString()}
-                        </div>
+                        <p className="font-medium text-sm">{scan.attendeeName}</p>
+                        <p className="text-xs text-gray-600">
+                          {scan.scanType === 'check_in' ? '➡️ Checked in' :
+                           scan.scanType === 'check_out' ? '⬅️ Checked out' : '✓ Verified'} 
+                          at {scan.scanLocation}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(scan.scanTimestamp).toLocaleString()}
+                          {scan.sessionDuration && ` • Session: ${Math.round(scan.sessionDuration)} min`}
+                        </p>
                       </div>
                     </div>
-                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <div className="text-right">
+                      <p className="text-xs text-gray-500">{scan.eventName}</p>
+                      <p className="text-xs font-mono text-gray-400">{scan.badgeId}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
