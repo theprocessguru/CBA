@@ -16,7 +16,8 @@ import {
   insertInteractionSchema,
   insertAISummitVolunteerSchema,
   insertAISummitTeamMemberSchema,
-  aiSummitRegistrations 
+  aiSummitRegistrations,
+  aiSummitBadges
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
