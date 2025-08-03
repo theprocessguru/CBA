@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Store, Tag, User, Building, Crown, QrCode } from "lucide-react";
+import { Home, Users, Store, Tag, User, Building, Crown, QrCode, Smartphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const BottomNavigation = () => {
@@ -43,16 +43,16 @@ const BottomNavigation = () => {
         
         {isAuthenticated && (
           <>
-            <Link href="/my-qr-code" asChild>
+            <Link href="/mobile-badge" asChild>
               <button
                 className={`flex flex-col items-center h-auto py-2 px-2 min-w-0 rounded-md transition-colors ${
-                  isActive("/my-qr-code") 
+                  isActive("/mobile-badge") 
                     ? "text-primary bg-primary/10" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                 }`}
               >
-                <QrCode size={18} className="mb-1" />
-                <span className="text-xs leading-tight">QR Code</span>
+                <Smartphone size={18} className="mb-1" />
+                <span className="text-xs leading-tight">Badge</span>
               </button>
             </Link>
             <Link href="/my-profile" asChild>

@@ -201,9 +201,9 @@ const Navbar = () => {
             </button>
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
-                <Link href="/my-profile">
+                <Link href="/mobile-badge">
                   <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
-                    My QR Code
+                    Mobile Badge
                   </Button>
                 </Link>
                 <Link href="/dashboard">
