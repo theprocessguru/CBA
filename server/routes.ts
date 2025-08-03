@@ -3062,7 +3062,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { badgeId } = req.params;
       
       // First try AI Summit badges
-      const aiSummitBadge = await storage.getAISummitBadgeByBadgeId(badgeId);
+      const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
       if (aiSummitBadge) {
         return res.json({
           badgeId: aiSummitBadge.badgeId,
