@@ -1069,3 +1069,10 @@ export type EventSession = typeof eventSessions.$inferSelect;
 
 export type InsertEventSessionRegistration = z.infer<typeof insertEventSessionRegistrationSchema>;
 export type EventSessionRegistration = typeof eventSessionRegistrations.$inferSelect;
+
+// CBA Events Types
+export type InsertCBAEvent = z.infer<typeof insertCBAEventSchema>;
+export type CBAEvent = typeof cbaEvents.$inferSelect;
+
+export type InsertCBAEventRegistration = z.infer<typeof insertCBAEventRegistrationSchema>;
+export type CBAEventRegistration = typeof cbaEventRegistrations.$inferSelect;

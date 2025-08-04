@@ -3388,6 +3388,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Event Management API
+  
+  // Get all events for admin management
+  app.get('/api/admin/events', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const events = await db.select().from(cbaEvents);
+      res.json(events);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      res.status(500).json({ message: 'Failed to fetch events' });
+    }
+  });
+
+  // Create new event
+  app.post('/api/admin/events', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const eventData = insertCBAEventSchema.parse(req.body);
+      
+      // Set creator
+      eventData.createdBy = req.user.id;
+      
+      const newEvent = await db.insert(cbaEvents).values(eventData).returning();
+      
+      res.status(201).json(newEvent[0]);
+    } catch (error) {
+      console.error('Error creating event:', error);
+      res.status(500).json({ message: 'Failed to create event' });
+    }
+  });
+
+  // Update event
+  app.put('/api/admin/events/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const eventData = insertCBAEventSchema.partial().parse(req.body);
+      
+      eventData.updatedAt = new Date();
+      
+      const updatedEvent = await db
+        .update(cbaEvents)
+        .set(eventData)
+        .where(eq(cbaEvents.id, parseInt(id)))
+        .returning();
+
+      if (updatedEvent.length === 0) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+
+      res.json(updatedEvent[0]);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      res.status(500).json({ message: 'Failed to update event' });
+    }
+  });
+
+  // Delete event
+  app.delete('/api/admin/events/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const deletedEvent = await db
+        .delete(cbaEvents)
+        .where(eq(cbaEvents.id, parseInt(id)))
+        .returning();
+
+      if (deletedEvent.length === 0) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+
+      res.json({ message: 'Event deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      res.status(500).json({ message: 'Failed to delete event' });
+    }
+  });
+
+  // Get event registrations
+  app.get('/api/admin/events/:id/registrations', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const registrations = await db
+        .select()
+        .from(cbaEventRegistrations)
+        .where(eq(cbaEventRegistrations.eventId, parseInt(id)))
+        .orderBy(cbaEventRegistrations.registeredAt);
+
+      res.json(registrations);
+    } catch (error) {
+      console.error('Error fetching event registrations:', error);
+      res.status(500).json({ message: 'Failed to fetch registrations' });
+    }
+  });
+
   // Get active events for selection
   app.get('/api/cba-events/active', isAuthenticated, async (req: any, res) => {
     try {

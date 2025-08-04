@@ -49,6 +49,7 @@ import MyProfile from "@/pages/my-profile";
 import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
 import EventManagement from "@/pages/admin/EventManagement";
 import AISummitSchedule from "@/pages/admin/AISummitSchedule";
+import AdminEventsPage from "@/pages/admin-events";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
 import MyRegistrations from "@/pages/my-registrations";
@@ -414,6 +415,13 @@ function Router() {
       <Route path="/dashboard/ai-summit-schedule">
         <AdminRoute>
           <AISummitSchedule />
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/events">
+        <AdminRoute>
+          <MainLayout>
+            <AdminEventsPage />
+          </MainLayout>
         </AdminRoute>
       </Route>
       
