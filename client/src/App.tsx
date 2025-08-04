@@ -51,6 +51,7 @@ import EventManagement from "@/pages/admin/EventManagement";
 import AISummitSchedule from "@/pages/admin/AISummitSchedule";
 import AdminEventsPage from "@/pages/admin-events";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminMembershipPricing from "@/pages/admin-membership-pricing";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
 import MyRegistrations from "@/pages/my-registrations";
@@ -429,6 +430,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AdminEventsPage />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/membership-pricing">
+        <AdminRoute>
+          <MainLayout>
+            <AdminMembershipPricing />
           </MainLayout>
         </AdminRoute>
       </Route>

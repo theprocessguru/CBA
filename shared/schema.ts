@@ -530,6 +530,30 @@ export const aiSummitSessionRegistrations = pgTable("ai_summit_session_registrat
   primaryKey(table.sessionId, table.badgeId)
 ]);
 
+// Membership Tiers table
+export const membershipTiers = pgTable("membership_tiers", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  displayName: text("display_name").notNull(),
+  monthlyPrice: integer("monthly_price").notNull(),
+  yearlyPrice: integer("yearly_price").notNull(),
+  description: text("description").notNull(),
+  features: text("features").array().notNull().default(sql`'{}'::text[]`),
+  aiCredits: integer("ai_credits").notNull().default(0),
+  maxEvents: integer("max_events").notNull().default(0),
+  maxNetworking: integer("max_networking").notNull().default(0),
+  priority: integer("priority").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  isPopular: boolean("is_popular").notNull().default(false),
+  color: text("color").notNull().default('#3B82F6'),
+  icon: text("icon").notNull().default('crown'),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type MembershipTier = typeof membershipTiers.$inferSelect;
+export type InsertMembershipTier = typeof membershipTiers.$inferInsert;
+
 // CBA Events management system
 export const cbaEvents = pgTable("cba_events", {
   id: serial("id").primaryKey(),
@@ -1076,3 +1100,23 @@ export type CBAEvent = typeof cbaEvents.$inferSelect;
 
 export type InsertCBAEventRegistration = z.infer<typeof insertCBAEventRegistrationSchema>;
 export type CBAEventRegistration = typeof cbaEventRegistrations.$inferSelect;
+
+// Membership Tier Schema and Types
+export const insertMembershipTierSchema = createInsertSchema(membershipTiers, {
+  id: z.string().min(1, "ID is required"),
+  name: z.string().min(1, "Name is required"),
+  displayName: z.string().min(1, "Display name is required"),
+  monthlyPrice: z.number().min(0, "Monthly price cannot be negative"),
+  yearlyPrice: z.number().min(0, "Yearly price cannot be negative"),
+  description: z.string().min(1, "Description is required"),
+  features: z.array(z.string()).default([]),
+  aiCredits: z.number().min(0, "AI credits cannot be negative"),
+  maxEvents: z.number().min(0, "Max events cannot be negative"),
+  maxNetworking: z.number().min(0, "Max networking cannot be negative"),
+  priority: z.number().min(0, "Priority cannot be negative"),
+  color: z.string().min(1, "Color is required"),
+  icon: z.string().min(1, "Icon is required"),
+});
+
+export type InsertMembershipTier = z.infer<typeof insertMembershipTierSchema>;
+export type MembershipTier = typeof membershipTiers.$inferSelect;

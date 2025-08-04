@@ -72,6 +72,13 @@ export default function AdminDashboard() {
       badge: stats?.totalUsers || 0
     },
     {
+      title: "Membership Pricing",
+      description: "Manage membership tiers and pricing",
+      icon: Crown,
+      href: "/admin/membership-pricing",
+      color: "bg-yellow-500"
+    },
+    {
       title: "Badge Management",
       description: "Manage digital badges and QR codes",
       icon: Award,

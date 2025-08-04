@@ -3443,6 +3443,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Membership Tier Management API
+  
+  // Get all membership tiers
+  app.get('/api/admin/membership-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const tiers = await db.select().from(membershipTiers).orderBy(membershipTiers.priority);
+      res.json(tiers);
+    } catch (error) {
+      console.error('Error fetching membership tiers:', error);
+      res.status(500).json({ message: 'Failed to fetch membership tiers' });
+    }
+  });
+
+  // Create new membership tier
+  app.post('/api/admin/membership-tiers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const tierData = insertMembershipTierSchema.parse(req.body);
+      
+      const newTier = await db.insert(membershipTiers).values(tierData).returning();
+      
+      res.status(201).json(newTier[0]);
+    } catch (error) {
+      console.error('Error creating membership tier:', error);
+      res.status(500).json({ message: 'Failed to create membership tier' });
+    }
+  });
+
+  // Update membership tier
+  app.put('/api/admin/membership-tiers/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const tierData = insertMembershipTierSchema.partial().parse(req.body);
+      
+      tierData.updatedAt = new Date();
+      
+      const updatedTier = await db
+        .update(membershipTiers)
+        .set(tierData)
+        .where(eq(membershipTiers.id, id))
+        .returning();
+
+      if (updatedTier.length === 0) {
+        return res.status(404).json({ message: 'Membership tier not found' });
+      }
+
+      res.json(updatedTier[0]);
+    } catch (error) {
+      console.error('Error updating membership tier:', error);
+      res.status(500).json({ message: 'Failed to update membership tier' });
+    }
+  });
+
+  // Delete membership tier
+  app.delete('/api/admin/membership-tiers/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const deletedTier = await db
+        .delete(membershipTiers)
+        .where(eq(membershipTiers.id, id))
+        .returning();
+
+      if (deletedTier.length === 0) {
+        return res.status(404).json({ message: 'Membership tier not found' });
+      }
+
+      res.json({ message: 'Membership tier deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting membership tier:', error);
+      res.status(500).json({ message: 'Failed to delete membership tier' });
+    }
+  });
+
   // Admin Event Management API
   
   // Get all events for admin management
