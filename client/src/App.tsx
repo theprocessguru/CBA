@@ -53,6 +53,7 @@ import AdminEventsPage from "@/pages/admin-events";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminMembershipPricing from "@/pages/admin-membership-pricing";
 import AdminAnalytics from "@/pages/admin-analytics";
+import ContactImport from "@/pages/admin/contact-import";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
 import MyRegistrations from "@/pages/my-registrations";
@@ -445,6 +446,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AdminAnalytics />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/contact-import">
+        <AdminRoute>
+          <MainLayout>
+            <ContactImport />
           </MainLayout>
         </AdminRoute>
       </Route>

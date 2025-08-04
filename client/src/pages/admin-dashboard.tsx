@@ -127,6 +127,13 @@ export default function AdminDashboard() {
       icon: Upload,
       href: "/admin/import",
       color: "bg-gray-500"
+    },
+    {
+      title: "Contact Import",
+      description: "Import volunteers, exhibitors, speakers and other contacts in bulk",
+      icon: Upload,
+      href: "/admin/contact-import",
+      color: "bg-cyan-500"
     }
   ];
 

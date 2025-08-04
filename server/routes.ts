@@ -6875,6 +6875,290 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Contact Import API
+  
+  // Import contacts in bulk
+  app.post('/api/admin/contacts/import', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { contacts, contactType, mappings, options = {} } = req.body;
+
+      if (!contacts || !Array.isArray(contacts) || contacts.length === 0) {
+        return res.status(400).json({ message: 'No contacts provided' });
+      }
+
+      if (!contactType) {
+        return res.status(400).json({ message: 'Contact type is required' });
+      }
+
+      if (!mappings.email) {
+        return res.status(400).json({ message: 'Email mapping is required' });
+      }
+
+      let successCount = 0;
+      let failedCount = 0;
+      let duplicateCount = 0;
+      const errors: string[] = [];
+
+      // Get existing emails to check for duplicates
+      const existingUsers = await db.select({ email: users.email }).from(users);
+      const existingEmails = new Set(existingUsers.map(u => u.email?.toLowerCase()));
+
+      for (let i = 0; i < contacts.length; i++) {
+        const contact = contacts[i];
+        try {
+          // Map contact data using provided mappings
+          const mappedContact: any = {
+            id: `imported-${Date.now()}-${i}`,
+            participantType: contactType
+          };
+
+          // Map each field
+          Object.entries(mappings).forEach(([field, column]) => {
+            if (column && contact[column]) {
+              switch (field) {
+                case 'email':
+                  mappedContact.email = contact[column]?.toString().toLowerCase().trim();
+                  break;
+                case 'firstName':
+                  mappedContact.firstName = contact[column]?.toString().trim();
+                  break;
+                case 'lastName':
+                  mappedContact.lastName = contact[column]?.toString().trim();
+                  break;
+                case 'company':
+                  mappedContact.company = contact[column]?.toString().trim();
+                  break;
+                case 'jobTitle':
+                  mappedContact.jobTitle = contact[column]?.toString().trim();
+                  break;
+                case 'phone':
+                  mappedContact.phone = contact[column]?.toString().trim();
+                  break;
+                case 'bio':
+                  mappedContact.bio = contact[column]?.toString().trim();
+                  break;
+                case 'university':
+                  mappedContact.university = contact[column]?.toString().trim();
+                  break;
+                case 'course':
+                  mappedContact.course = contact[column]?.toString().trim();
+                  break;
+                case 'yearOfStudy':
+                  mappedContact.yearOfStudy = contact[column]?.toString().trim();
+                  break;
+                case 'volunteerExperience':
+                  mappedContact.volunteerExperience = contact[column]?.toString().trim();
+                  break;
+                case 'participantType':
+                  mappedContact.participantType = contact[column]?.toString().trim() || contactType;
+                  break;
+              }
+            }
+          });
+
+          // Validate required fields
+          if (!mappedContact.email) {
+            errors.push(`Row ${i + 1}: Email is required`);
+            failedCount++;
+            continue;
+          }
+
+          // Check for duplicates
+          if (existingEmails.has(mappedContact.email)) {
+            if (options.skipDuplicates) {
+              duplicateCount++;
+              continue;
+            } else if (!options.updateExisting) {
+              errors.push(`Row ${i + 1}: Email ${mappedContact.email} already exists`);
+              failedCount++;
+              continue;
+            }
+          }
+
+          // Set default values
+          mappedContact.membershipTier = 'Starter Tier';
+          mappedContact.membershipStatus = 'active';
+          mappedContact.isTrialMember = true;
+          mappedContact.accountStatus = 'active';
+          mappedContact.isAdmin = false;
+
+          // Generate QR handle if not provided
+          if (!mappedContact.qrHandle && mappedContact.firstName && mappedContact.lastName) {
+            const baseHandle = `${mappedContact.firstName}${mappedContact.lastName}`.toLowerCase().replace(/[^a-z0-9]/g, '');
+            mappedContact.qrHandle = `${baseHandle}${Date.now()}`;
+          }
+
+          // Insert or update user
+          if (existingEmails.has(mappedContact.email) && options.updateExisting) {
+            await db.update(users)
+              .set({
+                firstName: mappedContact.firstName,
+                lastName: mappedContact.lastName,
+                company: mappedContact.company,
+                jobTitle: mappedContact.jobTitle,
+                phone: mappedContact.phone,
+                bio: mappedContact.bio,
+                participantType: mappedContact.participantType,
+                university: mappedContact.university,
+                course: mappedContact.course,
+                yearOfStudy: mappedContact.yearOfStudy,
+                volunteerExperience: mappedContact.volunteerExperience,
+                updatedAt: new Date()
+              })
+              .where(eq(users.email, mappedContact.email));
+          } else {
+            await db.insert(users).values(mappedContact);
+            existingEmails.add(mappedContact.email);
+          }
+
+          successCount++;
+        } catch (error) {
+          console.error(`Error processing contact ${i + 1}:`, error);
+          errors.push(`Row ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          failedCount++;
+        }
+      }
+
+      // Log import activity
+      const importLog = {
+        performedBy: req.user.id,
+        action: 'bulk_contact_import',
+        contactType,
+        totalRecords: contacts.length,
+        successCount,
+        failedCount,
+        duplicateCount,
+        timestamp: new Date()
+      };
+
+      console.log('Contact import completed:', importLog);
+
+      res.json({
+        success: successCount,
+        failed: failedCount,
+        duplicates: duplicateCount,
+        errors: errors.slice(0, 10), // Limit errors in response
+        total: contacts.length
+      });
+
+    } catch (error) {
+      console.error('Error importing contacts:', error);
+      res.status(500).json({ message: 'Failed to import contacts' });
+    }
+  });
+
+  // Get contacts with filtering
+  app.get('/api/admin/contacts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { type, page = 1, limit = 50, search } = req.query;
+      const offset = (page - 1) * limit;
+
+      let query = db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        company: users.company,
+        jobTitle: users.jobTitle,
+        phone: users.phone,
+        participantType: users.participantType,
+        membershipTier: users.membershipTier,
+        createdAt: users.createdAt
+      }).from(users);
+
+      // Apply filters
+      if (type && type !== 'all') {
+        query = query.where(eq(users.participantType, type));
+      }
+
+      if (search) {
+        query = query.where(
+          sql`LOWER(${users.firstName}) LIKE ${'%' + search.toLowerCase() + '%'} OR 
+              LOWER(${users.lastName}) LIKE ${'%' + search.toLowerCase() + '%'} OR 
+              LOWER(${users.email}) LIKE ${'%' + search.toLowerCase() + '%'} OR 
+              LOWER(${users.company}) LIKE ${'%' + search.toLowerCase() + '%'}`
+        );
+      }
+
+      const contacts = await query.limit(limit).offset(offset);
+
+      // Get total count for pagination
+      let countQuery = db.select({ count: sql<number>`count(*)` }).from(users);
+      if (type && type !== 'all') {
+        countQuery = countQuery.where(eq(users.participantType, type));
+      }
+      if (search) {
+        countQuery = countQuery.where(
+          sql`LOWER(${users.firstName}) LIKE ${'%' + search.toLowerCase() + '%'} OR 
+              LOWER(${users.lastName}) LIKE ${'%' + search.toLowerCase() + '%'} OR 
+              LOWER(${users.email}) LIKE ${'%' + search.toLowerCase() + '%'} OR 
+              LOWER(${users.company}) LIKE ${'%' + search.toLowerCase() + '%'}`
+        );
+      }
+
+      const totalResult = await countQuery;
+      const total = totalResult[0]?.count || 0;
+
+      res.json({
+        contacts,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
+
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      res.status(500).json({ message: 'Failed to fetch contacts' });
+    }
+  });
+
+  // Get contact statistics
+  app.get('/api/admin/contacts/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Get contact counts by type
+      const contactStats = await db
+        .select({
+          type: sql<string>`COALESCE(participant_type, 'attendee')`,
+          count: sql<number>`count(*)`
+        })
+        .from(users)
+        .groupBy(sql`participant_type`);
+
+      // Get recent imports (last 30 days)
+      const recentImports = await db
+        .select({
+          date: sql<string>`DATE(created_at)`,
+          count: sql<number>`count(*)`
+        })
+        .from(users)
+        .where(sql`created_at >= NOW() - INTERVAL '30 days'`)
+        .groupBy(sql`DATE(created_at)`)
+        .orderBy(sql`DATE(created_at) DESC`)
+        .limit(30);
+
+      const stats = {
+        byType: contactStats.reduce((acc, stat) => {
+          acc[stat.type] = stat.count;
+          return acc;
+        }, {} as Record<string, number>),
+        recentImports: recentImports.map(imp => ({
+          date: imp.date,
+          count: imp.count
+        })),
+        totalContacts: contactStats.reduce((sum, stat) => sum + stat.count, 0)
+      };
+
+      res.json(stats);
+
+    } catch (error) {
+      console.error('Error fetching contact stats:', error);
+      res.status(500).json({ message: 'Failed to fetch contact statistics' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
