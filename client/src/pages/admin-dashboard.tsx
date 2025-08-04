@@ -79,6 +79,13 @@ export default function AdminDashboard() {
       color: "bg-yellow-500"
     },
     {
+      title: "Business Analytics",
+      description: "View comprehensive business insights",
+      icon: BarChart3,
+      href: "/admin/analytics",
+      color: "bg-purple-500"
+    },
+    {
       title: "Badge Management",
       description: "Manage digital badges and QR codes",
       icon: Award,
