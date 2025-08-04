@@ -56,8 +56,9 @@ export default function AdminMembershipPricing() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingTier, setEditingTier] = useState<string | null>(null);
+  const [editingTier, setEditingTier] = useState<any>(null);
   const [newFeature, setNewFeature] = useState("");
+  const [bulkFeatures, setBulkFeatures] = useState("");
 
   // Check if user is admin
   if (!user?.isAdmin) {
@@ -167,7 +168,11 @@ export default function AdminMembershipPricing() {
         ...tier,
         features: [...tier.features, feature.trim()]
       };
-      handleUpdateTier(updatedTier);
+      if (editingTier) {
+        setEditingTier(updatedTier);
+      } else {
+        handleUpdateTier(updatedTier);
+      }
     }
   };
 
@@ -176,7 +181,48 @@ export default function AdminMembershipPricing() {
       ...tier,
       features: tier.features.filter((_, index) => index !== featureIndex)
     };
-    handleUpdateTier(updatedTier);
+    if (editingTier) {
+      setEditingTier(updatedTier);
+    } else {
+      handleUpdateTier(updatedTier);
+    }
+  };
+
+  const addBulkFeatures = (tier: MembershipTier, featuresText: string) => {
+    const newFeatures = featuresText
+      .split('\n')
+      .map(f => f.trim())
+      .filter(f => f && !tier.features.includes(f));
+    
+    if (newFeatures.length > 0) {
+      const updatedTier = {
+        ...tier,
+        features: [...tier.features, ...newFeatures]
+      };
+      if (editingTier) {
+        setEditingTier(updatedTier);
+      } else {
+        handleUpdateTier(updatedTier);
+      }
+    }
+  };
+
+  const copyFeaturesFromTier = (sourceTierId: string, targetTier: MembershipTier) => {
+    const sourceTier = membershipTiers?.find(t => t.id === sourceTierId);
+    if (sourceTier) {
+      const uniqueFeatures = sourceTier.features.filter(f => !targetTier.features.includes(f));
+      if (uniqueFeatures.length > 0) {
+        const updatedTier = {
+          ...targetTier,
+          features: [...targetTier.features, ...uniqueFeatures]
+        };
+        if (editingTier) {
+          setEditingTier(updatedTier);
+        } else {
+          handleUpdateTier(updatedTier);
+        }
+      }
+    }
   };
 
   if (isLoading) {
@@ -323,39 +369,127 @@ export default function AdminMembershipPricing() {
                         </div>
                       ))}
                       
-                      <div className="flex items-center gap-2">
-                        <Input
-                          value={newFeature}
-                          onChange={(e) => setNewFeature(e.target.value)}
-                          placeholder="Add new feature..."
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={newFeature}
+                            onChange={(e) => setNewFeature(e.target.value)}
+                            placeholder="Add new feature..."
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addFeatureToTier(tier, newFeature);
+                                setNewFeature("");
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
                               addFeatureToTier(tier, newFeature);
                               setNewFeature("");
-                            }
-                          }}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            addFeatureToTier(tier, newFeature);
-                            setNewFeature("");
-                          }}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        
+                        <div className="text-xs text-gray-500">
+                          <details className="cursor-pointer">
+                            <summary className="hover:text-gray-700">Advanced Options</summary>
+                            <div className="mt-2 space-y-2">
+                              <div>
+                                <Label className="text-xs">Add Multiple Features (one per line)</Label>
+                                <Textarea
+                                  value={bulkFeatures}
+                                  onChange={(e) => setBulkFeatures(e.target.value)}
+                                  placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                                  rows={3}
+                                  className="text-xs"
+                                />
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="mt-1 text-xs"
+                                  onClick={() => {
+                                    addBulkFeatures(tier, bulkFeatures);
+                                    setBulkFeatures("");
+                                  }}
+                                >
+                                  Add Bulk Features
+                                </Button>
+                              </div>
+                              
+                              <div>
+                                <Label className="text-xs">Copy Features From Another Tier</Label>
+                                <select 
+                                  className="w-full text-xs border rounded p-1"
+                                  onChange={(e) => {
+                                    if (e.target.value) {
+                                      copyFeaturesFromTier(e.target.value, tier);
+                                      e.target.value = "";
+                                    }
+                                  }}
+                                >
+                                  <option value="">Select tier to copy from...</option>
+                                  {membershipTiers?.filter(t => t.id !== tier.id).map(t => (
+                                    <option key={t.id} value={t.id}>{t.displayName}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          </details>
+                        </div>
                       </div>
                     </div>
                   ) : (
-                    <ul className="space-y-2 text-sm">
-                      {tier.features.map((feature, index) => (
-                        <li key={index} className="flex items-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 mr-3 flex-shrink-0"></div>
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
+                    <div>
+                      <ul className="space-y-2 text-sm">
+                        {tier.features.map((feature, index) => (
+                          <li key={index} className="flex items-center justify-between group">
+                            <div className="flex items-center">
+                              <div className="w-1.5 h-1.5 rounded-full bg-green-500 mr-3 flex-shrink-0"></div>
+                              {feature}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => removeFeatureFromTier(tier, index)}
+                            >
+                              <Trash2 className="h-3 w-3 text-red-500" />
+                            </Button>
+                          </li>
+                        ))}
+                      </ul>
+                      
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={newFeature}
+                            onChange={(e) => setNewFeature(e.target.value)}
+                            placeholder="Add new benefit..."
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addFeatureToTier(tier, newFeature);
+                                setNewFeature("");
+                              }
+                            }}
+                            className="text-xs"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              addFeatureToTier(tier, newFeature);
+                              setNewFeature("");
+                            }}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
 

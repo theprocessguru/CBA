@@ -40,7 +40,10 @@ import {
   eventScanners,
   scanHistory,
   scanSessions,
-  users
+  users,
+  membershipTiers,
+  insertMembershipTierSchema,
+  type MembershipTier
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
