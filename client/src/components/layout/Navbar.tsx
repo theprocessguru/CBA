@@ -216,6 +216,13 @@ const Navbar = () => {
                     Mobile Badge
                   </Button>
                 </Link>
+                {(user as any)?.isAdmin && (
+                  <Link href="/admin/dashboard">
+                    <Button size="sm" variant="secondary" className="text-sm px-3 py-2 whitespace-nowrap">
+                      Admin
+                    </Button>
+                  </Link>
+                )}
                 <Link href="/dashboard">
                   <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
                     Dashboard
