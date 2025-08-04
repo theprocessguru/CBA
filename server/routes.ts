@@ -547,6 +547,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/my/business', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      
+      // Check if user is admin - admins don't need business profiles
+      const user = await storage.getUser(userId);
+      if (user?.isAdmin) {
+        return res.status(204).json(null); // No content for admin users
+      }
+      
       const business = await storage.getBusinessByUserId(userId);
       
       if (!business) {
