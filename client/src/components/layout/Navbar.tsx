@@ -527,6 +527,15 @@ const Navbar = () => {
                   📝 Workshop Scanner
                 </a>
               </Link>
+              <Link href="/admin/dashboard">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/admin/dashboard') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  🏠 Admin Dashboard
+                </a>
+              </Link>
               <Link href="/admin/events">
                 <a className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/admin/events') 

@@ -44,6 +44,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
+import { sql } from "drizzle-orm";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
@@ -3385,6 +3386,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching scan history:', error);
       res.status(500).json({ message: 'Failed to fetch scan history' });
+    }
+  });
+
+  // Admin Dashboard API
+  
+  // Get dashboard statistics
+  app.get('/api/admin/dashboard/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Get total users
+      const totalUsersResult = await db.execute(sql`SELECT COUNT(*) as count FROM users`);
+      const totalUsers = totalUsersResult.rows[0]?.count || 0;
+
+      // Get event statistics
+      const eventStatsResult = await db.execute(sql`
+        SELECT 
+          COUNT(*) as total_events,
+          COUNT(CASE WHEN is_active = true THEN 1 END) as active_events
+        FROM cba_events
+      `);
+      const eventStats = eventStatsResult.rows[0] || {};
+
+      // Get recent registrations (last 24 hours)
+      const recentRegsResult = await db.execute(sql`
+        SELECT COUNT(*) as count 
+        FROM cba_event_registrations 
+        WHERE registered_at > NOW() - INTERVAL '24 hours'
+      `);
+      const recentRegistrations = recentRegsResult.rows[0]?.count || 0;
+
+      // Get pending approvals
+      const pendingApprovalsResult = await db.execute(sql`
+        SELECT COUNT(*) as count 
+        FROM cba_event_registrations 
+        WHERE registration_status = 'pending'
+      `);
+      const pendingApprovals = pendingApprovalsResult.rows[0]?.count || 0;
+
+      res.json({
+        totalUsers: Number(totalUsers),
+        totalEvents: Number(eventStats.total_events || 0),
+        activeEvents: Number(eventStats.active_events || 0),
+        recentRegistrations: Number(recentRegistrations),
+        pendingApprovals: Number(pendingApprovals)
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      res.status(500).json({ message: 'Failed to fetch dashboard statistics' });
     }
   });
 
