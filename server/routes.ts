@@ -41,13 +41,14 @@ import {
   scanHistory,
   scanSessions,
   users,
+  businesses,
   membershipTiers,
   insertMembershipTierSchema,
   type MembershipTier
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { sql } from "drizzle-orm";
+import { sql, desc } from "drizzle-orm";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
