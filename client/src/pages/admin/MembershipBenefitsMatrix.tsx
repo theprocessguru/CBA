@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/ui/page-header";
@@ -55,6 +56,8 @@ const MembershipBenefitsMatrix = () => {
   const [selectedTier, setSelectedTier] = useState<string>("all");
   const [editingBenefit, setEditingBenefit] = useState<Benefit | null>(null);
   const [editFormData, setEditFormData] = useState({ name: "", description: "", category: "", isActive: true });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [benefitToDelete, setBenefitToDelete] = useState<Benefit | null>(null);
 
   // Fetch benefits
   const { data: benefits = [], isLoading: benefitsLoading } = useQuery({
@@ -101,6 +104,23 @@ const MembershipBenefitsMatrix = () => {
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message || "Failed to update benefit", variant: "destructive" });
+    }
+  });
+
+  // Delete benefit mutation
+  const deleteBenefit = useMutation({
+    mutationFn: (benefitId: number) =>
+      apiRequest('DELETE', `/api/admin/benefits/${benefitId}`, {
+        method: 'DELETE'
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/benefits'] });
+      toast({ title: "Success", description: "Benefit deleted successfully" });
+      setDeleteConfirmOpen(false);
+      setBenefitToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to delete benefit", variant: "destructive" });
     }
   });
 
@@ -151,6 +171,16 @@ const MembershipBenefitsMatrix = () => {
       benefitId: editingBenefit.id,
       data: editFormData
     });
+  };
+
+  const handleDeleteBenefit = (benefit: Benefit) => {
+    setBenefitToDelete(benefit);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!benefitToDelete) return;
+    deleteBenefit.mutate(benefitToDelete.id);
   };
 
   const exportMatrix = () => {
@@ -311,8 +341,18 @@ const MembershipBenefitsMatrix = () => {
                               variant="outline"
                               onClick={() => handleEditBenefit(benefit)}
                               className="h-8 w-8 p-0"
+                              title="Edit benefit"
                             >
                               <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteBenefit(benefit)}
+                              className="h-8 w-8 p-0 hover:bg-red-50 hover:border-red-200"
+                              title="Delete benefit"
+                            >
+                              <Trash2 className="h-3 w-3 text-red-500" />
                             </Button>
                           </div>
                         </div>
@@ -422,6 +462,34 @@ const MembershipBenefitsMatrix = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the benefit "{benefitToDelete?.name}". 
+              This action cannot be undone and will remove all tier assignments for this benefit.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setDeleteConfirmOpen(false);
+              setBenefitToDelete(null);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              disabled={deleteBenefit.isPending}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteBenefit.isPending ? "Deleting..." : "Delete Benefit"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <BottomNavigation />
     </div>
