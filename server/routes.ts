@@ -6864,6 +6864,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const occupancyRate = event.maxCapacity > 0 
         ? Math.round((currentlyInside.count / event.maxCapacity) * 100)
         : 0;
+
+      // Get active sessions for this event
+      const currentTime = new Date();
+      const activeSessions = await db.select({
+        sessionId: eventSessions.id,
+        sessionName: eventSessions.sessionName,
+        room: eventSessions.room,
+        sessionType: eventSessions.sessionType,
+        startTime: eventSessions.startTime,
+        endTime: eventSessions.endTime,
+        maxCapacity: eventSessions.maxCapacity
+      })
+        .from(eventSessions)
+        .where(
+          and(
+            eq(eventSessions.eventId, parseInt(eventId)),
+            lte(eventSessions.startTime, currentTime),
+            gte(eventSessions.endTime, currentTime)
+          )
+        );
+
+      // Get attendance for each active session
+      const sessionAttendanceData = await Promise.all(
+        activeSessions.map(async (session) => {
+          // Count registered attendees for this session who are currently checked in to the event
+          const [sessionAttendees] = await db.select({ count: sql<number>`count(*)` })
+            .from(eventSessionRegistrations)
+            .innerJoin(
+              cbaEventRegistrations,
+              eq(eventSessionRegistrations.registrationId, cbaEventRegistrations.id)
+            )
+            .where(
+              and(
+                eq(eventSessionRegistrations.sessionId, session.sessionId),
+                eq(cbaEventRegistrations.checkedIn, true),
+                eq(cbaEventRegistrations.checkedOut, false)
+              )
+            );
+
+          const sessionOccupancyRate = session.maxCapacity > 0 
+            ? Math.round((sessionAttendees.count / session.maxCapacity) * 100)
+            : 0;
+
+          return {
+            sessionId: session.sessionId,
+            sessionName: session.sessionName,
+            room: session.room || 'TBA',
+            currentAttendees: sessionAttendees.count,
+            maxCapacity: session.maxCapacity,
+            occupancyRate: sessionOccupancyRate,
+            sessionType: session.sessionType,
+            startTime: session.startTime,
+            endTime: session.endTime,
+            isActive: true
+          };
+        })
+      );
       
       res.json({
         eventId: event.id,
@@ -6875,7 +6932,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         noShows: noShows.count,
         lastCheckInTime: lastCheckIn[0]?.checkedInAt || null,
         occupancyRate,
-        maxCapacity: event.maxCapacity
+        maxCapacity: event.maxCapacity,
+        activeSessions: sessionAttendanceData
       });
     } catch (error) {
       console.error('Error fetching real-time attendance:', error);

@@ -22,6 +22,19 @@ import { cn } from '@/lib/utils';
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
+interface SessionAttendance {
+  sessionId: number;
+  sessionName: string;
+  room: string;
+  currentAttendees: number;
+  maxCapacity: number;
+  occupancyRate: number;
+  sessionType: 'workshop' | 'talk' | 'networking' | 'break';
+  startTime: string;
+  endTime: string;
+  isActive: boolean;
+}
+
 interface AttendanceData {
   eventId: number;
   eventName: string;
@@ -33,6 +46,7 @@ interface AttendanceData {
   lastCheckInTime?: string;
   occupancyRate: number;
   maxCapacity: number;
+  activeSessions: SessionAttendance[];
 }
 
 interface RecentActivity {
@@ -272,6 +286,79 @@ export default function AttendanceDashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Active Sessions */}
+          {attendanceData?.activeSessions && attendanceData.activeSessions.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5" />
+                  Active Sessions - Live Attendance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {attendanceData.activeSessions.map((session) => (
+                    <Card key={session.sessionId} className="border-l-4 border-l-blue-500">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 text-sm">
+                              {session.sessionName}
+                            </h4>
+                            <p className="text-xs text-gray-600 mt-1">
+                              {session.room} • {capitalize(session.sessionType)}
+                            </p>
+                          </div>
+                          <Badge 
+                            variant={session.isActive ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {session.isActive ? "LIVE" : "SCHEDULED"}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Attendees:</span>
+                            <span className="font-bold text-lg text-green-600">
+                              {session.currentAttendees}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Capacity:</span>
+                            <span className="text-sm font-medium">
+                              {session.maxCapacity}
+                            </span>
+                          </div>
+                          
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={cn(
+                                "h-2 rounded-full transition-all",
+                                session.occupancyRate >= 90 ? "bg-red-500" :
+                                session.occupancyRate >= 75 ? "bg-orange-500" :
+                                session.occupancyRate >= 50 ? "bg-yellow-500" : "bg-green-500"
+                              )}
+                              style={{ width: `${Math.min(session.occupancyRate, 100)}%` }}
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>{session.occupancyRate}% full</span>
+                            <span>
+                              {formatTime(session.startTime)} - {formatTime(session.endTime)}
+                            </span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Recent Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
