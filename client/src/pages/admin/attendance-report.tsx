@@ -23,7 +23,7 @@ import { Link } from 'wouter';
 interface SessionReport {
   sessionId: number;
   sessionName: string;
-  sessionType: 'workshop' | 'talk' | 'networking' | 'break';
+  sessionType: 'workshop' | 'talk' | 'networking' | 'break' | 'exhibition';
   room: string;
   startTime: string;
   endTime: string;
@@ -33,6 +33,16 @@ interface SessionReport {
   attendanceRate: number;
   peakAttendance: number;
   averageAttendance: number;
+}
+
+interface ExhibitionReport {
+  areaId: string;
+  areaName: string;
+  totalVisitors: number;
+  uniqueVisitors: number;
+  averageVisitDuration: number;
+  peakOccupancy: number;
+  maxCapacity: number;
 }
 
 interface EventReport {
@@ -46,6 +56,7 @@ interface EventReport {
   peakOccupancy: number;
   averageOccupancy: number;
   sessionReports: SessionReport[];
+  exhibitionReports: ExhibitionReport[];
   reportGeneratedAt: string;
 }
 
@@ -279,6 +290,76 @@ export default function AttendanceReportPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Exhibition Areas Report */}
+          {report.exhibitionReports && report.exhibitionReports.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Exhibition Areas Report
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {report.exhibitionReports.map((area) => (
+                    <Card key={area.areaId} className="border-l-4 border-l-green-500">
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold text-gray-900 mb-3">
+                          {area.areaName}
+                        </h4>
+                        
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Total Visitors:</span>
+                            <span className="font-bold text-lg text-green-600">
+                              {area.totalVisitors}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Unique Visitors:</span>
+                            <span className="font-medium">
+                              {area.uniqueVisitors}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Peak Occupancy:</span>
+                            <span className="font-medium">
+                              {area.peakOccupancy}
+                            </span>
+                          </div>
+                          
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Avg Visit Time:</span>
+                            <span className="font-medium">
+                              {area.averageVisitDuration} min
+                            </span>
+                          </div>
+                          
+                          <div className="pt-2 border-t">
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="h-2 rounded-full bg-green-500 transition-all"
+                                style={{ 
+                                  width: `${Math.min((area.peakOccupancy / area.maxCapacity) * 100, 100)}%` 
+                                }}
+                              />
+                            </div>
+                            <div className="flex justify-between text-xs text-gray-500 mt-1">
+                              <span>Peak Utilization</span>
+                              <span>Capacity: {area.maxCapacity}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Session Breakdown */}
           <Card>

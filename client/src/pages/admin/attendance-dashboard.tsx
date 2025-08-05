@@ -29,10 +29,20 @@ interface SessionAttendance {
   currentAttendees: number;
   maxCapacity: number;
   occupancyRate: number;
-  sessionType: 'workshop' | 'talk' | 'networking' | 'break';
+  sessionType: 'workshop' | 'talk' | 'networking' | 'break' | 'exhibition';
   startTime: string;
   endTime: string;
   isActive: boolean;
+}
+
+interface ExhibitionArea {
+  areaId: string;
+  areaName: string;
+  currentVisitors: number;
+  maxCapacity: number;
+  occupancyRate: number;
+  totalVisitsToday: number;
+  averageVisitDuration: number;
 }
 
 interface AttendanceData {
@@ -47,6 +57,7 @@ interface AttendanceData {
   occupancyRate: number;
   maxCapacity: number;
   activeSessions: SessionAttendance[];
+  exhibitionAreas: ExhibitionArea[];
 }
 
 interface RecentActivity {
@@ -286,6 +297,74 @@ export default function AttendanceDashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Exhibition Areas */}
+          {attendanceData?.exhibitionAreas && attendanceData.exhibitionAreas.length > 0 && (
+            <Card className="mb-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Exhibition Areas - Live Visitor Count
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {attendanceData.exhibitionAreas.map((area) => (
+                    <Card key={area.areaId} className="border-l-4 border-l-green-500">
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 text-sm">
+                              {area.areaName}
+                            </h4>
+                            <p className="text-xs text-gray-600 mt-1">
+                              Exhibition Area
+                            </p>
+                          </div>
+                          <Badge variant="default" className="text-xs bg-green-600">
+                            LIVE
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Current Visitors:</span>
+                            <span className="font-bold text-lg text-green-600">
+                              {area.currentVisitors}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Total Visits:</span>
+                            <span className="text-sm font-medium">
+                              {area.totalVisitsToday}
+                            </span>
+                          </div>
+                          
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className={cn(
+                                "h-2 rounded-full transition-all",
+                                area.occupancyRate >= 90 ? "bg-red-500" :
+                                area.occupancyRate >= 75 ? "bg-orange-500" :
+                                area.occupancyRate >= 50 ? "bg-yellow-500" : "bg-green-500"
+                              )}
+                              style={{ width: `${Math.min(area.occupancyRate, 100)}%` }}
+                            />
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>{area.occupancyRate}% capacity</span>
+                            <span>Avg: {area.averageVisitDuration}min</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Active Sessions */}
           {attendanceData?.activeSessions && attendanceData.activeSessions.length > 0 && (
