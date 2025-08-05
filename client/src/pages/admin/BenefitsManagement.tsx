@@ -17,13 +17,18 @@ import { Plus, Edit2, Trash2, Tag, Users, Heart, Zap, Settings, ChevronDown, Che
 import type { Benefit } from "@shared/schema";
 
 const BENEFIT_CATEGORIES = [
-  { value: "networking", label: "Networking & Events", icon: Users, color: "bg-blue-500" },
-  { value: "support", label: "Business Support", icon: Heart, color: "bg-green-500" },
-  { value: "marketing", label: "Marketing & Promotion", icon: Zap, color: "bg-purple-500" },
   { value: "ai_services", label: "AI Services", icon: Settings, color: "bg-orange-500" },
+  { value: "technology", label: "Technology", icon: Settings, color: "bg-cyan-500" },
+  { value: "support", label: "Business Support", icon: Heart, color: "bg-green-500" },
+  { value: "access", label: "Access & Networking", icon: Users, color: "bg-blue-500" },
+  { value: "financial", label: "Financial & Discounts", icon: Tag, color: "bg-emerald-500" },
+  { value: "marketing", label: "Marketing & Promotion", icon: Zap, color: "bg-purple-500" },
+  { value: "communication", label: "Communication", icon: Heart, color: "bg-pink-500" },
+  { value: "training", label: "Training & Development", icon: Users, color: "bg-indigo-500" },
+  { value: "networking", label: "Networking & Events", icon: Users, color: "bg-blue-600" },
   { value: "automation", label: "Automation", icon: Settings, color: "bg-red-500" },
-  { value: "directory", label: "Directory & Visibility", icon: Tag, color: "bg-indigo-500" },
-  { value: "other", label: "Other Benefits", icon: Plus, color: "bg-gray-500" }
+  { value: "directory", label: "Directory & Visibility", icon: Tag, color: "bg-yellow-500" },
+  { value: "accounting", label: "Accounting Services", icon: Tag, color: "bg-gray-500" }
 ];
 
 const BenefitsManagement = () => {
@@ -113,8 +118,8 @@ const BenefitsManagement = () => {
       name: benefit.name,
       description: benefit.description || "",
       category: benefit.category,
-      isActive: benefit.isActive,
-      sortOrder: benefit.sortOrder
+      isActive: benefit.isActive ?? true,
+      sortOrder: benefit.sortOrder ?? 0
     });
     setEditingBenefit(benefit);
     setIsCreating(true);
@@ -146,7 +151,7 @@ const BenefitsManagement = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-neutral-50">
-        <PageHeader title="Benefits Management" showBack={true} />
+        <PageHeader title="Benefits Management" />
         <div className="p-4 pb-24">
           <div className="text-center">Loading benefits...</div>
         </div>
@@ -157,7 +162,7 @@ const BenefitsManagement = () => {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <PageHeader title="Benefits Management" showBack={true} />
+      <PageHeader title="Benefits Management" />
       
       <div className="p-4 pb-24 space-y-6">
         {/* Header Stats */}
@@ -310,7 +315,7 @@ const BenefitsManagement = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">
-                        {categoryBenefits.filter(b => b.isActive).length} active
+                        {categoryBenefits.filter((b: Benefit) => b.isActive).length} active
                       </Badge>
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </div>
@@ -326,8 +331,8 @@ const BenefitsManagement = () => {
                     ) : (
                       <div className="space-y-2">
                         {categoryBenefits
-                          .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name))
-                          .map((benefit) => (
+                          .sort((a: Benefit, b: Benefit) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || a.name.localeCompare(b.name))
+                          .map((benefit: Benefit) => (
                             <div key={benefit.id} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
