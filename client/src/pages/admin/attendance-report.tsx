@@ -70,10 +70,30 @@ interface Event {
 export default function AttendanceReportPage() {
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
 
-  // Fetch events
-  const { data: events = [] } = useQuery<Event[]>({
+  // Fetch events from both sources
+  const { data: cbaEvents = [] } = useQuery<Event[]>({
     queryKey: ['/api/cba-events'],
   });
+  
+  const { data: generalEvents = [] } = useQuery<Event[]>({
+    queryKey: ['/api/events'],
+  });
+
+  // Combine both event sources
+  const events = [
+    ...cbaEvents.map((event: any) => ({
+      ...event,
+      eventName: event.eventName || event.title || 'Unnamed Event',
+      eventDate: event.eventDate || event.startDate || '',
+      isActive: event.isActive !== undefined ? event.isActive : (event.status === 'published')
+    })),
+    ...generalEvents.map((event: any) => ({
+      ...event,
+      eventName: event.title || event.eventName || 'Unnamed Event',
+      eventDate: event.startDate || event.eventDate || '',
+      isActive: event.status === 'published'
+    }))
+  ];
 
   // Get events that have finished or are currently running
   const reportableEvents = events.filter(event => {

@@ -70,25 +70,51 @@ interface RecentActivity {
 
 interface Event {
   id: number;
-  eventName: string;
-  isActive: boolean;
-  eventDate: string;
+  eventName?: string;
+  title?: string;
+  isActive?: boolean;
+  status?: string;
+  eventDate?: string;
+  startDate?: string;
 }
 
 export default function AttendanceDashboardPage() {
   const [selectedEventId, setSelectedEventId] = useState<number | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Fetch events
-  const { data: events = [] } = useQuery<Event[]>({
+  // Fetch events from both sources
+  const { data: cbaEvents = [] } = useQuery<Event[]>({
     queryKey: ['/api/cba-events'],
   });
+  
+  const { data: generalEvents = [] } = useQuery<Event[]>({
+    queryKey: ['/api/events'],
+  });
 
-  // Get active events for today
+  // Combine both event sources
+  const events = [
+    ...cbaEvents.map(event => ({
+      ...event,
+      eventName: event.eventName || event.title || 'Unnamed Event',
+      eventDate: event.eventDate || event.startDate || '',
+      isActive: event.isActive !== undefined ? event.isActive : (event.status === 'published')
+    })),
+    ...generalEvents.map(event => ({
+      ...event,
+      eventName: event.title || event.eventName || 'Unnamed Event',
+      eventDate: event.startDate || event.eventDate || '',
+      isActive: event.status === 'published'
+    }))
+  ];
+
+  // Get active events (including future events within the next 3 months)
   const activeEvents = events.filter(event => {
-    const today = new Date().toDateString();
-    const eventDate = new Date(event.eventDate).toDateString();
-    return event.isActive && eventDate === today;
+    const today = new Date();
+    const threeMonthsFromNow = new Date(today.getTime() + 90 * 24 * 60 * 60 * 1000);
+    const eventDate = new Date(event.eventDate);
+    
+    // Include events that are active and happening within the next 3 months
+    return event.isActive && eventDate >= today && eventDate <= threeMonthsFromNow;
   });
 
   // Auto-select first active event
