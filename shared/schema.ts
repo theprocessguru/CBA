@@ -874,7 +874,12 @@ export const insertAISummitSpeakingSessionSchema = createInsertSchema(aiSummitSp
 export const insertAISummitSpeakingSessionRegistrationSchema = createInsertSchema(aiSummitSessionRegistrations).omit({ id: true });
 
 // Enhanced Event System Schemas
-export const insertCBAEventSchema = createInsertSchema(cbaEvents).omit({ id: true });
+export const insertCBAEventSchema = createInsertSchema(cbaEvents, {
+  eventDate: z.string().transform((val) => new Date(val)),
+  startTime: z.string().transform((val) => new Date(val)),
+  endTime: z.string().transform((val) => new Date(val)),
+  registrationDeadline: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+}).omit({ id: true });
 export const insertCBAEventRegistrationSchema = createInsertSchema(cbaEventRegistrations).omit({ id: true });
 export const insertEventAttendanceAnalyticsSchema = createInsertSchema(eventAttendanceAnalytics).omit({ id: true });
 export const insertPersonalBadgeEventSchema = createInsertSchema(personalBadgeEvents).omit({ id: true });
