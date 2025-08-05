@@ -13,68 +13,31 @@ import { PageHeader } from "@/components/ui/page-header";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Check, Crown, Star, Users, Heart, Gift } from "lucide-react";
+import { MEMBERSHIP_TIER_CONFIGS } from "@shared/membershipTiers";
+import { Check, Crown, Star, Users, Heart, Gift, Zap, Diamond, Rocket } from "lucide-react";
 
 // Load Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY!);
 
-const membershipPlans = [
-  {
-    id: "free-trial",
-    name: "Free Trial Membership",
-    price: 0,
-    period: "12 months free",
-    description: "Get started with CBA - first year absolutely free!",
-    features: [
-      "Basic business listing",
-      "Contact information display", 
-      "Member directory access",
-      "Monthly newsletter",
-      "Community events access",
-      "12 months completely free",
-      "Optional donation welcome"
-    ],
-    icon: Users,
-    popular: true,
-    isFree: true
-  },
-  {
-    id: "standard",
-    name: "Standard Membership",
-    price: 29.99,
-    period: "monthly",
-    description: "Perfect for established businesses",
-    features: [
-      "Everything in Free Trial",
-      "Priority business listing",
-      "Product & service showcase",
-      "Special offers posting",
-      "Enhanced profile features",
-      "Business referral system"
-    ],
-    icon: Star,
-    popular: false
-  },
-  {
-    id: "premium",
-    name: "Premium Membership",
-    price: 49.99,
-    period: "monthly", 
-    description: "Maximum exposure and business growth tools",
-    features: [
-      "Everything in Standard",
-      "Featured business placement",
-      "Unlimited product listings",
-      "Premium offer highlighting",
-      "Advanced analytics",
-      "Priority customer support",
-      "Co-marketing opportunities",
-      "Exclusive premium events"
-    ],
-    icon: Crown,
-    popular: false
-  }
-];
+// Convert the tier configs to a format that works with the existing UI
+const membershipPlans = Object.values(MEMBERSHIP_TIER_CONFIGS).map((tier, index) => {
+  const icons = [Users, Star, Zap, Crown, Diamond];
+  return {
+    id: tier.id,
+    name: tier.name,
+    price: tier.monthlyPrice,
+    annualPrice: tier.annualPrice,
+    period: tier.monthlyPrice === 0 ? "free" : "monthly",
+    description: tier.description,
+    features: tier.features,
+    icon: icons[index] || Star,
+    popular: tier.popularBadge || false,
+    isFree: tier.monthlyPrice === 0,
+    targetAudience: tier.targetAudience,
+    businessExamples: tier.businessExamples,
+    badge: tier.badge
+  };
+});
 
 const CheckoutForm = ({ planId, amount, isDonation = false }: { planId: string, amount: number, isDonation?: boolean }) => {
   const stripe = useStripe();
@@ -257,8 +220,8 @@ const MembershipPage = () => {
   const [showDonation, setShowDonation] = useState(false);
 
   const handleSelectPlan = async (planId: string, amount: number) => {
-    // Handle free trial separately
-    if (planId === "free-trial") {
+    // Handle starter tier (free) separately
+    if (planId === "starter") {
       setShowDonation(true);
       setSelectedPlan(planId);
       return;
@@ -267,7 +230,7 @@ const MembershipPage = () => {
     setIsLoading(true);
     try {
       const response = await apiRequest("POST", "/api/create-payment-intent", {
-        amount,
+        amount: Math.round(amount * 100), // Convert to cents for Stripe
         description: `CBA ${planId} membership`
       });
       
@@ -289,8 +252,8 @@ const MembershipPage = () => {
     }
   };
 
-  // Show donation form for free trial
-  if (selectedPlan === "free-trial" && showDonation) {
+  // Show donation form for starter tier
+  if (selectedPlan === "starter" && showDonation) {
     return (
       <div className="min-h-screen bg-neutral-50">
         <PageHeader 
@@ -307,21 +270,20 @@ const MembershipPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-800">
                 <Gift className="h-5 w-5" />
-                Free Trial Membership Activated!
+                Starter Tier Membership Activated!
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-green-700 mb-4">
-                Congratulations! Your free 12-month trial membership is ready to activate. 
-                As a new member, you have access to all basic CBA benefits at no cost.
+                Congratulations! Your Starter Tier membership is ready to activate. 
+                As a new member, you have access to essential CBA benefits at no cost.
               </p>
               <div className="bg-white p-4 rounded-lg border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">Your Free Benefits Include:</h4>
+                <h4 className="font-semibold text-green-800 mb-2">Your Starter Benefits Include:</h4>
                 <ul className="text-sm text-green-700 space-y-1">
-                  <li>✓ Basic business listing</li>
-                  <li>✓ Member directory access</li>
-                  <li>✓ Monthly newsletter</li>
-                  <li>✓ Community events access</li>
+                  {MEMBERSHIP_TIER_CONFIGS["Starter Tier"].features.map((feature, index) => (
+                    <li key={index}>✓ {feature}</li>
+                  ))}
                 </ul>
               </div>
             </CardContent>
@@ -445,15 +407,32 @@ const MembershipPage = () => {
                     <div className="flex items-center gap-3">
                       <IconComponent className="h-6 w-6 text-primary" />
                       <div>
-                        <CardTitle className="text-lg">{plan.name}</CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          {plan.name} {plan.badge}
+                        </CardTitle>
                         <p className="text-sm text-neutral-600">{plan.description}</p>
+                        <p className="text-xs text-neutral-500 mt-1">{plan.targetAudience}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-2xl font-bold text-primary">
-                        £{plan.price}
-                      </div>
-                      <div className="text-sm text-neutral-600">/{plan.period}</div>
+                      {plan.isFree ? (
+                        <div>
+                          <div className="text-2xl font-bold text-green-600">FREE</div>
+                          <div className="text-sm text-neutral-600">{plan.badge}</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-2xl font-bold text-primary">
+                            £{plan.price}
+                          </div>
+                          <div className="text-sm text-neutral-600">/month</div>
+                          {plan.annualPrice && (
+                            <div className="text-xs text-green-600">
+                              £{plan.annualPrice}/year (Save £{(plan.price * 12 - plan.annualPrice).toFixed(2)})
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -477,7 +456,7 @@ const MembershipPage = () => {
                     disabled={isLoading}
                   >
                     {isLoading ? "Loading..." : 
-                     plan.isFree ? "Start Free Trial" : 
+                     plan.isFree ? "Start Free Membership" : 
                      `Choose ${plan.name}`}
                   </Button>
                 </CardContent>
