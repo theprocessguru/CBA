@@ -74,6 +74,7 @@ import MultiRoleDemo from "@/pages/multi-role-demo";
 import MobileBadgePage from "@/pages/mobile-badge";
 import BenefitsManagement from "@/pages/admin/BenefitsManagement";
 import MembershipBenefitsManager from "@/pages/admin/MembershipBenefitsManager";
+import AIToolsDemo from "@/pages/ai-tools-demo";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -517,6 +518,11 @@ function Router() {
       <Route path="/multi-role-demo">
         <MainLayout>
           <MultiRoleDemo />
+        </MainLayout>
+      </Route>
+      <Route path="/ai-tools-demo">
+        <MainLayout>
+          <AIToolsDemo />
         </MainLayout>
       </Route>
       <Route path="/mobile-badge">
