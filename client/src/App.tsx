@@ -355,6 +355,13 @@ function Router() {
           <OccupancyDashboardPage />
         </MainLayout>
       </Route>
+      <Route path="/admin">
+        <AdminRoute>
+          <MainLayout>
+            <AdminDashboard />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
       <Route path="/admin/scanner-management">
         <AdminRoute>
           <MainLayout>
