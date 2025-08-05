@@ -121,11 +121,11 @@ const Analytics = () => {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => setLocation('/dashboard')}
+              onClick={() => setLocation('/admin')}
               className="flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Dashboard
+              Back to Admin
             </Button>
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 mb-2">Analytics Dashboard</h1>

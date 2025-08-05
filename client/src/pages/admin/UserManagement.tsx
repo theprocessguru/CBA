@@ -172,11 +172,11 @@ const UserManagement = () => {
           </div>
           <Button 
             variant="outline" 
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/admin')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
+            Back to Admin
           </Button>
         </div>
 
