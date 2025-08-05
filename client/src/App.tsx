@@ -73,6 +73,7 @@ import AttendanceReport from "@/pages/admin/attendance-report";
 import MultiRoleDemo from "@/pages/multi-role-demo";
 import MobileBadgePage from "@/pages/mobile-badge";
 import BenefitsManagement from "@/pages/admin/BenefitsManagement";
+import MembershipBenefitsMatrix from "@/pages/admin/MembershipBenefitsMatrix";
 import MembershipBenefitsManager from "@/pages/admin/MembershipBenefitsManager";
 import AIToolsDemo from "@/pages/ai-tools-demo";
 
@@ -480,6 +481,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <BenefitsManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/benefits-matrix">
+        <AdminRoute>
+          <MainLayout>
+            <MembershipBenefitsMatrix />
           </MainLayout>
         </AdminRoute>
       </Route>

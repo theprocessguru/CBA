@@ -7575,7 +7575,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const benefitsList = await query.orderBy(benefits.category, benefits.sortOrder, benefits.name);
-      res.json(benefitsList);
+      
+      // Get all tier assignments in one query to avoid N+1 problem
+      const allAssignments = await db
+        .select({
+          benefitId: membershipTierBenefits.benefitId,
+          tierName: membershipTierBenefits.tierName
+        })
+        .from(membershipTierBenefits);
+      
+      // Group assignments by benefit ID
+      const assignmentMap = allAssignments.reduce((acc, assignment) => {
+        if (!acc[assignment.benefitId]) {
+          acc[assignment.benefitId] = [];
+        }
+        acc[assignment.benefitId].push(assignment.tierName);
+        return acc;
+      }, {} as Record<number, string[]>);
+      
+      // Add tier assignments to benefits
+      const benefitsWithAssignments = benefitsList.map(benefit => ({
+        ...benefit,
+        tierAssignments: assignmentMap[benefit.id] || []
+      }));
+      
+      res.json(benefitsWithAssignments);
     } catch (error) {
       console.error('Error fetching benefits:', error);
       res.status(500).json({ message: 'Failed to fetch benefits' });
@@ -7676,6 +7700,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching tier benefits:', error);
       res.status(500).json({ message: 'Failed to fetch tier benefits' });
+    }
+  });
+
+  // Update benefit tier assignment (for matrix interface)
+  app.put('/api/admin/benefits/:id/tier-assignment', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { tierName, assigned } = req.body;
+      
+      if (!tierName || assigned === undefined) {
+        return res.status(400).json({ message: 'tierName and assigned status are required' });
+      }
+      
+      const benefitId = parseInt(id);
+      if (isNaN(benefitId)) {
+        return res.status(400).json({ message: 'Invalid benefit ID' });
+      }
+      
+      if (assigned) {
+        // Add the assignment if it doesn't exist
+        try {
+          await db
+            .insert(membershipTierBenefits)
+            .values({ tierName, benefitId, isIncluded: true })
+            .onConflictDoUpdate({
+              target: [membershipTierBenefits.tierName, membershipTierBenefits.benefitId],
+              set: { isIncluded: true }
+            });
+        } catch (error) {
+          // Handle unique constraint violation
+          await db
+            .update(membershipTierBenefits)
+            .set({ isIncluded: true })
+            .where(
+              sql`${membershipTierBenefits.tierName} = ${tierName} AND ${membershipTierBenefits.benefitId} = ${benefitId}`
+            );
+        }
+      } else {
+        // Remove the assignment
+        await db
+          .delete(membershipTierBenefits)
+          .where(
+            sql`${membershipTierBenefits.tierName} = ${tierName} AND ${membershipTierBenefits.benefitId} = ${benefitId}`
+          );
+      }
+      
+      res.json({ success: true, message: 'Benefit assignment updated successfully' });
+    } catch (error) {
+      console.error('Error updating benefit assignment:', error);
+      res.status(500).json({ message: 'Failed to update benefit assignment' });
     }
   });
 
