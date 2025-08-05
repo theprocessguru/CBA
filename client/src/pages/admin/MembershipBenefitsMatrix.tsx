@@ -6,11 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { PageHeader } from "@/components/ui/page-header";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Search, Filter, Download, Users, Star, Crown, Diamond, Gem } from "lucide-react";
+import { Search, Filter, Download, Users, Star, Crown, Diamond, Gem, Pencil, Trash2 } from "lucide-react";
 import type { Benefit, MembershipTier } from "@shared/schema";
 
 const TIER_ICONS = {
@@ -50,6 +53,8 @@ const MembershipBenefitsMatrix = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedTier, setSelectedTier] = useState<string>("all");
+  const [editingBenefit, setEditingBenefit] = useState<Benefit | null>(null);
+  const [editFormData, setEditFormData] = useState({ name: "", description: "", category: "", isActive: true });
 
   // Fetch benefits
   const { data: benefits = [], isLoading: benefitsLoading } = useQuery({
@@ -78,6 +83,24 @@ const MembershipBenefitsMatrix = () => {
     },
     onError: (error: any) => {
       toast({ title: "Error", description: error.message || "Failed to update assignment", variant: "destructive" });
+    }
+  });
+
+  // Update benefit mutation
+  const updateBenefit = useMutation({
+    mutationFn: ({ benefitId, data }: { benefitId: number, data: any }) =>
+      apiRequest('PUT', `/api/admin/benefits/${benefitId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/benefits'] });
+      toast({ title: "Success", description: "Benefit updated successfully" });
+      setEditingBenefit(null);
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to update benefit", variant: "destructive" });
     }
   });
 
@@ -110,6 +133,24 @@ const MembershipBenefitsMatrix = () => {
     // Check if this benefit is assigned to this tier
     // This would come from your membership tier benefits data
     return benefit.tierAssignments?.includes(tierName) || false;
+  };
+
+  const handleEditBenefit = (benefit: Benefit) => {
+    setEditingBenefit(benefit);
+    setEditFormData({
+      name: benefit.name,
+      description: benefit.description || "",
+      category: benefit.category,
+      isActive: benefit.isActive ?? true
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingBenefit) return;
+    updateBenefit.mutate({
+      benefitId: editingBenefit.id,
+      data: editFormData
+    });
   };
 
   const exportMatrix = () => {
@@ -264,6 +305,16 @@ const MembershipBenefitsMatrix = () => {
                               <p className="text-xs text-neutral-600 mb-3">{benefit.description}</p>
                             )}
                           </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditBenefit(benefit)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                         
                         {/* Tier Assignments */}
@@ -308,6 +359,69 @@ const MembershipBenefitsMatrix = () => {
           </Card>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      {editingBenefit && (
+        <Dialog open={!!editingBenefit} onOpenChange={() => setEditingBenefit(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Benefit</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Benefit Name</Label>
+                <Input
+                  id="name"
+                  value={editFormData.name}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter benefit name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={editFormData.description}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter benefit description"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select value={editFormData.category} onValueChange={(value) => setEditFormData(prev => ({ ...prev, category: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BENEFIT_CATEGORIES.map(cat => (
+                      <SelectItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isActive"
+                  checked={editFormData.isActive}
+                  onCheckedChange={(checked) => setEditFormData(prev => ({ ...prev, isActive: checked === true }))}
+                />
+                <Label htmlFor="isActive">Active</Label>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button onClick={handleSaveEdit} disabled={updateBenefit.isPending} className="flex-1">
+                  {updateBenefit.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+                <Button variant="outline" onClick={() => setEditingBenefit(null)} className="flex-1">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
       
       <BottomNavigation />
     </div>
