@@ -44,7 +44,13 @@ import {
   businesses,
   membershipTiers,
   insertMembershipTierSchema,
-  type MembershipTier
+  type MembershipTier,
+  benefits,
+  membershipTierBenefits,
+  insertBenefitSchema,
+  insertMembershipTierBenefitSchema,
+  type Benefit,
+  type MembershipTierBenefit
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -7553,6 +7559,204 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching contact stats:', error);
       res.status(500).json({ message: 'Failed to fetch contact statistics' });
+    }
+  });
+
+  // Benefits Management API
+  
+  // Get all benefits (filtered by active status for dropdowns)
+  app.get('/api/admin/benefits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { active } = req.query;
+      let query = db.select().from(benefits);
+      
+      if (active === 'true') {
+        query = query.where(eq(benefits.isActive, true));
+      }
+      
+      const benefitsList = await query.orderBy(benefits.category, benefits.sortOrder, benefits.name);
+      res.json(benefitsList);
+    } catch (error) {
+      console.error('Error fetching benefits:', error);
+      res.status(500).json({ message: 'Failed to fetch benefits' });
+    }
+  });
+
+  // Create new benefit
+  app.post('/api/admin/benefits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const benefitData = insertBenefitSchema.parse(req.body);
+      
+      const newBenefit = await db.insert(benefits).values(benefitData).returning();
+      res.status(201).json(newBenefit[0]);
+    } catch (error: any) {
+      console.error('Error creating benefit:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      res.status(500).json({ message: 'Failed to create benefit' });
+    }
+  });
+
+  // Update benefit
+  app.put('/api/admin/benefits/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const benefitData = insertBenefitSchema.parse(req.body);
+      
+      const updatedBenefit = await db
+        .update(benefits)
+        .set({ ...benefitData, updatedAt: new Date() })
+        .where(eq(benefits.id, parseInt(id)))
+        .returning();
+      
+      if (updatedBenefit.length === 0) {
+        return res.status(404).json({ message: 'Benefit not found' });
+      }
+      
+      res.json(updatedBenefit[0]);
+    } catch (error: any) {
+      console.error('Error updating benefit:', error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      res.status(500).json({ message: 'Failed to update benefit' });
+    }
+  });
+
+  // Delete benefit
+  app.delete('/api/admin/benefits/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Check if benefit is used by any membership tiers
+      const tierBenefits = await db
+        .select()
+        .from(membershipTierBenefits)
+        .where(eq(membershipTierBenefits.benefitId, parseInt(id)));
+      
+      if (tierBenefits.length > 0) {
+        return res.status(400).json({ 
+          message: 'Cannot delete benefit: it is currently assigned to membership tiers' 
+        });
+      }
+      
+      const deletedBenefit = await db
+        .delete(benefits)
+        .where(eq(benefits.id, parseInt(id)))
+        .returning();
+      
+      if (deletedBenefit.length === 0) {
+        return res.status(404).json({ message: 'Benefit not found' });
+      }
+      
+      res.json({ message: 'Benefit deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting benefit:', error);
+      res.status(500).json({ message: 'Failed to delete benefit' });
+    }
+  });
+
+  // Get benefits for a specific membership tier
+  app.get('/api/admin/membership-tiers/:tierName/benefits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { tierName } = req.params;
+      
+      const tierBenefits = await db
+        .select({
+          benefit: benefits,
+          isIncluded: membershipTierBenefits.isIncluded
+        })
+        .from(membershipTierBenefits)
+        .innerJoin(benefits, eq(benefits.id, membershipTierBenefits.benefitId))
+        .where(eq(membershipTierBenefits.tierName, tierName))
+        .orderBy(benefits.category, benefits.sortOrder, benefits.name);
+      
+      res.json(tierBenefits);
+    } catch (error) {
+      console.error('Error fetching tier benefits:', error);
+      res.status(500).json({ message: 'Failed to fetch tier benefits' });
+    }
+  });
+
+  // Add benefit to membership tier
+  app.post('/api/admin/membership-tiers/:tierName/benefits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { tierName } = req.params;
+      const { benefitId, isIncluded = true } = req.body;
+      
+      if (!benefitId) {
+        return res.status(400).json({ message: 'Benefit ID is required' });
+      }
+      
+      const tierBenefit = await db
+        .insert(membershipTierBenefits)
+        .values({ tierName, benefitId, isIncluded })
+        .returning();
+      
+      res.status(201).json(tierBenefit[0]);
+    } catch (error: any) {
+      console.error('Error adding benefit to tier:', error);
+      if (error.constraint === 'unique_tier_benefit') {
+        return res.status(400).json({ message: 'Benefit already exists for this tier' });
+      }
+      res.status(500).json({ message: 'Failed to add benefit to tier' });
+    }
+  });
+
+  // Remove benefit from membership tier
+  app.delete('/api/admin/membership-tiers/:tierName/benefits/:benefitId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { tierName, benefitId } = req.params;
+      
+      const deletedTierBenefit = await db
+        .delete(membershipTierBenefits)
+        .where(
+          sql`${membershipTierBenefits.tierName} = ${tierName} AND ${membershipTierBenefits.benefitId} = ${parseInt(benefitId)}`
+        )
+        .returning();
+      
+      if (deletedTierBenefit.length === 0) {
+        return res.status(404).json({ message: 'Tier benefit assignment not found' });
+      }
+      
+      res.json({ message: 'Benefit removed from tier successfully' });
+    } catch (error) {
+      console.error('Error removing benefit from tier:', error);
+      res.status(500).json({ message: 'Failed to remove benefit from tier' });
+    }
+  });
+
+  // Bulk update benefits for a membership tier
+  app.put('/api/admin/membership-tiers/:tierName/benefits', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { tierName } = req.params;
+      const { benefitIds } = req.body; // Array of benefit IDs to include
+      
+      if (!Array.isArray(benefitIds)) {
+        return res.status(400).json({ message: 'benefitIds must be an array' });
+      }
+      
+      // Remove all existing benefits for this tier
+      await db
+        .delete(membershipTierBenefits)
+        .where(eq(membershipTierBenefits.tierName, tierName));
+      
+      // Add new benefits
+      if (benefitIds.length > 0) {
+        const newTierBenefits = benefitIds.map(benefitId => ({
+          tierName,
+          benefitId,
+          isIncluded: true
+        }));
+        
+        await db.insert(membershipTierBenefits).values(newTierBenefits);
+      }
+      
+      res.json({ message: 'Tier benefits updated successfully' });
+    } catch (error) {
+      console.error('Error updating tier benefits:', error);
+      res.status(500).json({ message: 'Failed to update tier benefits' });
     }
   });
 

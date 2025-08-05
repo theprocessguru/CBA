@@ -72,6 +72,8 @@ import AttendanceDashboard from "@/pages/admin/attendance-dashboard";
 import AttendanceReport from "@/pages/admin/attendance-report";
 import MultiRoleDemo from "@/pages/multi-role-demo";
 import MobileBadgePage from "@/pages/mobile-badge";
+import BenefitsManagement from "@/pages/admin/BenefitsManagement";
+import MembershipBenefitsManager from "@/pages/admin/MembershipBenefitsManager";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -470,6 +472,20 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AdminMembershipPricing />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/benefits-management">
+        <AdminRoute>
+          <MainLayout>
+            <BenefitsManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/membership-benefits">
+        <AdminRoute>
+          <MainLayout>
+            <MembershipBenefitsManager />
           </MainLayout>
         </AdminRoute>
       </Route>

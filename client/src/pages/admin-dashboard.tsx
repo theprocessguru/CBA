@@ -80,6 +80,20 @@ export default function AdminDashboard() {
       color: "bg-yellow-500"
     },
     {
+      title: "Benefits Management",
+      description: "Create and manage membership benefits",
+      icon: Award,
+      href: "/admin/benefits-management",
+      color: "bg-indigo-500"
+    },
+    {
+      title: "Membership Benefits",
+      description: "Assign benefits to membership tiers",
+      icon: Shield,
+      href: "/admin/membership-benefits",
+      color: "bg-orange-500"
+    },
+    {
       title: "Business Analytics",
       description: "View comprehensive business insights",
       icon: BarChart3,

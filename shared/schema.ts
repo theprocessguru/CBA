@@ -1125,3 +1125,49 @@ export const insertMembershipTierSchema = createInsertSchema(membershipTiers, {
 
 export type InsertMembershipTier = z.infer<typeof insertMembershipTierSchema>;
 export type MembershipTier = typeof membershipTiers.$inferSelect;
+
+// Benefits table for managing all membership benefits
+export const benefits = pgTable("benefits", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull().unique(), // e.g., "Enhanced directory listing"
+  description: text("description"), // Detailed description of the benefit
+  category: varchar("category").notNull(), // e.g., "networking", "support", "marketing", "ai_services", "automation"
+  isActive: boolean("is_active").default(true), // Controls whether benefit appears in dropdowns
+  sortOrder: integer("sort_order").default(0), // For ordering in lists
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Junction table to link membership tiers with benefits
+export const membershipTierBenefits = pgTable("membership_tier_benefits", {
+  id: serial("id").primaryKey(),
+  tierName: varchar("tier_name").notNull().references(() => membershipTiers.name, { onDelete: "cascade" }),
+  benefitId: integer("benefit_id").notNull().references(() => benefits.id, { onDelete: "cascade" }),
+  isIncluded: boolean("is_included").default(true), // Whether this tier includes this benefit
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique("unique_tier_benefit").on(table.tierName, table.benefitId),
+  index("membership_tier_benefits_tier_idx").on(table.tierName),
+  index("membership_tier_benefits_benefit_idx").on(table.benefitId),
+]);
+
+// Benefits Schema and Types
+export const insertBenefitSchema = createInsertSchema(benefits, {
+  name: z.string().min(1, "Benefit name is required"),
+  description: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  isActive: z.boolean().default(true),
+  sortOrder: z.number().min(0, "Sort order cannot be negative"),
+}).omit({ id: true });
+
+export const insertMembershipTierBenefitSchema = createInsertSchema(membershipTierBenefits, {
+  tierName: z.string().min(1, "Tier name is required"),
+  benefitId: z.number().min(1, "Benefit ID is required"),
+  isIncluded: z.boolean().default(true),
+}).omit({ id: true });
+
+export type InsertBenefit = z.infer<typeof insertBenefitSchema>;
+export type Benefit = typeof benefits.$inferSelect;
+
+export type InsertMembershipTierBenefit = z.infer<typeof insertMembershipTierBenefitSchema>;
+export type MembershipTierBenefit = typeof membershipTierBenefits.$inferSelect;
