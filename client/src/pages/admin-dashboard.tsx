@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   const { user, isAuthenticated } = useAuth();
 
   // Check if user is admin
-  if (!user?.isAdmin) {
+  if (!user || !(user as any).isAdmin) {
     return (
       <div className="container mx-auto p-6">
         <Card>
@@ -52,7 +52,7 @@ export default function AdminDashboard() {
   // Fetch dashboard statistics
   const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
     queryKey: ['/api/admin/dashboard/stats'],
-    enabled: isAuthenticated && user?.isAdmin
+    enabled: isAuthenticated && (user as any)?.isAdmin
   });
 
   const quickActions = [
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
         <p className="text-gray-600">
-          Welcome back, {user.firstName || 'Admin'}. Here's what's happening with your CBA platform.
+          Welcome back, {(user as any).firstName || 'Admin'}. Here's what's happening with your CBA platform.
         </p>
       </div>
 

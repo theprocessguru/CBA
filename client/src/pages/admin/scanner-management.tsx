@@ -100,6 +100,8 @@ export default function ScannerManagementPage() {
         description: "User has been successfully assigned as scanner",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/event-scanners'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/event-scanners/event', selectedEventId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scan-analytics/event', selectedEventId] });
       setShowAssignForm(false);
     },
     onError: (error: any) => {
@@ -127,6 +129,8 @@ export default function ScannerManagementPage() {
         description: "Scanner has been deactivated successfully",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/event-scanners'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/event-scanners/event', selectedEventId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/scan-analytics/event', selectedEventId] });
     },
     onError: (error: any) => {
       toast({
