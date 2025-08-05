@@ -108,6 +108,13 @@ export default function AdminDashboard() {
       color: "bg-emerald-500"
     },
     {
+      title: "Final Report",
+      description: "Complete attendance breakdown by sessions",
+      icon: FileText,
+      href: "/admin/attendance-report",
+      color: "bg-indigo-500"
+    },
+    {
       title: "Analytics",
       description: "View detailed analytics and reports",
       icon: BarChart3,

@@ -69,6 +69,7 @@ import QuickLogin from "@/pages/quick-login";
 import ScannerManagement from "@/pages/admin/scanner-management";
 import AdminBadges from "@/pages/admin/badges";
 import AttendanceDashboard from "@/pages/admin/attendance-dashboard";
+import AttendanceReport from "@/pages/admin/attendance-report";
 import MultiRoleDemo from "@/pages/multi-role-demo";
 import MobileBadgePage from "@/pages/mobile-badge";
 
@@ -372,6 +373,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AttendanceDashboard />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/attendance-report">
+        <AdminRoute>
+          <MainLayout>
+            <AttendanceReport />
           </MainLayout>
         </AdminRoute>
       </Route>

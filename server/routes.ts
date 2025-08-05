@@ -6941,6 +6941,123 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Final attendance report API
+  app.get('/api/admin/attendance/final-report/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      // Get event details
+      const [event] = await db.select()
+        .from(cbaEvents)
+        .where(eq(cbaEvents.id, parseInt(eventId)));
+      
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+      
+      // Get overall event statistics
+      const [totalRegistered] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(eq(cbaEventRegistrations.eventId, parseInt(eventId)));
+      
+      const [totalAttended] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedIn, true)
+          )
+        );
+      
+      const [noShows] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedIn, false)
+          )
+        );
+      
+      const overallAttendanceRate = totalRegistered.count > 0 
+        ? Math.round((totalAttended.count / totalRegistered.count) * 100)
+        : 0;
+      
+      // Get all sessions for this event
+      const allSessions = await db.select({
+        sessionId: eventSessions.id,
+        sessionName: eventSessions.sessionName,
+        room: eventSessions.room,
+        sessionType: eventSessions.sessionType,
+        startTime: eventSessions.startTime,
+        endTime: eventSessions.endTime,
+        maxCapacity: eventSessions.maxCapacity
+      })
+        .from(eventSessions)
+        .where(eq(eventSessions.eventId, parseInt(eventId)))
+        .orderBy(eventSessions.startTime);
+
+      // Get detailed statistics for each session
+      const sessionReports = await Promise.all(
+        allSessions.map(async (session) => {
+          // Total registered for this session
+          const [sessionRegistered] = await db.select({ count: sql<number>`count(*)` })
+            .from(eventSessionRegistrations)
+            .where(eq(eventSessionRegistrations.sessionId, session.sessionId));
+
+          // Total who actually attended this session (registered + checked into event)
+          const [sessionAttended] = await db.select({ count: sql<number>`count(*)` })
+            .from(eventSessionRegistrations)
+            .innerJoin(
+              cbaEventRegistrations,
+              eq(eventSessionRegistrations.registrationId, cbaEventRegistrations.id)
+            )
+            .where(
+              and(
+                eq(eventSessionRegistrations.sessionId, session.sessionId),
+                eq(cbaEventRegistrations.checkedIn, true)
+              )
+            );
+
+          const sessionAttendanceRate = sessionRegistered.count > 0 
+            ? Math.round((sessionAttended.count / sessionRegistered.count) * 100)
+            : 0;
+
+          return {
+            sessionId: session.sessionId,
+            sessionName: session.sessionName,
+            sessionType: session.sessionType,
+            room: session.room || 'TBA',
+            startTime: session.startTime,
+            endTime: session.endTime,
+            maxCapacity: session.maxCapacity,
+            totalRegistered: sessionRegistered.count,
+            totalAttended: sessionAttended.count,
+            attendanceRate: sessionAttendanceRate,
+            peakAttendance: sessionAttended.count, // For now, same as total attended
+            averageAttendance: sessionAttended.count
+          };
+        })
+      );
+      
+      res.json({
+        eventId: event.id,
+        eventName: event.eventName,
+        eventDate: event.eventDate,
+        totalRegistered: totalRegistered.count,
+        totalAttended: totalAttended.count,
+        overallAttendanceRate,
+        noShows: noShows.count,
+        peakOccupancy: totalAttended.count, // For now, same as total attended
+        averageOccupancy: totalAttended.count,
+        sessionReports,
+        reportGeneratedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Error generating final attendance report:', error);
+      res.status(500).json({ message: 'Failed to generate attendance report' });
+    }
+  });
+
   app.get('/api/admin/attendance/recent-activity/:eventId', isAuthenticated, async (req: any, res) => {
     try {
       const { eventId } = req.params;
