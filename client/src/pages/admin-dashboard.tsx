@@ -101,6 +101,13 @@ export default function AdminDashboard() {
       color: "bg-orange-500"
     },
     {
+      title: "Live Attendance",
+      description: "Real-time event entry and exit tracking",
+      icon: Activity,
+      href: "/admin/attendance",
+      color: "bg-emerald-500"
+    },
+    {
       title: "Analytics",
       description: "View detailed analytics and reports",
       icon: BarChart3,

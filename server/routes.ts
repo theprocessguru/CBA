@@ -6790,6 +6790,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Real-time attendance dashboard API
+  app.get('/api/admin/attendance/real-time/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      // Get event details
+      const [event] = await db.select()
+        .from(cbaEvents)
+        .where(eq(cbaEvents.id, parseInt(eventId)));
+      
+      if (!event) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+      
+      // Get registration count
+      const [totalRegistered] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(eq(cbaEventRegistrations.eventId, parseInt(eventId)));
+      
+      // Get check-in statistics
+      const [totalCheckedIn] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedIn, true)
+          )
+        );
+      
+      const [totalCheckedOut] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedOut, true)
+          )
+        );
+      
+      // Calculate currently inside (checked in but not checked out)
+      const [currentlyInside] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedIn, true),
+            eq(cbaEventRegistrations.checkedOut, false)
+          )
+        );
+      
+      // Get no-shows (registered but not checked in)
+      const [noShows] = await db.select({ count: sql<number>`count(*)` })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedIn, false)
+          )
+        );
+      
+      // Get last check-in time
+      const lastCheckIn = await db.select({ checkedInAt: cbaEventRegistrations.checkedInAt })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.checkedIn, true)
+          )
+        )
+        .orderBy(desc(cbaEventRegistrations.checkedInAt))
+        .limit(1);
+      
+      const occupancyRate = event.maxCapacity > 0 
+        ? Math.round((currentlyInside.count / event.maxCapacity) * 100)
+        : 0;
+      
+      res.json({
+        eventId: event.id,
+        eventName: event.eventName,
+        totalRegistered: totalRegistered.count,
+        currentlyInside: currentlyInside.count,
+        totalCheckedIn: totalCheckedIn.count,
+        totalCheckedOut: totalCheckedOut.count,
+        noShows: noShows.count,
+        lastCheckInTime: lastCheckIn[0]?.checkedInAt || null,
+        occupancyRate,
+        maxCapacity: event.maxCapacity
+      });
+    } catch (error) {
+      console.error('Error fetching real-time attendance:', error);
+      res.status(500).json({ message: 'Failed to fetch attendance data' });
+    }
+  });
+
+  app.get('/api/admin/attendance/recent-activity/:eventId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      // Get recent check-ins (last 20)
+      const recentCheckIns = await db.select({
+        id: cbaEventRegistrations.id,
+        participantName: cbaEventRegistrations.participantName,
+        checkedInAt: cbaEventRegistrations.checkedInAt,
+        checkedOutAt: cbaEventRegistrations.checkedOutAt,
+        checkedIn: cbaEventRegistrations.checkedIn,
+        checkedOut: cbaEventRegistrations.checkedOut
+      })
+        .from(cbaEventRegistrations)
+        .where(
+          and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            or(
+              eq(cbaEventRegistrations.checkedIn, true),
+              eq(cbaEventRegistrations.checkedOut, true)
+            )
+          )
+        )
+        .orderBy(desc(cbaEventRegistrations.updatedAt))
+        .limit(20);
+      
+      // Format activity feed
+      const activity = [];
+      
+      for (const registration of recentCheckIns) {
+        if (registration.checkedOut && registration.checkedOutAt) {
+          activity.push({
+            id: `${registration.id}-checkout`,
+            participantName: registration.participantName,
+            action: 'check_out',
+            timestamp: registration.checkedOutAt
+          });
+        }
+        if (registration.checkedIn && registration.checkedInAt) {
+          activity.push({
+            id: `${registration.id}-checkin`,
+            participantName: registration.participantName,
+            action: 'check_in',
+            timestamp: registration.checkedInAt
+          });
+        }
+      }
+      
+      // Sort by timestamp descending
+      activity.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      res.json(activity.slice(0, 15)); // Return last 15 activities
+    } catch (error) {
+      console.error('Error fetching recent activity:', error);
+      res.status(500).json({ message: 'Failed to fetch recent activity' });
+    }
+  });
+
   app.get('/api/scan-analytics/event/:eventId', isAuthenticated, async (req: any, res) => {
     try {
       const { eventId } = req.params;
