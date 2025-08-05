@@ -16,7 +16,8 @@ import {
   Shield,
   Clock,
   AlertCircle,
-  CheckCircle
+  CheckCircle,
+  Crown
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
