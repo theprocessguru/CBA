@@ -267,19 +267,26 @@ const MembershipBenefitsMatrix = () => {
                         </div>
                         
                         {/* Tier Assignments */}
-                        <div className="grid grid-cols-5 gap-2 mt-3">
+                        <div className="flex flex-wrap gap-3 mt-3">
                           {membershipTiers.map((tier: MembershipTier) => {
                             const isAssigned = getTierAssignment(benefit, tier.name);
                             return (
-                              <div key={tier.name} className="flex items-center justify-center p-2 bg-neutral-50 rounded">
-                                <div className="flex flex-col items-center gap-1">
-                                  <div className="text-xs font-medium capitalize">{tier.name}</div>
-                                  <Checkbox
-                                    checked={isAssigned}
-                                    onCheckedChange={() => handleBenefitToggle(benefit.id, tier.name, isAssigned)}
-                                    disabled={updateBenefitAssignment.isPending}
-                                  />
-                                </div>
+                              <div key={tier.name} className="flex items-center gap-2 p-3 bg-neutral-50 rounded-lg border hover:bg-neutral-100 transition-colors">
+                                <Checkbox
+                                  checked={isAssigned}
+                                  onCheckedChange={() => handleBenefitToggle(benefit.id, tier.name, isAssigned)}
+                                  disabled={updateBenefitAssignment.isPending}
+                                />
+                                <label className="text-sm font-medium capitalize cursor-pointer">
+                                  {tier.name}
+                                </label>
+                                <Badge 
+                                  variant="outline" 
+                                  className="text-xs"
+                                  style={{ backgroundColor: tier.color + '20', borderColor: tier.color }}
+                                >
+                                  ${tier.monthlyPrice/100}/mo
+                                </Badge>
                               </div>
                             );
                           })}
