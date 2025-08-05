@@ -20,6 +20,8 @@ import {
 import { Link } from 'wouter';
 import { cn } from '@/lib/utils';
 
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
 interface AttendanceData {
   eventId: number;
   eventName: string;
@@ -310,7 +312,7 @@ export default function AttendanceDashboardPage() {
                               {activity.participantName}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {activity.action === 'check_in' ? 'Checked in' : 'Checked out'}
+                              {capitalize(activity.action.replace('_', ' '))}
                               {activity.scannerName && ` • Scanned by ${activity.scannerName}`}
                             </p>
                           </div>
