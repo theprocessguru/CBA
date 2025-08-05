@@ -67,6 +67,7 @@ import CreateVolunteer from "@/pages/create-volunteer";
 import AdminLogin from "@/pages/admin-login";
 import QuickLogin from "@/pages/quick-login";
 import ScannerManagement from "@/pages/admin/scanner-management";
+import AdminBadges from "@/pages/admin/badges";
 import MultiRoleDemo from "@/pages/multi-role-demo";
 import MobileBadgePage from "@/pages/mobile-badge";
 
@@ -356,6 +357,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <ScannerManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/badges">
+        <AdminRoute>
+          <MainLayout>
+            <AdminBadges />
           </MainLayout>
         </AdminRoute>
       </Route>
