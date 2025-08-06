@@ -58,7 +58,7 @@ const sponsorshipPackages: SponsorshipPackage[] = [
       "Co-branded lanyards for all attendees",
       "Large banner ads on CBA website (12 months)",
       "Premium exhibition booth space",
-      "30-minute keynote speaking slot",
+      "45-minute keynote speaking slot",
       "Access to full attendee list",
       "10 social media mentions",
       "VIP passes for 10 team members",
