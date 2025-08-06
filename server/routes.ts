@@ -172,6 +172,33 @@ const isAdmin = async (req: Request, res: Response, next: Function) => {
   }
 };
 
+// Check if user has restricted participant type
+const hasRestrictedAccess = async (req: Request, res: Response, next: Function) => {
+  try {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    
+    const user = await storage.getUser(userId);
+    if (!user) return res.status(401).json({ message: "User not found" });
+    
+    // Restricted participant types that have limited access
+    const restrictedTypes = ['resident', 'volunteer', 'exhibitor', 'speaker', 'vip_guest'];
+    
+    if (restrictedTypes.includes(user.participantType || '')) {
+      return res.status(403).json({ 
+        message: "Access restricted", 
+        detail: "Your account type has limited access to this feature. Please contact support for more information.",
+        participantType: user.participantType
+      });
+    }
+    
+    next();
+  } catch (error) {
+    console.error("Error checking access restrictions:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Security middleware
   const limiter = rateLimit({
@@ -578,7 +605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create or update business profile
-  app.post('/api/my/business', isAuthenticated, async (req: any, res) => {
+  app.post('/api/my/business', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const businessData = validateRequest(insertBusinessSchema, { ...req.body, userId });
@@ -656,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create product
-  app.post('/api/my/products', isAuthenticated, async (req: any, res) => {
+  app.post('/api/my/products', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
@@ -696,7 +723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Update product
-  app.put('/api/my/products/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/my/products/:id', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const productId = parseInt(req.params.id);
@@ -730,7 +757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Delete product
-  app.delete('/api/my/products/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/my/products/:id', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const productId = parseInt(req.params.id);
@@ -777,7 +804,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Create offer
-  app.post('/api/my/offers', isAuthenticated, async (req: any, res) => {
+  app.post('/api/my/offers', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const business = await storage.getBusinessByUserId(userId);
@@ -797,7 +824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Update offer
-  app.put('/api/my/offers/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/my/offers/:id', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const offerId = parseInt(req.params.id);
@@ -831,7 +858,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Delete offer
-  app.delete('/api/my/offers/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/my/offers/:id', isAuthenticated, hasRestrictedAccess, async (req: any, res) => {
     try {
       const userId = req.user.id;
       const offerId = parseInt(req.params.id);

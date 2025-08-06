@@ -18,9 +18,12 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Business, Offer, Product } from "@shared/schema";
+import { RestrictedAccessNotice } from "@/components/RestrictedAccessNotice";
+import { hasRestrictedAccess } from "@/lib/accessControl";
 
 const DashboardOverview = () => {
   const { user } = useAuth();
+  const participantType = (user as any)?.participantType;
   
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
     queryKey: ['/api/my/business'],
@@ -66,6 +69,9 @@ const DashboardOverview = () => {
   return (
     <div>
       <h1 className="text-2xl font-bold text-neutral-900 mb-6">Dashboard Overview</h1>
+      
+      {/* Show restricted access notice for limited participant types */}
+      <RestrictedAccessNotice participantType={participantType} />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <Card>
