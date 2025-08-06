@@ -46,7 +46,7 @@ const sponsorshipPackages: SponsorshipPackage[] = [
   {
     id: 1,
     name: "Platinum Partner",
-    level: 4,
+    level: 7,
     price: "£5,000",
     icon: Trophy,
     color: "bg-gradient-to-r from-slate-400 to-slate-600",
@@ -69,7 +69,7 @@ const sponsorshipPackages: SponsorshipPackage[] = [
   {
     id: 2,
     name: "Gold Sponsor",
-    level: 3,
+    level: 6,
     price: "£3,000",
     icon: Award,
     color: "bg-gradient-to-r from-yellow-400 to-yellow-600",
@@ -90,7 +90,7 @@ const sponsorshipPackages: SponsorshipPackage[] = [
   {
     id: 3,
     name: "Silver Sponsor",
-    level: 2,
+    level: 5,
     price: "£1,500",
     icon: Medal,
     color: "bg-gradient-to-r from-gray-400 to-gray-600",
@@ -109,7 +109,7 @@ const sponsorshipPackages: SponsorshipPackage[] = [
   {
     id: 4,
     name: "Bronze Supporter",
-    level: 1,
+    level: 4,
     price: "£750",
     icon: Star,
     color: "bg-gradient-to-r from-orange-400 to-orange-600",
@@ -120,6 +120,58 @@ const sponsorshipPackages: SponsorshipPackage[] = [
       "2 social media mentions",
       "VIP passes for 2 team members",
       "Event program listing",
+    ],
+  },
+  {
+    id: 5,
+    name: "Workshop Sponsor",
+    level: 3,
+    price: "£500",
+    icon: Users,
+    color: "bg-gradient-to-r from-purple-400 to-purple-600",
+    available: true,
+    maxSponsors: 4,
+    currentSponsors: 0,
+    benefits: [
+      "Sponsor a specific workshop session",
+      "Logo displayed in workshop room",
+      "5-minute introduction at workshop start",
+      "Workshop materials branding",
+      "2 VIP passes for team members",
+      "Social media mention",
+    ],
+  },
+  {
+    id: 6,
+    name: "Coffee Break Sponsor",
+    level: 2,
+    price: "£250",
+    icon: Package,
+    color: "bg-gradient-to-r from-amber-400 to-amber-600",
+    available: true,
+    maxSponsors: 4,
+    currentSponsors: 1,
+    benefits: [
+      "Branding at coffee stations",
+      "Logo on coffee cups/napkins",
+      "Thank you announcement during breaks",
+      "1 VIP pass",
+      "Event program listing",
+    ],
+  },
+  {
+    id: 7,
+    name: "Community Friend",
+    level: 1,
+    price: "£100",
+    icon: Sparkles,
+    color: "bg-gradient-to-r from-green-400 to-green-600",
+    available: true,
+    benefits: [
+      "Name listed on supporters wall",
+      "Thank you on social media",
+      "1 event ticket",
+      "Feel-good factor supporting local businesses",
     ],
   },
 ];
@@ -251,8 +303,25 @@ export default function AISummitSponsorship() {
         </CardContent>
       </Card>
 
+      {/* New Smaller Packages Highlight */}
+      <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-500">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-green-700">
+            <Sparkles className="h-5 w-5" />
+            NEW: Affordable Sponsorship Options
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-neutral-700">
+            We've added smaller sponsorship packages starting from just £100! Perfect for local businesses, 
+            startups, and community supporters who want to be part of the AI Summit while working within 
+            tighter budgets. Every contribution helps us educate and empower our business community.
+          </p>
+        </CardContent>
+      </Card>
+
       {/* Sponsorship Packages */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {sponsorshipPackages.map((pkg) => {
           const Icon = pkg.icon;
           const spotsLeft = pkg.maxSponsors ? pkg.maxSponsors - pkg.currentSponsors : null;
