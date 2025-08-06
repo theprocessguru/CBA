@@ -50,7 +50,7 @@ export function RestrictedAccessNotice({
         )}
         
         <p className="mt-3 text-sm text-orange-600">
-          Need full access? Please contact support at support@cba.org.uk
+          Need full access? Please contact support at support@croydonba.org.uk
         </p>
       </AlertDescription>
     </Alert>

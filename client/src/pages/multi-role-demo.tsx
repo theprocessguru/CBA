@@ -40,7 +40,7 @@ const MultiRoleDemo = () => {
     },
     {
       name: "James Wilson",
-      email: "james@cba.org.uk",
+      email: "james@croydonba.org.uk",
       company: "Croydon Business Association",
       participantRoles: '["team", "organizer", "speaker"]',
       primaryRole: "team",

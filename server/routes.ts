@@ -3838,7 +3838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create admin user data with all required fields
       const adminUserData = {
         id: 'admin-test-user',
-        email: 'admin@cba.org.uk',
+        email: 'admin@croydonba.org.uk',
         firstName: 'Admin',
         lastName: 'User',
         isAdmin: true,

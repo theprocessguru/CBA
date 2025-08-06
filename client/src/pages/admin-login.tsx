@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
             <h3 className="font-medium text-blue-900 mb-2">Test Admin Account</h3>
             <div className="space-y-1 text-sm text-blue-800">
               <p><strong>Name:</strong> Admin User</p>
-              <p><strong>Email:</strong> admin@cba.org.uk</p>
+              <p><strong>Email:</strong> admin@croydonba.org.uk</p>
               <p><strong>Role:</strong> Administrator</p>
               <p><strong>QR Handle:</strong> ADMIN-CBA-2025</p>
             </div>

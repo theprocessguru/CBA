@@ -507,7 +507,7 @@ export default function AISummitSponsorship() {
             Contact our sponsorship team for more information:
           </p>
           <div className="space-y-1">
-            <p className="font-medium">Email: sponsors@cba.org.uk</p>
+            <p className="font-medium">Email: sponsors@croydonba.org.uk</p>
             <p className="font-medium">Phone: 020 8555 0123</p>
           </div>
           <p className="text-xs text-neutral-500 pt-2">
