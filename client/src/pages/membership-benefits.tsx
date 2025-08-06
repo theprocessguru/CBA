@@ -88,9 +88,11 @@ const MembershipBenefits = () => {
                     Explore MyT Accounting
                   </Button>
                 </Link>
-                <Button variant="outline" className="border-white text-white hover:bg-white/10">
-                  35% Member Discount Available
-                </Button>
+                <Link href="/membership">
+                  <Button variant="outline" className="bg-white/20 border-white text-white hover:bg-white/30">
+                    35% Member Discount Available
+                  </Button>
+                </Link>
               </div>
             </div>
 
