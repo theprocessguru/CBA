@@ -23,8 +23,8 @@ const Home = () => {
         />
       </div>
       
-      <HeroSection />
       <AISummitBanner />
+      <HeroSection />
       <FeaturedMembers />
       <SpecialOffers />
       <MarketplacePreview />
