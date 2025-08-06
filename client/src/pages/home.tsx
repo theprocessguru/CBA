@@ -16,6 +16,8 @@ const Home = () => {
         <meta name="description" content={META_DESCRIPTIONS.home} />
       </Helmet>
       
+      <AISummitBanner />
+      
       <div className="md:hidden">
         <PageHeader 
           title="CBA Home"
@@ -23,7 +25,6 @@ const Home = () => {
         />
       </div>
       
-      <AISummitBanner />
       <HeroSection />
       <FeaturedMembers />
       <SpecialOffers />
