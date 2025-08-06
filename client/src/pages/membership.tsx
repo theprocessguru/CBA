@@ -420,6 +420,13 @@ const MembershipPage = () => {
                           <div className="text-2xl font-bold text-green-600">FREE</div>
                           <div className="text-sm text-neutral-600">{plan.badge}</div>
                         </div>
+                      ) : plan.id === "patron" || plan.id === "partner" ? (
+                        <div>
+                          <div className="text-lg font-bold text-primary">
+                            Call for price
+                          </div>
+                          <div className="text-xs text-neutral-600">Custom pricing</div>
+                        </div>
                       ) : (
                         <div>
                           <div className="text-2xl font-bold text-primary">
@@ -452,11 +459,18 @@ const MembershipPage = () => {
                   <Button 
                     className="w-full" 
                     variant={plan.popular ? "default" : "outline"}
-                    onClick={() => handleSelectPlan(plan.id, plan.price)}
+                    onClick={() => {
+                      if (plan.id === "patron" || plan.id === "partner") {
+                        window.location.href = "mailto:membership@croydonba.org.uk?subject=" + encodeURIComponent(`Inquiry about ${plan.name} membership`);
+                      } else {
+                        handleSelectPlan(plan.id, plan.price);
+                      }
+                    }}
                     disabled={isLoading}
                   >
                     {isLoading ? "Loading..." : 
                      plan.isFree ? "Start Free Membership" : 
+                     (plan.id === "patron" || plan.id === "partner") ? "Contact for Pricing" :
                      `Choose ${plan.name}`}
                   </Button>
                 </CardContent>

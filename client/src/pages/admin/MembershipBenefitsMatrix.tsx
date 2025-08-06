@@ -294,7 +294,9 @@ const MembershipBenefitsMatrix = () => {
                       <IconComponent className="h-4 w-4 text-white" />
                     </div>
                     <div className="text-sm font-medium capitalize">{tier.name}</div>
-                    <div className="text-xs text-neutral-600">${tier.monthlyPrice}/mo</div>
+                    <div className="text-xs text-neutral-600">
+                      {tier.id === "patron" || tier.id === "partner" ? "Call for price" : `$${tier.monthlyPrice}/mo`}
+                    </div>
                   </div>
                 );
               })}

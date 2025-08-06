@@ -417,8 +417,17 @@ const MembershipManagement = () => {
                       {tier.name}
                     </CardTitle>
                     <div className="text-right">
-                      <div className="text-lg font-bold">£{tier.monthlyPrice}/month</div>
-                      <div className="text-sm text-muted-foreground">£{tier.annualPrice}/year</div>
+                      {tier.id === "patron" || tier.id === "partner" ? (
+                        <div>
+                          <div className="text-lg font-bold">Call for price</div>
+                          <div className="text-sm text-muted-foreground">Custom pricing</div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="text-lg font-bold">£{tier.monthlyPrice}/month</div>
+                          <div className="text-sm text-muted-foreground">£{tier.annualPrice}/year</div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
