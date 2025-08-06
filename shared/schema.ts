@@ -742,6 +742,53 @@ export const scanSessions = pgTable('scan_sessions', {
   sessionNotes: text('session_notes')
 });
 
+// Event Sponsorship Packages
+export const sponsorshipPackages = pgTable('sponsorship_packages', {
+  id: serial('id').primaryKey(),
+  eventId: integer('event_id').references(() => cbaEvents.id),
+  packageName: varchar('package_name').notNull(), // Bronze, Silver, Gold, Platinum
+  packageLevel: integer('package_level').notNull(), // 1-4 for sorting
+  price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+  benefits: text('benefits').array(), // Array of benefit descriptions
+  maxSponsors: integer('max_sponsors').default(null), // null means unlimited
+  currentSponsors: integer('current_sponsors').default(0),
+  logoPlacement: varchar('logo_placement'), // website, banner, stage, materials
+  bannerAds: boolean('banner_ads').default(false),
+  lanyardBranding: boolean('lanyard_branding').default(false),
+  boothSpace: varchar('booth_space'), // small, medium, large, premium
+  speakingSlot: boolean('speaking_slot').default(false),
+  attendeeListAccess: boolean('attendee_list_access').default(false),
+  socialMediaMentions: integer('social_media_mentions').default(0),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+// Event Sponsors
+export const eventSponsors = pgTable('event_sponsors', {
+  id: serial('id').primaryKey(),
+  eventId: integer('event_id').notNull().references(() => cbaEvents.id),
+  packageId: integer('package_id').notNull().references(() => sponsorshipPackages.id),
+  companyName: varchar('company_name').notNull(),
+  contactName: varchar('contact_name').notNull(),
+  contactEmail: varchar('contact_email').notNull(),
+  contactPhone: varchar('contact_phone'),
+  companyWebsite: varchar('company_website'),
+  logoUrl: text('logo_url'),
+  companyDescription: text('company_description'),
+  sponsorshipAmount: decimal('sponsorship_amount', { precision: 10, scale: 2 }).notNull(),
+  paymentStatus: varchar('payment_status').default('pending'), // pending, paid, cancelled
+  paymentDate: timestamp('payment_date'),
+  invoiceNumber: varchar('invoice_number'),
+  specialRequests: text('special_requests'),
+  approvalStatus: varchar('approval_status').default('pending'), // pending, approved, rejected
+  approvedBy: varchar('approved_by').references(() => users.id),
+  approvedAt: timestamp('approved_at'),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -1171,3 +1218,53 @@ export type Benefit = typeof benefits.$inferSelect;
 
 export type InsertMembershipTierBenefit = z.infer<typeof insertMembershipTierBenefitSchema>;
 export type MembershipTierBenefit = typeof membershipTierBenefits.$inferSelect;
+
+// Sponsorship Package Schema and Types
+export const insertSponsorshipPackageSchema = createInsertSchema(sponsorshipPackages, {
+  eventId: z.number().optional(),
+  packageName: z.string().min(1, "Package name is required"),
+  packageLevel: z.number().min(1).max(4),
+  price: z.string().min(1, "Price is required"),
+  benefits: z.array(z.string()).optional(),
+  maxSponsors: z.number().nullable().optional(),
+  logoPlacement: z.string().optional(),
+  bannerAds: z.boolean().default(false),
+  lanyardBranding: z.boolean().default(false),
+  boothSpace: z.string().optional(),
+  speakingSlot: z.boolean().default(false),
+  attendeeListAccess: z.boolean().default(false),
+  socialMediaMentions: z.number().default(0),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, currentSponsors: true, createdAt: true, updatedAt: true });
+
+export type InsertSponsorshipPackage = z.infer<typeof insertSponsorshipPackageSchema>;
+export type SponsorshipPackage = typeof sponsorshipPackages.$inferSelect;
+
+// Event Sponsor Schema and Types
+export const insertEventSponsorSchema = createInsertSchema(eventSponsors, {
+  eventId: z.number().min(1, "Event ID is required"),
+  packageId: z.number().min(1, "Package ID is required"),
+  companyName: z.string().min(1, "Company name is required"),
+  contactName: z.string().min(1, "Contact name is required"),
+  contactEmail: z.string().email("Valid email is required"),
+  contactPhone: z.string().optional(),
+  companyWebsite: z.string().optional(),
+  logoUrl: z.string().optional(),
+  companyDescription: z.string().optional(),
+  sponsorshipAmount: z.string().min(1, "Sponsorship amount is required"),
+  specialRequests: z.string().optional(),
+}).omit({ 
+  id: true, 
+  paymentStatus: true, 
+  paymentDate: true, 
+  invoiceNumber: true,
+  approvalStatus: true,
+  approvedBy: true,
+  approvedAt: true,
+  isActive: true,
+  createdAt: true, 
+  updatedAt: true 
+});
+
+export type InsertEventSponsor = z.infer<typeof insertEventSponsorSchema>;
+export type EventSponsor = typeof eventSponsors.$inferSelect;

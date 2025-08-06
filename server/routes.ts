@@ -3971,6 +3971,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // API endpoint for sponsorship inquiries
+  app.post('/api/sponsorship/inquire', async (req, res) => {
+    try {
+      const {
+        packageId,
+        packageName,
+        companyName,
+        contactName,
+        contactEmail,
+        contactPhone,
+        companyWebsite,
+        companyDescription,
+        specialRequests
+      } = req.body;
+
+      // Validate required fields
+      if (!packageName || !companyName || !contactName || !contactEmail) {
+        return res.status(400).json({ 
+          message: "Missing required fields" 
+        });
+      }
+
+      // Store the sponsorship inquiry (for now, just log it)
+      console.log("Sponsorship inquiry received:", {
+        packageId,
+        packageName,
+        companyName,
+        contactName,
+        contactEmail,
+        contactPhone,
+        companyWebsite,
+        companyDescription,
+        specialRequests,
+        timestamp: new Date().toISOString()
+      });
+
+      // In a production system, you would:
+      // 1. Store this in the database
+      // 2. Send email notifications to admin
+      // 3. Send confirmation email to sponsor
+      
+      res.json({ 
+        success: true,
+        message: "Sponsorship inquiry received successfully"
+      });
+    } catch (error) {
+      console.error("Error processing sponsorship inquiry:", error);
+      res.status(500).json({ 
+        message: "Failed to process sponsorship inquiry" 
+      });
+    }
+  });
+
   // Download badge endpoint
   app.get('/api/download-badge/:registrationId', isAuthenticated, async (req: any, res) => {
     try {

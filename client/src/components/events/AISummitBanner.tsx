@@ -91,6 +91,12 @@ const AISummitBanner = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
+            <Link href="/ai-summit/sponsor">
+              <Button size="lg" className="bg-yellow-400 text-blue-900 hover:bg-yellow-300 font-semibold px-8 py-3">
+                <span>Become a Sponsor</span>
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
             <Link href="/membership-benefits">
               <Button size="lg" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-3">
                 <span>Join CBA Membership</span>

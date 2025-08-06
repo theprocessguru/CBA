@@ -34,6 +34,7 @@ import AIStrategy from "@/pages/ai-strategy";
 import AIEnterprise from "@/pages/ai-enterprise";
 import AIAnalytics from "@/pages/ai-analytics";
 import AISummit from "@/pages/ai-summit";
+import AISummitSponsorPage from "@/pages/ai-summit/sponsor";
 import GHLAdmin from "@/pages/ghl-admin";
 import DataImport from "@/pages/data-import";
 import AdminDataImport from "@/pages/admin/import";
@@ -272,6 +273,11 @@ function Router() {
       <Route path="/ai-summit">
         <MainLayout>
           <AISummit />
+        </MainLayout>
+      </Route>
+      <Route path="/ai-summit/sponsor">
+        <MainLayout>
+          <AISummitSponsorPage />
         </MainLayout>
       </Route>
       <Route path="/workshop-registration">

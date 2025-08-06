@@ -100,6 +100,12 @@ import {
   type InsertScanHistory,
   type ScanSession,
   type InsertScanSession,
+  sponsorshipPackages,
+  eventSponsors,
+  type SponsorshipPackage,
+  type InsertSponsorshipPackage,
+  type EventSponsor,
+  type InsertEventSponsor,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
