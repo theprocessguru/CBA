@@ -1502,6 +1502,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a new administrator
+  app.post('/api/admin/users/create-admin', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { email, firstName, lastName } = req.body;
+      
+      if (!email || !firstName || !lastName) {
+        return res.status(400).json({ 
+          message: "Email, first name, and last name are required" 
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        // If user exists but is not admin, upgrade them
+        if (!existingUser.isAdmin) {
+          await storage.updateUser(existingUser.id, { isAdmin: true });
+          return res.json({ 
+            message: "User upgraded to administrator", 
+            user: { ...existingUser, isAdmin: true }
+          });
+        }
+        return res.status(400).json({ 
+          message: "User is already an administrator" 
+        });
+      }
+
+      // Generate temporary password
+      const tempPassword = `CBA${Math.random().toString(36).substring(2, 8).toUpperCase()}2025!`;
+      
+      // Hash the password
+      const bcrypt = require('bcrypt');
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+      
+      // Create QR handle from name
+      const qrHandle = `${firstName.toUpperCase()}-CBA-2025`;
+      
+      // Create new admin user
+      const newAdmin = {
+        id: `admin-${firstName.toLowerCase()}-${Date.now()}`,
+        email,
+        firstName,
+        lastName,
+        isAdmin: true,
+        passwordHash,
+        qrHandle,
+        accountStatus: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      await storage.createUser(newAdmin);
+
+      // Send welcome email with temporary password
+      const emailService = new EmailService();
+      const emailResult = await emailService.sendAdminWelcomeEmail(
+        email,
+        `${firstName} ${lastName}`,
+        tempPassword
+      );
+
+      res.json({ 
+        success: true,
+        message: emailResult.success 
+          ? "Administrator created successfully. Welcome email sent with temporary password."
+          : "Administrator created successfully. Note: Email service not configured - please share the temporary password manually.",
+        user: {
+          id: newAdmin.id,
+          email: newAdmin.email,
+          firstName: newAdmin.firstName,
+          lastName: newAdmin.lastName,
+          qrHandle: newAdmin.qrHandle
+        },
+        tempPassword: emailResult.success ? undefined : tempPassword, // Only return password if email failed
+        emailSent: emailResult.success
+      });
+    } catch (error) {
+      console.error("Error creating administrator:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to create administrator" 
+      });
+    }
+  });
+
   app.put('/api/admin/users/:userId/suspend', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;

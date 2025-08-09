@@ -76,6 +76,117 @@ export class EmailService {
   }
 
   /**
+   * Send admin welcome email with temporary password
+   */
+  async sendAdminWelcomeEmail(
+    recipientEmail: string,
+    recipientName: string,
+    temporaryPassword: string
+  ): Promise<{ success: boolean; message: string }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        message: 'Email service not configured. Please contact IT support.'
+      };
+    }
+
+    const baseUrl = this.getBaseUrl();
+
+    try {
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: recipientEmail,
+        subject: `Welcome to CBA Admin Portal - Your Administrator Access`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="margin: 0; font-size: 28px;">Croydon Business Association</h1>
+              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Administrator Access Granted</p>
+            </div>
+            
+            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+              <h2 style="color: #1f2937; margin-top: 0;">Welcome ${recipientName}!</h2>
+              
+              <p style="color: #4b5563; line-height: 1.6;">
+                You have been granted <strong>Administrator access</strong> to the Croydon Business Association management platform.
+                This gives you full access to manage memberships, events, attendance tracking, and all administrative functions.
+              </p>
+              
+              <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #1f2937; margin-top: 0;">🔐 Your Login Credentials:</h3>
+                <div style="background: white; padding: 15px; border-radius: 5px; margin-top: 10px; border: 1px solid #e5e7eb;">
+                  <p style="margin: 5px 0; color: #4b5563;">
+                    <strong>Email:</strong> ${recipientEmail}<br>
+                    <strong>Temporary Password:</strong> <code style="background: #fef3c7; padding: 2px 6px; border-radius: 3px; color: #92400e; font-family: monospace;">${temporaryPassword}</code>
+                  </p>
+                </div>
+                <p style="color: #dc2626; margin-top: 15px; font-size: 14px;">
+                  ⚠️ <strong>Important:</strong> Please change your password immediately after your first login for security reasons.
+                </p>
+              </div>
+
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${baseUrl}/admin-login" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
+                  Access Admin Portal
+                </a>
+              </div>
+
+              <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #1e40af;">As an administrator, you can:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #1e40af; line-height: 1.6;">
+                  <li>Manage membership tiers and benefits</li>
+                  <li>Create and manage events</li>
+                  <li>Track attendance and generate reports</li>
+                  <li>View business analytics and insights</li>
+                  <li>Import contacts and manage users</li>
+                  <li>Handle sponsorships and partnerships</li>
+                </ul>
+              </div>
+              
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+              
+              <p style="color: #6b7280; font-size: 14px; text-align: center;">
+                If you have any questions or need assistance, please contact the IT support team at 
+                <a href="mailto:support@croydonba.org.uk" style="color: #3b82f6;">support@croydonba.org.uk</a>
+              </p>
+            </div>
+          </div>
+        `,
+        text: `
+Welcome ${recipientName}!
+
+You have been granted Administrator access to the Croydon Business Association management platform.
+
+Your Login Credentials:
+Email: ${recipientEmail}
+Temporary Password: ${temporaryPassword}
+
+IMPORTANT: Please change your password immediately after your first login for security reasons.
+
+Access the admin portal at: ${baseUrl}/admin-login
+
+If you have any questions, please contact support@croydonba.org.uk
+
+Best regards,
+Croydon Business Association
+        `
+      };
+
+      await this.transporter!.sendMail(mailOptions);
+      return { 
+        success: true, 
+        message: 'Admin welcome email sent successfully' 
+      };
+    } catch (error) {
+      console.error('Failed to send admin welcome email:', error);
+      return { 
+        success: false, 
+        message: `Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}` 
+      };
+    }
+  }
+
+  /**
    * Send printable badge via email
    */
   async sendPrintableBadge(

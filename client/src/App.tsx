@@ -77,6 +77,7 @@ import BenefitsManagement from "@/pages/admin/BenefitsManagement";
 import MembershipBenefitsMatrix from "@/pages/admin/MembershipBenefitsMatrix";
 import MembershipBenefitsManager from "@/pages/admin/MembershipBenefitsManager";
 import AIToolsDemo from "@/pages/ai-tools-demo";
+import AdminManagement from "@/pages/admin/AdminManagement";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -515,6 +516,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <ContactImport />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/administrators">
+        <AdminRoute>
+          <MainLayout>
+            <AdminManagement />
           </MainLayout>
         </AdminRoute>
       </Route>

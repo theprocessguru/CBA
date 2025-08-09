@@ -163,6 +163,13 @@ export default function AdminDashboard() {
       icon: Upload,
       href: "/admin/contact-import",
       color: "bg-cyan-500"
+    },
+    {
+      title: "Administrator Management",
+      description: "Manage administrator accounts and permissions",
+      icon: Shield,
+      href: "/admin/administrators",
+      color: "bg-rose-500"
     }
   ];
 
