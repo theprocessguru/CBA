@@ -78,6 +78,7 @@ import MembershipBenefitsMatrix from "@/pages/admin/MembershipBenefitsMatrix";
 import MembershipBenefitsManager from "@/pages/admin/MembershipBenefitsManager";
 import AIToolsDemo from "@/pages/ai-tools-demo";
 import AdminManagement from "@/pages/admin/AdminManagement";
+import UserTypes from "@/pages/admin/UserTypes";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -523,6 +524,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AdminManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/user-types">
+        <AdminRoute>
+          <MainLayout>
+            <UserTypes />
           </MainLayout>
         </AdminRoute>
       </Route>

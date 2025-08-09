@@ -73,6 +73,13 @@ export default function AdminDashboard() {
       badge: stats?.totalUsers || 0
     },
     {
+      title: "User Types & Categories",
+      description: "View and manage different participant types",
+      icon: Users,
+      href: "/admin/user-types",
+      color: "bg-violet-500"
+    },
+    {
       title: "Membership Pricing",
       description: "Manage membership tiers and pricing",
       icon: Crown,
