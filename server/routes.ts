@@ -50,7 +50,9 @@ import {
   insertBenefitSchema,
   insertMembershipTierBenefitSchema,
   type Benefit,
-  type MembershipTierBenefit
+  type MembershipTierBenefit,
+  eventSponsors,
+  sponsorshipPackages
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -7995,6 +7997,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error updating tier benefits:', error);
       res.status(500).json({ message: 'Failed to update tier benefits' });
+    }
+  });
+
+  // Get event sponsors for sponsor spotlight
+  app.get("/api/event-sponsors", async (req, res) => {
+    try {
+      // Import pool directly to execute raw query
+      const { pool } = await import("./db");
+      
+      const result = await pool.query(`
+        SELECT 
+          es.id,
+          es.company_name,
+          es.contact_name,
+          es.contact_email as email,
+          es.contact_phone as phone,
+          es.company_website as website,
+          es.logo_url,
+          sp.package_name,
+          sp.price as package_price,
+          es.approval_status as status,
+          es.special_requests as notes,
+          es.created_at
+        FROM event_sponsors es
+        LEFT JOIN sponsorship_packages sp ON es.package_id = sp.id
+        WHERE es.approval_status = 'approved'
+        ORDER BY sp.price DESC NULLS LAST
+      `);
+      
+      res.json(result.rows || []);
+    } catch (error) {
+      console.error("Error fetching sponsors:", error);
+      res.status(500).json({ error: "Failed to fetch sponsors" });
     }
   });
 

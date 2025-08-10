@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { ParticipantTypeSelector } from "@/components/forms/ParticipantTypeSelector";
+import { SponsorSpotlight } from "@/components/SponsorSpotlight";
 
 const AISummit = () => {
   const { user, isAuthenticated } = useAuth();
@@ -2667,6 +2668,11 @@ const AISummit = () => {
             </div>
           </div>
         )}
+
+        {/* Sponsor Spotlight Section */}
+        <div className="mb-12">
+          <SponsorSpotlight />
+        </div>
       </div>
     </>
   );
