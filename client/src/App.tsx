@@ -81,6 +81,7 @@ import AdminManagement from "@/pages/admin/AdminManagement";
 import UserTypes from "@/pages/admin/UserTypes";
 import { ExhibitorVisitors } from "@/pages/ExhibitorVisitors";
 import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
+import EventTimeSlots from "@/pages/admin/EventTimeSlots";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -547,6 +548,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <UserTypes />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/event-time-slots">
+        <AdminRoute>
+          <MainLayout>
+            <EventTimeSlots />
           </MainLayout>
         </AdminRoute>
       </Route>

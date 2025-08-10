@@ -585,6 +585,41 @@ export const cbaEvents = pgTable("cba_events", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Event time slots for detailed scheduling
+export const eventTimeSlots = pgTable("event_time_slots", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => cbaEvents.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(), // e.g., "Opening Keynote", "Break", "Panel Discussion"
+  description: text("description"),
+  slotType: varchar("slot_type").notNull(), // presentation, panel, break, networking, workshop, q&a
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  room: varchar("room"), // Room or location within venue
+  maxCapacity: integer("max_capacity"),
+  currentAttendees: integer("current_attendees").default(0),
+  speakerId: varchar("speaker_id").references(() => users.id), // Primary speaker
+  moderatorId: varchar("moderator_id").references(() => users.id), // Moderator for panels
+  isBreak: boolean("is_break").default(false), // For lunch, coffee breaks, etc.
+  materials: text("materials"), // Links or descriptions of session materials
+  streamingUrl: varchar("streaming_url"), // For hybrid/virtual events
+  recordingUrl: varchar("recording_url"), // Post-event recording
+  tags: text("tags"), // JSON array of topic tags
+  requiresRegistration: boolean("requires_registration").default(false), // If specific slot needs separate registration
+  displayOrder: integer("display_order").default(0), // For ordering in schedule
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Many-to-many relationship for multiple speakers per time slot
+export const timeSlotSpeakers = pgTable("time_slot_speakers", {
+  id: serial("id").primaryKey(),
+  timeSlotId: integer("time_slot_id").notNull().references(() => eventTimeSlots.id, { onDelete: "cascade" }),
+  speakerId: varchar("speaker_id").notNull().references(() => users.id),
+  role: varchar("role").default("speaker"), // speaker, co-speaker, panelist, moderator
+  displayOrder: integer("display_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Event registrations with enhanced tracking  
 export const cbaEventRegistrations = pgTable("cba_event_registrations", {
   id: serial("id").primaryKey(),
@@ -954,6 +989,27 @@ export const insertCBAEventSchema = createInsertSchema(cbaEvents, {
   endTime: z.string().transform((val) => new Date(val)),
   registrationDeadline: z.string().optional().transform((val) => val ? new Date(val) : undefined),
 }).omit({ id: true });
+
+// Event time slot schemas and types
+export const insertEventTimeSlotSchema = createInsertSchema(eventTimeSlots, {
+  startTime: z.string().transform((val) => new Date(val)),
+  endTime: z.string().transform((val) => new Date(val)),
+}).omit({ 
+  id: true,
+  currentAttendees: true,
+  createdAt: true,
+  updatedAt: true 
+});
+
+export const insertTimeSlotSpeakerSchema = createInsertSchema(timeSlotSpeakers).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type EventTimeSlot = typeof eventTimeSlots.$inferSelect;
+export type InsertEventTimeSlot = z.infer<typeof insertEventTimeSlotSchema>;
+export type TimeSlotSpeaker = typeof timeSlotSpeakers.$inferSelect;
+export type InsertTimeSlotSpeaker = z.infer<typeof insertTimeSlotSpeakerSchema>;
 export const insertCBAEventRegistrationSchema = createInsertSchema(cbaEventRegistrations).omit({ id: true });
 export const insertEventAttendanceAnalyticsSchema = createInsertSchema(eventAttendanceAnalytics).omit({ id: true });
 export const insertPersonalBadgeEventSchema = createInsertSchema(personalBadgeEvents).omit({ id: true });

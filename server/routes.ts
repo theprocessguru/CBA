@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -53,11 +53,14 @@ import {
   type MembershipTierBenefit,
   eventSponsors,
   sponsorshipPackages,
-  exhibitorStandVisitors
+  exhibitorStandVisitors,
+  eventTimeSlots,
+  timeSlotSpeakers,
+  insertEventTimeSlotSchema,
+  insertTimeSlotSpeakerSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { sql, desc } from "drizzle-orm";
 import { getGHLService } from "./ghlService";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
@@ -5741,6 +5744,222 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ==================== GENERAL EVENT MANAGEMENT API ROUTES ====================
+
+  // Event Time Slots Management Routes
+  app.get("/api/events/:eventId/time-slots", async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const timeSlots = await db
+        .select({
+          id: eventTimeSlots.id,
+          eventId: eventTimeSlots.eventId,
+          title: eventTimeSlots.title,
+          description: eventTimeSlots.description,
+          slotType: eventTimeSlots.slotType,
+          startTime: eventTimeSlots.startTime,
+          endTime: eventTimeSlots.endTime,
+          room: eventTimeSlots.room,
+          maxCapacity: eventTimeSlots.maxCapacity,
+          currentAttendees: eventTimeSlots.currentAttendees,
+          speakerId: eventTimeSlots.speakerId,
+          moderatorId: eventTimeSlots.moderatorId,
+          isBreak: eventTimeSlots.isBreak,
+          materials: eventTimeSlots.materials,
+          streamingUrl: eventTimeSlots.streamingUrl,
+          recordingUrl: eventTimeSlots.recordingUrl,
+          tags: eventTimeSlots.tags,
+          requiresRegistration: eventTimeSlots.requiresRegistration,
+          displayOrder: eventTimeSlots.displayOrder,
+          speakerName: users.firstName,
+          speakerLastName: users.lastName,
+          speakerEmail: users.email,
+        })
+        .from(eventTimeSlots)
+        .leftJoin(users, eq(eventTimeSlots.speakerId, users.id))
+        .where(eq(eventTimeSlots.eventId, parseInt(eventId)))
+        .orderBy(eventTimeSlots.displayOrder, eventTimeSlots.startTime);
+
+      // Get additional speakers for each time slot
+      const slotSpeakers = await db
+        .select({
+          timeSlotId: timeSlotSpeakers.timeSlotId,
+          speakerId: timeSlotSpeakers.speakerId,
+          role: timeSlotSpeakers.role,
+          displayOrder: timeSlotSpeakers.displayOrder,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          title: users.title,
+          company: users.company,
+        })
+        .from(timeSlotSpeakers)
+        .leftJoin(users, eq(timeSlotSpeakers.speakerId, users.id))
+        .where(
+          inArray(
+            timeSlotSpeakers.timeSlotId, 
+            timeSlots.map(slot => slot.id)
+          )
+        )
+        .orderBy(timeSlotSpeakers.displayOrder);
+
+      // Combine time slots with their speakers
+      const timeSlotsWithSpeakers = timeSlots.map(slot => ({
+        ...slot,
+        speakers: slotSpeakers.filter(speaker => speaker.timeSlotId === slot.id),
+        primarySpeaker: slot.speakerId ? {
+          id: slot.speakerId,
+          name: `${slot.speakerName || ''} ${slot.speakerLastName || ''}`.trim(),
+          email: slot.speakerEmail,
+        } : null,
+      }));
+
+      res.json(timeSlotsWithSpeakers);
+    } catch (error) {
+      console.error("Error fetching time slots:", error);
+      res.status(500).json({ error: "Failed to fetch time slots" });
+    }
+  });
+
+  // Create a new time slot
+  app.post("/api/events/:eventId/time-slots", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { eventId } = req.params;
+      const timeSlotData = insertEventTimeSlotSchema.parse({
+        ...req.body,
+        eventId: parseInt(eventId),
+      });
+
+      const [newTimeSlot] = await db
+        .insert(eventTimeSlots)
+        .values(timeSlotData)
+        .returning();
+
+      // Add speakers if provided
+      if (req.body.speakers && Array.isArray(req.body.speakers)) {
+        const speakersToAdd = req.body.speakers.map((speaker: any) => ({
+          timeSlotId: newTimeSlot.id,
+          speakerId: speaker.speakerId,
+          role: speaker.role || 'speaker',
+          displayOrder: speaker.displayOrder || 0,
+        }));
+
+        if (speakersToAdd.length > 0) {
+          await db.insert(timeSlotSpeakers).values(speakersToAdd);
+        }
+      }
+
+      res.json(newTimeSlot);
+    } catch (error) {
+      console.error("Error creating time slot:", error);
+      res.status(500).json({ error: "Failed to create time slot" });
+    }
+  });
+
+  // Update a time slot
+  app.put("/api/time-slots/:slotId", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { slotId } = req.params;
+      const updates = req.body;
+
+      // Remove speakers array from updates if present (handled separately)
+      const { speakers, ...timeSlotUpdates } = updates;
+
+      // Update the time slot
+      const [updatedSlot] = await db
+        .update(eventTimeSlots)
+        .set({
+          ...timeSlotUpdates,
+          updatedAt: new Date(),
+        })
+        .where(eq(eventTimeSlots.id, parseInt(slotId)))
+        .returning();
+
+      // Update speakers if provided
+      if (speakers && Array.isArray(speakers)) {
+        // Remove existing speakers
+        await db
+          .delete(timeSlotSpeakers)
+          .where(eq(timeSlotSpeakers.timeSlotId, parseInt(slotId)));
+
+        // Add new speakers
+        const speakersToAdd = speakers.map((speaker: any) => ({
+          timeSlotId: parseInt(slotId),
+          speakerId: speaker.speakerId,
+          role: speaker.role || 'speaker',
+          displayOrder: speaker.displayOrder || 0,
+        }));
+
+        if (speakersToAdd.length > 0) {
+          await db.insert(timeSlotSpeakers).values(speakersToAdd);
+        }
+      }
+
+      res.json(updatedSlot);
+    } catch (error) {
+      console.error("Error updating time slot:", error);
+      res.status(500).json({ error: "Failed to update time slot" });
+    }
+  });
+
+  // Delete a time slot
+  app.delete("/api/time-slots/:slotId", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const { slotId } = req.params;
+
+      await db
+        .delete(eventTimeSlots)
+        .where(eq(eventTimeSlots.id, parseInt(slotId)));
+
+      res.json({ message: "Time slot deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting time slot:", error);
+      res.status(500).json({ error: "Failed to delete time slot" });
+    }
+  });
+
+  // Get speakers for event management
+  app.get("/api/admin/speakers", isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      // Get all users who have registered as speakers for any event
+      const speakers = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          title: users.title,
+          company: users.company,
+        })
+        .from(users)
+        .where(
+          or(
+            sql`${users.participantType} = 'speaker'`,
+            sql`${users.participantType} LIKE '%speaker%'`
+          )
+        );
+
+      res.json(speakers);
+    } catch (error) {
+      console.error("Error fetching speakers:", error);
+      res.status(500).json({ error: "Failed to fetch speakers" });
+    }
+  });
 
   // Get all events (public endpoint)
   app.get("/api/events", async (req, res) => {

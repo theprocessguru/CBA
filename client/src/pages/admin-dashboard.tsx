@@ -177,6 +177,13 @@ export default function AdminDashboard() {
       icon: Shield,
       href: "/admin/administrators",
       color: "bg-rose-500"
+    },
+    {
+      title: "Event Time Slots",
+      description: "Manage event schedules and speaker assignments",
+      icon: Clock,
+      href: "/admin/event-time-slots",
+      color: "bg-cyan-500"
     }
   ];
 
