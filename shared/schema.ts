@@ -742,6 +742,33 @@ export const scanSessions = pgTable('scan_sessions', {
   sessionNotes: text('session_notes')
 });
 
+// Exhibitor Stand Visitors table - Track all visitors to exhibitor stands
+export const exhibitorStandVisitors = pgTable('exhibitor_stand_visitors', {
+  id: serial('id').primaryKey(),
+  exhibitorId: text('exhibitor_id').notNull().references(() => users.id), // The exhibitor who owns the stand
+  visitorId: text('visitor_id').notNull().references(() => users.id), // The visitor who was scanned
+  eventId: integer('event_id').references(() => cbaEvents.id), // Which event this occurred at
+  standNumber: varchar('stand_number'), // Exhibition stand number/location
+  scanTime: timestamp('scan_time').defaultNow(),
+  visitorType: varchar('visitor_type'), // attendee, student, resident, volunteer, vip, speaker, etc.
+  visitorName: varchar('visitor_name'),
+  visitorEmail: varchar('visitor_email'),
+  visitorPhone: varchar('visitor_phone'),
+  visitorCompany: varchar('visitor_company'),
+  visitorTitle: varchar('visitor_title'),
+  visitorUniversity: varchar('visitor_university'), // For students
+  visitorCourse: varchar('visitor_course'), // For students
+  notes: text('notes'), // Any notes the exhibitor wants to add
+  followUpStatus: varchar('follow_up_status').default('pending'), // pending, contacted, not_interested, converted
+  followUpNotes: text('follow_up_notes'),
+  lastContactedAt: timestamp('last_contacted_at'),
+  tags: text('tags'), // JSON array of tags for categorization
+  interestedIn: text('interested_in'), // What products/services they were interested in
+  leadScore: integer('lead_score').default(0), // 0-100 score for lead quality
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
 // Event Sponsorship Packages
 export const sponsorshipPackages = pgTable('sponsorship_packages', {
   id: serial('id').primaryKey(),
@@ -1045,6 +1072,7 @@ export type EventFeedback = typeof eventFeedback.$inferSelect;
 export const insertEventScannerSchema = createInsertSchema(eventScanners).omit({ id: true });
 export const insertScanHistorySchema = createInsertSchema(scanHistory).omit({ id: true });
 export const insertScanSessionSchema = createInsertSchema(scanSessions).omit({ id: true });
+export const insertExhibitorStandVisitorSchema = createInsertSchema(exhibitorStandVisitors).omit({ id: true });
 
 export type InsertEventScanner = z.infer<typeof insertEventScannerSchema>;
 export type EventScanner = typeof eventScanners.$inferSelect;
@@ -1054,6 +1082,9 @@ export type ScanHistory = typeof scanHistory.$inferSelect;
 
 export type InsertScanSession = z.infer<typeof insertScanSessionSchema>;
 export type ScanSession = typeof scanSessions.$inferSelect;
+
+export type InsertExhibitorStandVisitor = z.infer<typeof insertExhibitorStandVisitorSchema>;
+export type ExhibitorStandVisitor = typeof exhibitorStandVisitors.$inferSelect;
 
 // Legacy Event Management System (keeping for existing registrations)
 export const events = pgTable("events", {

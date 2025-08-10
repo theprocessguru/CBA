@@ -222,6 +222,35 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   My Events & Badges
                 </a>
               </Link>
+
+              {user?.participantType === 'exhibitor' && (
+                <>
+                  <Link href="/exhibitor-scanner">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/exhibitor-scanner' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <QrCode className={`mr-3 h-4 w-4 ${
+                        location === '/exhibitor-scanner' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Scan Visitors
+                    </a>
+                  </Link>
+                  <Link href="/exhibitor-visitors">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/exhibitor-visitors' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Users className={`mr-3 h-4 w-4 ${
+                        location === '/exhibitor-visitors' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Exhibition Visitors
+                    </a>
+                  </Link>
+                </>
+              )}
               
               {user?.isAdmin && (
                 <>

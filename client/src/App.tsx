@@ -79,6 +79,8 @@ import MembershipBenefitsManager from "@/pages/admin/MembershipBenefitsManager";
 import AIToolsDemo from "@/pages/ai-tools-demo";
 import AdminManagement from "@/pages/admin/AdminManagement";
 import UserTypes from "@/pages/admin/UserTypes";
+import { ExhibitorVisitors } from "@/pages/ExhibitorVisitors";
+import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -303,6 +305,20 @@ function Router() {
         <ProtectedRoute>
           <MainLayout>
             <OrganizerScanner />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/exhibitor-visitors">
+        <ProtectedRoute>
+          <MainLayout>
+            <ExhibitorVisitors />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/exhibitor-scanner">
+        <ProtectedRoute>
+          <MainLayout>
+            <ExhibitorScanner />
           </MainLayout>
         </ProtectedRoute>
       </Route>

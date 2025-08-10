@@ -52,7 +52,8 @@ import {
   type Benefit,
   type MembershipTierBenefit,
   eventSponsors,
-  sponsorshipPackages
+  sponsorshipPackages,
+  exhibitorStandVisitors
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -8030,6 +8031,216 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching sponsors:", error);
       res.status(500).json({ error: "Failed to fetch sponsors" });
+    }
+  });
+
+  // Exhibitor Stand Visitor Scanning Routes
+  
+  // Scan a visitor at exhibitor stand
+  app.post("/api/exhibitor/scan-visitor", isAuthenticated, async (req, res) => {
+    try {
+      const exhibitorId = req.user?.id;
+      const { visitorId, eventId, standNumber } = req.body;
+
+      if (!exhibitorId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      // Get visitor details
+      const visitor = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, visitorId))
+        .limit(1);
+
+      if (visitor.length === 0) {
+        return res.status(404).json({ error: "Visitor not found" });
+      }
+
+      const visitorData = visitor[0];
+
+      // Check if visitor was already scanned by this exhibitor
+      const existingScan = await db
+        .select()
+        .from(exhibitorStandVisitors)
+        .where(
+          and(
+            eq(exhibitorStandVisitors.exhibitorId, exhibitorId),
+            eq(exhibitorStandVisitors.visitorId, visitorId),
+            eventId ? eq(exhibitorStandVisitors.eventId, eventId) : sql`true`
+          )
+        )
+        .limit(1);
+
+      if (existingScan.length > 0) {
+        return res.status(200).json({ 
+          message: "Visitor already scanned",
+          visitor: existingScan[0],
+          alreadyScanned: true 
+        });
+      }
+
+      // Record the scan
+      const [newScan] = await db
+        .insert(exhibitorStandVisitors)
+        .values({
+          exhibitorId,
+          visitorId,
+          eventId,
+          standNumber,
+          visitorType: visitorData.participantType || "attendee",
+          visitorName: `${visitorData.firstName || ""} ${visitorData.lastName || ""}`.trim(),
+          visitorEmail: visitorData.email || "",
+          visitorPhone: visitorData.phone || "",
+          visitorCompany: visitorData.company || "",
+          visitorTitle: visitorData.jobTitle || visitorData.title || "",
+          visitorUniversity: visitorData.university || "",
+          visitorCourse: visitorData.course || "",
+        })
+        .returning();
+
+      res.json({ 
+        message: "Visitor scanned successfully",
+        visitor: newScan,
+        alreadyScanned: false 
+      });
+    } catch (error) {
+      console.error("Error scanning visitor:", error);
+      res.status(500).json({ error: "Failed to scan visitor" });
+    }
+  });
+
+  // Get all visitors for an exhibitor
+  app.get("/api/exhibitor/visitors", isAuthenticated, async (req, res) => {
+    try {
+      const exhibitorId = req.user?.id;
+      const { eventId } = req.query;
+
+      if (!exhibitorId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const visitors = await db
+        .select()
+        .from(exhibitorStandVisitors)
+        .where(
+          and(
+            eq(exhibitorStandVisitors.exhibitorId, exhibitorId),
+            eventId ? eq(exhibitorStandVisitors.eventId, Number(eventId)) : sql`true`
+          )
+        )
+        .orderBy(desc(exhibitorStandVisitors.scanTime));
+
+      res.json(visitors);
+    } catch (error) {
+      console.error("Error fetching exhibitor visitors:", error);
+      res.status(500).json({ error: "Failed to fetch visitors" });
+    }
+  });
+
+  // Update visitor follow-up status
+  app.patch("/api/exhibitor/visitors/:visitorId", isAuthenticated, async (req, res) => {
+    try {
+      const exhibitorId = req.user?.id;
+      const visitorId = parseInt(req.params.visitorId);
+      const { followUpStatus, followUpNotes, notes, tags, interestedIn, leadScore } = req.body;
+
+      if (!exhibitorId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const updateData: any = {
+        updatedAt: new Date(),
+      };
+
+      if (followUpStatus !== undefined) updateData.followUpStatus = followUpStatus;
+      if (followUpNotes !== undefined) updateData.followUpNotes = followUpNotes;
+      if (notes !== undefined) updateData.notes = notes;
+      if (tags !== undefined) updateData.tags = JSON.stringify(tags);
+      if (interestedIn !== undefined) updateData.interestedIn = interestedIn;
+      if (leadScore !== undefined) updateData.leadScore = leadScore;
+
+      if (followUpStatus === "contacted") {
+        updateData.lastContactedAt = new Date();
+      }
+
+      const [updated] = await db
+        .update(exhibitorStandVisitors)
+        .set(updateData)
+        .where(
+          and(
+            eq(exhibitorStandVisitors.id, visitorId),
+            eq(exhibitorStandVisitors.exhibitorId, exhibitorId)
+          )
+        )
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ error: "Visitor not found" });
+      }
+
+      res.json({ message: "Visitor updated successfully", visitor: updated });
+    } catch (error) {
+      console.error("Error updating visitor:", error);
+      res.status(500).json({ error: "Failed to update visitor" });
+    }
+  });
+
+  // Export visitors as CSV
+  app.get("/api/exhibitor/visitors/export", isAuthenticated, async (req, res) => {
+    try {
+      const exhibitorId = req.user?.id;
+      const { eventId } = req.query;
+
+      if (!exhibitorId) {
+        return res.status(401).json({ error: "Unauthorized" });
+      }
+
+      const visitors = await db
+        .select()
+        .from(exhibitorStandVisitors)
+        .where(
+          and(
+            eq(exhibitorStandVisitors.exhibitorId, exhibitorId),
+            eventId ? eq(exhibitorStandVisitors.eventId, Number(eventId)) : sql`true`
+          )
+        )
+        .orderBy(desc(exhibitorStandVisitors.scanTime));
+
+      // Convert to CSV format
+      const csvHeaders = [
+        "Name", "Email", "Phone", "Company", "Title", 
+        "Type", "University", "Course", "Scan Time", 
+        "Follow-up Status", "Lead Score", "Notes", "Interested In"
+      ];
+      
+      const csvRows = visitors.map(v => [
+        v.visitorName || "",
+        v.visitorEmail || "",
+        v.visitorPhone || "",
+        v.visitorCompany || "",
+        v.visitorTitle || "",
+        v.visitorType || "",
+        v.visitorUniversity || "",
+        v.visitorCourse || "",
+        v.scanTime ? new Date(v.scanTime).toLocaleString() : "",
+        v.followUpStatus || "",
+        v.leadScore?.toString() || "0",
+        v.notes || "",
+        v.interestedIn || ""
+      ]);
+
+      const csvContent = [
+        csvHeaders.join(","),
+        ...csvRows.map(row => row.map(cell => `"${cell}"`).join(","))
+      ].join("\n");
+
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="exhibitor-visitors-${Date.now()}.csv"`);
+      res.send(csvContent);
+    } catch (error) {
+      console.error("Error exporting visitors:", error);
+      res.status(500).json({ error: "Failed to export visitors" });
     }
   });
 
