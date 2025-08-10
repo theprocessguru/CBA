@@ -108,10 +108,138 @@ const sponsorProfiles: Record<string, SponsorProfile> = {
       linkedin: "https://linkedin.com/company/innovation-labs-cambridge",
       twitter: "https://twitter.com/innovlabs_uk"
     }
+  },
+  "MyT Ai": {
+    companyName: "MyT Ai",
+    description: "Leading AI solutions provider specializing in business automation and intelligent systems for SMEs. CBA Board Member committed to democratizing AI for local businesses.",
+    industry: "Artificial Intelligence",
+    founded: 2019,
+    employees: "25-50",
+    location: "Croydon, UK",
+    specialties: ["AI Implementation", "Business Automation", "Chatbot Development", "Machine Learning", "SME Solutions"],
+    achievements: [
+      "CBA Board Member",
+      "500+ SMEs automated",
+      "Local Business AI Pioneer Award",
+      "95% customer retention rate"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/myt-ai",
+      twitter: "https://twitter.com/myt_ai"
+    }
+  },
+  "MyT Automation": {
+    companyName: "MyT Automation",
+    description: "Process automation experts helping businesses streamline operations and increase efficiency. Proud CBA Board Member driving digital transformation in Croydon.",
+    industry: "Business Automation",
+    founded: 2020,
+    employees: "20-40",
+    location: "Croydon, UK",
+    specialties: ["Process Automation", "Workflow Optimization", "RPA", "Digital Transformation", "Efficiency Consulting"],
+    achievements: [
+      "CBA Board Member",
+      "200+ processes automated",
+      "40% average efficiency gain for clients",
+      "Automation Excellence Award 2024"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/myt-automation"
+    }
+  },
+  "The Process Guru": {
+    companyName: "The Process Guru",
+    description: "Business process optimization consultancy transforming operations for sustainable growth. CBA Board Member passionate about helping local businesses thrive.",
+    industry: "Business Consulting",
+    founded: 2017,
+    employees: "15-30",
+    location: "Croydon, UK",
+    specialties: ["Process Optimization", "Lean Six Sigma", "Operations Excellence", "Change Management", "Strategic Planning"],
+    achievements: [
+      "CBA Board Member",
+      "300+ businesses transformed",
+      "ISO 9001 certified",
+      "Best Consulting Firm - Croydon 2023"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/theprocessguru"
+    }
+  },
+  "Freshfield Markets": {
+    companyName: "Freshfield Markets",
+    description: "Premium fresh produce and gourmet food marketplace serving Croydon and surrounding areas. CBA Board Member supporting local food businesses.",
+    industry: "Food & Retail",
+    founded: 2015,
+    employees: "50-100",
+    location: "Croydon, UK",
+    specialties: ["Fresh Produce", "Local Sourcing", "Gourmet Foods", "Sustainable Retail", "Community Markets"],
+    achievements: [
+      "CBA Board Member",
+      "100+ local suppliers supported",
+      "Sustainable Retailer of the Year",
+      "Community Champion Award 2024"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/freshfield-markets"
+    }
+  },
+  "Joseph's Fruit and Veg Store": {
+    companyName: "Joseph's Fruit and Veg Store",
+    description: "Family-run fresh produce store in Surrey Street Market, serving Croydon for over 30 years. CBA Board Member representing traditional market traders.",
+    industry: "Retail - Fresh Produce",
+    founded: 1992,
+    employees: "5-10",
+    location: "Surrey Street Market, Croydon",
+    specialties: ["Fresh Fruits", "Vegetables", "Exotic Produce", "Local Sourcing", "Personal Service"],
+    achievements: [
+      "CBA Board Member",
+      "30+ years in business",
+      "Surrey Street Market Institution",
+      "Best Fresh Produce - Croydon 2023"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/josephs-fruit-veg"
+    }
+  },
+  "Sauba and Daughters Accountancy": {
+    companyName: "Sauba and Daughters Accountancy",
+    description: "Chartered accountants providing comprehensive financial services and business advisory. CBA Board Member dedicated to supporting local business growth.",
+    industry: "Accounting & Finance",
+    founded: 2008,
+    employees: "15-25",
+    location: "Croydon, UK",
+    specialties: ["Tax Planning", "Business Advisory", "Audit Services", "Financial Planning", "SME Accounting"],
+    achievements: [
+      "CBA Board Member",
+      "ACCA Chartered Certified",
+      "400+ businesses supported",
+      "Excellence in Client Service Award"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/sauba-daughters"
+    }
+  },
+  "Wagner Caleap Consultancy": {
+    companyName: "Wagner Caleap Consultancy",
+    description: "Strategic business consultancy specializing in growth strategies and organizational transformation. CBA Board Member championing business excellence.",
+    industry: "Management Consulting",
+    founded: 2016,
+    employees: "10-20",
+    location: "Croydon, UK",
+    specialties: ["Growth Strategy", "Organizational Development", "Leadership Coaching", "Market Analysis", "Business Transformation"],
+    achievements: [
+      "CBA Board Member",
+      "150+ successful transformations",
+      "Management Consultancy of the Year",
+      "5x average ROI for clients"
+    ],
+    socialMedia: {
+      linkedin: "https://linkedin.com/company/wagner-caleap"
+    }
   }
 };
 
 const packageStyles = {
+  "Board Member": { color: "bg-gradient-to-r from-purple-500 to-indigo-700 text-white", icon: "🏛️" },
   "Platinum": { color: "bg-gradient-to-r from-gray-300 to-gray-500 text-white", icon: "👑" },
   "Gold": { color: "bg-gradient-to-r from-yellow-400 to-yellow-600 text-white", icon: "🥇" },
   "Silver": { color: "bg-gradient-to-r from-gray-200 to-gray-400 text-gray-800", icon: "🥈" },
