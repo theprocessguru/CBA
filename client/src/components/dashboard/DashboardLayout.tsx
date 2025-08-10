@@ -132,44 +132,49 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </a>
               </Link>
               
-              <Link href="/dashboard/business-profile">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/dashboard/business-profile' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <Building className={`mr-3 h-4 w-4 ${
-                    location === '/dashboard/business-profile' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Business Profile
-                </a>
-              </Link>
-              
-              <Link href="/dashboard/products-services">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/dashboard/products-services' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <Package className={`mr-3 h-4 w-4 ${
-                    location === '/dashboard/products-services' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Products & Services
-                </a>
-              </Link>
-              
-              <Link href="/dashboard/special-offers">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/dashboard/special-offers' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <Tag className={`mr-3 h-4 w-4 ${
-                    location === '/dashboard/special-offers' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Special Offers
-                </a>
-              </Link>
+              {/* Hide business-related items for volunteers */}
+              {user?.participantType !== 'volunteer' && (
+                <>
+                  <Link href="/dashboard/business-profile">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/business-profile' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Building className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/business-profile' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Business Profile
+                    </a>
+                  </Link>
+                  
+                  <Link href="/dashboard/products-services">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/products-services' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Package className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/products-services' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Products & Services
+                    </a>
+                  </Link>
+                  
+                  <Link href="/dashboard/special-offers">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/special-offers' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Tag className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/special-offers' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Special Offers
+                    </a>
+                  </Link>
+                </>
+              )}
               
               <Link href="/dashboard/member-directory">
                 <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${

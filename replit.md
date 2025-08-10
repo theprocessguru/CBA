@@ -5,6 +5,7 @@ This platform is a comprehensive business automation solution designed to help b
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
+Volunteers: No business listing menu items in dashboard (they don't need business features).
 
 ## Recent Changes
 - **Exhibitor Visitor Scanning System Added (August 2025)**: Implemented comprehensive exhibitor stand visitor management system. Exhibitors can now scan visitor badges using QR codes to automatically capture contact details including name, email, phone, company, title, and student information. Features include real-time scanning with camera integration, duplicate scan prevention, lead scoring (0-100), follow-up status tracking (pending/contacted/not interested/converted), visitor tagging, and CSV export functionality. Exhibitors have dedicated dashboard sections for scanner access and visitor management with search, filtering, and detailed analytics.
