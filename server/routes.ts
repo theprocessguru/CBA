@@ -65,7 +65,10 @@ import {
   type EventMoodEntry,
   type EventMoodAggregation,
   affiliates,
-  affiliateCommissions
+  affiliateCommissions,
+  jobPostings,
+  jobApplications,
+  jobSavedSearches
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -7032,6 +7035,288 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user by QR handle:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Jobs Board Routes
+  app.get("/api/jobs", async (req, res) => {
+    try {
+      const { 
+        search, 
+        location, 
+        jobType, 
+        workMode, 
+        category,
+        experienceLevel,
+        salaryMin,
+        salaryMax 
+      } = req.query;
+      
+      let query = db.select().from(jobPostings).where(eq(jobPostings.isActive, true));
+      
+      const jobs = await query;
+      
+      // Apply filters
+      let filteredJobs = jobs;
+      
+      if (search) {
+        const searchTerm = String(search).toLowerCase();
+        filteredJobs = filteredJobs.filter(job => 
+          job.title.toLowerCase().includes(searchTerm) ||
+          job.company.toLowerCase().includes(searchTerm) ||
+          job.description.toLowerCase().includes(searchTerm)
+        );
+      }
+      
+      if (location) {
+        filteredJobs = filteredJobs.filter(job => 
+          job.location.toLowerCase().includes(String(location).toLowerCase())
+        );
+      }
+      
+      if (jobType) {
+        filteredJobs = filteredJobs.filter(job => job.jobType === jobType);
+      }
+      
+      if (workMode) {
+        filteredJobs = filteredJobs.filter(job => job.workMode === workMode);
+      }
+      
+      if (category) {
+        filteredJobs = filteredJobs.filter(job => job.category === category);
+      }
+      
+      if (experienceLevel) {
+        filteredJobs = filteredJobs.filter(job => job.experienceLevel === experienceLevel);
+      }
+      
+      if (salaryMin) {
+        filteredJobs = filteredJobs.filter(job => 
+          job.salaryMin && job.salaryMin >= Number(salaryMin)
+        );
+      }
+      
+      if (salaryMax) {
+        filteredJobs = filteredJobs.filter(job => 
+          job.salaryMax && job.salaryMax <= Number(salaryMax)
+        );
+      }
+      
+      // Sort by created date, newest first
+      filteredJobs.sort((a, b) => {
+        const dateA = new Date(a.createdAt || 0).getTime();
+        const dateB = new Date(b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+      
+      res.json(filteredJobs);
+    } catch (error) {
+      console.error("Error fetching jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  app.get("/api/jobs/:id", async (req, res) => {
+    try {
+      const jobId = parseInt(req.params.id);
+      
+      // Increment view count
+      await db.update(jobPostings)
+        .set({ views: sql`${jobPostings.views} + 1` })
+        .where(eq(jobPostings.id, jobId));
+      
+      const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, jobId));
+      
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      res.json(job);
+    } catch (error) {
+      console.error("Error fetching job:", error);
+      res.status(500).json({ message: "Failed to fetch job" });
+    }
+  });
+
+  app.post("/api/jobs", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Check if user has a business profile
+      const [business] = await db.select().from(businesses).where(eq(businesses.userId, userId));
+      
+      const jobData = {
+        ...req.body,
+        userId,
+        businessId: business?.id || null,
+        company: business?.name || req.body.company,
+      };
+      
+      const [newJob] = await db.insert(jobPostings).values(jobData).returning();
+      res.status(201).json(newJob);
+    } catch (error) {
+      console.error("Error creating job:", error);
+      res.status(500).json({ message: "Failed to create job posting" });
+    }
+  });
+
+  app.put("/api/jobs/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const jobId = parseInt(req.params.id);
+      
+      // Check ownership
+      const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, jobId));
+      
+      if (!job || job.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to edit this job" });
+      }
+      
+      const [updatedJob] = await db.update(jobPostings)
+        .set({ ...req.body, updatedAt: new Date() })
+        .where(eq(jobPostings.id, jobId))
+        .returning();
+      
+      res.json(updatedJob);
+    } catch (error) {
+      console.error("Error updating job:", error);
+      res.status(500).json({ message: "Failed to update job posting" });
+    }
+  });
+
+  app.delete("/api/jobs/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const jobId = parseInt(req.params.id);
+      
+      // Check ownership or admin
+      const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, jobId));
+      
+      if (!job || (job.userId !== userId && !req.user.isAdmin)) {
+        return res.status(403).json({ message: "Unauthorized to delete this job" });
+      }
+      
+      await db.delete(jobPostings).where(eq(jobPostings.id, jobId));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting job:", error);
+      res.status(500).json({ message: "Failed to delete job posting" });
+    }
+  });
+
+  app.get("/api/my-jobs", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const jobs = await db.select().from(jobPostings).where(eq(jobPostings.userId, userId));
+      res.json(jobs);
+    } catch (error) {
+      console.error("Error fetching user jobs:", error);
+      res.status(500).json({ message: "Failed to fetch your job postings" });
+    }
+  });
+
+  app.post("/api/jobs/:id/apply", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const jobId = parseInt(req.params.id);
+      
+      // Check if already applied
+      const existing = await db.select().from(jobApplications)
+        .where(and(
+          eq(jobApplications.jobId, jobId),
+          eq(jobApplications.userId, userId)
+        ));
+      
+      if (existing.length > 0) {
+        return res.status(400).json({ message: "You have already applied to this job" });
+      }
+      
+      const applicationData = {
+        ...req.body,
+        jobId,
+        userId,
+      };
+      
+      const [application] = await db.insert(jobApplications).values(applicationData).returning();
+      res.status(201).json(application);
+    } catch (error) {
+      console.error("Error applying to job:", error);
+      res.status(500).json({ message: "Failed to submit application" });
+    }
+  });
+
+  app.get("/api/jobs/:id/applications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const jobId = parseInt(req.params.id);
+      
+      // Check ownership
+      const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, jobId));
+      
+      if (!job || job.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to view applications" });
+      }
+      
+      const applications = await db.select().from(jobApplications)
+        .where(eq(jobApplications.jobId, jobId));
+      
+      res.json(applications);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+      res.status(500).json({ message: "Failed to fetch applications" });
+    }
+  });
+
+  app.get("/api/my-applications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const applications = await db
+        .select({
+          application: jobApplications,
+          job: jobPostings,
+        })
+        .from(jobApplications)
+        .leftJoin(jobPostings, eq(jobApplications.jobId, jobPostings.id))
+        .where(eq(jobApplications.userId, userId));
+      
+      res.json(applications);
+    } catch (error) {
+      console.error("Error fetching user applications:", error);
+      res.status(500).json({ message: "Failed to fetch your applications" });
+    }
+  });
+
+  app.put("/api/applications/:id/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const applicationId = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      // Get application and check ownership through job
+      const [application] = await db.select().from(jobApplications)
+        .where(eq(jobApplications.id, applicationId));
+      
+      if (!application) {
+        return res.status(404).json({ message: "Application not found" });
+      }
+      
+      const [job] = await db.select().from(jobPostings)
+        .where(eq(jobPostings.id, application.jobId));
+      
+      if (!job || job.userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized to update this application" });
+      }
+      
+      const [updated] = await db.update(jobApplications)
+        .set({ status, reviewedAt: new Date() })
+        .where(eq(jobApplications.id, applicationId))
+        .returning();
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating application status:", error);
+      res.status(500).json({ message: "Failed to update application status" });
     }
   });
 

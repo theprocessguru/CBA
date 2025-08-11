@@ -88,6 +88,10 @@ import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
+import Jobs from "@/pages/jobs";
+import JobDetails from "@/pages/job-details";
+import PostJob from "@/pages/post-job";
+import MyJobs from "@/pages/my-jobs";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -215,6 +219,30 @@ function Router() {
       <Route path="/events">
         <MainLayout>
           <EventsPage />
+        </MainLayout>
+      </Route>
+      <Route path="/jobs">
+        <MainLayout>
+          <Jobs />
+        </MainLayout>
+      </Route>
+      <Route path="/jobs/post">
+        <ProtectedRoute>
+          <MainLayout>
+            <PostJob />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/jobs/my-jobs">
+        <ProtectedRoute>
+          <MainLayout>
+            <MyJobs />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/jobs/:id">
+        <MainLayout>
+          <JobDetails />
         </MainLayout>
       </Route>
       <Route path="/my-benefits">

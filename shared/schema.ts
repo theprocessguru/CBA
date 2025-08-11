@@ -1551,6 +1551,66 @@ export type InsertAffiliateClick = z.infer<typeof insertAffiliateClickSchema>;
 export type AffiliateClick = typeof affiliateClicks.$inferSelect;
 
 // Person Types table - defines available person types
+// Jobs Board Schema
+export const jobPostings = pgTable("job_postings", {
+  id: serial("id").primaryKey(),
+  businessId: integer("business_id").references(() => businesses.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),
+  title: text("title").notNull(),
+  company: text("company").notNull(),
+  location: text("location").notNull(),
+  jobType: text("job_type").notNull(), // full-time, part-time, contract, internship
+  workMode: text("work_mode").notNull(), // on-site, remote, hybrid
+  salary: text("salary"),
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+  description: text("description").notNull(),
+  requirements: text("requirements"),
+  benefits: text("benefits"),
+  applicationEmail: text("application_email"),
+  applicationUrl: text("application_url"),
+  deadline: timestamp("deadline"),
+  isActive: boolean("is_active").default(true),
+  views: integer("views").default(0),
+  createdAt: timestamp("created_at").default(sql`now()`),
+  updatedAt: timestamp("updated_at").default(sql`now()`),
+  category: text("category"),
+  experienceLevel: text("experience_level"), // entry, mid, senior, executive
+  tags: text("tags").array(),
+});
+
+export const jobApplications = pgTable("job_applications", {
+  id: serial("id").primaryKey(),
+  jobId: integer("job_id").references(() => jobPostings.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),
+  applicantName: text("applicant_name").notNull(),
+  applicantEmail: text("applicant_email").notNull(),
+  applicantPhone: text("applicant_phone"),
+  coverLetter: text("cover_letter"),
+  resumeUrl: text("resume_url"),
+  linkedinProfile: text("linkedin_profile"),
+  status: text("status").default("pending"), // pending, reviewed, shortlisted, rejected, hired
+  notes: text("notes"),
+  appliedAt: timestamp("applied_at").default(sql`now()`),
+  reviewedAt: timestamp("reviewed_at"),
+});
+
+export const jobSavedSearches = pgTable("job_saved_searches", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  searchName: text("search_name").notNull(),
+  keywords: text("keywords"),
+  location: text("location"),
+  jobType: text("job_type"),
+  workMode: text("work_mode"),
+  category: text("category"),
+  experienceLevel: text("experience_level"),
+  salaryMin: integer("salary_min"),
+  salaryMax: integer("salary_max"),
+  emailAlerts: boolean("email_alerts").default(false),
+  createdAt: timestamp("created_at").default(sql`now()`),
+});
+
 export const personTypes = pgTable("person_types", {
   id: serial("id").primaryKey(),
   name: varchar("name").notNull().unique(), // e.g., "councillor", "speaker", "vip", "volunteer", "exhibitor"
@@ -1602,3 +1662,61 @@ export const insertUserPersonTypeSchema = createInsertSchema(userPersonTypes, {
 
 export type InsertUserPersonType = z.infer<typeof insertUserPersonTypeSchema>;
 export type UserPersonType = typeof userPersonTypes.$inferSelect;
+
+// Jobs Board Schemas and Types
+export const insertJobPostingSchema = createInsertSchema(jobPostings, {
+  userId: z.string().min(1, "User ID is required"),
+  title: z.string().min(1, "Job title is required"),
+  company: z.string().min(1, "Company name is required"),
+  location: z.string().min(1, "Location is required"),
+  jobType: z.enum(["full-time", "part-time", "contract", "internship", "temporary"]),
+  workMode: z.enum(["on-site", "remote", "hybrid"]),
+  salary: z.string().optional(),
+  salaryMin: z.number().optional(),
+  salaryMax: z.number().optional(),
+  description: z.string().min(1, "Job description is required"),
+  requirements: z.string().optional(),
+  benefits: z.string().optional(),
+  applicationEmail: z.string().email().optional(),
+  applicationUrl: z.string().url().optional(),
+  deadline: z.date().optional(),
+  category: z.string().optional(),
+  experienceLevel: z.enum(["entry", "mid", "senior", "executive"]).optional(),
+  tags: z.array(z.string()).optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true, views: true });
+
+export type InsertJobPosting = z.infer<typeof insertJobPostingSchema>;
+export type JobPosting = typeof jobPostings.$inferSelect;
+
+export const insertJobApplicationSchema = createInsertSchema(jobApplications, {
+  jobId: z.number().min(1, "Job ID is required"),
+  userId: z.string().min(1, "User ID is required"),
+  applicantName: z.string().min(1, "Name is required"),
+  applicantEmail: z.string().email("Valid email is required"),
+  applicantPhone: z.string().optional(),
+  coverLetter: z.string().optional(),
+  resumeUrl: z.string().url().optional(),
+  linkedinProfile: z.string().url().optional(),
+  status: z.enum(["pending", "reviewed", "shortlisted", "rejected", "hired"]).default("pending"),
+  notes: z.string().optional(),
+}).omit({ id: true, appliedAt: true, reviewedAt: true });
+
+export type InsertJobApplication = z.infer<typeof insertJobApplicationSchema>;
+export type JobApplication = typeof jobApplications.$inferSelect;
+
+export const insertJobSavedSearchSchema = createInsertSchema(jobSavedSearches, {
+  userId: z.string().min(1, "User ID is required"),
+  searchName: z.string().min(1, "Search name is required"),
+  keywords: z.string().optional(),
+  location: z.string().optional(),
+  jobType: z.string().optional(),
+  workMode: z.string().optional(),
+  category: z.string().optional(),
+  experienceLevel: z.string().optional(),
+  salaryMin: z.number().optional(),
+  salaryMax: z.number().optional(),
+  emailAlerts: z.boolean().default(false),
+}).omit({ id: true, createdAt: true });
+
+export type InsertJobSavedSearch = z.infer<typeof insertJobSavedSearchSchema>;
+export type JobSavedSearch = typeof jobSavedSearches.$inferSelect;
