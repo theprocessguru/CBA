@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Calendar, Clock, MapPin, Users, Ticket, GraduationCap, Award, Star } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Ticket, GraduationCap, Award, Star, Navigation } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -178,6 +178,13 @@ export default function EventsPage() {
     return userRegistrations.some(reg => reg.eventId === eventId);
   };
 
+  const getDirectionsToVenue = (location: string) => {
+    // Create a Google Maps directions URL
+    const encodedLocation = encodeURIComponent(location);
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodedLocation}`;
+    window.open(mapsUrl, '_blank');
+  };
+
   if (isLoading) {
     return <div className="flex justify-center py-8">Loading events...</div>;
   }
@@ -275,9 +282,20 @@ export default function EventsPage() {
                       <Clock className="w-4 h-4 mr-2" />
                       {format(new Date(event.startDate), "h:mm a")} - {format(new Date(event.endDate), "h:mm a")}
                     </div>
-                    <div className="flex items-center text-muted-foreground">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      <span className="truncate">{event.location}</span>
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <div className="flex items-center flex-1 min-w-0">
+                        <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                        <span className="truncate">{event.location}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="ml-2 h-7 px-2 text-xs"
+                        onClick={() => getDirectionsToVenue(event.location)}
+                      >
+                        <Navigation className="w-3 h-3 mr-1" />
+                        Directions
+                      </Button>
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <Users className="w-4 h-4 mr-2" />

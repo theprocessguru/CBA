@@ -176,16 +176,6 @@ const Navbar = () => {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAiMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
-
-              <Link href="/organizer-scanner">
-                <a className={`border-b-2 ${
-                  isActive('/organizer-scanner') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Badge Scanner
-                </a>
-              </Link>
               
 
             </div>
@@ -200,6 +190,11 @@ const Navbar = () => {
             </button>
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
+                <Link href="/organizer-scanner">
+                  <Button size="sm" variant="ghost" className="text-sm px-3 py-2 whitespace-nowrap">
+                    📱 Scanner
+                  </Button>
+                </Link>
                 <Link href="/mobile-badge">
                   <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
                     Mobile Badge
