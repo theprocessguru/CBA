@@ -161,16 +161,6 @@ const Navbar = () => {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMembershipMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
-
-              <Link href="/organizer-scanner">
-                <a className={`border-b-2 ${
-                  isActive('/organizer-scanner') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Badge Scanner
-                </a>
-              </Link>
               
               {/* AI Top-tier Menu - Non-clickable */}
               <div className="relative" ref={aiMenuRef}>
@@ -186,6 +176,16 @@ const Navbar = () => {
                   <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAiMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
               </div>
+
+              <Link href="/organizer-scanner">
+                <a className={`border-b-2 ${
+                  isActive('/organizer-scanner') 
+                    ? 'border-primary text-primary' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
+                  Badge Scanner
+                </a>
+              </Link>
               
 
             </div>
