@@ -84,6 +84,8 @@ import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 import EventTimeSlots from "@/pages/admin/EventTimeSlots";
 import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
+import AffiliateDashboard from "@/pages/AffiliateDashboard";
+import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -460,6 +462,11 @@ function Router() {
           <MemberDirectory />
         </ProtectedRoute>
       </Route>
+      <Route path="/dashboard/affiliate">
+        <ProtectedRoute>
+          <AffiliateDashboard />
+        </ProtectedRoute>
+      </Route>
       <Route path="/dashboard/content-reports">
         <AdminRoute>
           <ContentReports />
@@ -569,6 +576,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <EventTimeSlots />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/affiliates">
+        <AdminRoute>
+          <MainLayout>
+            <AffiliateManagement />
           </MainLayout>
         </AdminRoute>
       </Route>

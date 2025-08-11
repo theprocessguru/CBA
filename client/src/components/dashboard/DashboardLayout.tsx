@@ -20,7 +20,8 @@ import {
   Crown,
   Calendar,
   QrCode,
-  Heart
+  Heart,
+  DollarSign
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -190,6 +191,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </a>
               </Link>
               
+              <Link href="/dashboard/affiliate">
+                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                  location === '/dashboard/affiliate' 
+                    ? 'bg-primary text-white' 
+                    : 'text-neutral-700 hover:bg-neutral-100'
+                }`}>
+                  <DollarSign className={`mr-3 h-4 w-4 ${
+                    location === '/dashboard/affiliate' ? 'text-white' : 'text-neutral-500'
+                  }`} />
+                  Affiliate Programme
+                </a>
+              </Link>
+              
               <Link href="/my-personal-badge">
                 <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                   location === '/my-personal-badge' 
@@ -322,6 +336,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/mood-dashboard' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Event Mood Dashboard
+                    </a>
+                  </Link>
+                  
+                  <Link href="/admin/affiliates">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/admin/affiliates' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <DollarSign className={`mr-3 h-4 w-4 ${
+                        location === '/admin/affiliates' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Affiliate Management
                     </a>
                   </Link>
                 </>

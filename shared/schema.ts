@@ -1390,3 +1390,159 @@ export const insertEventSponsorSchema = createInsertSchema(eventSponsors, {
 
 export type InsertEventSponsor = z.infer<typeof insertEventSponsorSchema>;
 export type EventSponsor = typeof eventSponsors.$inferSelect;
+
+// Affiliate Programme Tables
+export const affiliates = pgTable("affiliates", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  affiliateCode: varchar("affiliate_code").notNull().unique(), // Unique referral code
+  stripeAccountId: varchar("stripe_account_id"), // Stripe Connect account ID for payouts
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).default("5.00"), // Default 5%
+  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0.00"),
+  pendingEarnings: decimal("pending_earnings", { precision: 10, scale: 2 }).default("0.00"),
+  paidEarnings: decimal("paid_earnings", { precision: 10, scale: 2 }).default("0.00"),
+  lastPayoutDate: timestamp("last_payout_date"),
+  payoutMethod: varchar("payout_method").default("stripe"), // stripe, bank_transfer, paypal
+  payoutDetails: jsonb("payout_details"), // Store payment method details
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("affiliates_user_idx").on(table.userId),
+  index("affiliates_code_idx").on(table.affiliateCode),
+]);
+
+// Track referred members
+export const affiliateReferrals = pgTable("affiliate_referrals", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull().references(() => affiliates.id),
+  referredUserId: varchar("referred_user_id").notNull().references(() => users.id),
+  referralDate: timestamp("referral_date").defaultNow(),
+  signupDate: timestamp("signup_date"),
+  firstPaymentDate: timestamp("first_payment_date"),
+  currentMembershipTier: varchar("current_membership_tier"),
+  membershipStatus: varchar("membership_status").default("pending"), // pending, trial, active, cancelled
+  lifetimeValue: decimal("lifetime_value", { precision: 10, scale: 2 }).default("0.00"),
+  totalCommissionEarned: decimal("total_commission_earned", { precision: 10, scale: 2 }).default("0.00"),
+  lastCommissionDate: timestamp("last_commission_date"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_referral").on(table.referredUserId),
+  index("referrals_affiliate_idx").on(table.affiliateId),
+  index("referrals_referred_user_idx").on(table.referredUserId),
+]);
+
+// Commission tracking
+export const affiliateCommissions = pgTable("affiliate_commissions", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull().references(() => affiliates.id),
+  referralId: integer("referral_id").notNull().references(() => affiliateReferrals.id),
+  paymentId: varchar("payment_id"), // Reference to payment/subscription in your payment system
+  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  commissionAmount: decimal("commission_amount", { precision: 10, scale: 2 }).notNull(),
+  commissionRate: decimal("commission_rate", { precision: 5, scale: 2 }).notNull(),
+  paymentDate: timestamp("payment_date").notNull(),
+  status: varchar("status").default("pending"), // pending, approved, paid, cancelled
+  payoutId: integer("payout_id"), // Will reference affiliatePayouts.id
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("commissions_affiliate_idx").on(table.affiliateId),
+  index("commissions_referral_idx").on(table.referralId),
+  index("commissions_status_idx").on(table.status),
+]);
+
+// Payout tracking
+export const affiliatePayouts = pgTable("affiliate_payouts", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull().references(() => affiliates.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: varchar("currency").default("GBP"),
+  method: varchar("method").notNull(), // stripe, bank_transfer, paypal
+  stripeTransferId: varchar("stripe_transfer_id"),
+  transactionReference: varchar("transaction_reference"),
+  status: varchar("status").default("pending"), // pending, processing, completed, failed
+  processedAt: timestamp("processed_at"),
+  failureReason: text("failure_reason"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("payouts_affiliate_idx").on(table.affiliateId),
+  index("payouts_status_idx").on(table.status),
+]);
+
+// Affiliate link clicks tracking
+export const affiliateClicks = pgTable("affiliate_clicks", {
+  id: serial("id").primaryKey(),
+  affiliateId: integer("affiliate_id").notNull().references(() => affiliates.id),
+  affiliateCode: varchar("affiliate_code").notNull(),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  referrerUrl: text("referrer_url"),
+  landingPage: text("landing_page"),
+  convertedToReferral: boolean("converted_to_referral").default(false),
+  referralId: integer("referral_id").references(() => affiliateReferrals.id),
+  clickedAt: timestamp("clicked_at").defaultNow(),
+}, (table) => [
+  index("clicks_affiliate_idx").on(table.affiliateId),
+  index("clicks_code_idx").on(table.affiliateCode),
+  index("clicks_date_idx").on(table.clickedAt),
+]);
+
+// Affiliate Schema and Types
+export const insertAffiliateSchema = createInsertSchema(affiliates, {
+  userId: z.string().min(1, "User ID is required"),
+  affiliateCode: z.string().min(1, "Affiliate code is required"),
+  commissionRate: z.string().default("5.00"),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertAffiliate = z.infer<typeof insertAffiliateSchema>;
+export type Affiliate = typeof affiliates.$inferSelect;
+
+export const insertAffiliateReferralSchema = createInsertSchema(affiliateReferrals, {
+  affiliateId: z.number().min(1, "Affiliate ID is required"),
+  referredUserId: z.string().min(1, "Referred user ID is required"),
+  currentMembershipTier: z.string().optional(),
+  membershipStatus: z.string().default("pending"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertAffiliateReferral = z.infer<typeof insertAffiliateReferralSchema>;
+export type AffiliateReferral = typeof affiliateReferrals.$inferSelect;
+
+export const insertAffiliateCommissionSchema = createInsertSchema(affiliateCommissions, {
+  affiliateId: z.number().min(1, "Affiliate ID is required"),
+  referralId: z.number().min(1, "Referral ID is required"),
+  amount: z.string().min(1, "Amount is required"),
+  commissionAmount: z.string().min(1, "Commission amount is required"),
+  commissionRate: z.string().min(1, "Commission rate is required"),
+  paymentDate: z.date(),
+  status: z.string().default("pending"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertAffiliateCommission = z.infer<typeof insertAffiliateCommissionSchema>;
+export type AffiliateCommission = typeof affiliateCommissions.$inferSelect;
+
+export const insertAffiliatePayoutSchema = createInsertSchema(affiliatePayouts, {
+  affiliateId: z.number().min(1, "Affiliate ID is required"),
+  amount: z.string().min(1, "Amount is required"),
+  currency: z.string().default("GBP"),
+  method: z.string().min(1, "Payment method is required"),
+  status: z.string().default("pending"),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertAffiliatePayout = z.infer<typeof insertAffiliatePayoutSchema>;
+export type AffiliatePayout = typeof affiliatePayouts.$inferSelect;
+
+export const insertAffiliateClickSchema = createInsertSchema(affiliateClicks, {
+  affiliateId: z.number().min(1, "Affiliate ID is required"),
+  affiliateCode: z.string().min(1, "Affiliate code is required"),
+}).omit({ id: true });
+
+export type InsertAffiliateClick = z.infer<typeof insertAffiliateClickSchema>;
+export type AffiliateClick = typeof affiliateClicks.$inferSelect;

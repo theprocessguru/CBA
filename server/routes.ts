@@ -63,7 +63,9 @@ import {
   insertEventMoodEntrySchema,
   insertEventMoodAggregationSchema,
   type EventMoodEntry,
-  type EventMoodAggregation
+  type EventMoodAggregation,
+  affiliates,
+  affiliateCommissions
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -8674,6 +8676,224 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating mood aggregation:', error);
     }
   }
+
+  // ===========================
+  // Affiliate Programme Routes
+  // ===========================
+  
+  const { affiliateService } = await import("./affiliateService");
+  
+  // Get affiliate dashboard data
+  app.get('/api/affiliate/dashboard', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Get or create affiliate account
+      let affiliate = await affiliateService.getAffiliateByUserId(userId);
+      if (!affiliate) {
+        affiliate = await affiliateService.createAffiliateAccount(userId);
+      }
+
+      if (!affiliate) {
+        return res.status(500).json({ message: "Failed to create affiliate account" });
+      }
+
+      // Get affiliate stats
+      const stats = await affiliateService.getAffiliateStats(affiliate.id);
+      res.json(stats);
+    } catch (error: any) {
+      console.error("Error fetching affiliate dashboard:", error);
+      res.status(500).json({ message: "Failed to fetch affiliate data: " + error.message });
+    }
+  });
+
+  // Track affiliate click
+  app.get('/api/affiliate/track/:code', async (req: Request, res: Response) => {
+    try {
+      const { code } = req.params;
+      const { redirect } = req.query;
+
+      // Track the click
+      await affiliateService.trackClick(code, {
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        referrerUrl: req.get('referer'),
+        landingPage: redirect as string || '/'
+      });
+
+      // Store affiliate code in session/cookie for later use
+      if (req.session) {
+        req.session.affiliateCode = code;
+      }
+
+      // Redirect to the target page
+      res.redirect(redirect as string || '/');
+    } catch (error: any) {
+      console.error("Error tracking affiliate click:", error);
+      res.redirect('/');
+    }
+  });
+
+  // Process affiliate referral during registration
+  app.post('/api/affiliate/referral', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { affiliateCode } = req.body;
+      if (!affiliateCode) {
+        return res.status(400).json({ message: "Affiliate code required" });
+      }
+
+      const referral = await affiliateService.createReferral(affiliateCode, userId);
+      res.json({ success: true, referral });
+    } catch (error: any) {
+      console.error("Error processing referral:", error);
+      res.status(500).json({ message: "Failed to process referral: " + error.message });
+    }
+  });
+
+  // Request affiliate payout
+  app.post('/api/affiliate/payout', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req.user as any)?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const affiliate = await affiliateService.getAffiliateByUserId(userId);
+      if (!affiliate) {
+        return res.status(404).json({ message: "Affiliate account not found" });
+      }
+
+      const { amount } = req.body;
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "Invalid payout amount" });
+      }
+
+      const pendingEarnings = parseFloat(affiliate.pendingEarnings || "0");
+      if (amount > pendingEarnings) {
+        return res.status(400).json({ message: "Insufficient balance" });
+      }
+
+      const success = await affiliateService.processPayout(affiliate.id, amount);
+      if (success) {
+        res.json({ success: true, message: "Payout processed successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to process payout" });
+      }
+    } catch (error: any) {
+      console.error("Error processing payout:", error);
+      res.status(500).json({ message: "Failed to process payout: " + error.message });
+    }
+  });
+
+  // Admin: Get all affiliates
+  app.get('/api/admin/affiliates', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = (req.user as any);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const affiliates = await db.select({
+        affiliate: affiliates,
+        user: users
+      })
+        .from(affiliates)
+        .leftJoin(users, eq(affiliates.userId, users.id))
+        .orderBy(desc(affiliates.totalEarnings));
+
+      res.json(affiliates);
+    } catch (error: any) {
+      console.error("Error fetching affiliates:", error);
+      res.status(500).json({ message: "Failed to fetch affiliates: " + error.message });
+    }
+  });
+
+  // Admin: Approve commissions
+  app.post('/api/admin/commissions/approve', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = (req.user as any);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { commissionIds } = req.body;
+      if (!commissionIds || !Array.isArray(commissionIds)) {
+        return res.status(400).json({ message: "Invalid commission IDs" });
+      }
+
+      await db.update(affiliateCommissions)
+        .set({ status: "approved", updatedAt: new Date() })
+        .where(and(
+          inArray(affiliateCommissions.id, commissionIds),
+          eq(affiliateCommissions.status, "pending")
+        ));
+
+      res.json({ success: true, message: "Commissions approved" });
+    } catch (error: any) {
+      console.error("Error approving commissions:", error);
+      res.status(500).json({ message: "Failed to approve commissions: " + error.message });
+    }
+  });
+
+  // Webhook: Process commission on successful payment
+  app.post('/api/webhook/stripe-payment', async (req: Request, res: Response) => {
+    try {
+      const sig = req.headers['stripe-signature'] as string;
+      
+      if (!stripe) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      // Verify webhook signature
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET || ''
+      );
+
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object as any;
+        const userId = paymentIntent.metadata?.userId;
+        const amount = paymentIntent.amount / 100; // Convert from pence to pounds
+
+        if (userId) {
+          await affiliateService.processCommission(userId, amount, paymentIntent.id);
+        }
+      }
+
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("Webhook error:", error);
+      res.status(400).json({ message: "Webhook error: " + error.message });
+    }
+  });
+
+  // Automatically enroll all users as affiliates (run once)
+  app.post('/api/admin/affiliates/enroll-all', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = (req.user as any);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const enrolled = await affiliateService.enrollAllUsersAsAffiliates();
+      res.json({ 
+        success: true, 
+        message: `Successfully enrolled ${enrolled} users as affiliates` 
+      });
+    } catch (error: any) {
+      console.error("Error enrolling affiliates:", error);
+      res.status(500).json({ message: "Failed to enroll affiliates: " + error.message });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;
