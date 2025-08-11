@@ -1105,6 +1105,32 @@ export type AISummitSpeakingSession = typeof aiSummitSpeakingSessions.$inferSele
 export type InsertAISummitSpeakingSessionRegistration = z.infer<typeof insertAISummitSpeakingSessionRegistrationSchema>;
 export type AISummitSpeakingSessionRegistration = typeof aiSummitSessionRegistrations.$inferSelect;
 
+// Event Mood Sentiment Tracking System
+export const eventMoodEntries = pgTable("event_mood_entries", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => cbaEvents.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id),
+  sessionName: varchar("session_name"),
+  moodType: varchar("mood_type").notNull(), // happy, excited, inspired, focused, confused, bored, frustrated, neutral
+  intensity: integer("intensity").notNull().default(5), // 1-10 scale
+  comment: text("comment"),
+  isAnonymous: boolean("is_anonymous").default(false),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Real-time mood aggregation for quick display
+export const eventMoodAggregations = pgTable("event_mood_aggregations", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").references(() => cbaEvents.id, { onDelete: "cascade" }),
+  sessionName: varchar("session_name"),
+  moodType: varchar("mood_type").notNull(),
+  totalCount: integer("total_count").default(0),
+  averageIntensity: decimal("average_intensity", { precision: 3, scale: 2 }).default("0.00"),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
 // Enhanced Event System Types
 export type InsertCBAEvent = z.infer<typeof insertCBAEventSchema>;
 export type CBAEvent = typeof cbaEvents.$inferSelect;
@@ -1123,6 +1149,15 @@ export type GHLAutomationLog = typeof ghlAutomationLogs.$inferSelect;
 
 export type InsertEventFeedback = z.infer<typeof insertEventFeedbackSchema>;
 export type EventFeedback = typeof eventFeedback.$inferSelect;
+
+// Event Mood System Types and Schemas
+export const insertEventMoodEntrySchema = createInsertSchema(eventMoodEntries).omit({ id: true, createdAt: true });
+export const insertEventMoodAggregationSchema = createInsertSchema(eventMoodAggregations).omit({ id: true, lastUpdated: true });
+
+export type InsertEventMoodEntry = z.infer<typeof insertEventMoodEntrySchema>;
+export type EventMoodEntry = typeof eventMoodEntries.$inferSelect;
+export type InsertEventMoodAggregation = z.infer<typeof insertEventMoodAggregationSchema>;
+export type EventMoodAggregation = typeof eventMoodAggregations.$inferSelect;
 
 // Scanning system schemas
 export const insertEventScannerSchema = createInsertSchema(eventScanners).omit({ id: true });

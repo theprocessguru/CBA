@@ -82,6 +82,8 @@ import UserTypes from "@/pages/admin/UserTypes";
 import { ExhibitorVisitors } from "@/pages/ExhibitorVisitors";
 import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 import EventTimeSlots from "@/pages/admin/EventTimeSlots";
+import EventMoodDashboard from "@/pages/EventMoodDashboard";
+import MoodSubmission from "@/pages/MoodSubmission";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -322,6 +324,18 @@ function Router() {
             <ExhibitorScanner />
           </MainLayout>
         </ProtectedRoute>
+      </Route>
+      <Route path="/mood-dashboard">
+        <ProtectedRoute>
+          <MainLayout>
+            <EventMoodDashboard />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/mood-submission">
+        <MainLayout>
+          <MoodSubmission />
+        </MainLayout>
       </Route>
       <Route path="/test-qr-codes">
         <MainLayout>

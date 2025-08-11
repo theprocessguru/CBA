@@ -57,7 +57,13 @@ import {
   eventTimeSlots,
   timeSlotSpeakers,
   insertEventTimeSlotSchema,
-  insertTimeSlotSpeakerSchema
+  insertTimeSlotSpeakerSchema,
+  eventMoodEntries,
+  eventMoodAggregations,
+  insertEventMoodEntrySchema,
+  insertEventMoodAggregationSchema,
+  type EventMoodEntry,
+  type EventMoodAggregation
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -8462,6 +8468,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to export visitors" });
     }
   });
+
+  // Event Mood Sentiment Tracking API
+  
+  // Submit mood entry
+  app.post('/api/mood/submit', async (req: any, res) => {
+    try {
+      const moodData = insertEventMoodEntrySchema.parse(req.body);
+      
+      // Add additional context
+      moodData.ipAddress = req.ip;
+      moodData.userAgent = req.get('User-Agent');
+      
+      // Insert mood entry
+      const moodEntry = await db.insert(eventMoodEntries).values(moodData).returning();
+      
+      // Update aggregation
+      await updateMoodAggregation(moodData.eventId, moodData.sessionName, moodData.moodType, moodData.intensity);
+      
+      res.status(201).json(moodEntry[0]);
+    } catch (error) {
+      console.error('Error submitting mood:', error);
+      res.status(500).json({ message: 'Failed to submit mood entry' });
+    }
+  });
+
+  // Get mood data for event
+  app.get('/api/mood/:eventId', async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      const { sessionName, timeRange = '1h' } = req.query;
+      
+      // Calculate time filter based on range
+      const timeFilter = new Date();
+      switch (timeRange) {
+        case '15m':
+          timeFilter.setMinutes(timeFilter.getMinutes() - 15);
+          break;
+        case '30m':
+          timeFilter.setMinutes(timeFilter.getMinutes() - 30);
+          break;
+        case '1h':
+          timeFilter.setHours(timeFilter.getHours() - 1);
+          break;
+        case '3h':
+          timeFilter.setHours(timeFilter.getHours() - 3);
+          break;
+        case '6h':
+          timeFilter.setHours(timeFilter.getHours() - 6);
+          break;
+        default:
+          timeFilter.setHours(timeFilter.getHours() - 1);
+      }
+
+      // Build query conditions
+      let whereConditions = [eq(eventMoodEntries.eventId, parseInt(eventId))];
+      
+      if (sessionName && sessionName !== 'all') {
+        whereConditions.push(eq(eventMoodEntries.sessionName, sessionName));
+      }
+      
+      whereConditions.push(gte(eventMoodEntries.createdAt, timeFilter));
+
+      // Get mood entries
+      const entries = await db
+        .select()
+        .from(eventMoodEntries)
+        .where(and(...whereConditions))
+        .orderBy(desc(eventMoodEntries.createdAt));
+
+      // Get aggregated mood data
+      const aggregatedData = await db
+        .select({
+          moodType: eventMoodEntries.moodType,
+          count: sql<number>`COUNT(*)`,
+          avgIntensity: sql<number>`AVG(intensity)`,
+          sessionName: eventMoodEntries.sessionName
+        })
+        .from(eventMoodEntries)
+        .where(and(...whereConditions))
+        .groupBy(eventMoodEntries.moodType, eventMoodEntries.sessionName);
+
+      // Get time-series data for charts (grouped by 5-minute intervals)
+      const timeSeriesData = await db
+        .select({
+          timeSlot: sql<string>`TO_CHAR(DATE_TRUNC('minute', created_at) + 
+            INTERVAL '5 min' * FLOOR(EXTRACT(MINUTE FROM created_at) / 5), 'HH24:MI')`,
+          moodType: eventMoodEntries.moodType,
+          count: sql<number>`COUNT(*)`,
+          avgIntensity: sql<number>`AVG(intensity)`
+        })
+        .from(eventMoodEntries)
+        .where(and(...whereConditions))
+        .groupBy(
+          sql`DATE_TRUNC('minute', created_at) + INTERVAL '5 min' * FLOOR(EXTRACT(MINUTE FROM created_at) / 5)`,
+          eventMoodEntries.moodType
+        )
+        .orderBy(sql`DATE_TRUNC('minute', created_at) + INTERVAL '5 min' * FLOOR(EXTRACT(MINUTE FROM created_at) / 5)`);
+
+      res.json({
+        entries,
+        aggregated: aggregatedData,
+        timeSeries: timeSeriesData,
+        totalEntries: entries.length,
+        timeRange,
+        sessionName: sessionName || 'all'
+      });
+    } catch (error) {
+      console.error('Error fetching mood data:', error);
+      res.status(500).json({ message: 'Failed to fetch mood data' });
+    }
+  });
+
+  // Get mood aggregations for dashboard
+  app.get('/api/mood/aggregations/:eventId', async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      const aggregations = await db
+        .select()
+        .from(eventMoodAggregations)
+        .where(eq(eventMoodAggregations.eventId, parseInt(eventId)))
+        .orderBy(desc(eventMoodAggregations.lastUpdated));
+
+      res.json(aggregations);
+    } catch (error) {
+      console.error('Error fetching mood aggregations:', error);
+      res.status(500).json({ message: 'Failed to fetch mood aggregations' });
+    }
+  });
+
+  // Get available sessions for an event
+  app.get('/api/mood/sessions/:eventId', async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      
+      // Get unique sessions from mood entries
+      const sessionsFromMood = await db
+        .select({ sessionName: eventMoodEntries.sessionName })
+        .from(eventMoodEntries)
+        .where(eq(eventMoodEntries.eventId, parseInt(eventId)))
+        .groupBy(eventMoodEntries.sessionName);
+
+      // Get sessions from time slots if available
+      const sessionsFromTimeSlots = await db
+        .select({ title: eventTimeSlots.title })
+        .from(eventTimeSlots)
+        .where(eq(eventTimeSlots.eventId, parseInt(eventId)));
+
+      // Combine and deduplicate sessions
+      const allSessions = [
+        ...sessionsFromMood.map(s => s.sessionName).filter(Boolean),
+        ...sessionsFromTimeSlots.map(s => s.title).filter(Boolean)
+      ];
+      
+      const uniqueSessions = [...new Set(allSessions)].sort();
+
+      res.json(uniqueSessions);
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      res.status(500).json({ message: 'Failed to fetch sessions' });
+    }
+  });
+
+  // Helper function to update mood aggregation
+  async function updateMoodAggregation(eventId: number, sessionName: string | null, moodType: string, intensity: number) {
+    try {
+      // Check if aggregation exists
+      const existing = await db
+        .select()
+        .from(eventMoodAggregations)
+        .where(and(
+          eq(eventMoodAggregations.eventId, eventId),
+          sessionName ? eq(eventMoodAggregations.sessionName, sessionName) : sql`session_name IS NULL`,
+          eq(eventMoodAggregations.moodType, moodType)
+        ));
+
+      if (existing.length > 0) {
+        // Update existing aggregation
+        const current = existing[0];
+        const newCount = current.totalCount + 1;
+        const currentAvg = parseFloat(current.averageIntensity.toString());
+        const newAvg = ((currentAvg * current.totalCount) + intensity) / newCount;
+
+        await db
+          .update(eventMoodAggregations)
+          .set({
+            totalCount: newCount,
+            averageIntensity: newAvg.toFixed(2),
+            lastUpdated: new Date()
+          })
+          .where(eq(eventMoodAggregations.id, current.id));
+      } else {
+        // Create new aggregation
+        await db.insert(eventMoodAggregations).values({
+          eventId,
+          sessionName,
+          moodType,
+          totalCount: 1,
+          averageIntensity: intensity.toFixed(2),
+          lastUpdated: new Date()
+        });
+      }
+    } catch (error) {
+      console.error('Error updating mood aggregation:', error);
+    }
+  }
 
   const httpServer = createServer(app);
   return httpServer;
