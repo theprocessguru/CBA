@@ -33,7 +33,11 @@ export function LocationWelcome() {
   const [userLocation, setUserLocation] = useState<GeolocationPosition | null>(null);
   const [nearbyVenue, setNearbyVenue] = useState<Venue | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
-  const [locationEnabled, setLocationEnabled] = useState(false);
+  // Check localStorage for previous dismissal or enablement
+  const [locationEnabled, setLocationEnabled] = useState(() => {
+    const stored = localStorage.getItem('locationPermissionDismissed');
+    return stored === 'true';
+  });
   const [hasWelcomed, setHasWelcomed] = useState<string[]>([]);
   const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const watchIdRef = useRef<number | null>(null);
@@ -107,6 +111,7 @@ export function LocationWelcome() {
         console.log("Location permission granted", position);
         setUserLocation(position);
         setLocationEnabled(true);
+        localStorage.setItem('locationPermissionDismissed', 'true');
         setIsRequestingPermission(false);
         checkNearbyVenue(position);
         
@@ -166,11 +171,15 @@ export function LocationWelcome() {
   };
 
   useEffect(() => {
-    // Check if user has previously granted location permission
-    if ("permissions" in navigator) {
+    // Only check permissions if user hasn't dismissed the popup
+    if (!locationEnabled && "permissions" in navigator) {
       navigator.permissions.query({ name: "geolocation" }).then((result) => {
+        // Only auto-request if already granted and not dismissed
         if (result.state === "granted") {
-          requestLocationPermission();
+          const dismissed = localStorage.getItem('locationPermissionDismissed');
+          if (dismissed !== 'true') {
+            requestLocationPermission();
+          }
         }
       }).catch((error) => {
         console.log("Permissions API not supported or error:", error);
@@ -215,7 +224,10 @@ export function LocationWelcome() {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => setLocationEnabled(true)}
+                  onClick={() => {
+                    setLocationEnabled(true);
+                    localStorage.setItem('locationPermissionDismissed', 'true');
+                  }}
                   className="flex-1"
                 >
                   Not Now
