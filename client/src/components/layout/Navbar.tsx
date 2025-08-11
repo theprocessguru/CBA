@@ -9,10 +9,12 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
   const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
+  const [isMembershipMenuOpen, setIsMembershipMenuOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const [location] = useLocation();
   const aiMenuRef = useRef<HTMLDivElement>(null);
   const homeMenuRef = useRef<HTMLDivElement>(null);
+  const membershipMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location === path;
   const isAiPathActive = () => location.startsWith('/ai-');
@@ -24,11 +26,19 @@ const Navbar = () => {
   const toggleAiMenu = () => {
     setIsAiMenuOpen(!isAiMenuOpen);
     setIsHomeMenuOpen(false); // Close home menu when opening AI menu
+    setIsMembershipMenuOpen(false); // Close membership menu
   };
 
   const toggleHomeMenu = () => {
     setIsHomeMenuOpen(!isHomeMenuOpen);
     setIsAiMenuOpen(false); // Close AI menu when opening home menu
+    setIsMembershipMenuOpen(false); // Close membership menu
+  };
+  
+  const toggleMembershipMenu = () => {
+    setIsMembershipMenuOpen(!isMembershipMenuOpen);
+    setIsAiMenuOpen(false); // Close AI menu
+    setIsHomeMenuOpen(false); // Close home menu
   };
 
   // Close menus when clicking outside (but not on menu items)
@@ -47,6 +57,10 @@ const Navbar = () => {
       
       if (homeMenuRef.current && !homeMenuRef.current.contains(target)) {
         setIsHomeMenuOpen(false);
+      }
+      
+      if (membershipMenuRef.current && !membershipMenuRef.current.contains(target)) {
+        setIsMembershipMenuOpen(false);
       }
     };
 
@@ -133,25 +147,20 @@ const Navbar = () => {
                 </button>
               </div>
 
-              <Link href="/membership-benefits">
-                <a className={`border-b-2 ${
-                  isActive('/membership-benefits') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Membership
-                </a>
-              </Link>
-
-              <Link href="/directory">
-                <a className={`border-b-2 ${
-                  isActive('/directory') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Directory
-                </a>
-              </Link>
+              {/* Membership Dropdown Menu */}
+              <div className="relative" ref={membershipMenuRef}>
+                <button 
+                  className={`border-b-2 ${
+                    isActive('/membership-benefits') || isActive('/directory') || isActive('/events') || isActive('/marketplace')
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                    } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
+                  onClick={toggleMembershipMenu}
+                >
+                  <span>Membership</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMembershipMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </div>
 
               <Link href="/organizer-scanner">
                 <a className={`border-b-2 ${
@@ -160,26 +169,6 @@ const Navbar = () => {
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
                   } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
                   Badge Scanner
-                </a>
-              </Link>
-
-              <Link href="/events">
-                <a className={`border-b-2 ${
-                  isActive('/events') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Events
-                </a>
-              </Link>
-
-              <Link href="/marketplace">
-                <a className={`border-b-2 ${
-                  isActive('/marketplace') 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                  } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200`}>
-                  Marketplace
                 </a>
               </Link>
               
@@ -277,6 +266,56 @@ const Navbar = () => {
                   } transition-colors duration-200`}
                   onClick={() => setIsHomeMenuOpen(false)}>
                   About CBA
+                </a>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Membership Horizontal Submenu */}
+      {isMembershipMenuOpen && (
+        <div className="bg-gray-50 border-t border-gray-200 block relative z-40" onClick={(e) => e.stopPropagation()}>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
+              <Link href="/membership-benefits">
+                <a className={`text-sm font-medium ${
+                  isActive('/membership-benefits') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsMembershipMenuOpen(false)}>
+                  Benefits
+                </a>
+              </Link>
+              <Link href="/directory">
+                <a className={`text-sm font-medium ${
+                  isActive('/directory') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsMembershipMenuOpen(false)}>
+                  Directory
+                </a>
+              </Link>
+              <Link href="/marketplace">
+                <a className={`text-sm font-medium ${
+                  isActive('/marketplace') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsMembershipMenuOpen(false)}>
+                  Marketplace
+                </a>
+              </Link>
+              <Link href="/events">
+                <a className={`text-sm font-medium ${
+                  isActive('/events') 
+                    ? 'text-primary' 
+                    : 'text-neutral-600 hover:text-primary'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsMembershipMenuOpen(false)}>
+                  Events
                 </a>
               </Link>
             </div>
@@ -389,11 +428,6 @@ const Navbar = () => {
               Benefits
             </a>
           </Link>
-
-          {/* Business Section */}
-          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            Business
-          </div>
           <Link href="/directory">
             <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/directory') 
@@ -403,15 +437,6 @@ const Navbar = () => {
               Directory
             </a>
           </Link>
-          <Link href="/events">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/events') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Events
-            </a>
-          </Link>
           <Link href="/marketplace">
             <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/marketplace') 
@@ -419,6 +444,15 @@ const Navbar = () => {
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
               } font-medium text-sm`}>
               Marketplace
+            </a>
+          </Link>
+          <Link href="/events">
+            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+              isActive('/events') 
+                ? 'border-primary text-primary bg-neutral-100' 
+                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+              } font-medium text-sm`}>
+              Events
             </a>
           </Link>
           
