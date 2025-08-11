@@ -41,7 +41,8 @@ const MyProfile = () => {
     phone: "",
     company: "",
     jobTitle: "",
-    bio: ""
+    bio: "",
+    isProfileHidden: false
   });
 
   // Get user profile data
@@ -60,7 +61,8 @@ const MyProfile = () => {
         phone: (profile as any).phone || "",
         company: (profile as any).company || "",
         jobTitle: (profile as any).jobTitle || "",
-        bio: (profile as any).bio || ""
+        bio: (profile as any).bio || "",
+        isProfileHidden: (profile as any).isProfileHidden || false
       });
     }
   }, [profile]);
@@ -106,7 +108,8 @@ const MyProfile = () => {
         phone: profile.phone || "",
         company: profile.company || "",
         jobTitle: profile.jobTitle || "",
-        bio: profile.bio || ""
+        bio: profile.bio || "",
+        isProfileHidden: profile.isProfileHidden || false
       });
     }
     setIsEditing(false);
@@ -298,16 +301,39 @@ const MyProfile = () => {
                 </div>
 
                 {isEditing && (
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      value={profileData.bio}
-                      onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                      placeholder="Tell us about yourself..."
-                      rows={3}
-                    />
-                  </div>
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        value={profileData.bio}
+                        onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
+                        placeholder="Tell us about yourself..."
+                        rows={3}
+                      />
+                    </div>
+                    
+                    <div className="border-t pt-4">
+                      <div className="flex items-start space-x-3">
+                        <input
+                          type="checkbox"
+                          id="isProfileHidden"
+                          checked={profileData.isProfileHidden}
+                          onChange={(e) => setProfileData(prev => ({ ...prev, isProfileHidden: e.target.checked }))}
+                          className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor="isProfileHidden" className="text-sm font-medium cursor-pointer">
+                            Hide my profile from public directories
+                          </Label>
+                          <p className="text-sm text-gray-500 mt-1">
+                            When enabled, your profile won't appear in the member directory, marketplace, or other public areas of the site. 
+                            You'll still be able to access all member benefits and features.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>

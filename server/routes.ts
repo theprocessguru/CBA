@@ -5717,7 +5717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "User ID not found" });
       }
 
-      const { firstName, lastName, phone, company, jobTitle, bio } = req.body;
+      const { firstName, lastName, phone, company, jobTitle, bio, isProfileHidden } = req.body;
       
       const user = await storage.updateUserProfile(userId, {
         firstName,
@@ -5725,7 +5725,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone,
         company,
         jobTitle,
-        bio
+        bio,
+        isProfileHidden
       });
       
       res.json(user);

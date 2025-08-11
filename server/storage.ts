@@ -116,7 +116,7 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
-  updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string }): Promise<User>;
+  updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string; isProfileHidden?: boolean }): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   isUserAdmin(id: string): Promise<boolean>;
   getUserEventRegistrations(userId: string): Promise<any[]>;
@@ -424,7 +424,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string }): Promise<User> {
+  async updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string; isProfileHidden?: boolean }): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ 
@@ -531,7 +531,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listBusinesses(options?: { categoryId?: number; search?: string; limit?: number }): Promise<Business[]> {
-    let query = db.select().from(businesses).where(eq(businesses.isActive, true));
+    let query = db
+      .select({
+        id: businesses.id,
+        userId: businesses.userId,
+        name: businesses.name,
+        description: businesses.description,
+        address: businesses.address,
+        city: businesses.city,
+        postcode: businesses.postcode,
+        phone: businesses.phone,
+        email: businesses.email,
+        website: businesses.website,
+        logo: businesses.logo,
+        coverImage: businesses.coverImage,
+        categoryId: businesses.categoryId,
+        established: businesses.established,
+        employeeCount: businesses.employeeCount,
+        isVerified: businesses.isVerified,
+        isActive: businesses.isActive,
+        createdAt: businesses.createdAt,
+        updatedAt: businesses.updatedAt
+      })
+      .from(businesses)
+      .leftJoin(users, eq(businesses.userId, users.id))
+      .where(
+        and(
+          eq(businesses.isActive, true),
+          or(
+            isNull(users.isProfileHidden),
+            eq(users.isProfileHidden, false)
+          )
+        )
+      );
     
     if (options?.categoryId) {
       query = query.where(eq(businesses.categoryId, options.categoryId));

@@ -58,6 +58,8 @@ export const users = pgTable("users", {
   phone: varchar("phone"),
   bio: text("bio"),
   participantType: varchar("participant_type").default("attendee"), // attendee, volunteer, speaker, etc.
+  // Profile visibility
+  isProfileHidden: boolean("is_profile_hidden").default(false), // If true, profile won't appear in directories or public areas
   // Volunteer/Student specific fields
   university: varchar("university"),
   studentId: varchar("student_id"),
