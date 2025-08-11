@@ -7142,15 +7142,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       
+      console.log("Received job posting data:", req.body);
+      
       // Check if user has a business profile
       const [business] = await db.select().from(businesses).where(eq(businesses.userId, userId));
       
-      const jobData = {
-        ...req.body,
+      // Map frontend field names to Drizzle schema field names (camelCase)
+      const jobData: any = {
         userId,
         businessId: business?.id || null,
+        title: req.body.title,
         company: business?.name || req.body.company,
+        location: req.body.location,
+        jobType: req.body.type || req.body.jobType || "full-time", // Use camelCase for Drizzle
+        workMode: req.body.remote ? "remote" : (req.body.workMode || "on-site"), // Map remote to workMode
+        salary: req.body.salary,
+        salaryMin: req.body.salaryMin,
+        salaryMax: req.body.salaryMax,
+        description: req.body.description,
+        requirements: req.body.requirements,
+        benefits: req.body.benefits,
+        applicationUrl: req.body.applicationUrl,
+        applicationEmail: req.body.applicationEmail,
+        isActive: true,
+        category: req.body.category,
+        experienceLevel: req.body.experienceLevel || "intermediate",
+        tags: req.body.tags || [],
       };
+      
+      // Convert deadline to Date object if provided
+      if (req.body.applicationDeadline || req.body.deadline) {
+        jobData.deadline = new Date(req.body.applicationDeadline || req.body.deadline);
+      }
+      
+      console.log("Mapped job data for database:", jobData);
       
       const [newJob] = await db.insert(jobPostings).values(jobData).returning();
       res.status(201).json(newJob);
@@ -7172,8 +7197,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Unauthorized to edit this job" });
       }
       
+      // Map frontend field names to Drizzle schema field names (camelCase)
+      const updateData: any = {
+        updatedAt: new Date()
+      };
+      
+      // Only include fields that are provided
+      if (req.body.title !== undefined) updateData.title = req.body.title;
+      if (req.body.company !== undefined) updateData.company = req.body.company;
+      if (req.body.location !== undefined) updateData.location = req.body.location;
+      if (req.body.type !== undefined) updateData.jobType = req.body.type;
+      if (req.body.jobType !== undefined) updateData.jobType = req.body.jobType;
+      if (req.body.remote !== undefined) updateData.workMode = req.body.remote ? "remote" : "on-site";
+      if (req.body.workMode !== undefined) updateData.workMode = req.body.workMode;
+      if (req.body.salary !== undefined) updateData.salary = req.body.salary;
+      if (req.body.salaryMin !== undefined) updateData.salaryMin = req.body.salaryMin;
+      if (req.body.salaryMax !== undefined) updateData.salaryMax = req.body.salaryMax;
+      if (req.body.description !== undefined) updateData.description = req.body.description;
+      if (req.body.requirements !== undefined) updateData.requirements = req.body.requirements;
+      if (req.body.benefits !== undefined) updateData.benefits = req.body.benefits;
+      if (req.body.applicationDeadline !== undefined) updateData.deadline = req.body.applicationDeadline;
+      if (req.body.deadline !== undefined) updateData.deadline = req.body.deadline;
+      if (req.body.applicationUrl !== undefined) updateData.applicationUrl = req.body.applicationUrl;
+      if (req.body.applicationEmail !== undefined) updateData.applicationEmail = req.body.applicationEmail;
+      if (req.body.isActive !== undefined) updateData.isActive = req.body.isActive;
+      if (req.body.category !== undefined) updateData.category = req.body.category;
+      if (req.body.experienceLevel !== undefined) updateData.experienceLevel = req.body.experienceLevel;
+      if (req.body.tags !== undefined) updateData.tags = req.body.tags;
+      
       const [updatedJob] = await db.update(jobPostings)
-        .set({ ...req.body, updatedAt: new Date() })
+        .set(updateData)
         .where(eq(jobPostings.id, jobId))
         .returning();
       
