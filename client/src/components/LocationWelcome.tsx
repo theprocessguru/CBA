@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,8 @@ export function LocationWelcome() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [hasWelcomed, setHasWelcomed] = useState<string[]>([]);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const watchIdRef = useRef<number | null>(null);
   const { toast } = useToast();
 
   // Calculate distance between two coordinates in meters
@@ -82,42 +84,79 @@ export function LocationWelcome() {
 
   // Request location permission
   const requestLocationPermission = () => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation(position);
-          setLocationEnabled(true);
-          checkNearbyVenue(position);
-          
-          // Set up continuous tracking
-          const watchId = navigator.geolocation.watchPosition(
-            (newPosition) => {
-              setUserLocation(newPosition);
-              checkNearbyVenue(newPosition);
-            },
-            (error) => {
-              console.error("Location error:", error);
-            },
-            {
-              enableHighAccuracy: true,
-              timeout: 5000,
-              maximumAge: 0
-            }
-          );
-
-          // Cleanup on unmount
-          return () => navigator.geolocation.clearWatch(watchId);
-        },
-        (error) => {
-          console.error("Location permission denied:", error);
-          toast({
-            title: "Location Access",
-            description: "Enable location to get venue directions and welcome messages.",
-            variant: "default",
-          });
-        }
-      );
+    // Prevent multiple simultaneous requests
+    if (isRequestingPermission) {
+      console.log("Already requesting permission, skipping duplicate request");
+      return;
     }
+    
+    if (!("geolocation" in navigator)) {
+      toast({
+        title: "Location Not Supported",
+        description: "Your browser doesn't support location services.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    console.log("Starting location permission request");
+    setIsRequestingPermission(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log("Location permission granted", position);
+        setUserLocation(position);
+        setLocationEnabled(true);
+        setIsRequestingPermission(false);
+        checkNearbyVenue(position);
+        
+        // Set up continuous tracking
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+        }
+        
+        watchIdRef.current = navigator.geolocation.watchPosition(
+          (newPosition) => {
+            setUserLocation(newPosition);
+            checkNearbyVenue(newPosition);
+          },
+          (error) => {
+            console.error("Location watch error:", error);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+          }
+        );
+      },
+      (error) => {
+        console.error("Location permission error:", error);
+        setIsRequestingPermission(false);
+        
+        // More specific error handling
+        let errorMessage = "Enable location to get venue directions and welcome messages.";
+        
+        if (error.code === error.PERMISSION_DENIED) {
+          errorMessage = "Location permission was denied. Please enable it in your browser settings.";
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          errorMessage = "Location information is unavailable. Please try again.";
+        } else if (error.code === error.TIMEOUT) {
+          errorMessage = "Location request timed out. Please try again.";
+        }
+        
+        toast({
+          title: "Location Access",
+          description: errorMessage,
+          variant: "default",
+        });
+      },
+      {
+        enableHighAccuracy: false, // Changed to false for better compatibility
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   };
 
   // Get directions to a venue
@@ -133,8 +172,17 @@ export function LocationWelcome() {
         if (result.state === "granted") {
           requestLocationPermission();
         }
+      }).catch((error) => {
+        console.log("Permissions API not supported or error:", error);
       });
     }
+    
+    // Cleanup on unmount
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
   }, []);
 
   return (
@@ -156,7 +204,10 @@ export function LocationWelcome() {
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  onClick={requestLocationPermission}
+                  onClick={() => {
+                    console.log("Enable location button clicked");
+                    requestLocationPermission();
+                  }}
                   className="flex-1"
                 >
                   Enable
