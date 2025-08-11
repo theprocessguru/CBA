@@ -826,34 +826,36 @@ const AISummit = () => {
                     </Link>
                   )}
                 </div>
-                <div className="pt-2">
+                <div className="pt-4">
                   <Link href="/my-registrations">
-                    <a className="bg-blue-500 text-white hover:bg-blue-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                    <a className="bg-blue-500 text-white hover:bg-blue-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mb-4">
                       <Calendar className="h-5 w-5" />
                       My Schedule & Calendar
                     </a>
                   </Link>
-                  <button 
-                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                    onClick={() => setShowExhibitorForm(true)}
-                  >
-                    <Building className="h-5 w-5" />
-                    Exhibit Your Business
-                  </button>
-                  <button 
-                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                    onClick={() => setShowSpeakerForm(true)}
-                  >
-                    <Mic className="h-5 w-5" />
-                    Speak at Summit
-                  </button>
-                  <button 
-                    className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-6 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-                    onClick={() => setShowVolunteerForm(true)}
-                  >
-                    <UserPlus className="h-5 w-5" />
-                    Volunteer with Us
-                  </button>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <button 
+                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      onClick={() => setShowExhibitorForm(true)}
+                    >
+                      <Building className="h-5 w-5" />
+                      Exhibit Your Business
+                    </button>
+                    <button 
+                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      onClick={() => setShowSpeakerForm(true)}
+                    >
+                      <Mic className="h-5 w-5" />
+                      Speak at Summit
+                    </button>
+                    <button 
+                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      onClick={() => setShowVolunteerForm(true)}
+                    >
+                      <UserPlus className="h-5 w-5" />
+                      Volunteer with Us
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
