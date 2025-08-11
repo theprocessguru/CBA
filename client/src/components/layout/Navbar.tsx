@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, ArrowLeft, Home, ChevronDown } from "lucide-react";
 import cbaLogo from "@assets/CBA LOGO.png";
@@ -12,9 +12,6 @@ const Navbar = () => {
   const [isMembershipMenuOpen, setIsMembershipMenuOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
   const [location] = useLocation();
-  const aiMenuRef = useRef<HTMLDivElement>(null);
-  const homeMenuRef = useRef<HTMLDivElement>(null);
-  const membershipMenuRef = useRef<HTMLDivElement>(null);
 
   const isActive = (path: string) => location === path;
   const isAiPathActive = () => location.startsWith('/ai-');
@@ -41,34 +38,7 @@ const Navbar = () => {
     setIsHomeMenuOpen(false); // Close home menu
   };
 
-  // Close menus when clicking outside (but not on menu items)
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      
-      // Don't close if clicking on a submenu link or home button
-      if (target.closest('a[href^="/ai-"]') || target.closest('a[href="/about"]') || target.closest('a[href="/"]')) {
-        return;
-      }
-      
-      if (aiMenuRef.current && !aiMenuRef.current.contains(target)) {
-        setIsAiMenuOpen(false);
-      }
-      
-      if (homeMenuRef.current && !homeMenuRef.current.contains(target)) {
-        setIsHomeMenuOpen(false);
-      }
-      
-      if (membershipMenuRef.current && !membershipMenuRef.current.contains(target)) {
-        setIsMembershipMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+  // Removed click-outside handler - menus now stay open until another menu is clicked or navigation happens
 
   // Close menus when location changes
   useEffect(() => {
@@ -133,7 +103,7 @@ const Navbar = () => {
             </div>
             <div className="hidden lg:ml-6 lg:flex lg:space-x-6 lg:items-center lg:h-16">
               {/* Home Dropdown Menu */}
-              <div className="relative" ref={homeMenuRef}>
+              <div className="relative">
                 <button 
                   className={`border-b-2 ${
                     isActive('/') || isActive('/about') 
@@ -148,7 +118,7 @@ const Navbar = () => {
               </div>
 
               {/* Membership Dropdown Menu */}
-              <div className="relative" ref={membershipMenuRef}>
+              <div className="relative">
                 <button 
                   className={`border-b-2 ${
                     isActive('/membership-benefits') || isActive('/directory') || isActive('/events') || isActive('/marketplace')
@@ -163,7 +133,7 @@ const Navbar = () => {
               </div>
               
               {/* AI Top-tier Menu - Non-clickable */}
-              <div className="relative" ref={aiMenuRef}>
+              <div className="relative">
                 <button 
                   className={`border-b-2 ${
                     isAiPathActive() 
