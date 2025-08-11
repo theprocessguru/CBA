@@ -106,6 +106,12 @@ import {
   type InsertSponsorshipPackage,
   type EventSponsor,
   type InsertEventSponsor,
+  personTypes,
+  userPersonTypes,
+  type PersonType,
+  type InsertPersonType,
+  type UserPersonType,
+  type InsertUserPersonType,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
@@ -388,6 +394,20 @@ export interface IStorage {
   getScanAnalyticsByScanner(scannerId: string): Promise<any>;
   getTopScanners(eventId?: number, limit?: number): Promise<any[]>;
   getMostScannedAttendees(eventId: number, limit?: number): Promise<any[]>;
+  
+  // Person Types operations
+  listPersonTypes(): Promise<PersonType[]>;
+  getPersonTypeById(id: number): Promise<PersonType | undefined>;
+  createPersonType(personType: InsertPersonType): Promise<PersonType>;
+  updatePersonType(id: number, personType: Partial<InsertPersonType>): Promise<PersonType>;
+  deletePersonType(id: number): Promise<boolean>;
+  
+  // User Person Types operations
+  getUserPersonTypes(userId: string): Promise<UserPersonType[]>;
+  assignPersonTypeToUser(assignment: InsertUserPersonType): Promise<UserPersonType>;
+  removePersonTypeFromUser(userId: string, personTypeId: number): Promise<boolean>;
+  setPrimaryPersonType(userId: string, personTypeId: number): Promise<boolean>;
+  getUsersByPersonType(personTypeId: number): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1958,6 +1978,122 @@ export class DatabaseStorage implements IStorage {
       .groupBy(scanHistory.scannedUserId)
       .orderBy(desc(sql`count(*)`))
       .limit(limit);
+  }
+
+  // Person Types operations
+  async listPersonTypes(): Promise<PersonType[]> {
+    return await db
+      .select()
+      .from(personTypes)
+      .where(eq(personTypes.isActive, true))
+      .orderBy(asc(personTypes.priority), asc(personTypes.name));
+  }
+
+  async getPersonTypeById(id: number): Promise<PersonType | undefined> {
+    const [personType] = await db
+      .select()
+      .from(personTypes)
+      .where(eq(personTypes.id, id));
+    return personType;
+  }
+
+  async createPersonType(personType: InsertPersonType): Promise<PersonType> {
+    const [newPersonType] = await db
+      .insert(personTypes)
+      .values(personType)
+      .returning();
+    return newPersonType;
+  }
+
+  async updatePersonType(id: number, personType: Partial<InsertPersonType>): Promise<PersonType> {
+    const [updatedPersonType] = await db
+      .update(personTypes)
+      .set({
+        ...personType,
+        updatedAt: new Date()
+      })
+      .where(eq(personTypes.id, id))
+      .returning();
+    return updatedPersonType;
+  }
+
+  async deletePersonType(id: number): Promise<boolean> {
+    const result = await db
+      .update(personTypes)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(personTypes.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  // User Person Types operations
+  async getUserPersonTypes(userId: string): Promise<UserPersonType[]> {
+    return await db
+      .select()
+      .from(userPersonTypes)
+      .where(eq(userPersonTypes.userId, userId))
+      .orderBy(desc(userPersonTypes.isPrimary), asc(userPersonTypes.assignedAt));
+  }
+
+  async assignPersonTypeToUser(assignment: InsertUserPersonType): Promise<UserPersonType> {
+    const [userPersonType] = await db
+      .insert(userPersonTypes)
+      .values(assignment)
+      .onConflictDoNothing()
+      .returning();
+    return userPersonType;
+  }
+
+  async removePersonTypeFromUser(userId: string, personTypeId: number): Promise<boolean> {
+    const result = await db
+      .delete(userPersonTypes)
+      .where(
+        and(
+          eq(userPersonTypes.userId, userId),
+          eq(userPersonTypes.personTypeId, personTypeId)
+        )
+      )
+      .returning();
+    return result.length > 0;
+  }
+
+  async setPrimaryPersonType(userId: string, personTypeId: number): Promise<boolean> {
+    // First, set all user's person types to non-primary
+    await db
+      .update(userPersonTypes)
+      .set({ isPrimary: false })
+      .where(eq(userPersonTypes.userId, userId));
+    
+    // Then set the specified one as primary
+    const result = await db
+      .update(userPersonTypes)
+      .set({ isPrimary: true })
+      .where(
+        and(
+          eq(userPersonTypes.userId, userId),
+          eq(userPersonTypes.personTypeId, personTypeId)
+        )
+      )
+      .returning();
+    return result.length > 0;
+  }
+
+  async getUsersByPersonType(personTypeId: number): Promise<User[]> {
+    const userIds = await db
+      .select({ userId: userPersonTypes.userId })
+      .from(userPersonTypes)
+      .where(eq(userPersonTypes.personTypeId, personTypeId));
+    
+    if (userIds.length === 0) return [];
+    
+    return await db
+      .select()
+      .from(users)
+      .where(
+        or(
+          ...userIds.map(u => eq(users.id, u.userId))
+        )
+      );
   }
 }
 

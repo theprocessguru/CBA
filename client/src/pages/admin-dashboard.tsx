@@ -80,6 +80,13 @@ export default function AdminDashboard() {
       color: "bg-violet-500"
     },
     {
+      title: "Person Types",
+      description: "Manage multiple person types per user",
+      icon: Users,
+      href: "/admin/person-types",
+      color: "bg-teal-500"
+    },
+    {
       title: "Membership Pricing",
       description: "Manage membership tiers and pricing",
       icon: Crown,

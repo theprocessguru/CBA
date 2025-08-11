@@ -6888,6 +6888,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Person Types Management Routes
+  // Get all person types
+  app.get('/api/person-types', async (req, res) => {
+    try {
+      const types = await storage.listPersonTypes();
+      res.json(types);
+    } catch (error) {
+      console.error('Error fetching person types:', error);
+      res.status(500).json({ message: 'Failed to fetch person types' });
+    }
+  });
+
+  // Create new person type (admin only)
+  app.post('/api/admin/person-types', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const personType = await storage.createPersonType(req.body);
+      res.json(personType);
+    } catch (error) {
+      console.error('Error creating person type:', error);
+      res.status(500).json({ message: 'Failed to create person type' });
+    }
+  });
+
+  // Update person type (admin only)
+  app.put('/api/admin/person-types/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const personType = await storage.updatePersonType(parseInt(req.params.id), req.body);
+      res.json(personType);
+    } catch (error) {
+      console.error('Error updating person type:', error);
+      res.status(500).json({ message: 'Failed to update person type' });
+    }
+  });
+
+  // Delete person type (admin only)
+  app.delete('/api/admin/person-types/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const success = await storage.deletePersonType(parseInt(req.params.id));
+      res.json({ success });
+    } catch (error) {
+      console.error('Error deleting person type:', error);
+      res.status(500).json({ message: 'Failed to delete person type' });
+    }
+  });
+
+  // Get user's person types
+  app.get('/api/users/:userId/person-types', isAuthenticated, async (req: any, res) => {
+    try {
+      const userTypes = await storage.getUserPersonTypes(req.params.userId);
+      res.json(userTypes);
+    } catch (error) {
+      console.error('Error fetching user person types:', error);
+      res.status(500).json({ message: 'Failed to fetch user person types' });
+    }
+  });
+
+  // Assign person type to user (admin only)
+  app.post('/api/admin/users/:userId/person-types', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const assignment = await storage.assignPersonTypeToUser({
+        userId: req.params.userId,
+        personTypeId: req.body.personTypeId,
+        isPrimary: req.body.isPrimary || false,
+        assignedBy: req.user.id,
+        notes: req.body.notes
+      });
+      res.json(assignment);
+    } catch (error) {
+      console.error('Error assigning person type:', error);
+      res.status(500).json({ message: 'Failed to assign person type' });
+    }
+  });
+
+  // Remove person type from user (admin only)
+  app.delete('/api/admin/users/:userId/person-types/:personTypeId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const success = await storage.removePersonTypeFromUser(
+        req.params.userId,
+        parseInt(req.params.personTypeId)
+      );
+      res.json({ success });
+    } catch (error) {
+      console.error('Error removing person type:', error);
+      res.status(500).json({ message: 'Failed to remove person type' });
+    }
+  });
+
+  // Set primary person type for user (admin only)
+  app.put('/api/admin/users/:userId/person-types/:personTypeId/primary', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const success = await storage.setPrimaryPersonType(
+        req.params.userId,
+        parseInt(req.params.personTypeId)
+      );
+      res.json({ success });
+    } catch (error) {
+      console.error('Error setting primary person type:', error);
+      res.status(500).json({ message: 'Failed to set primary person type' });
+    }
+  });
+
+  // Get users by person type
+  app.get('/api/person-types/:personTypeId/users', isAuthenticated, async (req: any, res) => {
+    try {
+      const users = await storage.getUsersByPersonType(parseInt(req.params.personTypeId));
+      res.json(users);
+    } catch (error) {
+      console.error('Error fetching users by person type:', error);
+      res.status(500).json({ message: 'Failed to fetch users by person type' });
+    }
+  });
+
   // QR Code Scanning Interface Route
   app.get('/api/user-by-qr/:qrHandle', isAuthenticated, async (req: any, res) => {
     try {

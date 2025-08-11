@@ -87,6 +87,7 @@ import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
+import PersonTypes from "@/pages/admin/person-types";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -585,6 +586,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AffiliateManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/person-types">
+        <AdminRoute>
+          <MainLayout>
+            <PersonTypes />
           </MainLayout>
         </AdminRoute>
       </Route>

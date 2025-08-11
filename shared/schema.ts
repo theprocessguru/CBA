@@ -57,6 +57,7 @@ export const users = pgTable("users", {
   jobTitle: varchar("job_title"),
   phone: varchar("phone"),
   bio: text("bio"),
+  // Deprecated - use userPersonTypes table instead
   participantType: varchar("participant_type").default("attendee"), // attendee, volunteer, speaker, etc.
   // Profile visibility
   isProfileHidden: boolean("is_profile_hidden").default(false), // If true, profile won't appear in directories or public areas
@@ -1548,3 +1549,56 @@ export const insertAffiliateClickSchema = createInsertSchema(affiliateClicks, {
 
 export type InsertAffiliateClick = z.infer<typeof insertAffiliateClickSchema>;
 export type AffiliateClick = typeof affiliateClicks.$inferSelect;
+
+// Person Types table - defines available person types
+export const personTypes = pgTable("person_types", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull().unique(), // e.g., "councillor", "speaker", "vip", "volunteer", "exhibitor"
+  displayName: varchar("display_name").notNull(), // e.g., "Councillor", "Speaker", "VIP Guest"
+  description: text("description"),
+  color: varchar("color"), // For badge colors
+  icon: varchar("icon"), // Icon identifier for UI
+  priority: integer("priority").default(0), // Display order priority
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// User Person Types junction table - allows users to have multiple person types
+export const userPersonTypes = pgTable("user_person_types", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  personTypeId: integer("person_type_id").notNull().references(() => personTypes.id),
+  isPrimary: boolean("is_primary").default(false), // Marks the primary type for display
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  notes: text("notes"),
+}, (table) => [
+  unique("unique_user_person_type").on(table.userId, table.personTypeId),
+  index("user_person_types_user_idx").on(table.userId),
+  index("user_person_types_type_idx").on(table.personTypeId),
+]);
+
+// Person Type Schema and Types
+export const insertPersonTypeSchema = createInsertSchema(personTypes, {
+  name: z.string().min(1, "Name is required"),
+  displayName: z.string().min(1, "Display name is required"),
+  description: z.string().optional(),
+  color: z.string().optional(),
+  icon: z.string().optional(),
+  priority: z.number().default(0),
+  isActive: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertPersonType = z.infer<typeof insertPersonTypeSchema>;
+export type PersonType = typeof personTypes.$inferSelect;
+
+export const insertUserPersonTypeSchema = createInsertSchema(userPersonTypes, {
+  userId: z.string().min(1, "User ID is required"),
+  personTypeId: z.number().min(1, "Person type ID is required"),
+  isPrimary: z.boolean().default(false),
+  notes: z.string().optional(),
+}).omit({ id: true, assignedAt: true });
+
+export type InsertUserPersonType = z.infer<typeof insertUserPersonTypeSchema>;
+export type UserPersonType = typeof userPersonTypes.$inferSelect;
