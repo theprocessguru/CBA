@@ -92,6 +92,7 @@ import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
 import MyJobs from "@/pages/my-jobs";
+import { EventMoodDemo } from "@/pages/EventMoodDemo";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";

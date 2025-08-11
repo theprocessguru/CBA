@@ -112,6 +112,12 @@ import {
   type InsertPersonType,
   type UserPersonType,
   type InsertUserPersonType,
+  eventMoodEntries,
+  eventMoodAggregations,
+  type EventMoodEntry,
+  type InsertEventMoodEntry,
+  type EventMoodAggregation,
+  type InsertEventMoodAggregation,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
@@ -408,6 +414,14 @@ export interface IStorage {
   removePersonTypeFromUser(userId: string, personTypeId: number): Promise<boolean>;
   setPrimaryPersonType(userId: string, personTypeId: number): Promise<boolean>;
   getUsersByPersonType(personTypeId: number): Promise<User[]>;
+
+  // Event Mood Sentiment operations
+  createMoodEntry(entry: InsertEventMoodEntry): Promise<EventMoodEntry>;
+  getMoodEntriesByEventId(eventId: number): Promise<EventMoodEntry[]>;
+  getMoodEntriesBySession(eventId: number, sessionName: string): Promise<EventMoodEntry[]>;
+  getMoodAggregationsByEventId(eventId: number): Promise<EventMoodAggregation[]>;
+  updateMoodAggregation(eventId: number, sessionName: string | null, moodType: string, count: number, avgIntensity: number): Promise<void>;
+  getRealTimeMoodData(eventId: number): Promise<{ entries: EventMoodEntry[]; aggregations: EventMoodAggregation[] }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2094,6 +2108,115 @@ export class DatabaseStorage implements IStorage {
           ...userIds.map(u => eq(users.id, u.userId))
         )
       );
+  }
+
+  // Event Mood Sentiment operations
+  async createMoodEntry(entry: InsertEventMoodEntry): Promise<EventMoodEntry> {
+    const [moodEntry] = await db
+      .insert(eventMoodEntries)
+      .values({
+        ...entry,
+        createdAt: new Date(),
+      })
+      .returning();
+
+    // Update aggregations after creating entry
+    if (entry.eventId && entry.moodType) {
+      await this.updateMoodAggregation(
+        entry.eventId, 
+        entry.sessionName || null, 
+        entry.moodType, 
+        1, 
+        entry.intensity || 5
+      );
+    }
+
+    return moodEntry;
+  }
+
+  async getMoodEntriesByEventId(eventId: number): Promise<EventMoodEntry[]> {
+    return await db
+      .select()
+      .from(eventMoodEntries)
+      .where(eq(eventMoodEntries.eventId, eventId))
+      .orderBy(desc(eventMoodEntries.createdAt));
+  }
+
+  async getMoodEntriesBySession(eventId: number, sessionName: string): Promise<EventMoodEntry[]> {
+    return await db
+      .select()
+      .from(eventMoodEntries)
+      .where(
+        and(
+          eq(eventMoodEntries.eventId, eventId),
+          eq(eventMoodEntries.sessionName, sessionName)
+        )
+      )
+      .orderBy(desc(eventMoodEntries.createdAt));
+  }
+
+  async getMoodAggregationsByEventId(eventId: number): Promise<EventMoodAggregation[]> {
+    return await db
+      .select()
+      .from(eventMoodAggregations)
+      .where(eq(eventMoodAggregations.eventId, eventId))
+      .orderBy(desc(eventMoodAggregations.lastUpdated));
+  }
+
+  async updateMoodAggregation(eventId: number, sessionName: string | null, moodType: string, count: number, avgIntensity: number): Promise<void> {
+    const whereClause = sessionName 
+      ? and(
+          eq(eventMoodAggregations.eventId, eventId),
+          eq(eventMoodAggregations.sessionName, sessionName),
+          eq(eventMoodAggregations.moodType, moodType)
+        )
+      : and(
+          eq(eventMoodAggregations.eventId, eventId),
+          isNull(eventMoodAggregations.sessionName),
+          eq(eventMoodAggregations.moodType, moodType)
+        );
+
+    // Check if aggregation exists
+    const [existing] = await db
+      .select()
+      .from(eventMoodAggregations)
+      .where(whereClause);
+
+    if (existing) {
+      // Update existing aggregation
+      const newCount = existing.totalCount + count;
+      const newAvgIntensity = ((existing.averageIntensity * existing.totalCount) + (avgIntensity * count)) / newCount;
+      
+      await db
+        .update(eventMoodAggregations)
+        .set({
+          totalCount: newCount,
+          averageIntensity: newAvgIntensity.toFixed(2),
+          lastUpdated: new Date(),
+        })
+        .where(whereClause);
+    } else {
+      // Create new aggregation
+      await db
+        .insert(eventMoodAggregations)
+        .values({
+          eventId,
+          sessionName,
+          moodType,
+          totalCount: count,
+          averageIntensity: avgIntensity.toFixed(2),
+          lastUpdated: new Date(),
+        });
+    }
+  }
+
+  async getRealTimeMoodData(eventId: number): Promise<{ entries: EventMoodEntry[]; aggregations: EventMoodAggregation[] }> {
+    const [entries, aggregations] = await Promise.all([
+      this.getMoodEntriesByEventId(eventId),
+      this.getMoodAggregationsByEventId(eventId)
+    ]);
+
+    return { entries, aggregations };
   }
 }
 

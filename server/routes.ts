@@ -9346,6 +9346,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ===========================
+  // Event Mood Sentiment API Routes
+  // ===========================
+
+  // Submit a mood entry for an event
+  app.post('/api/events/:eventId/mood', async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      const moodData = insertEventMoodEntrySchema.parse({
+        ...req.body,
+        eventId,
+        ipAddress: req.ip,
+        userAgent: req.get('User-Agent'),
+      });
+
+      const entry = await storage.createMoodEntry(moodData);
+      res.status(201).json(entry);
+    } catch (error: any) {
+      console.error("Error creating mood entry:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: fromZodError(error).toString() });
+      }
+      res.status(500).json({ message: "Failed to create mood entry: " + error.message });
+    }
+  });
+
+  // Get real-time mood data for an event
+  app.get('/api/events/:eventId/mood', async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      const moodData = await storage.getRealTimeMoodData(eventId);
+      res.json(moodData);
+    } catch (error: any) {
+      console.error("Error fetching mood data:", error);
+      res.status(500).json({ message: "Failed to fetch mood data: " + error.message });
+    }
+  });
+
+  // Get mood entries for a specific session
+  app.get('/api/events/:eventId/mood/session/:sessionName', async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      const sessionName = req.params.sessionName;
+      
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      const entries = await storage.getMoodEntriesBySession(eventId, sessionName);
+      res.json(entries);
+    } catch (error: any) {
+      console.error("Error fetching session mood entries:", error);
+      res.status(500).json({ message: "Failed to fetch session mood entries: " + error.message });
+    }
+  });
+
+  // Get mood aggregations for visualization
+  app.get('/api/events/:eventId/mood/aggregations', async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      const aggregations = await storage.getMoodAggregationsByEventId(eventId);
+      res.json(aggregations);
+    } catch (error: any) {
+      console.error("Error fetching mood aggregations:", error);
+      res.status(500).json({ message: "Failed to fetch mood aggregations: " + error.message });
+    }
+  });
+
+  // Get event mood analytics (admin only)
+  app.get('/api/admin/events/:eventId/mood/analytics', isAuthenticated, isAdmin, async (req: any, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.eventId);
+      if (isNaN(eventId)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+
+      const [entries, aggregations] = await Promise.all([
+        storage.getMoodEntriesByEventId(eventId),
+        storage.getMoodAggregationsByEventId(eventId)
+      ]);
+
+      // Calculate analytics
+      const totalEntries = entries.length;
+      const averageIntensity = entries.length > 0 
+        ? entries.reduce((sum, entry) => sum + (entry.intensity || 0), 0) / entries.length 
+        : 0;
+      
+      const moodDistribution = aggregations.reduce((acc, agg) => {
+        acc[agg.moodType] = agg.totalCount;
+        return acc;
+      }, {} as Record<string, number>);
+
+      const sessionBreakdown = entries.reduce((acc, entry) => {
+        if (entry.sessionName) {
+          if (!acc[entry.sessionName]) {
+            acc[entry.sessionName] = { total: 0, moods: {} };
+          }
+          acc[entry.sessionName].total += 1;
+          acc[entry.sessionName].moods[entry.moodType] = (acc[entry.sessionName].moods[entry.moodType] || 0) + 1;
+        }
+        return acc;
+      }, {} as Record<string, { total: number; moods: Record<string, number> }>);
+
+      const analytics = {
+        totalEntries,
+        averageIntensity: Math.round(averageIntensity * 100) / 100,
+        moodDistribution,
+        sessionBreakdown,
+        recentEntries: entries.slice(0, 10),
+        aggregations
+      };
+
+      res.json(analytics);
+    } catch (error: any) {
+      console.error("Error fetching mood analytics:", error);
+      res.status(500).json({ message: "Failed to fetch mood analytics: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
