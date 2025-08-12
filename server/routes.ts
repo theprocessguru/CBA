@@ -617,12 +617,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete user endpoint for admins
-  app.delete('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      if (!req.user.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const { userId } = req.params;
       
       // Prevent admins from deleting themselves
