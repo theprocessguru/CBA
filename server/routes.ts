@@ -69,7 +69,8 @@ import {
   affiliateCommissions,
   jobPostings,
   jobApplications,
-  jobSavedSearches
+  jobSavedSearches,
+  type AISummitRegistration
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -4662,23 +4663,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Store registration in database
-      const registration = await storage.createAISummitRegistration({
-        userId: user.id,
-        name,
-        email,
-        company: company || null,
-        jobTitle: jobTitle || null,
-        phoneNumber: phoneNumber || null,
-        businessType: businessType || null,
-        aiInterest: aiInterest || null,
-        accessibilityNeeds: accessibilityNeeds || null,
-        comments: comments || null,
-        email_verified: false,
-        email_verification_token: user.verificationToken || null,
-        email_verification_sent_at: new Date(),
-        registeredAt: new Date()
-      });
+      // Store registration in database - insert without RETURNING to avoid Drizzle column mapping issue
+      await db
+        .insert(aiSummitRegistrations)
+        .values({
+          userId: user.id,
+          name,
+          email,
+          company: company || null,
+          jobTitle: jobTitle || null,
+          phoneNumber: phoneNumber || null,
+          businessType: businessType || null,
+          aiInterest: aiInterest || null,
+          accessibilityNeeds: accessibilityNeeds || null,
+          comments: comments || null
+          // Let all other fields use their defaults
+        });
+      
+      // Fetch the registration we just created
+      const [registration] = await db
+        .select()
+        .from(aiSummitRegistrations)
+        .where(and(
+          eq(aiSummitRegistrations.email, email),
+          eq(aiSummitRegistrations.userId, user.id)
+        ))
+        .orderBy(desc(aiSummitRegistrations.id))
+        .limit(1);
 
       // Sync with GHL (Go High Level)
       try {
