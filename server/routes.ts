@@ -4825,7 +4825,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Send confirmation email
-      const emailService = getEmailService();
       if (emailService) {
         try {
           await emailService.sendEmail({
