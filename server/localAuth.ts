@@ -297,7 +297,10 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // Attach user to request
-  req.user = session.user;
+  // Attach user to request - ensure isAdmin is included
+  req.user = {
+    ...session.user,
+    isAdmin: session.user?.isAdmin || false
+  };
   next();
 };

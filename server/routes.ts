@@ -620,6 +620,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
+      console.log("DELETE endpoint - User trying to delete:", userId);
+      console.log("DELETE endpoint - Current user:", req.user);
       
       // Prevent admins from deleting themselves
       if (userId === req.user.id) {
