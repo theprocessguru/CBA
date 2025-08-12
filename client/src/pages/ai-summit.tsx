@@ -1624,6 +1624,36 @@ const AISummit = () => {
                     />
                   </div>
 
+                  {/* Account Creation Section */}
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Create Your Account</h3>
+                    <p className="text-sm text-gray-600">You'll need this to access your QR code and event badges</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="password">Password *</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          required
+                          value={registrationData.password || ''}
+                          onChange={(e) => handleInputChange('password', e.target.value)}
+                          placeholder="At least 8 characters"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          required
+                          value={registrationData.confirmPassword || ''}
+                          onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                          placeholder="Re-enter your password"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
                     <Label htmlFor="comments">Additional Comments/Questions</Label>
                     <Textarea
@@ -1798,6 +1828,36 @@ const AISummit = () => {
                       placeholder="What do you hope to achieve from exhibiting at this event?"
                       rows={2}
                     />
+                  </div>
+
+                  {/* Account Creation Section */}
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Create Your Account</h3>
+                    <p className="text-sm text-gray-600">You'll need this to access your QR codes and event badges</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="exhibitorPassword">Password *</Label>
+                        <Input
+                          id="exhibitorPassword"
+                          type="password"
+                          required
+                          value={exhibitorData.password || ''}
+                          onChange={(e) => handleExhibitorInputChange('password', e.target.value)}
+                          placeholder="At least 8 characters"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="exhibitorConfirmPassword">Confirm Password *</Label>
+                        <Input
+                          id="exhibitorConfirmPassword"
+                          type="password"
+                          required
+                          value={exhibitorData.confirmPassword || ''}
+                          onChange={(e) => handleExhibitorInputChange('confirmPassword', e.target.value)}
+                          placeholder="Re-enter your password"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Attendee Management Section */}
@@ -2530,6 +2590,36 @@ const AISummit = () => {
                         placeholder="Any specific availability constraints or preferences..."
                         rows={2}
                       />
+                    </div>
+                  </div>
+
+                  {/* Account Creation Section */}
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Create Your Account</h3>
+                    <p className="text-sm text-gray-600">You'll need this to access your QR code and event badges</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerPassword">Password *</Label>
+                        <Input
+                          id="volunteerPassword"
+                          type="password"
+                          required
+                          value={volunteerData.password || ''}
+                          onChange={(e) => handleVolunteerInputChange('password', e.target.value)}
+                          placeholder="At least 8 characters"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="volunteerConfirmPassword">Confirm Password *</Label>
+                        <Input
+                          id="volunteerConfirmPassword"
+                          type="password"
+                          required
+                          value={volunteerData.confirmPassword || ''}
+                          onChange={(e) => handleVolunteerInputChange('confirmPassword', e.target.value)}
+                          placeholder="Re-enter your password"
+                        />
+                      </div>
                     </div>
                   </div>
 

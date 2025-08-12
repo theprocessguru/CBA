@@ -7,6 +7,11 @@ This platform is a comprehensive business automation solution designed to help b
 Preferred communication style: Simple, everyday language.
 Volunteers: No business listing menu items in dashboard (they don't need business features).
 
+## Recent Changes
+- **Password Fields Added to All Registration Forms (August 2025)**: Added password creation fields to all AI Summit registration forms. Users must now create passwords during registration to access their QR codes and event badges later. Added clear "Create Your Account" sections with password/confirm password fields in attendee, exhibitor, and volunteer forms (speaker and sponsor forms already had them).
+- **Required Fields Update for All Registration Forms (August 2025)**: Made email and mobile phone numbers required fields in all AI Summit registration forms (attendees, speakers, exhibitors, volunteers, sponsors). All forms now properly validate that users provide complete contact information for better event communication and coordination.
+- **AI Summit Attendee Registration Fix (August 2025)**: Removed inappropriate "Role at the Event" dropdown from main registration form. Main registration is now exclusively for general attendees, with separate dedicated forms for speakers, sponsors, exhibitors, and volunteers. Each participant type uses their own registration button and tailored form.
+
 ## System Architecture
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript, built with Vite.
