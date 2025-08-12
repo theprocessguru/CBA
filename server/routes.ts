@@ -4768,6 +4768,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         website,
         linkedIn,
         bio,
+        password,
+        confirmPassword,
         sessionType,
         talkTitle,
         talkDescription,
@@ -4785,12 +4787,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } = req.body;
 
       // Basic validation
-      if (!name || !email || !bio || !talkTitle || !talkDescription || !keyTakeaways) {
-        return res.status(400).json({ message: "Name, email, bio, talk title, description, and key takeaways are required" });
+      if (!name || !email || !bio || !talkTitle || !talkDescription || !keyTakeaways || !password) {
+        return res.status(400).json({ message: "Name, email, bio, talk title, description, key takeaways, and password are required" });
       }
 
       if (!agreesToTerms) {
         return res.status(400).json({ message: "Must agree to speaker terms and conditions" });
+      }
+
+      // Password validation
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
       }
 
       // Email validation
@@ -4798,6 +4809,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!emailRegex.test(email)) {
         return res.status(400).json({ message: "Please provide a valid email address" });
       }
+
+      // Check if user with email already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "An account with this email already exists. Please log in instead." });
+      }
+
+      // Create user account for speaker
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        name,
+        participantType: 'speaker',
+        isEmailVerified: false,
+        createdAt: new Date()
+      });
 
       // Add speaker to GoHighLevel if available
       const ghlService = getGHLService();
@@ -4853,6 +4881,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   <li>Event preparation guidelines</li>
                 </ul>
 
+                <div style="background-color: #e0f2fe; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <h3>Your Speaker Account Details:</h3>
+                  <p><strong>Email:</strong> ${email}</p>
+                  <p><strong>Password:</strong> [The password you created during registration]</p>
+                  <p>You can log in at any time to manage your speaker profile and check your submission status.</p>
+                </div>
+
                 <p>We appreciate your interest in contributing to our inaugural AI Summit and sharing your expertise with the Croydon business community!</p>
                 
                 <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
@@ -4872,6 +4907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Store speaker interest in database
       const speakerInterest = await storage.createAISummitSpeakerInterest({
+        userId: user.id,
         name,
         email,
         phone,
@@ -4900,14 +4936,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ 
         success: true, 
-        message: "Speaker interest submitted successfully! Our program committee will review your proposal and contact you soon.",
-        speakerInterestId: speakerInterest.id
+        message: "Speaker account created successfully! You can now log in with your email and password. Our program committee will review your proposal and contact you soon.",
+        speakerInterestId: speakerInterest.id,
+        userId: user.id
       });
 
     } catch (error: any) {
       console.error("AI Summit speaker interest error:", error);
       res.status(500).json({ 
-        message: "Speaker interest submission failed. Please try again or contact support." 
+        message: "Speaker registration failed. Please try again or contact support." 
       });
     }
   });

@@ -123,10 +123,12 @@ const AISummit = () => {
     website: "",
     linkedIn: "",
     bio: "",
+    password: "",
+    confirmPassword: "",
     sessionType: "talk",
     talkTitle: "",
     talkDescription: "",
-    talkDuration: "30",
+    talkDuration: "15",
     audienceLevel: "Beginner",
     speakingExperience: "",
     previousSpeaking: false,
@@ -492,8 +494,8 @@ const AISummit = () => {
     },
     onSuccess: () => {
       toast({
-        title: "Speaker Interest Submitted!",
-        description: "Thank you for your interest in speaking. Our program committee will review your submission and contact you soon.",
+        title: "Speaker Account Created!",
+        description: "Your speaker account has been created successfully. You can now log in with your email and password. Our program committee will review your submission and contact you soon.",
       });
       setShowSpeakerForm(false);
       setSpeakerData({
@@ -505,10 +507,12 @@ const AISummit = () => {
         website: "",
         linkedIn: "",
         bio: "",
+        password: "",
+        confirmPassword: "",
         sessionType: "talk",
         talkTitle: "",
         talkDescription: "",
-        talkDuration: "30",
+        talkDuration: "15",
         audienceLevel: "Beginner",
         speakingExperience: "",
         previousSpeaking: false,
@@ -2046,6 +2050,37 @@ const AISummit = () => {
                         placeholder="Brief background about yourself, your expertise, and why you're qualified to speak on AI topics (200-300 words)..."
                         rows={4}
                       />
+                    </div>
+                    
+                    {/* Account Creation Fields */}
+                    <div className="bg-blue-50 p-4 rounded-lg space-y-4 mt-4">
+                      <h4 className="font-semibold text-neutral-800">Create Your Speaker Account</h4>
+                      <p className="text-sm text-gray-600">You'll need an account to manage your speaker profile and access event resources.</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="speakerPassword">Password *</Label>
+                          <Input
+                            id="speakerPassword"
+                            type="password"
+                            required
+                            value={speakerData.password || ''}
+                            onChange={(e) => handleSpeakerInputChange('password', e.target.value)}
+                            placeholder="Create a strong password"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
+                        </div>
+                        <div>
+                          <Label htmlFor="speakerConfirmPassword">Confirm Password *</Label>
+                          <Input
+                            id="speakerConfirmPassword"
+                            type="password"
+                            required
+                            value={speakerData.confirmPassword || ''}
+                            onChange={(e) => handleSpeakerInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your password"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
