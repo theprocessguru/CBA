@@ -73,6 +73,7 @@ import {
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { getGHLService } from "./ghlService";
+import bcrypt from "bcrypt";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
 import { aiAdvancedService } from "./aiAdvancedService";
