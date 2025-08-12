@@ -57,6 +57,10 @@ export const users = pgTable("users", {
   jobTitle: varchar("job_title"),
   phone: varchar("phone"),
   bio: text("bio"),
+  // Email verification fields
+  emailVerified: boolean("email_verified").default(false),
+  verificationToken: varchar("verification_token"),
+  verificationTokenExpiry: timestamp("verification_token_expiry"),
   // Deprecated - use userPersonTypes table instead
   participantType: varchar("participant_type").default("attendee"), // attendee, volunteer, speaker, etc.
   // Profile visibility

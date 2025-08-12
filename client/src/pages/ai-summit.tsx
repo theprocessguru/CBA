@@ -425,10 +425,12 @@ const AISummit = () => {
       const response = await apiRequest("POST", "/api/ai-summit-registration", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Registration Successful!",
-        description: "Thank you for registering for the AI Summit. You'll receive a confirmation email shortly.",
+        description: data.requiresVerification 
+          ? "Please check your email to verify your account and access your QR codes."
+          : "Thank you for registering for the AI Summit. You'll receive a confirmation email shortly.",
       });
       setShowRegistrationForm(false);
       setRegistrationData({

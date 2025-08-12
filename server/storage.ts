@@ -130,6 +130,7 @@ export interface IStorage {
   createUser(user: Partial<User>): Promise<User>;
   updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
   updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string; isProfileHidden?: boolean }): Promise<User>;
+  updateUserVerificationToken(id: string, token: string, expiry: Date): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
   isUserAdmin(id: string): Promise<boolean>;
   getUserEventRegistrations(userId: string): Promise<any[]>;
@@ -480,6 +481,19 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({ 
         ...profileData, 
+        updatedAt: new Date() 
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
+  async updateUserVerificationToken(id: string, token: string, expiry: Date): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        verificationToken: token,
+        verificationTokenExpiry: expiry,
         updatedAt: new Date() 
       })
       .where(eq(users.id, id))

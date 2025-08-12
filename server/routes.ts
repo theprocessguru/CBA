@@ -7,6 +7,7 @@ import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm"
 import multer from "multer";
 import * as Papa from "papaparse";
 import * as XLSX from "xlsx";
+import crypto from "crypto";
 import { 
   insertBusinessSchema, 
   insertProductSchema, 
@@ -4603,6 +4604,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         const [firstName, ...lastNameParts] = name.split(' ');
         const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        
+        // Generate verification token
+        const verificationToken = crypto.randomUUID();
+        const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
+        
         user = await storage.upsertUser({
           id: userId,
           email,
@@ -4612,6 +4618,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           membershipTier: 'Starter Tier',
           membershipStatus: 'trial',
           accountStatus: 'active',
+          emailVerified: false,
+          verificationToken,
+          verificationTokenExpiry,
           createdAt: new Date(),
           updatedAt: new Date()
         });
@@ -4698,61 +4707,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the registration if badge creation fails
       }
 
-      // Send confirmation email if email service is available
+      // Send verification email if email service is available and user not verified
       try {
-        if (emailService) {
-          await emailService.sendEmail({
-            to: email,
-            subject: "AI Summit 2025 Registration Confirmed",
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #2563eb;">Registration Confirmed!</h1>
-                <p>Dear ${name},</p>
-                <p>Thank you for registering for the <strong>First AI Summit Croydon 2025</strong>!</p>
-                
-                <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                  <h2 style="color: #1f2937; margin-top: 0;">Event Details</h2>
-                  <p><strong>Date:</strong> October 1st, 2025</p>
-                  <p><strong>Time:</strong> 10:00 AM - 4:00 PM</p>
-                  <p><strong>Venue:</strong> LSBU London South Bank University Croydon</p>
-                  <p><strong>Admission:</strong> FREE</p>
-                  ${badge ? `<p><strong>Your Badge ID:</strong> ${badge.badgeId}</p>` : ''}
-                </div>
-
-                <p>We're excited to have you join us for this groundbreaking event featuring:</p>
-                <ul>
-                  <li>Keynote speakers from leading AI companies</li>
-                  <li>Hands-on AI workshops</li>
-                  <li>Micro business exhibition</li>
-                  <li>Networking opportunities</li>
-                  <li>Free refreshments throughout the day</li>
-                </ul>
-
-                <p>You'll receive more details about the agenda and speakers closer to the event date.</p>
-
-                <p>If you have any questions, please don't hesitate to contact us.</p>
-
-                <p>Best regards,<br>
-                <strong>The Croydon Business Association Team</strong></p>
-              </div>
-            `
-          });
+        if (emailService && !user.emailVerified) {
+          // Generate verification token if not already present
+          let verificationToken = user.verificationToken;
+          if (!verificationToken) {
+            verificationToken = crypto.randomUUID();
+            const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+            
+            // Update user with verification token
+            await storage.updateUserVerificationToken(user.id, verificationToken, verificationTokenExpiry);
+          }
+          
+          const emailResult = await emailService.sendVerificationEmail(
+            email,
+            name,
+            verificationToken
+          );
+          
+          if (!emailResult.success) {
+            console.error("Failed to send verification email:", emailResult.message);
+          }
         }
       } catch (emailError) {
-        console.error("Failed to send confirmation email:", emailError);
+        console.error("Failed to send verification email:", emailError);
         // Don't fail the registration if email fails
       }
 
       res.json({ 
         success: true, 
-        message: "Registration successful! You'll receive a confirmation email shortly.",
-        registrationId: registration.id
+        message: "Registration successful! Please check your email to verify your account and access your QR codes.",
+        registrationId: registration.id,
+        requiresVerification: !user.emailVerified
       });
 
     } catch (error: any) {
       console.error("AI Summit registration error:", error);
       res.status(500).json({ 
         message: "Registration failed. Please try again or contact support." 
+      });
+    }
+  });
+
+  // Email verification endpoint
+  app.get('/api/verify-email', async (req, res) => {
+    try {
+      const { token } = req.query;
+      
+      if (!token || typeof token !== 'string') {
+        return res.status(400).json({ message: "Verification token is required" });
+      }
+      
+      // Find user with this verification token
+      const allUsers = await storage.listUsers();
+      const user = allUsers.find(u => 
+        u.verificationToken === token && 
+        u.verificationTokenExpiry && 
+        new Date(u.verificationTokenExpiry) > new Date()
+      );
+      
+      if (!user) {
+        return res.status(400).json({ 
+          message: "Invalid or expired verification token. Please request a new verification email." 
+        });
+      }
+      
+      // Mark email as verified
+      await storage.updateUser(user.id, {
+        emailVerified: true,
+        verificationToken: null,
+        verificationTokenExpiry: null
+      });
+      
+      // Redirect to login page with success message
+      const baseUrl = process.env.BASE_URL || (process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'http://localhost:5000');
+      res.redirect(`${baseUrl}/login?verified=true`);
+      
+    } catch (error: any) {
+      console.error("Email verification error:", error);
+      res.status(500).json({ 
+        message: "Failed to verify email. Please try again or contact support." 
       });
     }
   });

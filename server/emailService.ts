@@ -76,6 +76,97 @@ export class EmailService {
   }
 
   /**
+   * Send email verification link
+   */
+  async sendVerificationEmail(
+    recipientEmail: string,
+    recipientName: string,
+    verificationToken: string
+  ): Promise<{ success: boolean; message: string }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        message: 'Email service not configured. Please contact IT support.'
+      };
+    }
+
+    const baseUrl = this.getBaseUrl();
+    const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
+
+    try {
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: recipientEmail,
+        subject: `Please Verify Your Email - Croydon Business Association`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="margin: 0; font-size: 28px;">Croydon Business Association</h1>
+              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Email Verification Required</p>
+            </div>
+            
+            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+              <h2 style="color: #1f2937; margin-top: 0;">Hello ${recipientName}!</h2>
+              
+              <p style="color: #4b5563; line-height: 1.6;">
+                Thank you for registering with the Croydon Business Association. To complete your registration and access your QR codes and event badges, please verify your email address.
+              </p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${verificationLink}" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
+                  Verify My Email Address
+                </a>
+              </div>
+              
+              <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <p style="margin: 0; color: #92400e;">
+                  <strong>⚠️ Important:</strong> This verification link will expire in 24 hours. If the link expires, you'll need to request a new one.
+                </p>
+              </div>
+              
+              <p style="color: #6b7280; font-size: 14px;">
+                If you can't click the button above, copy and paste this link into your browser:<br>
+                <code style="background: #f3f4f6; padding: 5px; border-radius: 3px; word-break: break-all; display: block; margin-top: 10px;">${verificationLink}</code>
+              </p>
+              
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
+              
+              <p style="color: #6b7280; font-size: 14px; text-align: center;">
+                If you didn't create an account with us, please ignore this email.
+              </p>
+            </div>
+          </div>
+        `,
+        text: `
+          Hello ${recipientName}!
+          
+          Thank you for registering with the Croydon Business Association.
+          
+          Please verify your email address by clicking the following link:
+          ${verificationLink}
+          
+          This verification link will expire in 24 hours.
+          
+          If you didn't create an account with us, please ignore this email.
+        `
+      };
+
+      await this.transporter!.sendMail(mailOptions);
+      
+      return {
+        success: true,
+        message: 'Verification email sent successfully'
+      };
+    } catch (error: any) {
+      console.error('Error sending verification email:', error);
+      return {
+        success: false,
+        message: error.message || 'Failed to send verification email'
+      };
+    }
+  }
+
+  /**
    * Send admin welcome email with temporary password
    */
   async sendAdminWelcomeEmail(

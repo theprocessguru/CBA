@@ -129,6 +129,14 @@ export async function setupLocalAuth(app: Express) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
+      // Check if email is verified
+      if (!user.emailVerified) {
+        return res.status(403).json({ 
+          message: "Please verify your email before logging in. Check your inbox for the verification link.",
+          emailNotVerified: true 
+        });
+      }
+
       // Set session
       (req.session as any).userId = user.id;
       (req.session as any).user = {
