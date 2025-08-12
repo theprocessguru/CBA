@@ -42,7 +42,8 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const UserManagement = () => {
@@ -51,6 +52,8 @@ const UserManagement = () => {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [suspendingUser, setSuspendingUser] = useState<User | null>(null);
   const [suspensionReason, setSuspensionReason] = useState("");
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<User>>({});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -106,12 +109,60 @@ const UserManagement = () => {
     },
   });
 
+  const updateUserMutation = useMutation({
+    mutationFn: ({ userId, userData }: { userId: string; userData: Partial<User> }) => {
+      return apiRequest("PUT", `/api/admin/users/${userId}`, userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setEditingUser(null);
+      setEditFormData({});
+      toast({
+        title: "User Updated",
+        description: "The user details have been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update user",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSuspendUser = () => {
     if (!suspendingUser || !suspensionReason.trim()) return;
 
     suspendUserMutation.mutate({
       userId: suspendingUser.id,
       reason: suspensionReason,
+    });
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setEditFormData({
+      email: user.email,
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      phone: user.phone || '',
+      company: user.company || '',
+      jobTitle: user.jobTitle || '',
+      membershipTier: user.membershipTier || 'Starter',
+      membershipStatus: user.membershipStatus || 'active',
+      isAdmin: user.isAdmin || false,
+      emailVerified: user.emailVerified || false,
+      accountStatus: user.accountStatus || 'active',
+    });
+  };
+
+  const handleUpdateUser = () => {
+    if (!editingUser) return;
+    
+    updateUserMutation.mutate({
+      userId: editingUser.id,
+      userData: editFormData,
     });
   };
 
@@ -284,6 +335,15 @@ const UserManagement = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditUser(user)}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <Edit2 className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
                             {user.accountStatus === "suspended" ? (
                               <Button
                                 size="sm"
@@ -379,6 +439,188 @@ const UserManagement = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit User Dialog */}
+        <Dialog open={!!editingUser} onOpenChange={(open) => {
+          if (!open) {
+            setEditingUser(null);
+            setEditFormData({});
+          }
+        }}>
+          <DialogContent className="sm:max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Edit2 className="h-5 w-5 mr-2" />
+                Edit User Details
+              </DialogTitle>
+            </DialogHeader>
+            
+            {editingUser && (
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-firstName">First Name</Label>
+                    <Input
+                      id="edit-firstName"
+                      value={editFormData.firstName || ''}
+                      onChange={(e) => setEditFormData({...editFormData, firstName: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-lastName">Last Name</Label>
+                    <Input
+                      id="edit-lastName"
+                      value={editFormData.lastName || ''}
+                      onChange={(e) => setEditFormData({...editFormData, lastName: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-email">Email</Label>
+                  <Input
+                    id="edit-email"
+                    type="email"
+                    value={editFormData.email || ''}
+                    onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Input
+                    id="edit-phone"
+                    value={editFormData.phone || ''}
+                    onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-company">Company</Label>
+                    <Input
+                      id="edit-company"
+                      value={editFormData.company || ''}
+                      onChange={(e) => setEditFormData({...editFormData, company: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-jobTitle">Job Title</Label>
+                    <Input
+                      id="edit-jobTitle"
+                      value={editFormData.jobTitle || ''}
+                      onChange={(e) => setEditFormData({...editFormData, jobTitle: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-membershipTier">Membership Tier</Label>
+                    <Select 
+                      value={editFormData.membershipTier || 'Starter'} 
+                      onValueChange={(value) => setEditFormData({...editFormData, membershipTier: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Starter">Starter</SelectItem>
+                        <SelectItem value="Growth">Growth</SelectItem>
+                        <SelectItem value="Strategic">Strategic</SelectItem>
+                        <SelectItem value="Patron">Patron</SelectItem>
+                        <SelectItem value="Partner">Partner</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-membershipStatus">Membership Status</Label>
+                    <Select 
+                      value={editFormData.membershipStatus || 'active'} 
+                      onValueChange={(value) => setEditFormData({...editFormData, membershipStatus: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-accountStatus">Account Status</Label>
+                  <Select 
+                    value={editFormData.accountStatus || 'active'} 
+                    onValueChange={(value) => setEditFormData({...editFormData, accountStatus: value})}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="suspended">Suspended</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="edit-isAdmin" className="text-base">Admin Access</Label>
+                    <Switch
+                      id="edit-isAdmin"
+                      checked={editFormData.isAdmin || false}
+                      onCheckedChange={(checked) => setEditFormData({...editFormData, isAdmin: checked})}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="edit-emailVerified" className="text-base">Email Verified</Label>
+                    <Switch
+                      id="edit-emailVerified"
+                      checked={editFormData.emailVerified || false}
+                      onCheckedChange={(checked) => setEditFormData({...editFormData, emailVerified: checked})}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-2 pt-4">
+                  <Button
+                    onClick={handleUpdateUser}
+                    disabled={updateUserMutation.isPending}
+                    className="flex-1"
+                  >
+                    {updateUserMutation.isPending ? "Updating..." : "Update User"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setEditingUser(null);
+                      setEditFormData({});
+                    }}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );

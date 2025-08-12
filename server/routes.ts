@@ -565,6 +565,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive user update endpoint for admins
+  app.put('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.user.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { userId } = req.params;
+      const { 
+        email, 
+        firstName, 
+        lastName, 
+        phone,
+        company,
+        jobTitle,
+        membershipTier, 
+        membershipStatus,
+        isAdmin,
+        emailVerified,
+        accountStatus
+      } = req.body;
+      
+      // Build update data object with only provided fields
+      const updateData: any = {};
+      if (email !== undefined) updateData.email = email;
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (phone !== undefined) updateData.phone = phone;
+      if (company !== undefined) updateData.company = company;
+      if (jobTitle !== undefined) updateData.jobTitle = jobTitle;
+      if (membershipTier !== undefined) updateData.membershipTier = membershipTier;
+      if (membershipStatus !== undefined) updateData.membershipStatus = membershipStatus;
+      if (isAdmin !== undefined) updateData.isAdmin = isAdmin;
+      if (emailVerified !== undefined) updateData.emailVerified = emailVerified;
+      if (accountStatus !== undefined) updateData.accountStatus = accountStatus;
+      
+      await storage.updateUser(userId, updateData);
+      
+      // Return updated user
+      const updatedUser = await storage.getUser(userId);
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
   // Start trial membership with donation
   app.post('/api/start-trial-membership', isAuthenticated, async (req: any, res) => {
     try {
