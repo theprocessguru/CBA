@@ -52,6 +52,7 @@ const AISummit = () => {
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
   const [showSpeakerForm, setShowSpeakerForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
+  const [showSponsorForm, setShowSponsorForm] = useState(false);
   const [registrationData, setRegistrationData] = useState({
     name: "",
     email: "",
@@ -152,6 +153,20 @@ const AISummit = () => {
     emergencyContact: "",
     tShirtSize: "",
     dietaryRequirements: "",
+    agreesToTerms: false
+  });
+
+  const [sponsorData, setSponsorData] = useState({
+    companyName: "",
+    contactName: "",
+    contactEmail: "",
+    contactPhone: "",
+    password: "",
+    confirmPassword: "",
+    companyWebsite: "",
+    companyDescription: "",
+    packageName: "",
+    specialRequests: "",
     agreesToTerms: false
   });
   
@@ -568,6 +583,40 @@ const AISummit = () => {
     },
   });
 
+  const sponsorMutation = useMutation({
+    mutationFn: async (data: typeof sponsorData) => {
+      const response = await apiRequest("POST", "/api/ai-summit-sponsor-registration", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Sponsor Account Created!",
+        description: "Your sponsor account has been created successfully. You can now log in with your email and password. Our sponsorship team will contact you soon to discuss your package.",
+      });
+      setShowSponsorForm(false);
+      setSponsorData({
+        companyName: "",
+        contactName: "",
+        contactEmail: "",
+        contactPhone: "",
+        password: "",
+        confirmPassword: "",
+        companyWebsite: "",
+        companyDescription: "",
+        packageName: "",
+        specialRequests: "",
+        agreesToTerms: false
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Sponsor Registration Failed",
+        description: error instanceof Error ? error.message : "Failed to register as sponsor. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     registerMutation.mutate(registrationData);
@@ -653,6 +702,41 @@ const AISummit = () => {
     speakerMutation.mutate(speakerData);
   };
 
+  const handleSponsorRegistration = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate passwords match
+    if (sponsorData.password !== sponsorData.confirmPassword) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "Please make sure your passwords match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate password length
+    if (sponsorData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!sponsorData.agreesToTerms) {
+      toast({
+        title: "Terms Required",
+        description: "Please agree to the sponsorship terms and conditions.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    sponsorMutation.mutate(sponsorData);
+  };
+
   const handleVolunteerRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     if (!volunteerData.agreesToTerms) {
@@ -726,6 +810,13 @@ const AISummit = () => {
 
   const handleVolunteerInputChange = (field: string, value: string | boolean) => {
     setVolunteerData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSponsorInputChange = (field: string, value: string | boolean) => {
+    setSponsorData(prev => ({
       ...prev,
       [field]: value
     }));
@@ -860,6 +951,13 @@ const AISummit = () => {
                     >
                       <UserPlus className="h-5 w-5" />
                       Volunteer with Us
+                    </button>
+                    <button 
+                      className="border-2 border-white text-white hover:bg-white hover:text-purple-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      onClick={() => setShowSponsorForm(true)}
+                    >
+                      <Trophy className="h-5 w-5" />
+                      Become a Sponsor
                     </button>
                   </div>
                 </div>
@@ -2699,6 +2797,193 @@ const AISummit = () => {
                       disabled={volunteerMutation.isPending || !volunteerData.agreesToTerms}
                     >
                       {volunteerMutation.isPending ? "Submitting..." : "Register as Volunteer"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sponsor Registration Form Modal */}
+        {showSponsorForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neutral-900">Sponsor Registration - AI Summit 2025</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowSponsorForm(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleSponsorRegistration} className="space-y-4">
+                  {/* Company Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Company Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sponsorCompanyName">Company Name *</Label>
+                        <Input
+                          id="sponsorCompanyName"
+                          type="text"
+                          required
+                          value={sponsorData.companyName}
+                          onChange={(e) => handleSponsorInputChange('companyName', e.target.value)}
+                          placeholder="Your company name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sponsorContactName">Contact Person *</Label>
+                        <Input
+                          id="sponsorContactName"
+                          type="text"
+                          required
+                          value={sponsorData.contactName}
+                          onChange={(e) => handleSponsorInputChange('contactName', e.target.value)}
+                          placeholder="Full name of main contact"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sponsorEmail">Email Address *</Label>
+                        <Input
+                          id="sponsorEmail"
+                          type="email"
+                          required
+                          value={sponsorData.contactEmail}
+                          onChange={(e) => handleSponsorInputChange('contactEmail', e.target.value)}
+                          placeholder="contact@company.com"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sponsorPhone">Phone Number</Label>
+                        <Input
+                          id="sponsorPhone"
+                          type="tel"
+                          value={sponsorData.contactPhone}
+                          onChange={(e) => handleSponsorInputChange('contactPhone', e.target.value)}
+                          placeholder="Your contact number"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Account Creation */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Create Your Account</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sponsorPassword">Password *</Label>
+                        <Input
+                          id="sponsorPassword"
+                          type="password"
+                          required
+                          value={sponsorData.password}
+                          onChange={(e) => handleSponsorInputChange('password', e.target.value)}
+                          placeholder="At least 8 characters"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sponsorConfirmPassword">Confirm Password *</Label>
+                        <Input
+                          id="sponsorConfirmPassword"
+                          type="password"
+                          required
+                          value={sponsorData.confirmPassword}
+                          onChange={(e) => handleSponsorInputChange('confirmPassword', e.target.value)}
+                          placeholder="Re-enter your password"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      You'll use your email and password to log in to your sponsor account after registration.
+                    </p>
+                  </div>
+
+                  {/* Sponsorship Details */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Sponsorship Details</h3>
+                    <div>
+                      <Label htmlFor="sponsorWebsite">Company Website</Label>
+                      <Input
+                        id="sponsorWebsite"
+                        type="url"
+                        value={sponsorData.companyWebsite}
+                        onChange={(e) => handleSponsorInputChange('companyWebsite', e.target.value)}
+                        placeholder="https://www.yourcompany.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sponsorPackage">Preferred Sponsorship Package *</Label>
+                      <select
+                        id="sponsorPackage"
+                        required
+                        value={sponsorData.packageName}
+                        onChange={(e) => handleSponsorInputChange('packageName', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                      >
+                        <option value="">Select a package...</option>
+                        <option value="Platinum">Platinum Sponsor (£5,000)</option>
+                        <option value="Gold">Gold Sponsor (£2,500)</option>
+                        <option value="Silver">Silver Sponsor (£1,000)</option>
+                        <option value="Bronze">Bronze Sponsor (£500)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="sponsorDescription">Company Description</Label>
+                      <Textarea
+                        id="sponsorDescription"
+                        value={sponsorData.companyDescription}
+                        onChange={(e) => handleSponsorInputChange('companyDescription', e.target.value)}
+                        placeholder="Tell us about your company and what you do..."
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sponsorRequests">Special Requests or Questions</Label>
+                      <Textarea
+                        id="sponsorRequests"
+                        value={sponsorData.specialRequests}
+                        onChange={(e) => handleSponsorInputChange('specialRequests', e.target.value)}
+                        placeholder="Any specific requirements or questions about sponsorship..."
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-purple-50 rounded-lg">
+                    <Checkbox
+                      id="sponsorAgreesToTerms"
+                      checked={sponsorData.agreesToTerms}
+                      onCheckedChange={(checked) => handleSponsorInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="sponsorAgreesToTerms" className="text-sm">
+                      I agree to the sponsorship terms and conditions and understand the commitments involved *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowSponsorForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                      disabled={sponsorMutation.isPending || !sponsorData.agreesToTerms}
+                    >
+                      {sponsorMutation.isPending ? "Creating Account..." : "Register as Sponsor"}
                     </Button>
                   </div>
                 </form>

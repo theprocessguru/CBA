@@ -4757,6 +4757,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Summit Speaker Interest endpoint
+  // API endpoint for sponsor registration with account creation
+  app.post('/api/ai-summit-sponsor-registration', async (req, res) => {
+    try {
+      const {
+        companyName,
+        contactName,
+        contactEmail,
+        contactPhone,
+        password,
+        confirmPassword,
+        companyWebsite,
+        companyDescription,
+        packageName,
+        specialRequests,
+        agreesToTerms
+      } = req.body;
+
+      // Validate required fields
+      if (!companyName || !contactName || !contactEmail || !password || !confirmPassword || !packageName || !agreesToTerms) {
+        return res.status(400).json({ message: "Please fill in all required fields" });
+      }
+
+      // Validate passwords match
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+
+      // Validate password length
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(contactEmail);
+      if (existingUser) {
+        return res.status(400).json({ message: "An account with this email already exists" });
+      }
+
+      // Create user account
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await storage.createUser({
+        email: contactEmail,
+        password: hashedPassword,
+        firstName: contactName.split(' ')[0] || '',
+        lastName: contactName.split(' ').slice(1).join(' ') || '',
+        participantType: 'sponsor',
+        companyName: companyName,
+        phoneNumber: contactPhone || '',
+        createdAt: new Date()
+      });
+
+      // Store sponsor details in database
+      const sponsorDetails = {
+        userId: newUser.id,
+        companyName,
+        contactName,
+        contactEmail,
+        contactPhone,
+        companyWebsite,
+        companyDescription,
+        packageName,
+        specialRequests,
+        registeredAt: new Date()
+      };
+
+      // For now, log the sponsor details (you can add database storage later)
+      console.log('Sponsor registered:', sponsorDetails);
+
+      // Send confirmation email
+      await emailService.sendNotificationEmail(
+        contactEmail,
+        'Sponsor Registration Confirmed - AI Summit 2025',
+        `
+        <h2>Welcome as a Sponsor of AI Summit 2025!</h2>
+        <p>Dear ${contactName},</p>
+        
+        <p>Thank you for registering ${companyName} as a sponsor for the AI Summit 2025. Your account has been created successfully.</p>
+        
+        <h3>Registration Details:</h3>
+        <ul>
+          <li><strong>Company:</strong> ${companyName}</li>
+          <li><strong>Contact Person:</strong> ${contactName}</li>
+          <li><strong>Email:</strong> ${contactEmail}</li>
+          <li><strong>Sponsorship Package:</strong> ${packageName}</li>
+        </ul>
+        
+        <p><strong>Login Information:</strong></p>
+        <p>You can now log in to your sponsor account using:</p>
+        <ul>
+          <li>Email: ${contactEmail}</li>
+          <li>Password: [the password you created]</li>
+        </ul>
+        
+        <p>Our sponsorship team will contact you within 48 hours to discuss:</p>
+        <ul>
+          <li>Payment arrangements</li>
+          <li>Logo and branding requirements</li>
+          <li>Exhibition space setup</li>
+          <li>Speaking opportunities (if applicable)</li>
+          <li>Marketing materials and promotion</li>
+        </ul>
+        
+        ${specialRequests ? `<p><strong>Your Special Requests:</strong> ${specialRequests}</p>` : ''}
+        
+        <p>If you have any immediate questions, please contact us at sponsors@croydonba.co.uk</p>
+        
+        <p>We look forward to partnering with you for this exciting event!</p>
+        
+        <p>Best regards,<br>
+        The AI Summit 2025 Team<br>
+        Croydon Business Association</p>
+        `
+      );
+
+      // Send notification to admin
+      await emailService.sendNotificationEmail(
+        'admin@croydonba.org.uk',
+        'New Sponsor Registration - AI Summit 2025',
+        `
+        <h2>New Sponsor Registration</h2>
+        
+        <h3>Company Details:</h3>
+        <ul>
+          <li><strong>Company:</strong> ${companyName}</li>
+          <li><strong>Contact Person:</strong> ${contactName}</li>
+          <li><strong>Email:</strong> ${contactEmail}</li>
+          <li><strong>Phone:</strong> ${contactPhone || 'Not provided'}</li>
+          <li><strong>Website:</strong> ${companyWebsite || 'Not provided'}</li>
+          <li><strong>Package:</strong> ${packageName}</li>
+        </ul>
+        
+        <p><strong>Company Description:</strong></p>
+        <p>${companyDescription || 'Not provided'}</p>
+        
+        ${specialRequests ? `<p><strong>Special Requests:</strong></p><p>${specialRequests}</p>` : ''}
+        
+        <p><strong>Registered at:</strong> ${new Date().toLocaleString()}</p>
+        `
+      );
+
+      res.json({ 
+        success: true, 
+        message: "Sponsor registration successful! You can now log in with your email and password.",
+        userId: newUser.id 
+      });
+    } catch (error) {
+      console.error('Error registering sponsor:', error);
+      res.status(500).json({ message: 'Failed to register sponsor. Please try again.' });
+    }
+  });
+
   app.post("/api/ai-summit-speaker-interest", async (req, res) => {
     try {
       const {
