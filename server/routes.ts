@@ -4776,6 +4776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         speakingExperience,
         previousSpeaking,
         techRequirements,
+        availableSlots,
         motivationToSpeak,
         keyTakeaways,
         interactiveElements,
@@ -4827,7 +4828,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const emailService = getEmailService();
       if (emailService) {
         try {
-          await emailService.sendNotificationEmail({
+          await emailService.sendEmail({
             to: email,
             subject: "AI Summit 2025 - Speaker Interest Received",
             html: `
@@ -4888,7 +4889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         speakingExperience,
         previousSpeaking,
         techRequirements,
-        availableSlots: JSON.stringify([]), // Empty array as JSON string
+        availableSlots: Array.isArray(availableSlots) ? JSON.stringify(availableSlots) : JSON.stringify([]),
         motivationToSpeak,
         keyTakeaways,
         interactiveElements,
