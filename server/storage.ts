@@ -137,6 +137,7 @@ export interface IStorage {
   listUsers(options?: { search?: string; status?: string; limit?: number }): Promise<User[]>;
   suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User>;
   reactivateUser(userId: string): Promise<User>;
+  deleteUser(userId: string): Promise<boolean>;
   
   // Business operations
   getBusinessById(id: number): Promise<Business | undefined>;
@@ -563,6 +564,31 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async deleteUser(userId: string): Promise<boolean> {
+    try {
+      // Delete related records first to maintain referential integrity
+      // Delete AI Summit related records
+      await db.delete(aiSummitRegistrations).where(eq(aiSummitRegistrations.userId, userId));
+      await db.delete(aiSummitExhibitorRegistrations).where(eq(aiSummitExhibitorRegistrations.userId, userId));
+      await db.delete(aiSummitVolunteers).where(eq(aiSummitVolunteers.userId, userId));
+      await db.delete(aiSummitBadges).where(eq(aiSummitBadges.userId, userId));
+      await db.delete(aiSummitCheckIns).where(eq(aiSummitCheckIns.userId, userId));
+      
+      // Delete user's business if exists
+      const userBusiness = await this.getBusinessByUserId(userId);
+      if (userBusiness) {
+        await db.delete(businesses).where(eq(businesses.userId, userId));
+      }
+      
+      // Finally delete the user
+      const result = await db.delete(users).where(eq(users.id, userId));
+      return true;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
+    }
   }
 
   // Business operations

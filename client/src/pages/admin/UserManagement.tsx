@@ -43,7 +43,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2 } from "lucide-react";
+import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const UserManagement = () => {
@@ -54,6 +54,7 @@ const UserManagement = () => {
   const [suspensionReason, setSuspensionReason] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<User>>({});
+  const [deletingUser, setDeletingUser] = useState<User | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -131,6 +132,27 @@ const UserManagement = () => {
     },
   });
 
+  const deleteUserMutation = useMutation({
+    mutationFn: (userId: string) => {
+      return apiRequest("DELETE", `/api/admin/users/${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setDeletingUser(null);
+      toast({
+        title: "User Deleted",
+        description: "The user has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSuspendUser = () => {
     if (!suspendingUser || !suspensionReason.trim()) return;
 
@@ -164,6 +186,11 @@ const UserManagement = () => {
       userId: editingUser.id,
       userData: editFormData,
     });
+  };
+
+  const handleDeleteUser = () => {
+    if (!deletingUser) return;
+    deleteUserMutation.mutate(deletingUser.id);
   };
 
   const getStatusBadge = (status: string): { variant: BadgeProps["variant"]; icon: React.ReactNode } => {
@@ -344,6 +371,17 @@ const UserManagement = () => {
                               <Edit2 className="h-3 w-3 mr-1" />
                               Edit
                             </Button>
+                            
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setDeletingUser(user)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3 mr-1" />
+                              Delete
+                            </Button>
+                            
                             {user.accountStatus === "suspended" ? (
                               <Button
                                 size="sm"
@@ -361,7 +399,7 @@ const UserManagement = () => {
                                     size="sm"
                                     variant="outline"
                                     onClick={() => setSuspendingUser(user)}
-                                    className="text-red-600 hover:text-red-700"
+                                    className="text-amber-600 hover:text-amber-700"
                                   >
                                     Suspend
                                   </Button>
@@ -612,6 +650,70 @@ const UserManagement = () => {
                       setEditingUser(null);
                       setEditFormData({});
                     }}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete User Confirmation Dialog */}
+        <Dialog open={!!deletingUser} onOpenChange={(open) => {
+          if (!open) {
+            setDeletingUser(null);
+          }
+        }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center text-red-600">
+                <AlertTriangle className="h-5 w-5 mr-2" />
+                Delete User Account
+              </DialogTitle>
+            </DialogHeader>
+            
+            {deletingUser && (
+              <div className="space-y-4">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm text-red-900">
+                    <strong>Warning:</strong> This action cannot be undone. This will permanently delete:
+                  </p>
+                  <ul className="mt-2 text-sm text-red-800 list-disc list-inside">
+                    <li>The user account and all personal information</li>
+                    <li>All AI Summit registrations and badges</li>
+                    <li>Any associated business profiles</li>
+                    <li>All related data and history</li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <p className="font-medium">User to be deleted:</p>
+                  <div className="bg-neutral-100 p-3 rounded-lg">
+                    <p className="text-sm">
+                      <strong>Name:</strong> {deletingUser.firstName} {deletingUser.lastName}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Email:</strong> {deletingUser.email}
+                    </p>
+                    <p className="text-sm">
+                      <strong>Company:</strong> {deletingUser.company || 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={handleDeleteUser}
+                    disabled={deleteUserMutation.isPending}
+                    className="flex-1 bg-red-600 hover:bg-red-700"
+                  >
+                    {deleteUserMutation.isPending ? "Deleting..." : "Delete User"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeletingUser(null)}
                     className="flex-1"
                   >
                     Cancel
