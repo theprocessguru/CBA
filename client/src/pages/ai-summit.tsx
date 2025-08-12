@@ -70,10 +70,13 @@ const AISummit = () => {
   // Auto-populate form when user data is available
   useEffect(() => {
     if (user && showRegistrationForm) {
+      const userFirstName = (user as any).firstName || "";
+      const userLastName = (user as any).lastName || "";
+      const userEmail = (user as any).email || "";
       setRegistrationData(prev => ({
         ...prev,
-        name: user.firstName + " " + user.lastName || "",
-        email: user.email || "",
+        name: `${userFirstName} ${userLastName}`.trim() || "",
+        email: userEmail,
         company: prev.company || "",
         jobTitle: prev.jobTitle || "",
         phoneNumber: prev.phoneNumber || "",
@@ -486,6 +489,8 @@ const AISummit = () => {
           name: "",
           email: "",
           jobTitle: "",
+          participantType: "exhibitor",
+          customRole: "",
           isSpeaker: false,
           speakerBio: "",
           presentationTitle: "",
@@ -880,14 +885,14 @@ const AISummit = () => {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button 
                     className={`${
-                      registrationStatus?.isRegistered 
+                      (registrationStatus as any)?.isRegistered 
                         ? "bg-green-500 text-white hover:bg-green-600 cursor-default" 
                         : "bg-white text-blue-600 hover:bg-blue-50"
                     } text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2`}
-                    onClick={() => !registrationStatus?.isRegistered && setShowRegistrationForm(true)}
-                    disabled={registrationStatus?.isRegistered}
+                    onClick={() => !(registrationStatus as any)?.isRegistered && setShowRegistrationForm(true)}
+                    disabled={(registrationStatus as any)?.isRegistered}
                   >
-                    {registrationStatus?.isRegistered ? (
+                    {(registrationStatus as any)?.isRegistered ? (
                       <>
                         <UserPlus className="h-5 w-5" />
                         ✓ Registered for AI Summit 
@@ -899,7 +904,7 @@ const AISummit = () => {
                       </>
                     )}
                   </button>
-                  {registrationStatus?.isRegistered ? (
+                  {(registrationStatus as any)?.isRegistered ? (
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Link href="/my-qr-code">
                         <a className="bg-purple-600 text-white hover:bg-purple-700 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
@@ -1070,15 +1075,15 @@ const AISummit = () => {
                   </p>
                   <Button 
                     className={`w-full font-semibold ${
-                      registrationStatus?.isRegistered 
+                      (registrationStatus as any)?.isRegistered 
                         ? "bg-green-500 hover:bg-green-600 cursor-default" 
                         : "bg-blue-600 hover:bg-blue-700"
                     }`}
-                    onClick={() => !registrationStatus?.isRegistered && setShowRegistrationForm(true)}
-                    disabled={registrationStatus?.isRegistered}
+                    onClick={() => !(registrationStatus as any)?.isRegistered && setShowRegistrationForm(true)}
+                    disabled={(registrationStatus as any)?.isRegistered}
                   >
                     <UserPlus className="mr-2 h-4 w-4" />
-                    <span>{registrationStatus?.isRegistered ? "✓ Registered" : "Register Now"}</span>
+                    <span>{(registrationStatus as any)?.isRegistered ? "✓ Registered" : "Register Now"}</span>
                   </Button>
                 </CardContent>
               </Card>
@@ -1447,15 +1452,15 @@ const AISummit = () => {
                 <Button 
                   size="lg" 
                   className={`font-semibold ${
-                    registrationStatus?.isRegistered 
+                    (registrationStatus as any)?.isRegistered 
                       ? "bg-green-500 text-white hover:bg-green-600 cursor-default" 
                       : "bg-white text-blue-600 hover:bg-blue-50"
                   }`}
-                  onClick={() => !registrationStatus?.isRegistered && setShowRegistrationForm(true)}
-                  disabled={registrationStatus?.isRegistered}
+                  onClick={() => !(registrationStatus as any)?.isRegistered && setShowRegistrationForm(true)}
+                  disabled={(registrationStatus as any)?.isRegistered}
                 >
                   <UserPlus className="mr-2 h-5 w-5" />
-                  <span>{registrationStatus?.isRegistered ? "✓ Registered for FREE" : "Register for FREE"}</span>
+                  <span>{(registrationStatus as any)?.isRegistered ? "✓ Registered for FREE" : "Register for FREE"}</span>
                 </Button>
                 <Button 
                   size="lg" 
