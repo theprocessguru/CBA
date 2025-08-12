@@ -1863,6 +1863,37 @@ const AISummit = () => {
                     </p>
                   </div>
 
+                  {/* Test Data Button - Only show in development */}
+                  {import.meta.env.DEV && (
+                    <div className="flex justify-center">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            name: 'John Smith',
+                            email: `test${Math.floor(Math.random() * 10000)}@example.com`,
+                            phoneNumber: '07700900123',
+                            company: 'Tech Solutions Ltd',
+                            jobTitle: 'Senior Developer',
+                            businessType: 'Technology',
+                            aiInterest: 'automation',
+                            accessibilityNeeds: '',
+                            password: 'TestPassword123!',
+                            confirmPassword: 'TestPassword123!',
+                            comments: 'Looking forward to the event'
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      >
+                        🧪 Fill with Test Data (Dev Only)
+                      </Button>
+                    </div>
+                  )}
+
                   <div className="flex gap-4 pt-4">
                     <Button 
                       type="button" 
@@ -1903,6 +1934,46 @@ const AISummit = () => {
                 </div>
 
                 <form onSubmit={handleExhibitorRegistration} className="space-y-4">
+                  {/* Test Data Button for Exhibitor Form */}
+                  {import.meta.env.DEV && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            companyName: 'Innovative Tech Solutions',
+                            contactName: 'Sarah Johnson',
+                            email: `exhibitor${Math.floor(Math.random() * 10000)}@techsolutions.com`,
+                            phone: '02087654321',
+                            website: 'https://www.techsolutions.com',
+                            businessDescription: 'Leading provider of AI-powered business automation solutions',
+                            productsServices: 'AI chatbots, automation tools, data analytics platforms',
+                            exhibitionGoals: 'Generate leads and showcase our latest AI products',
+                            boothRequirements: 'table-2',
+                            electricalNeeds: true,
+                            internetNeeds: true,
+                            specialRequirements: 'Need 2 power outlets and stable WiFi',
+                            marketingMaterials: 'Brochures, demo screens, promotional items',
+                            numberOfAttendees: '2',
+                            previousExhibitor: false,
+                            referralSource: 'Email newsletter',
+                            agreesToTerms: true,
+                            attendees: [
+                              { name: 'Sarah Johnson', email: 'sarah@techsolutions.com', jobTitle: 'CEO' },
+                              { name: 'Mike Chen', email: 'mike@techsolutions.com', jobTitle: 'CTO' }
+                            ]
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleExhibitorInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      >
+                        🧪 Fill with Test Data (Dev Only)
+                      </Button>
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="companyName">Company Name *</Label>
@@ -2320,6 +2391,49 @@ const AISummit = () => {
                 </div>
 
                 <form onSubmit={handleSpeakerSubmission} className="space-y-6">
+                  {/* Test Data Button for Speaker Form */}
+                  {import.meta.env.DEV && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            name: 'Dr. Emily Watson',
+                            email: `speaker${Math.floor(Math.random() * 10000)}@example.com`,
+                            phone: '07891234567',
+                            company: 'AI Innovation Lab',
+                            jobTitle: 'Chief Technology Officer',
+                            website: 'https://www.aiinnovationlab.com',
+                            linkedIn: 'https://linkedin.com/in/emilywatson',
+                            bio: 'Dr. Emily Watson is a renowned AI expert with over 15 years of experience in machine learning and artificial intelligence. She has published numerous papers on AI applications in business and regularly speaks at international conferences.',
+                            password: 'SpeakerPass123!',
+                            confirmPassword: 'SpeakerPass123!',
+                            sessionType: 'keynote',
+                            talkTitle: 'Transforming Small Business with AI: Practical Strategies',
+                            talkDescription: 'This keynote will explore practical ways small businesses can leverage AI to improve efficiency, customer service, and growth. We will cover real-world case studies, affordable AI tools, and implementation strategies that work for businesses with limited budgets.',
+                            talkDuration: '45',
+                            audienceLevel: 'Beginner',
+                            speakingExperience: 'Keynote speaker at TechSummit 2024, AI Conference London 2023, numerous workshops and webinars',
+                            previousSpeaking: 'Yes',
+                            techRequirements: 'HDMI connection, clicker, microphone',
+                            availableSlots: ['morning', 'afternoon'],
+                            motivationToSpeak: 'Passionate about democratizing AI for small businesses',
+                            keyTakeaways: '1. Understanding AI basics\n2. Identifying AI opportunities in your business\n3. Implementing AI on a budget\n4. Measuring AI ROI',
+                            interactiveElements: 'Live demos, Q&A session, audience polls',
+                            handoutsProvided: 'Yes',
+                            agreesToTerms: true
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleSpeakerInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      >
+                        🧪 Fill with Test Data (Dev Only)
+                      </Button>
+                    </div>
+                  )}
                   {/* Personal Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-neutral-800">Personal Information</h3>
@@ -2712,6 +2826,38 @@ const AISummit = () => {
                 </div>
 
                 <form onSubmit={handleVolunteerRegistration} className="space-y-4">
+                  {/* Test Data Button for Volunteer Form */}
+                  {import.meta.env.DEV && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            name: "Alex Thompson",
+                            email: `volunteer${Math.floor(Math.random() * 10000)}@example.com`,
+                            phone: "07543210987",
+                            emergencyContact: "Jane Thompson - 07777888999",
+                            role: "registration",
+                            shift: "full-day",
+                            experience: "Volunteered at TechConf 2024, local charity events",
+                            availability: "Available for the full day, happy to help wherever needed",
+                            password: "Volunteer123!",
+                            confirmPassword: "Volunteer123!",
+                            motivation: "Passionate about AI and want to contribute to the community",
+                            specialSkills: "Customer service experience, bilingual (English/Spanish)",
+                            agreesToTerms: true
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleVolunteerInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      >
+                        🧪 Fill with Test Data (Dev Only)
+                      </Button>
+                    </div>
+                  )}
                   {/* Personal Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-neutral-800">Personal Information</h3>
@@ -3167,6 +3313,38 @@ const AISummit = () => {
                 </div>
 
                 <form onSubmit={handleSponsorRegistration} className="space-y-4">
+                  {/* Test Data Button for Sponsor Form */}
+                  {import.meta.env.DEV && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            companyName: "TechCorp Solutions",
+                            contactName: "Michael Johnson",
+                            contactEmail: `sponsor${Math.floor(Math.random() * 10000)}@techcorp.com`,
+                            contactPhone: "02012345678",
+                            sponsorshipLevel: "Gold",
+                            website: "https://www.techcorp.com",
+                            companyDescription: "Leading technology solutions provider specializing in AI and ML services",
+                            sponsorshipGoals: "Brand visibility, lead generation, and networking with AI community",
+                            marketingOpportunities: "logo-placement,exhibition-booth,speaking-opportunity",
+                            additionalRequests: "Prefer keynote speaking slot and prime booth location",
+                            password: "Sponsor123!",
+                            confirmPassword: "Sponsor123!",
+                            agreesToTerms: true
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleSponsorInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      >
+                        🧪 Fill with Test Data (Dev Only)
+                      </Button>
+                    </div>
+                  )}
                   {/* Company Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-neutral-800">Company Information</h3>
