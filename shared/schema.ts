@@ -293,6 +293,9 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   comments: text("comments"),
   participantRoles: text("participant_roles").notNull().default('["attendee"]'), // JSON array of roles: attendee, exhibitor, speaker, organizer, volunteer, team
   customRole: varchar("custom_role"), // For custom role descriptions
+  email_verified: boolean("email_verified").default(false), // Email verification status
+  email_verification_token: varchar("email_verification_token"), // Token for email verification
+  email_verification_sent_at: timestamp("email_verification_sent_at"), // When verification email was sent
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
