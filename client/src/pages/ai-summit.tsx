@@ -626,11 +626,53 @@ const AISummit = () => {
 
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate passwords match
+    if (registrationData.password !== registrationData.confirmPassword) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "Please make sure your password and confirm password fields match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate password length
+    if (registrationData.password && registrationData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     registerMutation.mutate(registrationData);
   };
 
   const handleExhibitorRegistration = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate passwords match
+    if (exhibitorData.password !== exhibitorData.confirmPassword) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "Please make sure your password and confirm password fields match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate password length
+    if (exhibitorData.password && exhibitorData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!exhibitorData.agreesToTerms) {
       toast({
         title: "Terms Required",
@@ -698,6 +740,27 @@ const AISummit = () => {
 
   const handleSpeakerSubmission = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate passwords match
+    if (speakerData.password !== speakerData.confirmPassword) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "Please make sure your password and confirm password fields match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate password length
+    if (speakerData.password && speakerData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!speakerData.agreesToTerms) {
       toast({
         title: "Terms Required",
@@ -746,6 +809,27 @@ const AISummit = () => {
 
   const handleVolunteerRegistration = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate passwords match
+    if (volunteerData.password !== volunteerData.confirmPassword) {
+      toast({
+        title: "Passwords Don't Match",
+        description: "Please make sure your password and confirm password fields match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Validate password length
+    if (volunteerData.password && volunteerData.password.length < 8) {
+      toast({
+        title: "Password Too Short",
+        description: "Password must be at least 8 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (!volunteerData.agreesToTerms) {
       toast({
         title: "Terms Required",
