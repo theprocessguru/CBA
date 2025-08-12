@@ -1564,10 +1564,11 @@ const AISummit = () => {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="phoneNumber">Phone Number</Label>
+                      <Label htmlFor="phoneNumber">Phone Number *</Label>
                       <Input
                         id="phoneNumber"
                         type="tel"
+                        required
                         value={registrationData.phoneNumber}
                         onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                         placeholder="Your contact number"
@@ -1721,10 +1722,11 @@ const AISummit = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="exhibitorPhone">Phone Number</Label>
+                      <Label htmlFor="exhibitorPhone">Phone Number *</Label>
                       <Input
                         id="exhibitorPhone"
                         type="tel"
+                        required
                         value={exhibitorData.phone}
                         onChange={(e) => handleExhibitorInputChange('phone', e.target.value)}
                         placeholder="07123 456789"
@@ -2075,10 +2077,11 @@ const AISummit = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor="speakerPhone">Phone Number</Label>
+                        <Label htmlFor="speakerPhone">Phone Number *</Label>
                         <Input
                           id="speakerPhone"
                           type="tel"
+                          required
                           value={speakerData.phone}
                           onChange={(e) => handleSpeakerInputChange('phone', e.target.value)}
                           placeholder="Your contact number"
@@ -2853,10 +2856,11 @@ const AISummit = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="sponsorPhone">Phone Number</Label>
+                        <Label htmlFor="sponsorPhone">Phone Number *</Label>
                         <Input
                           id="sponsorPhone"
                           type="tel"
+                          required
                           value={sponsorData.contactPhone}
                           onChange={(e) => handleSponsorInputChange('contactPhone', e.target.value)}
                           placeholder="Your contact number"
