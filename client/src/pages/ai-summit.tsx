@@ -1593,20 +1593,6 @@ const AISummit = () => {
                     </div>
                   </div>
 
-                  <ParticipantTypeSelector
-                    value={registrationData.participantType}
-                    customRole={registrationData.customRole}
-                    onValueChange={(type, customRole) => {
-                      setRegistrationData(prev => ({
-                        ...prev,
-                        participantType: type,
-                        customRole: customRole || ""
-                      }));
-                    }}
-                    label="Your Role at the Event"
-                    required
-                  />
-
                   <div>
                     <Label htmlFor="aiInterest">AI Interest/Focus Area</Label>
                     <Select value={registrationData.aiInterest} onValueChange={(value) => handleInputChange('aiInterest', value)}>
