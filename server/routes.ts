@@ -4872,7 +4872,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Store speaker interest in database
       const speakerInterest = await storage.createAISummitSpeakerInterest({
-        userId: null, // Speaker might not have an account yet
         name,
         email,
         phone,
