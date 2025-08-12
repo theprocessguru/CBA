@@ -32,7 +32,9 @@ import {
   Building,
   Coffee,
   Trophy,
-  BookOpen
+  BookOpen,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { Link } from "wouter";
 import { ParticipantTypeSelector } from "@/components/forms/ParticipantTypeSelector";
@@ -53,6 +55,18 @@ const AISummit = () => {
   const [showSpeakerForm, setShowSpeakerForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
   const [showSponsorForm, setShowSponsorForm] = useState(false);
+  
+  // Password visibility states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showExhibitorPassword, setShowExhibitorPassword] = useState(false);
+  const [showExhibitorConfirmPassword, setShowExhibitorConfirmPassword] = useState(false);
+  const [showSpeakerPassword, setShowSpeakerPassword] = useState(false);
+  const [showSpeakerConfirmPassword, setShowSpeakerConfirmPassword] = useState(false);
+  const [showVolunteerPassword, setShowVolunteerPassword] = useState(false);
+  const [showVolunteerConfirmPassword, setShowVolunteerConfirmPassword] = useState(false);
+  const [showSponsorPassword, setShowSponsorPassword] = useState(false);
+  const [showSponsorConfirmPassword, setShowSponsorConfirmPassword] = useState(false);
   const [registrationData, setRegistrationData] = useState({
     name: "",
     email: "",
@@ -1717,25 +1731,49 @@ const AISummit = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="password">Password *</Label>
-                        <Input
-                          id="password"
-                          type="password"
-                          required
-                          value={registrationData.password || ''}
-                          onChange={(e) => handleInputChange('password', e.target.value)}
-                          placeholder="At least 8 characters"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            required
+                            value={registrationData.password || ''}
+                            onChange={(e) => handleInputChange('password', e.target.value)}
+                            placeholder="At least 8 characters"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label htmlFor="confirmPassword">Confirm Password *</Label>
-                        <Input
-                          id="confirmPassword"
-                          type="password"
-                          required
-                          value={registrationData.confirmPassword || ''}
-                          onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                          placeholder="Re-enter your password"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="confirmPassword"
+                            type={showConfirmPassword ? "text" : "password"}
+                            required
+                            value={registrationData.confirmPassword || ''}
+                            onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your password"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1923,25 +1961,49 @@ const AISummit = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="exhibitorPassword">Password *</Label>
-                        <Input
-                          id="exhibitorPassword"
-                          type="password"
-                          required
-                          value={exhibitorData.password || ''}
-                          onChange={(e) => handleExhibitorInputChange('password', e.target.value)}
-                          placeholder="At least 8 characters"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="exhibitorPassword"
+                            type={showExhibitorPassword ? "text" : "password"}
+                            required
+                            value={exhibitorData.password || ''}
+                            onChange={(e) => handleExhibitorInputChange('password', e.target.value)}
+                            placeholder="At least 8 characters"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowExhibitorPassword(!showExhibitorPassword)}
+                          >
+                            {showExhibitorPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label htmlFor="exhibitorConfirmPassword">Confirm Password *</Label>
-                        <Input
-                          id="exhibitorConfirmPassword"
-                          type="password"
-                          required
-                          value={exhibitorData.confirmPassword || ''}
-                          onChange={(e) => handleExhibitorInputChange('confirmPassword', e.target.value)}
-                          placeholder="Re-enter your password"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="exhibitorConfirmPassword"
+                            type={showExhibitorConfirmPassword ? "text" : "password"}
+                            required
+                            value={exhibitorData.confirmPassword || ''}
+                            onChange={(e) => handleExhibitorInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your password"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowExhibitorConfirmPassword(!showExhibitorConfirmPassword)}
+                          >
+                            {showExhibitorConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2297,26 +2359,50 @@ const AISummit = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="speakerPassword">Password *</Label>
-                          <Input
-                            id="speakerPassword"
-                            type="password"
-                            required
-                            value={speakerData.password || ''}
-                            onChange={(e) => handleSpeakerInputChange('password', e.target.value)}
-                            placeholder="Create a strong password"
-                          />
+                          <div className="relative">
+                            <Input
+                              id="speakerPassword"
+                              type={showSpeakerPassword ? "text" : "password"}
+                              required
+                              value={speakerData.password || ''}
+                              onChange={(e) => handleSpeakerInputChange('password', e.target.value)}
+                              placeholder="Create a strong password"
+                              className="pr-10"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowSpeakerPassword(!showSpeakerPassword)}
+                            >
+                              {showSpeakerPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
                           <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
                         </div>
                         <div>
                           <Label htmlFor="speakerConfirmPassword">Confirm Password *</Label>
-                          <Input
-                            id="speakerConfirmPassword"
-                            type="password"
-                            required
-                            value={speakerData.confirmPassword || ''}
-                            onChange={(e) => handleSpeakerInputChange('confirmPassword', e.target.value)}
-                            placeholder="Re-enter your password"
-                          />
+                          <div className="relative">
+                            <Input
+                              id="speakerConfirmPassword"
+                              type={showSpeakerConfirmPassword ? "text" : "password"}
+                              required
+                              value={speakerData.confirmPassword || ''}
+                              onChange={(e) => handleSpeakerInputChange('confirmPassword', e.target.value)}
+                              placeholder="Re-enter your password"
+                              className="pr-10"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowSpeakerConfirmPassword(!showSpeakerConfirmPassword)}
+                            >
+                              {showSpeakerConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -2686,25 +2772,49 @@ const AISummit = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="volunteerPassword">Password *</Label>
-                        <Input
-                          id="volunteerPassword"
-                          type="password"
-                          required
-                          value={volunteerData.password || ''}
-                          onChange={(e) => handleVolunteerInputChange('password', e.target.value)}
-                          placeholder="At least 8 characters"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="volunteerPassword"
+                            type={showVolunteerPassword ? "text" : "password"}
+                            required
+                            value={volunteerData.password || ''}
+                            onChange={(e) => handleVolunteerInputChange('password', e.target.value)}
+                            placeholder="At least 8 characters"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowVolunteerPassword(!showVolunteerPassword)}
+                          >
+                            {showVolunteerPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label htmlFor="volunteerConfirmPassword">Confirm Password *</Label>
-                        <Input
-                          id="volunteerConfirmPassword"
-                          type="password"
-                          required
-                          value={volunteerData.confirmPassword || ''}
-                          onChange={(e) => handleVolunteerInputChange('confirmPassword', e.target.value)}
-                          placeholder="Re-enter your password"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="volunteerConfirmPassword"
+                            type={showVolunteerConfirmPassword ? "text" : "password"}
+                            required
+                            value={volunteerData.confirmPassword || ''}
+                            onChange={(e) => handleVolunteerInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your password"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowVolunteerConfirmPassword(!showVolunteerConfirmPassword)}
+                          >
+                            {showVolunteerConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -3051,25 +3161,49 @@ const AISummit = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="sponsorPassword">Password *</Label>
-                        <Input
-                          id="sponsorPassword"
-                          type="password"
-                          required
-                          value={sponsorData.password}
-                          onChange={(e) => handleSponsorInputChange('password', e.target.value)}
-                          placeholder="At least 8 characters"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="sponsorPassword"
+                            type={showSponsorPassword ? "text" : "password"}
+                            required
+                            value={sponsorData.password}
+                            onChange={(e) => handleSponsorInputChange('password', e.target.value)}
+                            placeholder="At least 8 characters"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowSponsorPassword(!showSponsorPassword)}
+                          >
+                            {showSponsorPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                       <div>
                         <Label htmlFor="sponsorConfirmPassword">Confirm Password *</Label>
-                        <Input
-                          id="sponsorConfirmPassword"
-                          type="password"
-                          required
-                          value={sponsorData.confirmPassword}
-                          onChange={(e) => handleSponsorInputChange('confirmPassword', e.target.value)}
-                          placeholder="Re-enter your password"
-                        />
+                        <div className="relative">
+                          <Input
+                            id="sponsorConfirmPassword"
+                            type={showSponsorConfirmPassword ? "text" : "password"}
+                            required
+                            value={sponsorData.confirmPassword}
+                            onChange={(e) => handleSponsorInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your password"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowSponsorConfirmPassword(!showSponsorConfirmPassword)}
+                          >
+                            {showSponsorConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     <p className="text-sm text-gray-600">
