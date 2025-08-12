@@ -569,12 +569,14 @@ export class DatabaseStorage implements IStorage {
   async deleteUser(userId: string): Promise<boolean> {
     try {
       // Delete related records first to maintain referential integrity
-      // Delete AI Summit related records
-      await db.delete(aiSummitRegistrations).where(eq(aiSummitRegistrations.userId, userId));
-      await db.delete(aiSummitExhibitorRegistrations).where(eq(aiSummitExhibitorRegistrations.userId, userId));
-      await db.delete(aiSummitVolunteers).where(eq(aiSummitVolunteers.userId, userId));
-      await db.delete(aiSummitBadges).where(eq(aiSummitBadges.userId, userId));
-      await db.delete(aiSummitCheckIns).where(eq(aiSummitCheckIns.userId, userId));
+      // Delete AI Summit related records - using raw SQL for tables with user_id column
+      await db.execute(sql`DELETE FROM ai_summit_registrations WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM ai_summit_exhibitor_registrations WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM ai_summit_volunteers WHERE user_id = ${userId}`);
+      
+      // Delete badges and check-ins (these should be checked too)
+      await db.execute(sql`DELETE FROM ai_summit_badges WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM ai_summit_check_ins WHERE user_id = ${userId}`);
       
       // Delete user's business if exists
       const userBusiness = await this.getBusinessByUserId(userId);
@@ -587,7 +589,7 @@ export class DatabaseStorage implements IStorage {
       return true;
     } catch (error) {
       console.error("Error deleting user:", error);
-      return false;
+      throw error; // Re-throw error instead of silently returning false
     }
   }
 
