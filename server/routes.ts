@@ -4674,6 +4674,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         aiInterest: aiInterest || null,
         accessibilityNeeds: accessibilityNeeds || null,
         comments: comments || null,
+        email_verified: false,
+        email_verification_token: user.verificationToken || null,
+        email_verification_sent_at: new Date(),
         registeredAt: new Date()
       });
 
