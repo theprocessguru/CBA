@@ -127,6 +127,7 @@ export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createUser(user: Partial<User>): Promise<User>;
   updateUser(id: string, user: Partial<UpsertUser>): Promise<User>;
   updateUserProfile(id: string, profileData: { firstName?: string; lastName?: string; phone?: string; company?: string; jobTitle?: string; bio?: string; isProfileHidden?: boolean }): Promise<User>;
   getUserByEmail(email: string): Promise<User | undefined>;
@@ -441,6 +442,22 @@ export class DatabaseStorage implements IStorage {
           ...userData,
           updatedAt: new Date(),
         },
+      })
+      .returning();
+    return user;
+  }
+
+  async createUser(userData: Partial<User>): Promise<User> {
+    // Generate a unique ID if not provided
+    const userId = userData.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...userData,
+        id: userId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
       .returning();
     return user;

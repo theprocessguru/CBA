@@ -4972,10 +4972,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await storage.createUser({
         email,
-        password: hashedPassword,
-        name,
+        passwordHash: hashedPassword,
+        firstName: name.split(' ')[0] || name,
+        lastName: name.split(' ').slice(1).join(' ') || '',
         participantType: 'speaker',
-        isEmailVerified: false,
         createdAt: new Date()
       });
 
