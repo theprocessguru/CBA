@@ -183,6 +183,10 @@ const isAdmin = async (req: Request, res: Response, next: Function) => {
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
     
     const user = await storage.getUser(userId);
+    console.log("Admin check - User ID:", userId);
+    console.log("Admin check - User data:", user);
+    console.log("Admin check - isAdmin value:", user?.isAdmin);
+    
     if (!user || !user.isAdmin) return res.status(403).json({ message: "Forbidden: Admin access required" });
     
     next();
