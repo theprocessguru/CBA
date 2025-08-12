@@ -2121,13 +2121,12 @@ const AISummit = () => {
                           <SelectContent>
                             {speakerData.sessionType === 'workshop' ? (
                               <>
-                                <SelectItem value="45">45 minutes (recommended for workshops)</SelectItem>
-                                <SelectItem value="60">60 minutes (full workshop)</SelectItem>
+                                <SelectItem value="30">30 minutes (workshop session)</SelectItem>
                               </>
                             ) : (
                               <>
                                 <SelectItem value="15">15 minutes (lightning talk)</SelectItem>
-                                <SelectItem value="45">45 minutes (extended talk)</SelectItem>
+                                <SelectItem value="30">30 minutes (standard talk)</SelectItem>
                               </>
                             )}
                           </SelectContent>

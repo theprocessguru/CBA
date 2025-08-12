@@ -28,7 +28,7 @@ Volunteers: No business listing menu items in dashboard (they don't need busines
 - **Admin Event Management System Added (August 2025)**: Created comprehensive admin interface for managing CBA events with full CRUD operations. Admins can create, edit, delete, and view events through dedicated interface accessible via admin navigation menu. System includes advanced form validation, event status management, pricing controls, and integration with existing CBA events database.
 - **Badge Printing Format Updated (August 2025)**: Changed badge dimensions from A4 page size to standard badge holder format (102mm x 76mm). All badges now print at proper size for badge holders with compact, professional layout optimized for wearing at events. User confirmed this works perfectly.
 - **Password Visibility Toggle Added (August 2025)**: Added show/hide password functionality to all login and registration forms to help users with dysgraphia and improve general accessibility. Users can now see their password text while typing to verify correct input.
-- **Speaker Duration Options Updated (August 2025)**: Removed 30 minute slot option from speaker interest form. Now only offers 15 minutes (lightning talk) and 45 minutes (extended talk) for standard talks, while workshops retain 45 and 60 minute options.
+- **Speaker Duration Options Updated (August 2025)**: Updated speaker time slots to match available slots. Now offers only 15 minutes (lightning talk) and 30 minutes (standard talk) for all session types including workshops, as these are the only time slots available for the event.
 
 ## System Architecture
 ### Frontend Architecture
