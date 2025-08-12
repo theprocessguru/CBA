@@ -456,6 +456,28 @@ Croydon Business Association
     }
   }
 
+  public async sendNotificationEmail({ to, subject, html }: { to: string; subject: string; html: string }): Promise<boolean> {
+    if (!this.isConfigured()) {
+      console.warn('Email service not configured. Email not sent to:', to);
+      return false;
+    }
+
+    try {
+      await this.transporter!.sendMail({
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to,
+        subject,
+        html,
+      });
+
+      console.log(`Notification email sent to ${to}`);
+      return true;
+    } catch (error) {
+      console.error('Failed to send notification email:', error);
+      return false;
+    }
+  }
+
   public async testConnection(): Promise<boolean> {
     if (!this.isConfigured()) {
       return false;

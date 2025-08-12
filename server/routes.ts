@@ -4827,7 +4827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send confirmation email
       if (emailService) {
         try {
-          await emailService.sendEmail({
+          await emailService.sendNotificationEmail({
             to: email,
             subject: "AI Summit 2025 - Speaker Interest Received",
             html: `
@@ -4872,6 +4872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Store speaker interest in database
       const speakerInterest = await storage.createAISummitSpeakerInterest({
+        userId: null, // Speaker might not have an account yet
         name,
         email,
         phone,
