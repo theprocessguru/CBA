@@ -414,6 +414,8 @@ const AISummit = () => {
       setRegistrationData({
         name: "",
         email: "",
+        participantType: "attendee",
+        customRole: "",
         company: "",
         jobTitle: "",
         phoneNumber: "",

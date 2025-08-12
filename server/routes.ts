@@ -4575,6 +4575,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { 
         name, 
         email, 
+        participantType,
+        customRole,
         company, 
         jobTitle, 
         phoneNumber, 
@@ -4648,6 +4650,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             tags: [
               'AI_Summit_2025',
               'Event_Registration',
+              ...(participantType ? [`Participant_${participantType.replace(/[^a-zA-Z0-9]/g, '_')}`] : []),
+              ...(participantType === 'speaker' ? ['AI_Summit_Speaker'] : []),
               ...(businessType ? [`Business_Type_${businessType.replace(/[^a-zA-Z0-9]/g, '_')}`] : []),
               ...(aiInterest ? [`AI_Interest_${aiInterest.replace(/[^a-zA-Z0-9]/g, '_')}`] : [])
             ],
@@ -4655,6 +4659,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               job_title: jobTitle,
               business_type: businessType,
               ai_interest: aiInterest,
+              participant_type: participantType || 'attendee',
+              custom_role: customRole,
               accessibility_needs: accessibilityNeeds,
               registration_comments: comments,
               event_name: 'First AI Summit Croydon 2025',
@@ -4672,16 +4678,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail the registration if GHL sync fails
       }
 
-      // Create attendee badge
+      // Create badge with appropriate participant type
       let badge;
       try {
+        // Use provided participant type or default to 'attendee'
+        const actualParticipantType = participantType || 'attendee';
         badge = await badgeService.createBadge({
-          participantType: 'attendee',
+          participantType: actualParticipantType,
           participantId: registration.id.toString(),
           name,
           email,
           company: company || undefined,
-          jobTitle: jobTitle || undefined
+          jobTitle: jobTitle || undefined,
+          customRole: customRole || undefined
         });
       } catch (badgeError) {
         console.error("Failed to create attendee badge:", badgeError);
