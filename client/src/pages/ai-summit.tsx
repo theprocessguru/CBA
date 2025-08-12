@@ -463,12 +463,25 @@ const AISummit = () => {
       // Refresh registration status
       refetchStatus();
     },
-    onError: (error) => {
-      toast({
-        title: "Registration Failed",
-        description: error instanceof Error ? error.message : "Failed to register. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if this is a duplicate registration error
+      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
+        toast({
+          title: "Already Registered!",
+          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          variant: "default",
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: error instanceof Error ? error.message : "Failed to register. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -514,12 +527,25 @@ const AISummit = () => {
         }]
       });
     },
-    onError: (error) => {
-      toast({
-        title: "Exhibitor Registration Failed",
-        description: error instanceof Error ? error.message : "Failed to register as exhibitor. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if this is a duplicate registration error
+      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
+        toast({
+          title: "Already Registered!",
+          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          variant: "default",
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        toast({
+          title: "Exhibitor Registration Failed",
+          description: error instanceof Error ? error.message : "Failed to register as exhibitor. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -561,12 +587,25 @@ const AISummit = () => {
         agreesToTerms: false
       });
     },
-    onError: (error) => {
-      toast({
-        title: "Submission Failed",
-        description: error instanceof Error ? error.message : "Failed to submit speaker interest. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if this is a duplicate registration error
+      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
+        toast({
+          title: "Already Registered!",
+          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          variant: "default",
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        toast({
+          title: "Submission Failed",
+          description: error instanceof Error ? error.message : "Failed to submit speaker interest. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -595,12 +634,25 @@ const AISummit = () => {
         agreesToTerms: false
       });
     },
-    onError: (error) => {
-      toast({
-        title: "Volunteer Registration Failed",
-        description: error instanceof Error ? error.message : "Failed to register as volunteer. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if this is a duplicate registration error
+      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
+        toast({
+          title: "Already Registered!",
+          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          variant: "default",
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        toast({
+          title: "Volunteer Registration Failed",
+          description: error instanceof Error ? error.message : "Failed to register as volunteer. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -629,12 +681,25 @@ const AISummit = () => {
         agreesToTerms: false
       });
     },
-    onError: (error) => {
-      toast({
-        title: "Sponsor Registration Failed",
-        description: error instanceof Error ? error.message : "Failed to register as sponsor. Please try again.",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      // Check if this is a duplicate registration error
+      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
+        toast({
+          title: "Already Registered!",
+          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          variant: "default",
+        });
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        toast({
+          title: "Sponsor Registration Failed",
+          description: error instanceof Error ? error.message : "Failed to register as sponsor. Please try again.",
+          variant: "destructive",
+        });
+      }
     },
   });
 

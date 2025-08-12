@@ -4264,8 +4264,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Create user account for main contact if it doesn't exist
+      // Check if user already exists
       let user = await storage.getUserByEmail(email);
+      if (user) {
+        // User already exists - check if they have a registration
+        const existingRegistration = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .where(eq(aiSummitRegistrations.email, email));
+        
+        if (existingRegistration.length > 0) {
+          // Already registered - tell them to login
+          return res.status(409).json({ 
+            message: "You're already registered! Please login to access your account and event badges.",
+            alreadyRegistered: true,
+            shouldLogin: true
+          });
+        }
+      }
+      
+      // Create user account if it doesn't exist
       if (!user) {
         const [firstName, ...lastNameParts] = contactName.split(' ');
         const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -4599,8 +4617,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Please provide a valid email address" });
       }
 
-      // Create user account if it doesn't exist
+      // Check if user already exists
       let user = await storage.getUserByEmail(email);
+      if (user) {
+        // User already exists - check if they have a registration
+        const existingRegistration = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .where(eq(aiSummitRegistrations.email, email));
+        
+        if (existingRegistration.length > 0) {
+          // Already registered - tell them to login
+          return res.status(409).json({ 
+            message: "You're already registered! Please login to access your account and event badges.",
+            alreadyRegistered: true,
+            shouldLogin: true
+          });
+        }
+      }
+      
+      // Create user account if it doesn't exist
       if (!user) {
         const [firstName, ...lastNameParts] = name.split(' ');
         const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -4828,7 +4864,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(contactEmail);
       if (existingUser) {
-        return res.status(400).json({ message: "An account with this email already exists" });
+        // Check if they have an AI Summit registration
+        const existingRegistration = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .where(eq(aiSummitRegistrations.email, contactEmail));
+        
+        if (existingRegistration.length > 0) {
+          return res.status(409).json({ 
+            message: "You're already registered! Please login to access your account and event badges.",
+            alreadyRegistered: true,
+            shouldLogin: true
+          });
+        }
       }
 
       // Create user account
@@ -5000,7 +5048,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user with email already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ message: "An account with this email already exists. Please log in instead." });
+        // Check if they have an AI Summit registration
+        const existingRegistration = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .where(eq(aiSummitRegistrations.email, email));
+        
+        if (existingRegistration.length > 0) {
+          return res.status(409).json({ 
+            message: "You're already registered! Please login to access your account and event badges.",
+            alreadyRegistered: true,
+            shouldLogin: true
+          });
+        }
       }
 
       // Create user account for speaker
@@ -5303,8 +5363,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertAISummitVolunteerSchema.parse(req.body);
       
-      // Create user account if it doesn't exist
+      // Check if user already exists
       let user = await storage.getUserByEmail(validatedData.email);
+      if (user) {
+        // User already exists - check if they have a registration
+        const existingRegistration = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .where(eq(aiSummitRegistrations.email, validatedData.email));
+        
+        if (existingRegistration.length > 0) {
+          // Already registered - tell them to login
+          return res.status(409).json({ 
+            message: "You're already registered! Please login to access your account and event badges.",
+            alreadyRegistered: true,
+            shouldLogin: true
+          });
+        }
+      }
+      
+      // Create user account if it doesn't exist
       if (!user) {
         const [firstName, ...lastNameParts] = validatedData.name.split(' ');
         const userId = `ai_summit_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
