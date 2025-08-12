@@ -85,6 +85,7 @@ export async function setupLocalAuth(app: Express) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        isAdmin: user.isAdmin || false,
       };
 
       res.json({ 
@@ -94,6 +95,7 @@ export async function setupLocalAuth(app: Express) {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          isAdmin: user.isAdmin || false,
         }
       });
     } catch (error) {
@@ -144,6 +146,7 @@ export async function setupLocalAuth(app: Express) {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        isAdmin: user.isAdmin || false,
       };
 
       res.json({ 
@@ -153,6 +156,7 @@ export async function setupLocalAuth(app: Express) {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          isAdmin: user.isAdmin || false,
         }
       });
     } catch (error) {
