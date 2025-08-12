@@ -2127,7 +2127,6 @@ const AISummit = () => {
                             ) : (
                               <>
                                 <SelectItem value="15">15 minutes (lightning talk)</SelectItem>
-                                <SelectItem value="30">30 minutes (standard talk)</SelectItem>
                                 <SelectItem value="45">45 minutes (extended talk)</SelectItem>
                               </>
                             )}
