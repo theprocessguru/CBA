@@ -23,6 +23,5 @@ export const pool = new Pool({
 
 export const db = drizzle({ 
   client: pool, 
-  schema,
-  logger: true // Enable SQL logging to debug the column mapping issue
+  schema
 });
