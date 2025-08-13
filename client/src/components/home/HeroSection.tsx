@@ -34,7 +34,14 @@ const HeroSection = () => {
               <div className="text-center">
                 <p className="text-gray-700 mb-3 leading-relaxed">
                   <span className="font-semibold text-gray-900">The CBA proudly thanks our Executive Board Member</span>
-                  {" "}<span className="font-bold text-blue-600">Steve Ball - The Process Guru</span>{" "}
+                  {" "}<a 
+                    href="https://theprocess.guru" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="font-bold text-blue-600 hover:text-blue-800 transition underline"
+                  >
+                    Steve Ball - The Process Guru
+                  </a>{" "}
                   for creating this incredible platform that transforms how we connect and serve our business community.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

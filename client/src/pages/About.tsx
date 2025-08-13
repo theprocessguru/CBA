@@ -283,7 +283,14 @@ const About = () => {
               <h2 className="text-2xl font-bold mb-4 text-gray-800">Powered by Innovation</h2>
               <p className="text-lg mb-4 text-gray-700">
                 This app was built by{" "}
-                <span className="font-bold text-blue-600">Steve Ball - The Process Guru</span>
+                <a 
+                  href="https://theprocess.guru" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-blue-600 hover:text-blue-800 transition underline"
+                >
+                  Steve Ball - The Process Guru
+                </a>
                 {" "}Founder of{" "}
                 <a 
                   href="https://mytai.co.uk" 

@@ -160,6 +160,7 @@ const sponsorProfiles: Record<string, SponsorProfile> = {
       "ISO 9001 certified",
       "Best Consulting Firm - Croydon 2023"
     ],
+    website: "https://theprocess.guru",
     socialMedia: {
       linkedin: "https://linkedin.com/company/theprocessguru"
     }

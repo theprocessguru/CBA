@@ -91,7 +91,14 @@ const Footer = () => {
             <div className="text-center text-neutral-500 text-xs">
               <p className="mb-1">
                 This app was built by{" "}
-                <span className="text-blue-400 font-medium">Steve Ball - The Process Guru</span>
+                <a 
+                  href="https://theprocess.guru" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition underline font-medium"
+                >
+                  Steve Ball - The Process Guru
+                </a>
                 {" "}Founder of{" "}
                 <a 
                   href="https://mytai.co.uk" 
