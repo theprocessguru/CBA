@@ -297,7 +297,7 @@ export class BadgeService {
             <div>Scan QR code for digital profile</div>
             <div style="margin-top: 10px;">
                 <strong>UK's Leading AI-Powered Business Association</strong><br>
-                mytai.co.uk • Powered by Innovation
+                croydonba.co.uk • Powered by Innovation
             </div>
         </div>
     </div>

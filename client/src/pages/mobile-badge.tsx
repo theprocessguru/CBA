@@ -255,7 +255,7 @@ export default function MobileBadgePage() {
       {/* Footer */}
       <div className="text-center p-4 text-xs text-gray-500">
         <p>UK's Leading AI-Powered Business Association</p>
-        <p>mytai.co.uk • Powered by Innovation</p>
+        <p>croydonba.co.uk • Powered by Innovation</p>
       </div>
     </div>
   );
