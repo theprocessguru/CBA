@@ -1018,19 +1018,27 @@ const AISummit = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Hero Section */}
+        {/* Hero Section with Minister Keynote Announcement */}
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white">
           <div className="container mx-auto px-4 py-16">
             <div className="text-center space-y-6">
               <Badge className="bg-white/20 text-white border-white/30 text-sm px-4 py-2">
                 🚀 INAUGURAL EVENT
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 First AI Summit
                 <span className="block text-3xl md:text-5xl text-blue-200">Croydon 2025</span>
               </h1>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4 border border-white/20 max-w-3xl mx-auto">
+                <h2 className="text-2xl md:text-3xl font-bold mb-2 text-yellow-300">
+                  Opening the Future: The Minister for AI Takes the Stage
+                </h2>
+                <p className="text-lg md:text-xl text-white">
+                  Don't Miss Feryal Clark's Opening Keynote!
+                </p>
+              </div>
               <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-                Educate • Motivate • Develop • Inspire • Empower
+                Join South London's premier AI technology event - Educate • Motivate • Develop • Inspire • Empower
               </p>
               <div className="flex flex-wrap justify-center items-center gap-6 text-lg">
                 <div className="flex items-center gap-2">
@@ -1136,13 +1144,296 @@ const AISummit = () => {
           </div>
         </div>
 
+        {/* Event Statistics */}
+        <div className="py-12 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-blue-600 mb-2">1000+</div>
+                <div className="text-gray-600 font-medium">Attendees</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-purple-600 mb-2">50+</div>
+                <div className="text-gray-600 font-medium">Companies</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-green-600 mb-2">30+</div>
+                <div className="text-gray-600 font-medium">Speakers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-bold text-orange-600 mb-2">25+</div>
+                <div className="text-gray-600 font-medium">Sessions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 py-12">
+          {/* About The Summit - Enhanced */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-neutral-900 mb-4">About The Summit</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                The South London AI Summit brings together the brightest minds in artificial intelligence, 
+                innovative businesses, and tech enthusiasts for a day of learning, networking, and collaboration.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-br from-blue-50 to-blue-100">
+                  <Rocket className="h-12 w-12 text-blue-600 mb-3 mx-auto" />
+                  <CardTitle className="text-xl text-center">For AI Startups</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-gray-600 mb-4">
+                    Showcase your innovative AI solutions, connect with investors, and expand your network in London's growing tech ecosystem.
+                  </p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-blue-600 border-blue-600" />
+                      <span className="text-sm">Product demos</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-blue-600 border-blue-600" />
+                      <span className="text-sm">Investor meetings</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-blue-600 border-blue-600" />
+                      <span className="text-sm">Networking events</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-br from-green-50 to-green-100">
+                  <Building className="h-12 w-12 text-green-600 mb-3 mx-auto" />
+                  <CardTitle className="text-xl text-center">For Businesses</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-gray-600 mb-4">
+                    Discover how AI can transform your operations, improve efficiency, and help your business thrive in the digital age.
+                  </p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-green-600 border-green-600" />
+                      <span className="text-sm">AI adoption workshops</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-green-600 border-green-600" />
+                      <span className="text-sm">Solution providers</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-green-600 border-green-600" />
+                      <span className="text-sm">Implementation strategies</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-br from-purple-50 to-purple-100">
+                  <Users className="h-12 w-12 text-purple-600 mb-3 mx-auto" />
+                  <CardTitle className="text-xl text-center">For Everyone</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-gray-600 mb-4">
+                    Learn about the latest AI trends, participate in workshops, and be part of South London's growing tech ecosystem.
+                  </p>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-purple-600 border-purple-600" />
+                      <span className="text-sm">Expert talks</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-purple-600 border-purple-600" />
+                      <span className="text-sm">Hands-on workshops</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Badge variant="outline" className="w-2 h-2 p-0 rounded-full bg-purple-600 border-purple-600" />
+                      <span className="text-sm">Community building</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Building a Smarter, Fairer Croydon Section */}
+          <div className="mb-16">
+            <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-none">
+              <CardContent className="p-8">
+                <h2 className="text-3xl font-bold text-center text-neutral-900 mb-6">
+                  Building a Smarter, Fairer Croydon with AI
+                </h2>
+                <p className="text-lg text-center text-gray-700 mb-8 max-w-3xl mx-auto">
+                  The AI Summit is more than a tech event—it's a community empowerment initiative bringing together 
+                  technology, local businesses, and residents to create a more inclusive and innovative Croydon.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-white rounded-lg p-6 shadow-md">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-blue-100 p-3 rounded-full">
+                        <Zap className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <h3 className="text-xl font-semibold">Digital Inclusion</h3>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Ensuring all Croydon residents, regardless of background, have access to AI tools, training, and opportunities.
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-600">✓</span> Accessible technology
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-600">✓</span> Multilingual support
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-blue-600">✓</span> Free workshops
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-md">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-green-100 p-3 rounded-full">
+                        <GraduationCap className="h-6 w-6 text-green-600" />
+                      </div>
+                      <h3 className="text-xl font-semibold">Future Skills for All</h3>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Equipping the community with AI skills for career growth, business development, and personal enrichment.
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-600">✓</span> Career switchers support
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-600">✓</span> Small business training
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-600">✓</span> Student opportunities
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-white rounded-lg p-6 shadow-md">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-purple-100 p-3 rounded-full">
+                        <Users className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <h3 className="text-xl font-semibold">Family Enrichment</h3>
+                    </div>
+                    <p className="text-gray-600 mb-4">
+                      Showcasing how AI can improve quality of life for families at home, school, and work.
+                    </p>
+                    <ul className="space-y-2 text-sm">
+                      <li className="flex items-center gap-2">
+                        <span className="text-purple-600">✓</span> Kids & teens activities
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-purple-600">✓</span> Senior-friendly tech
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-purple-600">✓</span> Family workshops
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* AI For Everyone Section */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold text-neutral-900 mb-4">AI For Everyone</h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Join us for an inclusive event that brings AI technology to all Croydon residents, 
+                regardless of age, background, or technical knowledge.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-br from-orange-50 to-orange-100">
+                  <Users className="h-12 w-12 text-orange-600 mb-3 mx-auto" />
+                  <CardTitle className="text-xl text-center">For Families</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-gray-600 mb-4">
+                    Interactive exhibits and workshops showing how AI can improve daily life at home, school, and work.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-orange-600">•</span> AI in Daily Life Zone
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-orange-600">•</span> Kids & Teens Discovery Lab
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-orange-600">•</span> AI Art & Music Creation
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-br from-teal-50 to-teal-100">
+                  <Rocket className="h-12 w-12 text-teal-600 mb-3 mx-auto" />
+                  <CardTitle className="text-xl text-center">For Career Switchers</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-gray-600 mb-4">
+                    Resources and guidance for those looking to transition into AI-related careers or enhance their skills.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-teal-600">•</span> AI Career Switchers Hub
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-teal-600">•</span> Skills Assessment
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-teal-600">•</span> Local Training Opportunities
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow">
+                <CardHeader className="bg-gradient-to-br from-indigo-50 to-indigo-100">
+                  <Coffee className="h-12 w-12 text-indigo-600 mb-3 mx-auto" />
+                  <CardTitle className="text-xl text-center">For Seniors</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <p className="text-gray-600 mb-4">
+                    Demonstrations and hands-on sessions showing how AI can assist older residents in daily tasks.
+                  </p>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      <span className="text-indigo-600">•</span> AI for the Elderly
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-indigo-600">•</span> Voice Assistant Workshops
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-indigo-600">•</span> Healthcare Monitoring Demos
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
           {/* Event Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             <div className="lg:col-span-2">
               <Card className="h-full">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-center">About the AI Summit</CardTitle>
+                  <CardTitle className="text-2xl text-center">Community Partnership</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-lg text-neutral-700">
