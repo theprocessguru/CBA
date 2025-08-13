@@ -182,6 +182,25 @@ const UserManagement = () => {
   const handleUpdateUser = () => {
     if (!editingUser) return;
     
+    // Validate required fields
+    if (!editFormData.email?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Email address is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!editFormData.phone?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Phone number is required",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     updateUserMutation.mutate({
       userId: editingUser.id,
       userData: editFormData,
@@ -518,23 +537,31 @@ const UserManagement = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="edit-email">Email</Label>
+                  <Label htmlFor="edit-email">
+                    Email <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="edit-email"
                     type="email"
                     value={editFormData.email || ''}
                     onChange={(e) => setEditFormData({...editFormData, email: e.target.value})}
                     className="mt-1"
+                    required
+                    placeholder="Enter email address"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="edit-phone">Phone</Label>
+                  <Label htmlFor="edit-phone">
+                    Phone <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="edit-phone"
                     value={editFormData.phone || ''}
                     onChange={(e) => setEditFormData({...editFormData, phone: e.target.value})}
                     className="mt-1"
+                    required
+                    placeholder="Enter phone number"
                   />
                 </div>
 

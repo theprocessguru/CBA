@@ -554,12 +554,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/admin/members/:userId/membership', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/members/:userId/membership', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      if (!req.user.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const { userId } = req.params;
       const { membershipTier, membershipStatus } = req.body;
       
@@ -576,12 +572,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Comprehensive user update endpoint for admins
-  app.put('/api/admin/users/:userId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      if (!req.user.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-
       const { userId } = req.params;
       const { 
         email, 
