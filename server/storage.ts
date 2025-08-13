@@ -606,7 +606,26 @@ export class DatabaseStorage implements IStorage {
       await db.execute(sql`DELETE FROM job_postings WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM job_saved_searches WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM password_reset_tokens WHERE user_id = ${userId}`);
+      
+      // Delete event badge assignments first (they reference personal_badges)
+      await db.execute(sql`
+        DELETE FROM event_badge_assignments 
+        WHERE badge_id IN (
+          SELECT badge_id FROM personal_badges WHERE user_id = ${userId}
+        )
+      `);
+      
+      // Delete personal badge events
+      await db.execute(sql`
+        DELETE FROM personal_badge_events 
+        WHERE personal_badge_id IN (
+          SELECT id FROM personal_badges WHERE user_id = ${userId}
+        )
+      `);
+      
+      // Then delete personal badges
       await db.execute(sql`DELETE FROM personal_badges WHERE user_id = ${userId}`);
+      
       await db.execute(sql`DELETE FROM scan_history WHERE scanned_user_id = ${userId}`);
       await db.execute(sql`DELETE FROM scan_history WHERE scanner_id = ${userId}`);
       await db.execute(sql`DELETE FROM scan_sessions WHERE scanner_id = ${userId}`);
