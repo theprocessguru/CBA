@@ -179,7 +179,7 @@ const validateRequest = <T extends z.ZodType>(schema: T, data: unknown): z.infer
 // Check if user is admin
 const isAdmin = async (req: Request, res: Response, next: Function) => {
   try {
-    const userId = (req.session as any)?.userId;
+    const userId = (req.session as any)?.userId || (req as any).user?.id;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
     
     const user = await storage.getUser(userId);
@@ -187,8 +187,14 @@ const isAdmin = async (req: Request, res: Response, next: Function) => {
     console.log("Admin check - User data:", user);
     console.log("Admin check - isAdmin value:", user?.isAdmin);
     
-    if (!user || !user.isAdmin) return res.status(403).json({ message: "Forbidden: Admin access required" });
+    if (!user || !user.isAdmin) {
+      console.log("Admin check FAILED - User is not an admin or user not found");
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
     
+    console.log("Admin check PASSED - User is an admin");
+    // Attach the full user data to the request
+    (req as any).user = user;
     next();
   } catch (error) {
     console.error("Error checking admin status:", error);
