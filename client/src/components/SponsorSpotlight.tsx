@@ -232,6 +232,7 @@ const sponsorProfiles: Record<string, SponsorProfile> = {
       "Management Consultancy of the Year",
       "5x average ROI for clients"
     ],
+    website: "https://wagnercaleap.com",
     socialMedia: {
       linkedin: "https://linkedin.com/company/wagner-caleap"
     }
