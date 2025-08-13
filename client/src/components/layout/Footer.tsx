@@ -101,6 +101,15 @@ const Footer = () => {
                 >
                   MyT AI
                 </a>
+                {" "}and{" "}
+                <a 
+                  href="https://mytautomation.co.uk" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 transition underline font-medium"
+                >
+                  MyT Automation
+                </a>
               </p>
               <p className="text-neutral-600">
                 Using nothing more than English and Amazing AI called Dave

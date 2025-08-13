@@ -293,6 +293,15 @@ const About = () => {
                 >
                   MyT AI
                 </a>
+                {" "}and{" "}
+                <a 
+                  href="https://mytautomation.co.uk" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="font-bold text-blue-600 hover:text-blue-800 transition underline"
+                >
+                  MyT Automation
+                </a>
               </p>
               <p className="text-gray-600 mb-6">
                 Using nothing more than English and Amazing AI called Dave

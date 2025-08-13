@@ -41,14 +41,24 @@ const HeroSection = () => {
                   <p className="text-sm text-gray-600">
                     Discover the future of business automation
                   </p>
-                  <a 
-                    href="https://mytai.co.uk" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                  >
-                    Visit MyT AI →
-                  </a>
+                  <div className="flex gap-2">
+                    <a 
+                      href="https://mytai.co.uk" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                    >
+                      MyT AI →
+                    </a>
+                    <a 
+                      href="https://mytautomation.co.uk" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                    >
+                      MyT Automation →
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
