@@ -569,10 +569,15 @@ export class DatabaseStorage implements IStorage {
   async deleteUser(userId: string): Promise<boolean> {
     try {
       // Delete related records first to maintain referential integrity
+      
+      // Delete user_person_types entries
+      await db.execute(sql`DELETE FROM user_person_types WHERE user_id = ${userId}`);
+      
       // Delete AI Summit related records - using raw SQL for tables with user_id column
       await db.execute(sql`DELETE FROM ai_summit_registrations WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM ai_summit_exhibitor_registrations WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM ai_summit_volunteers WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM ai_summit_speaker_interests WHERE user_id = ${userId}`);
       
       // Delete check-ins first (they reference badges)
       await db.execute(sql`
@@ -584,6 +589,26 @@ export class DatabaseStorage implements IStorage {
       
       // Then delete badges - uses participant_id instead of user_id
       await db.execute(sql`DELETE FROM ai_summit_badges WHERE participant_id = ${userId}`);
+      
+      // Delete other user-related records
+      await db.execute(sql`DELETE FROM affiliates WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM affiliate_referrals WHERE referred_user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM cba_event_registrations WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM donations WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM event_registrations WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM event_scanners WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM event_feedback WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM event_mood_entries WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM event_attendance_analytics WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM ghl_automation_logs WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM interactions WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM job_applications WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM job_postings WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM job_saved_searches WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM password_reset_tokens WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM personal_badges WHERE user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM scan_history WHERE scanned_user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM content_reports WHERE reporter_user_id = ${userId}`);
       
       // Delete user's business if exists
       const userBusiness = await this.getBusinessByUserId(userId);
