@@ -574,9 +574,16 @@ export class DatabaseStorage implements IStorage {
       await db.execute(sql`DELETE FROM ai_summit_exhibitor_registrations WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM ai_summit_volunteers WHERE user_id = ${userId}`);
       
-      // Delete badges and check-ins (these should be checked too)
-      await db.execute(sql`DELETE FROM ai_summit_badges WHERE user_id = ${userId}`);
-      await db.execute(sql`DELETE FROM ai_summit_check_ins WHERE user_id = ${userId}`);
+      // Delete check-ins first (they reference badges)
+      await db.execute(sql`
+        DELETE FROM ai_summit_check_ins 
+        WHERE badge_id IN (
+          SELECT badge_id FROM ai_summit_badges WHERE participant_id = ${userId}
+        )
+      `);
+      
+      // Then delete badges - uses participant_id instead of user_id
+      await db.execute(sql`DELETE FROM ai_summit_badges WHERE participant_id = ${userId}`);
       
       // Delete user's business if exists
       const userBusiness = await this.getBusinessByUserId(userId);
