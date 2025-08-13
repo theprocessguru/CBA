@@ -608,6 +608,8 @@ export class DatabaseStorage implements IStorage {
       await db.execute(sql`DELETE FROM password_reset_tokens WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM personal_badges WHERE user_id = ${userId}`);
       await db.execute(sql`DELETE FROM scan_history WHERE scanned_user_id = ${userId}`);
+      await db.execute(sql`DELETE FROM scan_history WHERE scanner_id = ${userId}`);
+      await db.execute(sql`DELETE FROM scan_sessions WHERE scanner_id = ${userId}`);
       await db.execute(sql`DELETE FROM content_reports WHERE reporter_user_id = ${userId}`);
       
       // Delete user's business if exists
