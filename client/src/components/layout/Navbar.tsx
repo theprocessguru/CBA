@@ -101,54 +101,55 @@ const Navbar = () => {
                 </div>
               </Link>
             </div>
-            <div className="hidden lg:ml-6 lg:flex lg:space-x-6 lg:items-center lg:h-16">
-              {/* Home Dropdown Menu */}
-              <div className="relative">
-                <button 
-                  className={`border-b-2 ${
-                    isActive('/') || isActive('/about') 
-                      ? 'border-primary text-primary' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                    } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
-                  onClick={toggleHomeMenu}
-                >
-                  <span>Home</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isHomeMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
+            {/* Only show navigation menus when NOT logged in */}
+            {!isAuthenticated && (
+              <div className="hidden lg:ml-6 lg:flex lg:space-x-6 lg:items-center lg:h-16">
+                {/* Home Dropdown Menu */}
+                <div className="relative">
+                  <button 
+                    className={`border-b-2 ${
+                      isActive('/') || isActive('/about') 
+                        ? 'border-primary text-primary' 
+                        : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                      } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
+                    onClick={toggleHomeMenu}
+                  >
+                    <span>Home</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isHomeMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
 
-              {/* Membership Dropdown Menu */}
-              <div className="relative">
-                <button 
-                  className={`border-b-2 ${
-                    isActive('/membership-benefits') || isActive('/directory') || isActive('/events') || isActive('/marketplace')
-                      ? 'border-primary text-primary' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                    } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
-                  onClick={toggleMembershipMenu}
-                >
-                  <span>Membership</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMembershipMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
+                {/* Membership Dropdown Menu */}
+                <div className="relative">
+                  <button 
+                    className={`border-b-2 ${
+                      isActive('/membership-benefits') || isActive('/directory') || isActive('/events') || isActive('/marketplace')
+                        ? 'border-primary text-primary' 
+                        : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                      } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
+                    onClick={toggleMembershipMenu}
+                  >
+                    <span>Membership</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMembershipMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
+                
+                {/* AI Top-tier Menu - Non-clickable */}
+                <div className="relative">
+                  <button 
+                    className={`border-b-2 ${
+                      isAiPathActive() 
+                        ? 'border-primary text-primary' 
+                        : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
+                      } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
+                    onClick={toggleAiMenu}
+                  >
+                    <span>AI</span>
+                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAiMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </div>
               </div>
-              
-              {/* AI Top-tier Menu - Non-clickable */}
-              <div className="relative">
-                <button 
-                  className={`border-b-2 ${
-                    isAiPathActive() 
-                      ? 'border-primary text-primary' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
-                    } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
-                  onClick={toggleAiMenu}
-                >
-                  <span>AI</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isAiMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
-              
-
-            </div>
+            )}
           </div>
           <div className="hidden sm:ml-4 sm:flex sm:items-center sm:space-x-3 flex-shrink-0 relative z-50">
             <button 
@@ -361,118 +362,174 @@ const Navbar = () => {
       {/* Mobile menu */}
       <div className={`sm:hidden ${isMenuOpen ? 'block' : 'hidden'}`} id="mobile-menu">
         <div className="pt-2 pb-3 space-y-1">
-          <Link href="/ai-summit">
-            <a className="block pl-3 pr-4 py-2 border-l-4 border-red-500 text-red-600 bg-red-50 font-bold text-sm">
-              🚀 First AI Summit - Oct 1st FREE
-            </a>
-          </Link>
-          
-          {/* Home Section */}
-          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            Home
-          </div>
-          <Link href="/">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Home
-            </a>
-          </Link>
-          <Link href="/about">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/about') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              About CBA
-            </a>
-          </Link>
-          
-          {/* Membership Section */}
-          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            Membership
-          </div>
-          <Link href="/membership-benefits">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/membership-benefits') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Benefits
-            </a>
-          </Link>
-          <Link href="/directory">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/directory') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Directory
-            </a>
-          </Link>
-          <Link href="/marketplace">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/marketplace') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Marketplace
-            </a>
-          </Link>
-          <Link href="/events">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/events') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Events
-            </a>
-          </Link>
-          <Link href="/jobs">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/jobs') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              Jobs Board
-            </a>
-          </Link>
-          
-          {/* QR Scanner - Prominent for all users */}
-          <Link href="/organizer-scanner">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/organizer-scanner') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              📱 QR Code Scanner
-            </a>
-          </Link>
-          
-          {/* AI Section Header */}
-          <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-            AI Services
-          </div>
-          <Link href="/ai-summit">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/ai-summit') 
-                ? 'border-red-500 text-red-600 bg-red-100' 
-                : 'border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50 hover:border-red-500'
-              } font-bold text-sm`}>
-              🚀 AI Summit Oct 1st
-            </a>
-          </Link>
-          <Link href="/ai-services">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
-              isActive('/ai-services') 
-                ? 'border-primary text-primary bg-neutral-100' 
-                : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
-              AI Services
-            </a>
-          </Link>
+          {/* For logged-in users, show only essential actions */}
+          {isAuthenticated ? (
+            <>
+              <Link href="/dashboard">
+                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/dashboard') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Dashboard
+                </a>
+              </Link>
+              <Link href="/organizer-scanner">
+                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/organizer-scanner') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  📱 Scanner
+                </a>
+              </Link>
+              <Link href="/mobile-badge">
+                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/mobile-badge') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Mobile Badge
+                </a>
+              </Link>
+              <Link href="/my-qr-code">
+                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/my-qr-code') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  My QR Code
+                </a>
+              </Link>
+              {(user as any)?.isAdmin && (
+                <Link href="/admin/dashboard">
+                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                    isActive('/admin/dashboard') 
+                      ? 'border-primary text-primary bg-neutral-100' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                    } font-medium text-sm`}>
+                    Admin
+                  </a>
+                </Link>
+              )}
+            </>
+          ) : (
+            <>
+              {/* For non-logged-in users, show full navigation */}
+              <Link href="/ai-summit">
+                <a className="block pl-3 pr-4 py-2 border-l-4 border-red-500 text-red-600 bg-red-50 font-bold text-sm">
+                  🚀 First AI Summit - Oct 1st FREE
+                </a>
+              </Link>
+              
+              {/* Home Section */}
+              <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                Home
+              </div>
+              <Link href="/">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Home
+                </a>
+              </Link>
+              <Link href="/about">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/about') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  About CBA
+                </a>
+              </Link>
+              
+              {/* Membership Section */}
+              <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                Membership
+              </div>
+              <Link href="/membership-benefits">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/membership-benefits') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Benefits
+                </a>
+              </Link>
+              <Link href="/directory">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/directory') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Directory
+                </a>
+              </Link>
+              <Link href="/marketplace">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/marketplace') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Marketplace
+                </a>
+              </Link>
+              <Link href="/events">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/events') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Events
+                </a>
+              </Link>
+              <Link href="/jobs">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/jobs') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  Jobs Board
+                </a>
+              </Link>
+              
+              {/* QR Scanner - Prominent for all users */}
+              <Link href="/organizer-scanner">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/organizer-scanner') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  📱 QR Code Scanner
+                </a>
+              </Link>
+              
+              {/* AI Section Header */}
+              <div className="px-3 py-2 text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                AI Services
+              </div>
+              <Link href="/ai-summit">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/ai-summit') 
+                    ? 'border-red-500 text-red-600 bg-red-100' 
+                    : 'border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50 hover:border-red-500'
+                  } font-bold text-sm`}>
+                  🚀 AI Summit Oct 1st
+                </a>
+              </Link>
+              <Link href="/ai-services">
+                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                  isActive('/ai-services') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  AI Services
+                </a>
+              </Link>
+            </>
+          )}
           <Link href="/ai-tools">
             <a className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/ai-tools') 

@@ -6,6 +6,7 @@ This platform is a comprehensive business automation solution designed to help b
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Volunteers: No business listing menu items in dashboard (they don't need business features).
+Navigation: Logged-in users only see logo and action buttons (Scanner, Mobile Badge, Dashboard) - no dropdown menus.
 
 ## Recent Changes
 - **Role-Based Dashboard Navigation (August 14, 2025)**: Implemented complete role-based navigation where each user type only sees relevant menu items. Admin users see admin tasks only (analytics, user management, event management). Students and volunteers see portal features without business profiles. Business members get full business functionality (profiles, products, services, special offers). Dashboard titles dynamically change based on user role (Admin Dashboard, Student Portal, Volunteer Portal, or My Business Dashboard).
