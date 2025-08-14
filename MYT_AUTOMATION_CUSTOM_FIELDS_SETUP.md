@@ -244,9 +244,9 @@ This document contains all custom fields that need to be created in your MyT Aut
 
 ---
 
-## TAGS TO CREATE IN GHL
+## TAGS TO CREATE IN MYT AUTOMATION
 
-In addition to custom fields, create these tags in GoHighLevel for easy segmentation:
+In addition to custom fields, create these tags in MyT Automation for easy segmentation:
 
 ### Membership Tags
 - `CBA_Member`
@@ -301,7 +301,7 @@ After creating fields, set up these automations:
 
 - Field names are case-sensitive - use exactly as shown
 - Some fields store JSON data as text - these will need special handling in automations
-- Date fields should use the Date or Date/Time type in GHL
+- Date fields should use the Date or Date/Time type in MyT Automation
 - Multi-select fields can be implemented as tags or comma-separated text fields
 - Consider creating separate pipelines for different participant types (Attendees, Speakers, Exhibitors, etc.)
 
@@ -315,4 +315,4 @@ After creating all fields:
 3. Test automations trigger properly
 4. Check that tags are applied correctly
 
-For support or questions about field mapping, refer to the GHL API documentation or contact support.
+For support or questions about field mapping, refer to the MyT Automation API documentation or contact support.
