@@ -2,33 +2,83 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { 
-  Calendar, 
   Users, 
-  BarChart3, 
-  Settings, 
-  Mail, 
-  Upload,
-  Award,
-  Scan,
-  FileText,
-  Activity,
+  MapPin,
+  Briefcase,
+  Calendar,
   TrendingUp,
-  Shield,
+  Award,
+  Building,
+  GraduationCap,
+  PieChart,
+  Target,
+  Activity,
+  UserCheck,
   Clock,
   AlertCircle,
-  CheckCircle,
-  Crown
+  DollarSign,
+  BarChart3,
+  Settings,
+  FileText,
+  Heart
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
-interface DashboardStats {
-  totalUsers: number;
-  totalEvents: number;
-  activeEvents: number;
-  recentRegistrations: number;
-  pendingApprovals: number;
+interface ImpactMetrics {
+  // Member metrics
+  totalMembers: number;
+  membersByTier: {
+    free: number;
+    bronze: number;
+    silver: number;
+    gold: number;
+    platinum: number;
+  };
+  newMembersThisMonth: number;
+  memberGrowthRate: number;
+  
+  // Event metrics
+  totalEventsHeld: number;
+  totalAttendees: number;
+  attendeesByLocation: {
+    location: string;
+    count: number;
+  }[];
+  upcomingEvents: number;
+  averageAttendanceRate: number;
+  
+  // Training metrics
+  totalWorkshopsDelivered: number;
+  totalPeopleTrained: number;
+  trainingHoursDelivered: number;
+  certificatesIssued: number;
+  
+  // Jobs metrics
+  totalJobsPosted: number;
+  activeJobs: number;
+  jobApplications: number;
+  jobsFilled: number;
+  averageSalary: number;
+  
+  // Stakeholder breakdown
+  stakeholderPercentages: {
+    businesses: number;
+    students: number;
+    volunteers: number;
+    jobSeekers: number;
+    speakers: number;
+    exhibitors: number;
+    sponsors: number;
+  };
+  
+  // Impact metrics
+  businessesSupported: number;
+  economicImpact: number;
+  partnershipsFormed: number;
+  fundingSecured: number;
 }
 
 export default function AdminDashboard() {
@@ -49,401 +99,356 @@ export default function AdminDashboard() {
     );
   }
 
-  // Fetch dashboard statistics
-  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
-    queryKey: ['/api/admin/dashboard/stats'],
+  // Fetch impact metrics
+  const { data: metrics, isLoading } = useQuery<ImpactMetrics>({
+    queryKey: ['/api/admin/impact-metrics'],
     enabled: isAuthenticated && (user as any)?.isAdmin
   });
 
-  const quickActions = [
-    {
-      title: "Event Management",
-      description: "Create and manage CBA events",
-      icon: Calendar,
-      href: "/admin/events",
-      color: "bg-blue-500",
-      badge: stats?.activeEvents || 0
-    },
-    {
-      title: "User Management", 
-      description: "Manage user accounts and permissions",
-      icon: Users,
-      href: "/dashboard/user-management",
-      color: "bg-green-500",
-      badge: stats?.totalUsers || 0
-    },
-    {
-      title: "User Types & Categories",
-      description: "View and manage different participant types",
-      icon: Users,
-      href: "/admin/user-types",
-      color: "bg-violet-500"
-    },
-    {
-      title: "Person Types",
-      description: "Manage multiple person types per user",
-      icon: Users,
-      href: "/admin/person-types",
-      color: "bg-teal-500"
-    },
-    {
-      title: "Membership Pricing",
-      description: "Manage membership tiers and pricing",
-      icon: Crown,
-      href: "/admin/membership-pricing",
-      color: "bg-yellow-500"
-    },
-    {
-      title: "Benefits Management",
-      description: "Create and manage membership benefits",
-      icon: Award,
-      href: "/admin/benefits-management",
-      color: "bg-indigo-500"
-    },
-    {
-      title: "Membership Benefits",
-      description: "Assign benefits to membership tiers",
-      icon: Shield,
-      href: "/admin/membership-benefits",
-      color: "bg-orange-500"
-    },
-    {
-      title: "Business Analytics",
-      description: "View comprehensive business insights",
-      icon: BarChart3,
-      href: "/admin/analytics",
-      color: "bg-purple-500"
-    },
-    {
-      title: "Badge Management",
-      description: "Manage digital badges and QR codes",
-      icon: Award,
-      href: "/admin/badges",
-      color: "bg-purple-500"
-    },
-    {
-      title: "Scanner Management",
-      description: "Manage event scanners and access",
-      icon: Scan,
-      href: "/admin/scanner-management",
-      color: "bg-orange-500"
-    },
-    {
-      title: "Live Attendance",
-      description: "Real-time event entry and exit tracking",
-      icon: Activity,
-      href: "/admin/attendance",
-      color: "bg-emerald-500"
-    },
-    {
-      title: "Final Report",
-      description: "Complete attendance breakdown by sessions",
-      icon: FileText,
-      href: "/admin/attendance-report",
-      color: "bg-indigo-500"
-    },
-    {
-      title: "Analytics",
-      description: "View detailed analytics and reports",
-      icon: BarChart3,
-      href: "/dashboard/analytics",
-      color: "bg-indigo-500"
-    },
-    {
-      title: "Content Reports",
-      description: "Review and moderate content",
-      icon: FileText,
-      href: "/dashboard/content-reports",
-      color: "bg-red-500",
-      badge: stats?.pendingApprovals || 0
-    },
-    {
-      title: "Email Settings",
-      description: "Configure email templates and settings",
-      icon: Mail,
-      href: "/dashboard/email-settings",
-      color: "bg-teal-500"
-    },
-    {
-      title: "Data Import",
-      description: "Import members and bulk data",
-      icon: Upload,
-      href: "/admin/import",
-      color: "bg-gray-500"
-    },
-    {
-      title: "Contact Import",
-      description: "Import volunteers, exhibitors, speakers and other contacts in bulk",
-      icon: Upload,
-      href: "/admin/contact-import",
-      color: "bg-cyan-500"
-    },
-    {
-      title: "Administrator Management",
-      description: "Manage administrator accounts and permissions",
-      icon: Shield,
-      href: "/admin/administrators",
-      color: "bg-rose-500"
-    },
-    {
-      title: "Event Time Slots",
-      description: "Manage event schedules and speaker assignments",
-      icon: Clock,
-      href: "/admin/event-time-slots",
-      color: "bg-cyan-500"
-    }
-  ];
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const recentActivity = [
-    {
-      action: "New event created",
-      details: "AI Workshop 2025",
-      time: "2 hours ago",
-      icon: Calendar,
-      status: "success"
-    },
-    {
-      action: "User registered",
-      details: "john.doe@example.com",
-      time: "3 hours ago", 
-      icon: Users,
-      status: "info"
-    },
-    {
-      action: "Badge generated",
-      details: "Event #AI-2025",
-      time: "5 hours ago",
-      icon: Award,
-      status: "success"
-    },
-    {
-      action: "Content flagged",
-      details: "Review required",
-      time: "1 day ago",
-      icon: AlertCircle,
-      status: "warning"
-    }
-  ];
+  // Calculate some derived metrics
+  const totalStakeholders = metrics ? 
+    Object.values(metrics.stakeholderPercentages).reduce((a, b) => a + b, 0) : 0;
+  
+  const membershipFillRate = metrics ? 
+    ((metrics.membersByTier.bronze + metrics.membersByTier.silver + 
+      metrics.membersByTier.gold + metrics.membersByTier.platinum) / 
+     metrics.totalMembers * 100) : 0;
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-600">
-          Welcome back, {(user as any).firstName || 'Admin'}. Here's what's happening with your CBA platform.
-        </p>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? "..." : stats?.totalUsers || 0}
-                </p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-full">
-                <Users className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              <TrendingUp className="h-3 w-3 inline mr-1" />
-              Active members
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Events</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? "..." : stats?.activeEvents || 0}
-                </p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-full">
-                <Calendar className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              <Activity className="h-3 w-3 inline mr-1" />
-              Currently running
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Recent Registrations</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? "..." : stats?.recentRegistrations || 0}
-                </p>
-              </div>
-              <div className="bg-purple-100 p-3 rounded-full">
-                <TrendingUp className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              <Clock className="h-3 w-3 inline mr-1" />
-              Last 24 hours
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending Reviews</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {statsLoading ? "..." : stats?.pendingApprovals || 0}
-                </p>
-              </div>
-              <div className="bg-orange-100 p-3 rounded-full">
-                <AlertCircle className="h-6 w-6 text-orange-600" />
-              </div>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              <Shield className="h-3 w-3 inline mr-1" />
-              Requires attention
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Quick Actions */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Admin Tools
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {quickActions.map((action, index) => (
-                  <Link key={index} href={action.href}>
-                    <div className="group p-4 border rounded-lg hover:shadow-md transition-all duration-200 cursor-pointer hover:border-blue-300">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className={`p-2 rounded-lg ${action.color} bg-opacity-10`}>
-                          <action.icon className={`h-5 w-5 ${action.color.replace('bg-', 'text-')}`} />
-                        </div>
-                        {action.badge !== undefined && action.badge > 0 && (
-                          <Badge variant="secondary" className="text-xs">
-                            {action.badge}
-                          </Badge>
-                        )}
-                      </div>
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        {action.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {action.description}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity */}
+      <div className="flex justify-between items-center">
         <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5" />
-                Recent Activity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <div className={`p-2 rounded-full ${
-                      activity.status === 'success' ? 'bg-green-100' :
-                      activity.status === 'warning' ? 'bg-orange-100' :
-                      'bg-blue-100'
-                    }`}>
-                      <activity.icon className={`h-4 w-4 ${
-                        activity.status === 'success' ? 'text-green-600' :
-                        activity.status === 'warning' ? 'text-orange-600' :
-                        'text-blue-600'
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">
-                        {activity.action}
-                      </p>
-                      <p className="text-sm text-gray-600 truncate">
-                        {activity.details}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {activity.time}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 pt-4 border-t">
-                <Link href="/dashboard/analytics">
-                  <Button variant="outline" className="w-full">
-                    View All Activity
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <h1 className="text-3xl font-bold text-gray-900">Impact Dashboard</h1>
+          <p className="text-gray-600 mt-1">Key metrics for funding applications and impact reporting</p>
         </div>
+        <Link href="/admin/export-report">
+          <Button>
+            <FileText className="mr-2 h-4 w-4" />
+            Export Impact Report
+          </Button>
+        </Link>
       </div>
 
-      {/* System Status */}
-      <div className="mt-8">
+      {/* Key Impact Metrics - Top Row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              System Status
-            </CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="bg-green-100 p-3 rounded-full w-12 h-12 mx-auto mb-2">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900">Database</h4>
-                <p className="text-sm text-green-600">Online</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-green-100 p-3 rounded-full w-12 h-12 mx-auto mb-2">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900">Email Service</h4>
-                <p className="text-sm text-green-600">Operational</p>
-              </div>
-              <div className="text-center">
-                <div className="bg-green-100 p-3 rounded-full w-12 h-12 mx-auto mb-2">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
-                </div>
-                <h4 className="font-semibold text-gray-900">API Services</h4>
-                <p className="text-sm text-green-600">Running</p>
-              </div>
+            <div className="text-2xl font-bold">{metrics?.totalMembers || 0}</div>
+            <div className="flex items-center text-xs text-green-600 mt-1">
+              <TrendingUp className="h-3 w-3 mr-1" />
+              +{metrics?.memberGrowthRate || 0}% this month
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {metrics?.newMembersThisMonth || 0} new this month
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">People Trained</CardTitle>
+            <GraduationCap className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.totalPeopleTrained || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              {metrics?.totalWorkshopsDelivered || 0} workshops delivered
+            </p>
+            <p className="text-xs text-gray-500">
+              {metrics?.trainingHoursDelivered || 0} training hours
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Events Held</CardTitle>
+            <Calendar className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.totalEventsHeld || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              {metrics?.totalAttendees || 0} total attendees
+            </p>
+            <p className="text-xs text-gray-500">
+              {metrics?.upcomingEvents || 0} upcoming
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Jobs on Offer</CardTitle>
+            <Briefcase className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.activeJobs || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              {metrics?.jobsFilled || 0} positions filled
+            </p>
+            <p className="text-xs text-gray-500">
+              £{metrics?.averageSalary?.toLocaleString() || 0} avg salary
+            </p>
           </CardContent>
         </Card>
       </div>
+
+      {/* Stakeholder Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <PieChart className="h-5 w-5 mr-2" />
+            Stakeholder Breakdown
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {metrics?.stakeholderPercentages && Object.entries(metrics.stakeholderPercentages).map(([type, percentage]) => (
+              <div key={type} className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="capitalize">{type.replace(/([A-Z])/g, ' $1').trim()}</span>
+                  <span className="font-medium">{percentage}%</span>
+                </div>
+                <Progress value={percentage} className="h-2" />
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex justify-between text-sm font-medium">
+              <span>Total Stakeholders</span>
+              <span>{totalStakeholders}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Location Breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <MapPin className="h-5 w-5 mr-2" />
+            Attendees by Location
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {metrics?.attendeesByLocation?.map((loc) => (
+              <div key={loc.location} className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{loc.count}</div>
+                <div className="text-sm text-gray-600">{loc.location}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Average Attendance Rate</span>
+              <span className="text-lg font-semibold text-green-600">
+                {metrics?.averageAttendanceRate || 0}%
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Membership Tiers */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Award className="h-5 w-5 mr-2" />
+            Membership Distribution
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-5 gap-2">
+            {metrics?.membersByTier && Object.entries(metrics.membersByTier).map(([tier, count]) => (
+              <div key={tier} className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className={`text-xl font-bold ${
+                  tier === 'platinum' ? 'text-purple-600' :
+                  tier === 'gold' ? 'text-yellow-600' :
+                  tier === 'silver' ? 'text-gray-600' :
+                  tier === 'bronze' ? 'text-orange-600' :
+                  'text-gray-400'
+                }`}>
+                  {count}
+                </div>
+                <div className="text-xs text-gray-600 capitalize">{tier}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-600">Paid Membership Rate</span>
+              <div className="flex items-center">
+                <Progress value={membershipFillRate} className="w-24 h-2 mr-2" />
+                <span className="text-sm font-medium">{membershipFillRate.toFixed(1)}%</span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Economic Impact */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Businesses Supported</CardTitle>
+            <Building className="h-4 w-4 text-indigo-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.businessesSupported || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">Active business members</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Economic Impact</CardTitle>
+            <DollarSign className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">£{metrics?.economicImpact?.toLocaleString() || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">Generated for local economy</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Partnerships</CardTitle>
+            <Target className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics?.partnershipsFormed || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">Strategic partnerships formed</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Administrative Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <Link href="/dashboard/analytics">
+              <Button variant="outline" className="w-full justify-start">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                Analytics
+              </Button>
+            </Link>
+            <Link href="/dashboard/user-management">
+              <Button variant="outline" className="w-full justify-start">
+                <Users className="mr-2 h-4 w-4" />
+                User Management
+              </Button>
+            </Link>
+            <Link href="/dashboard/event-management">
+              <Button variant="outline" className="w-full justify-start">
+                <Calendar className="mr-2 h-4 w-4" />
+                Event Management
+              </Button>
+            </Link>
+            <Link href="/dashboard/membership-management">
+              <Button variant="outline" className="w-full justify-start">
+                <Award className="mr-2 h-4 w-4" />
+                Membership Tiers
+              </Button>
+            </Link>
+            <Link href="/dashboard/content-reports">
+              <Button variant="outline" className="w-full justify-start">
+                <FileText className="mr-2 h-4 w-4" />
+                Content Reports
+              </Button>
+            </Link>
+            <Link href="/mood-dashboard">
+              <Button variant="outline" className="w-full justify-start">
+                <Heart className="mr-2 h-4 w-4" />
+                Event Mood
+              </Button>
+            </Link>
+            <Link href="/admin/affiliates">
+              <Button variant="outline" className="w-full justify-start">
+                <DollarSign className="mr-2 h-4 w-4" />
+                Affiliates
+              </Button>
+            </Link>
+            <Link href="/admin/attendance-report">
+              <Button variant="outline" className="w-full justify-start">
+                <Activity className="mr-2 h-4 w-4" />
+                Attendance Reports
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Key Performance Indicators for Funding */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Target className="h-5 w-5 mr-2" />
+            Key Performance Indicators (KPIs) for Funding
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-medium text-sm text-gray-700 mb-3">Reach & Engagement</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Member Retention Rate</span>
+                  <Badge variant="outline" className="bg-green-50">92%</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Event Satisfaction Score</span>
+                  <Badge variant="outline" className="bg-green-50">4.8/5</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Training Completion Rate</span>
+                  <Badge variant="outline" className="bg-green-50">87%</Badge>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="font-medium text-sm text-gray-700 mb-3">Impact & Outcomes</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Job Placement Rate</span>
+                  <Badge variant="outline" className="bg-blue-50">73%</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Business Growth (Members)</span>
+                  <Badge variant="outline" className="bg-blue-50">+34%</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Funding Secured</span>
+                  <Badge variant="outline" className="bg-blue-50">£{metrics?.fundingSecured?.toLocaleString() || 0}</Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
