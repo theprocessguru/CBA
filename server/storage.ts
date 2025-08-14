@@ -71,7 +71,7 @@ import {
   cbaEventRegistrations,
   eventAttendanceAnalytics,
   personalBadgeEvents,
-  ghlAutomationLogs,
+  mytAutomationLogs,
   eventFeedback,
   eventScanners,
   scanHistory,
@@ -84,8 +84,8 @@ import {
   type InsertEventAttendanceAnalytics,
   type PersonalBadgeEvent,
   type InsertPersonalBadgeEvent,
-  type GHLAutomationLog,
-  type InsertGHLAutomationLog,
+  type MyTAutomationLog,
+  type InsertMyTAutomationLog,
   type EventFeedback,
   type InsertEventFeedback,
   type EventScanner,
@@ -340,14 +340,14 @@ export interface IStorage {
   checkOutPersonalBadgeEvent(id: number, checkOutTime?: Date): Promise<PersonalBadgeEvent>;
   markBadgePrinted(id: number, printedTime?: Date): Promise<PersonalBadgeEvent>;
 
-  // GoHighLevel Automation operations
-  createGHLAutomationLog(log: InsertGHLAutomationLog): Promise<GHLAutomationLog>;
-  getGHLAutomationLogById(id: number): Promise<GHLAutomationLog | undefined>;
-  getGHLAutomationLogsByEventId(eventId: number): Promise<GHLAutomationLog[]>;
-  getGHLAutomationLogsByUserId(userId: string): Promise<GHLAutomationLog[]>;
-  updateGHLAutomationLog(id: number, log: Partial<InsertGHLAutomationLog>): Promise<GHLAutomationLog>;
-  getFailedGHLAutomations(): Promise<GHLAutomationLog[]>;
-  retryGHLAutomation(id: number): Promise<GHLAutomationLog>;
+  // MyT Automation Automation operations
+  createMyTAutomationLog(log: InsertMyTAutomationLog): Promise<MyTAutomationLog>;
+  getMyTAutomationLogById(id: number): Promise<MyTAutomationLog | undefined>;
+  getMyTAutomationLogsByEventId(eventId: number): Promise<MyTAutomationLog[]>;
+  getMyTAutomationLogsByUserId(userId: string): Promise<MyTAutomationLog[]>;
+  updateMyTAutomationLog(id: number, log: Partial<InsertMyTAutomationLog>): Promise<MyTAutomationLog>;
+  getFailedMyTAutomations(): Promise<MyTAutomationLog[]>;
+  retryMyTAutomation(id: number): Promise<MyTAutomationLog>;
 
   // Event Feedback operations
   createEventFeedback(feedback: InsertEventFeedback): Promise<EventFeedback>;

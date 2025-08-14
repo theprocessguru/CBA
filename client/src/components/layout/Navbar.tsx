@@ -522,7 +522,7 @@ const Navbar = () => {
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
                   } font-medium text-sm`}>
-                  ⚙️ GHL Admin
+                  ⚙️ MyT Automation Admin
                 </a>
               </Link>
               <Link href="/dashboard/ai-summit-schedule">

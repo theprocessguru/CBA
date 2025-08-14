@@ -8,11 +8,12 @@ Preferred communication style: Simple, everyday language.
 Volunteers: No business listing menu items in dashboard (they don't need business features).
 
 ## Recent Changes
+- **MyT Automation Rebranding Complete (August 14, 2025)**: Successfully changed all GoHighLevel (GHL) references to "MyT Automation" throughout the application. Updated file names (ghlService.ts → mytAutomationService.ts, GHLChatbot → MyTAutomationChatbot, ghl-admin → myt-automation-admin), component names, documentation, and all references across frontend and backend. Environment variable GHL_API_KEY kept for compatibility.
 - **Multiple Event Types Support (August 14, 2025)**: Added comprehensive events management system supporting networking events, workshops, summits, conferences, exhibitions, and seminars. Created new database tables for generic event management including registrations, exhibitors, speakers, volunteers, and sponsors.
 - **Exhibition Stand Management (August 14, 2025)**: Added stand location, stand number, and stand size fields to AI Summit exhibitor registrations for proper exhibition space management. Exhibitors can now specify their exact stand details during registration.
 - **Jobs Board Confirmed (August 14, 2025)**: Confirmed jobs board is fully implemented with job postings, applications, and saved searches functionality. Accessible via Membership dropdown in navigation at /jobs.
-- **GoHighLevel Custom Fields Documentation (August 14, 2025)**: Created comprehensive GHL_CUSTOM_FIELDS_SETUP.md guide with 150+ custom fields needed for complete data synchronization. Document includes field names, types, dropdown options, tags, and automation triggers organized by user type (members, exhibitors, speakers, volunteers, sponsors).
-- **GoHighLevel API Key Update (August 14, 2025)**: Successfully updated GHL_API_KEY to connect to new GoHighLevel account. All integrations now point to new account including contact management, SMS/email notifications, and chatbot features.
+- **MyT Automation Custom Fields Documentation (August 14, 2025)**: Created comprehensive MYT_AUTOMATION_CUSTOM_FIELDS_SETUP.md guide with 150+ custom fields needed for complete data synchronization. Document includes field names, types, dropdown options, tags, and automation triggers organized by user type (members, exhibitors, speakers, volunteers, sponsors).
+- **MyT Automation API Key Update (August 14, 2025)**: Successfully updated GHL_API_KEY (environment variable still uses this name for compatibility) to connect to new MyT Automation account. All integrations now point to new account including contact management, SMS/email notifications, and chatbot features.
 - **Membership Stats Page Fix (August 14, 2025)**: Fixed "Failed to fetch stats" error by adding credentials: 'include' to fetch requests in MembershipManagement.tsx. Stats now properly display member counts and tier distribution.
 - **Website Links Completed (August 14, 2025)**: Added https://theprocess.guru link to all Steve Ball references throughout the application. All company websites now properly linked: The Process Guru, MyT Automation, MyT AI, Wagner Caleap Consultancy.
 - **Admin Login Fix (August 12, 2025)**: Fixed admin login issues by marking admin accounts as email verified. Both admin accounts (admin@croydonba.org.uk and rithu@croydonba.co.uk) can now successfully login with password Admin2025!
@@ -51,5 +52,5 @@ Volunteers: No business listing menu items in dashboard (they don't need busines
 - **Database**: Neon PostgreSQL serverless database.
 - **Email Service**: NodeMailer and SendGrid.
 - **Payment Processing**: Stripe.
-- **AI Chatbot**: GoHighLevel.
+- **AI Chatbot**: MyT Automation.
 - **Third-party APIs**: General integration capabilities for external business tools.

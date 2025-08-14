@@ -13,19 +13,19 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-interface GHLChatbotProps {
+interface MyTAutomationChatbotProps {
   position?: 'bottom-right' | 'bottom-left';
   primaryColor?: string;
   welcomeMessage?: string;
   businessName?: string;
 }
 
-export default function GHLChatbot({ 
+export default function MyTAutomationChatbot({ 
   position = 'bottom-right',
   primaryColor = '#2563eb',
   welcomeMessage = "👋 Hi! I'm the CBA AI Assistant. How can I help you today?",
   businessName = "Croydon Business Association"
-}: GHLChatbotProps) {
+}: MyTAutomationChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);

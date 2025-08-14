@@ -1322,7 +1322,7 @@ server/
 ├── emailService.ts             # Email service
 ├── aiService.ts                # AI integration
 ├── badgeService.ts             # Badge generation
-├── ghlService.ts               # GoHighLevel integration
+├── mytAutomationService.ts     # MyT Automation integration
 ├── limitService.ts             # Rate limiting
 └── index.ts                    # Server entry point
 ```

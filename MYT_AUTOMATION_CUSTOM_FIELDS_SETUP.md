@@ -1,10 +1,10 @@
-# GoHighLevel Custom Fields Setup Guide
+# MyT Automation Custom Fields Setup Guide
 
-This document contains all custom fields that need to be created in your GoHighLevel account to properly sync data from the CBA application.
+This document contains all custom fields that need to be created in your MyT Automation account to properly sync data from the CBA application.
 
-## How to Create Custom Fields in GHL
+## How to Create Custom Fields in MyT Automation
 
-1. Log into your GoHighLevel account at app.gohighlevel.com
+1. Log into your MyT Automation account
 2. Go to **Settings** → **Custom Fields**
 3. Click **Add Field** for each field listed below
 4. Use the exact Field Name provided (case-sensitive)

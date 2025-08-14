@@ -36,7 +36,7 @@ import AIEnterprise from "@/pages/ai-enterprise";
 import AIAnalytics from "@/pages/ai-analytics";
 import AISummit from "@/pages/ai-summit";
 import AISummitSponsorPage from "@/pages/ai-summit/sponsor";
-import GHLAdmin from "@/pages/ghl-admin";
+import MyTAutomationAdmin from "@/pages/myt-automation-admin";
 import DataImport from "@/pages/data-import";
 import AdminDataImport from "@/pages/admin/import";
 import OffersPage from "@/pages/offers";
@@ -97,7 +97,7 @@ import { EventMoodDemo } from "@/pages/EventMoodDemo";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
-import GHLChatbot from "@/components/GHLChatbot";
+import MyTAutomationChatbot from "@/components/MyTAutomationChatbot";
 import PWAInstaller from "@/components/PWAInstaller";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -114,7 +114,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
       <BottomNavigation />
       <PWAInstaller />
       <div className="fixed right-4 bottom-20 md:bottom-4 z-40">
-        <GHLChatbot 
+        <MyTAutomationChatbot 
           position="bottom-right"
           primaryColor="#2563eb"
           welcomeMessage="👋 Hi! I'm the CBA AI Assistant. How can I help you today?"
@@ -409,7 +409,7 @@ function Router() {
       </Route>
       <Route path="/admin/ghl">
         <MainLayout>
-          <GHLAdmin />
+          <MyTAutomationAdmin />
         </MainLayout>
       </Route>
       <Route path="/admin/import">

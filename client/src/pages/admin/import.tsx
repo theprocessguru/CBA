@@ -454,7 +454,7 @@ const DataImport = () => {
                         Import Another File
                       </Button>
                       <Button variant="outline" onClick={() => window.location.href = '/admin/ghl'}>
-                        View GHL Admin
+                        View MyT Automation Admin
                       </Button>
                     </div>
                   </div>

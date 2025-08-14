@@ -10,12 +10,12 @@ import { apiRequest } from "@/lib/queryClient";
 import { CheckCircle, XCircle, Users, RefreshCw, TestTube } from "lucide-react";
 import { Helmet } from "react-helmet";
 
-export default function GHLAdmin() {
+export default function MyTAutomationAdmin() {
   const { toast } = useToast();
   const [syncEmail, setSyncEmail] = useState("");
   const [syncBusinessName, setSyncBusinessName] = useState("");
 
-  // Test GHL connection
+  // Test MyT Automation connection
   const { data: connectionStatus, isLoading: testingConnection, refetch: testConnection } = useQuery({
     queryKey: ["/api/ghl/test-connection"],
     enabled: false,
@@ -33,7 +33,7 @@ export default function GHLAdmin() {
     onSuccess: (data) => {
       toast({
         title: "Member Synced Successfully",
-        description: `Member synced to GHL. Contact ID: ${data.ghlContactId}`,
+        description: `Member synced to MyT Automation. Contact ID: ${data.ghlContactId}`,
       });
       setSyncEmail("");
       setSyncBusinessName("");
@@ -41,7 +41,7 @@ export default function GHLAdmin() {
     onError: (error) => {
       toast({
         title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync member to GHL",
+        description: error instanceof Error ? error.message : "Failed to sync member to MyT Automation",
         variant: "destructive",
       });
     },
@@ -70,15 +70,15 @@ export default function GHLAdmin() {
   return (
     <>
       <Helmet>
-        <title>GHL Integration Admin - CBA</title>
-        <meta name="description" content="Manage GoHighLevel integration settings and sync data for Croydon Business Association." />
+        <title>MyT Automation Integration Admin - CBA</title>
+        <meta name="description" content="Manage MyT Automation integration settings and sync data for Croydon Business Association." />
       </Helmet>
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">GoHighLevel Integration</h1>
-          <p className="text-lg text-gray-600">Manage your GHL connection and sync data</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">MyT Automation Integration</h1>
+          <p className="text-lg text-gray-600">Manage your MyT Automation connection and sync data</p>
         </div>
 
         {/* Connection Status */}

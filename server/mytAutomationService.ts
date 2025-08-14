@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 
-export interface GHLContact {
+export interface MyTAutomationContact {
   id: string;
   email: string;
   firstName?: string;
@@ -11,7 +11,7 @@ export interface GHLContact {
   customFields?: Record<string, any>;
 }
 
-export interface GHLOpportunity {
+export interface MyTAutomationOpportunity {
   id: string;
   name: string;
   status: string;
@@ -19,7 +19,7 @@ export interface GHLOpportunity {
   contactId: string;
 }
 
-export class GHLService {
+export class MyTAutomationService {
   private api: AxiosInstance;
   private apiKey: string;
 
@@ -27,7 +27,7 @@ export class GHLService {
     this.apiKey = process.env.GHL_API_KEY || '';
     
     if (!this.apiKey) {
-      throw new Error('GHL_API_KEY is required');
+      throw new Error('GHL_API_KEY is required for MyT Automation');
     }
 
     this.api = axios.create({
@@ -40,18 +40,18 @@ export class GHLService {
   }
 
   // Get all contacts
-  async getContacts(): Promise<GHLContact[]> {
+  async getContacts(): Promise<MyTAutomationContact[]> {
     try {
       const response = await this.api.get('/contacts');
       return response.data.contacts || [];
     } catch (error) {
-      console.error('Error fetching GHL contacts:', error);
-      throw new Error('Failed to fetch contacts from Go High Level');
+      console.error('Error fetching MyT Automation contacts:', error);
+      throw new Error('Failed to fetch contacts from MyT Automation');
     }
   }
 
   // Get contact by email
-  async getContactByEmail(email: string): Promise<GHLContact | null> {
+  async getContactByEmail(email: string): Promise<MyTAutomationContact | null> {
     try {
       const response = await this.api.get('/contacts', {
         params: { email }
@@ -59,13 +59,13 @@ export class GHLService {
       const contacts = response.data.contacts || [];
       return contacts.length > 0 ? contacts[0] : null;
     } catch (error) {
-      console.error('Error fetching GHL contact by email:', error);
+      console.error('Error fetching MyT Automation contact by email:', error);
       return null;
     }
   }
 
   // Create or update contact
-  async upsertContact(contactData: Partial<GHLContact>): Promise<GHLContact> {
+  async upsertContact(contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
     try {
       // Check if contact exists
       if (contactData.email) {
@@ -308,21 +308,21 @@ export class GHLService {
 }
 
 // Singleton instance
-let ghlServiceInstance: GHLService | null = null;
+let mytAutomationServiceInstance: MyTAutomationService | null = null;
 
-export function getGHLService(): GHLService | null {
+export function getMyTAutomationService(): MyTAutomationService | null {
   if (!process.env.GHL_API_KEY) {
     return null;
   }
 
-  if (!ghlServiceInstance) {
+  if (!mytAutomationServiceInstance) {
     try {
-      ghlServiceInstance = new GHLService();
+      mytAutomationServiceInstance = new MyTAutomationService();
     } catch (error) {
-      console.error('Failed to initialize GHL service:', error);
+      console.error('Failed to initialize MyT Automation service:', error);
       return null;
     }
   }
 
-  return ghlServiceInstance;
+  return mytAutomationServiceInstance;
 }

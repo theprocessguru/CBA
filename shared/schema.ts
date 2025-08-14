@@ -740,8 +740,8 @@ export const cbaEvents = pgTable("cba_events", {
   recurringPattern: varchar("recurring_pattern"), // weekly, monthly, etc.
   tags: text("tags"), // JSON array of event tags
   imageUrl: text("image_url"),
-  ghlWorkflowId: varchar("ghl_workflow_id"), // GoHighLevel workflow ID for automation
-  ghlTagName: varchar("ghl_tag_name"), // GHL tag for attendees
+  ghlWorkflowId: varchar("ghl_workflow_id"), // MyT Automation workflow ID for automation
+  ghlTagName: varchar("ghl_tag_name"), // MyT Automation tag for attendees
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -809,8 +809,8 @@ export const cbaEventRegistrations = pgTable("cba_event_registrations", {
   noShow: boolean("no_show").default(false),
   feedbackRating: integer("feedback_rating"), // 1-5 rating
   feedbackComments: text("feedback_comments"),
-  ghlContactId: varchar("ghl_contact_id"), // GoHighLevel contact ID
-  ghlTagsApplied: text("ghl_tags_applied"), // JSON array of applied GHL tags
+  ghlContactId: varchar("ghl_contact_id"), // MyT Automation contact ID
+  ghlTagsApplied: text("ghl_tags_applied"), // JSON array of applied MyT Automation tags
   registeredAt: timestamp("registered_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
@@ -818,7 +818,7 @@ export const cbaEventRegistrations = pgTable("cba_event_registrations", {
   index("event_registrations_unique_idx").on(table.eventId, table.participantEmail)
 ]);
 
-// Event attendance analytics for GoHighLevel integration
+// Event attendance analytics for MyT Automation integration
 export const eventAttendanceAnalytics = pgTable("event_attendance_analytics", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id").notNull().references(() => cbaEvents.id),
@@ -860,17 +860,17 @@ export const personalBadgeEvents = pgTable("personal_badge_events", {
   index("badge_event_unique_idx").on(table.personalBadgeId, table.eventId)
 ]);
 
-// GoHighLevel automation tracking
-export const ghlAutomationLogs = pgTable("ghl_automation_logs", {
+// MyT Automation tracking
+export const mytAutomationLogs = pgTable("ghl_automation_logs", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id").references(() => cbaEvents.id),
   userId: varchar("user_id").references(() => users.id),
   userEmail: varchar("user_email").notNull(),
   automationType: varchar("automation_type").notNull(), // registration_confirmation, reminder, no_show_followup, feedback_request
-  workflowId: varchar("workflow_id").notNull(), // GHL workflow ID
+  workflowId: varchar("workflow_id").notNull(), // MyT Automation workflow ID
   triggerReason: varchar("trigger_reason").notNull(), // registered, checked_in, no_show, event_ended
   status: varchar("status").default("pending"), // pending, sent, delivered, failed
-  ghlResponse: text("ghl_response"), // JSON response from GHL API
+  ghlResponse: text("ghl_response"), // JSON response from MyT Automation API
   retryCount: integer("retry_count").default(0),
   lastRetryAt: timestamp("last_retry_at"),
   completedAt: timestamp("completed_at"),
@@ -1175,7 +1175,7 @@ export type InsertTimeSlotSpeaker = z.infer<typeof insertTimeSlotSpeakerSchema>;
 export const insertCBAEventRegistrationSchema = createInsertSchema(cbaEventRegistrations).omit({ id: true });
 export const insertEventAttendanceAnalyticsSchema = createInsertSchema(eventAttendanceAnalytics).omit({ id: true });
 export const insertPersonalBadgeEventSchema = createInsertSchema(personalBadgeEvents).omit({ id: true });
-export const insertGHLAutomationLogSchema = createInsertSchema(ghlAutomationLogs).omit({ id: true });
+export const insertMyTAutomationLogSchema = createInsertSchema(mytAutomationLogs).omit({ id: true });
 export const insertEventFeedbackSchema = createInsertSchema(eventFeedback).omit({ id: true });
 
 // Type definitions
@@ -1306,8 +1306,8 @@ export type EventAttendanceAnalytics = typeof eventAttendanceAnalytics.$inferSel
 export type InsertPersonalBadgeEvent = z.infer<typeof insertPersonalBadgeEventSchema>;
 export type PersonalBadgeEvent = typeof personalBadgeEvents.$inferSelect;
 
-export type InsertGHLAutomationLog = z.infer<typeof insertGHLAutomationLogSchema>;
-export type GHLAutomationLog = typeof ghlAutomationLogs.$inferSelect;
+export type InsertMyTAutomationLog = z.infer<typeof insertMyTAutomationLogSchema>;
+export type MyTAutomationLog = typeof mytAutomationLogs.$inferSelect;
 
 export type InsertEventFeedback = z.infer<typeof insertEventFeedbackSchema>;
 export type EventFeedback = typeof eventFeedback.$inferSelect;

@@ -627,9 +627,9 @@ export default function AdminEventsPage() {
                     name="ghlWorkflowId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>GHL Workflow ID</FormLabel>
+                        <FormLabel>MyT Automation Workflow ID</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Enter GoHighLevel workflow ID" />
+                          <Input {...field} placeholder="Enter MyT Automation workflow ID" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -641,9 +641,9 @@ export default function AdminEventsPage() {
                     name="ghlTagName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>GHL Tag Name</FormLabel>
+                        <FormLabel>MyT Automation Tag Name</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Enter GoHighLevel tag name" />
+                          <Input {...field} placeholder="Enter MyT Automation tag name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

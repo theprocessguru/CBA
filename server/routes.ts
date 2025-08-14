@@ -27,7 +27,7 @@ import {
   insertCBAEventRegistrationSchema,
   insertEventAttendanceAnalyticsSchema,
   insertPersonalBadgeEventSchema,
-  insertGHLAutomationLogSchema,
+  insertMyTAutomationLogSchema,
   insertEventFeedbackSchema,
   insertEventScannerSchema,
   insertScanHistorySchema,
@@ -36,7 +36,7 @@ import {
   cbaEventRegistrations,
   eventAttendanceAnalytics,
   personalBadgeEvents,
-  ghlAutomationLogs,
+  mytAutomationLogs,
   eventFeedback,
   eventScanners,
   scanHistory,
@@ -74,7 +74,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
-import { getGHLService } from "./ghlService";
+import { getMyTAutomationService } from "./mytAutomationService";
 import bcrypt from "bcrypt";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
@@ -714,9 +714,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Create new business
         business = await storage.createBusiness(businessData);
         
-        // Auto-sync new member to GHL
-        const ghlService = getGHLService();
-        if (ghlService) {
+        // Auto-sync new member to MyT Automation
+        const mytAutomationService = getMyTAutomationService();
+        if (mytAutomationService) {
           try {
             const user = await storage.getUser(userId);
             if (user && user.email) {
@@ -728,12 +728,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 membershipTier: 'Standard'
               };
               
-              await ghlService.syncBusinessMember(memberData);
-              console.log(`New member ${user.email} synced to GHL successfully`);
+              await mytAutomationService.syncBusinessMember(memberData);
+              console.log(`New member ${user.email} synced to MyT Automation successfully`);
             }
           } catch (ghlError) {
-            console.error("Failed to sync new member to GHL:", ghlError);
-            // Don't fail the business creation if GHL sync fails
+            console.error("Failed to sync new member to MyT Automation:", ghlError);
+            // Don't fail the business creation if MyT Automation sync fails
           }
         }
       }
@@ -1231,9 +1231,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // GHL Integration routes
+  // MyT Automation Integration routes
   
-  // Test GHL connection
+  // Test MyT Automation connection
   // Data Import routes (admin only)
   
   // Parse CSV or Excel file and return preview
@@ -1377,11 +1377,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newBusiness = await storage.createBusiness(validatedData);
           imported++;
 
-          // Auto-sync to GHL if enabled
-          const ghlService = getGHLService();
-          if (ghlService && businessData.email) {
+          // Auto-sync to MyT Automation if enabled
+          const mytAutomationService = getMyTAutomationService();
+          if (mytAutomationService && businessData.email) {
             try {
-              await ghlService.syncBusinessMember({
+              await mytAutomationService.syncBusinessMember({
                 email: businessData.email,
                 firstName: '',
                 lastName: '',
@@ -1389,7 +1389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 membershipTier: 'Standard'
               });
             } catch (ghlError) {
-              console.error(`Failed to sync business ${businessData.email} to GHL:`, ghlError);
+              console.error(`Failed to sync business ${businessData.email} to MyT Automation:`, ghlError);
             }
           }
         } catch (error) {
@@ -1413,31 +1413,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GHL (Go High Level) integration routes
+  // MyT Automation (Go High Level) integration routes
   
   app.get('/api/ghl/test', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const ghlService = getGHLService();
-      if (!ghlService) {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
         return res.status(503).json({ message: "Go High Level integration not configured" });
       }
       
-      const isConnected = await ghlService.testConnection();
+      const isConnected = await mytAutomationService.testConnection();
       res.json({ 
         connected: isConnected,
-        message: isConnected ? "GHL connection successful" : "GHL connection failed"
+        message: isConnected ? "MyT Automation connection successful" : "MyT Automation connection failed"
       });
     } catch (error) {
-      console.error("Error testing GHL connection:", error);
-      res.status(500).json({ message: "Failed to test GHL connection" });
+      console.error("Error testing MyT Automation connection:", error);
+      res.status(500).json({ message: "Failed to test MyT Automation connection" });
     }
   });
   
-  // Sync member to GHL
+  // Sync member to MyT Automation
   app.post('/api/ghl/sync-member', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const ghlService = getGHLService();
-      if (!ghlService) {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
         return res.status(503).json({ message: "Go High Level integration not configured" });
       }
       
@@ -1462,15 +1462,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         membershipTier: 'Standard'
       };
       
-      const ghlContact = await ghlService.syncBusinessMember(memberData);
+      const ghlContact = await mytAutomationService.syncBusinessMember(memberData);
       res.json({ 
         success: true, 
         ghlContactId: ghlContact.id,
         message: "Member synced to Go High Level successfully"
       });
     } catch (error) {
-      console.error("Error syncing member to GHL:", error);
-      res.status(500).json({ message: "Failed to sync member to GHL" });
+      console.error("Error syncing member to MyT Automation:", error);
+      res.status(500).json({ message: "Failed to sync member to MyT Automation" });
     }
   });
   
@@ -4420,16 +4420,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         attendees: JSON.stringify(attendees)
       });
 
-      // Sync with GHL (Go High Level)
+      // Sync with MyT Automation (Go High Level)
       try {
-        const ghlService = getGHLService();
-        if (ghlService) {
+        const mytAutomationService = getMyTAutomationService();
+        if (mytAutomationService) {
           // Split contact name into first and last name
           const nameParts = contactName.trim().split(' ');
           const firstName = nameParts[0] || '';
           const lastName = nameParts.slice(1).join(' ') || '';
 
-          // Prepare GHL contact data
+          // Prepare MyT Automation contact data
           const ghlContactData = {
             email,
             firstName,
@@ -4466,13 +4466,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           };
 
-          // Create or update contact in GHL
-          const ghlContact = await ghlService.upsertContact(ghlContactData);
-          console.log(`AI Summit exhibitor registration synced to GHL: Contact ID ${ghlContact.id}`);
+          // Create or update contact in MyT Automation
+          const ghlContact = await mytAutomationService.upsertContact(ghlContactData);
+          console.log(`AI Summit exhibitor registration synced to MyT Automation: Contact ID ${ghlContact.id}`);
         }
       } catch (ghlError) {
-        console.error("Failed to sync AI Summit exhibitor registration to GHL:", ghlError);
-        // Don't fail the registration if GHL sync fails
+        console.error("Failed to sync AI Summit exhibitor registration to MyT Automation:", ghlError);
+        // Don't fail the registration if MyT Automation sync fails
       }
 
       // Send confirmation email if email service is available
@@ -4564,10 +4564,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const speakerRegistration = await storage.createAISummitSpeakerInterest(speakerData);
           speakerRegistrations.push(speakerRegistration);
 
-          // Sync speaker to GHL with appropriate tags
+          // Sync speaker to MyT Automation with appropriate tags
           try {
-            const ghlService = getGHLService();
-            if (ghlService) {
+            const mytAutomationService = getMyTAutomationService();
+            if (mytAutomationService) {
               const speakerNameParts = speakerAttendee.name.trim().split(' ');
               const speakerFirstName = speakerNameParts[0] || '';
               const speakerLastName = speakerNameParts.slice(1).join(' ') || '';
@@ -4595,10 +4595,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               };
 
-              await ghlService.upsertContact(speakerGhlData);
+              await mytAutomationService.upsertContact(speakerGhlData);
             }
           } catch (speakerGhlError) {
-            console.error("Failed to sync speaker attendee to GHL:", speakerGhlError);
+            console.error("Failed to sync speaker attendee to MyT Automation:", speakerGhlError);
           }
 
         } catch (speakerError) {
@@ -4764,16 +4764,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(desc(aiSummitRegistrations.id))
         .limit(1);
 
-      // Sync with GHL (Go High Level)
+      // Sync with MyT Automation (Go High Level)
       try {
-        const ghlService = getGHLService();
-        if (ghlService) {
+        const mytAutomationService = getMyTAutomationService();
+        if (mytAutomationService) {
           // Split name into first and last name
           const nameParts = name.trim().split(' ');
           const firstName = nameParts[0] || '';
           const lastName = nameParts.slice(1).join(' ') || '';
 
-          // Prepare GHL contact data
+          // Prepare MyT Automation contact data
           const ghlContactData = {
             email,
             firstName,
@@ -4802,13 +4802,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           };
 
-          // Create or update contact in GHL
-          const ghlContact = await ghlService.upsertContact(ghlContactData);
-          console.log(`AI Summit registration synced to GHL: Contact ID ${ghlContact.id}`);
+          // Create or update contact in MyT Automation
+          const ghlContact = await mytAutomationService.upsertContact(ghlContactData);
+          console.log(`AI Summit registration synced to MyT Automation: Contact ID ${ghlContact.id}`);
         }
       } catch (ghlError) {
-        console.error("Failed to sync AI Summit registration to GHL:", ghlError);
-        // Don't fail the registration if GHL sync fails
+        console.error("Failed to sync AI Summit registration to MyT Automation:", ghlError);
+        // Don't fail the registration if MyT Automation sync fails
       }
 
       // Create badge with appropriate participant type
@@ -5162,10 +5162,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Add speaker to GoHighLevel if available
-      const ghlService = getGHLService();
-      if (ghlService) {
+      const mytAutomationService = getMyTAutomationService();
+      if (mytAutomationService) {
         try {
-          await ghlService.addContact({
+          await mytAutomationService.addContact({
             firstName: name.split(' ')[0] || name,
             lastName: name.split(' ').slice(1).join(' ') || '',
             email: email,
@@ -5181,8 +5181,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           });
         } catch (ghlError) {
-          console.error('GHL sync failed for speaker:', ghlError);
-          // Continue with registration even if GHL sync fails
+          console.error('MyT Automation sync failed for speaker:', ghlError);
+          // Continue with registration even if MyT Automation sync fails
         }
       }
 
@@ -6629,20 +6629,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message and session ID are required" });
       }
 
-      const ghlService = getGHLService();
+      const mytAutomationService = getMyTAutomationService();
       
-      if (!ghlService) {
-        // If GHL is not configured, use fallback responses only
-        console.warn("GHL service not available, using fallback responses");
+      if (!mytAutomationService) {
+        // If MyT Automation is not configured, use fallback responses only
+        console.warn("MyT Automation service not available, using fallback responses");
         const fallbackResponse = getFallbackChatbotResponse(message);
         return res.json({ response: fallbackResponse, success: false });
       }
 
       // Send message to GoHighLevel
-      const result = await ghlService.sendChatbotMessage(message, sessionId, contactInfo);
+      const result = await mytAutomationService.sendChatbotMessage(message, sessionId, contactInfo);
       
       // Track the interaction for analytics
-      await ghlService.trackChatbotInteraction(sessionId, message, result.response, result.success);
+      await mytAutomationService.trackChatbotInteraction(sessionId, message, result.response, result.success);
       
       res.json(result);
     } catch (error) {
