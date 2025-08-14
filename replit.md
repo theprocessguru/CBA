@@ -8,12 +8,12 @@ Preferred communication style: Simple, everyday language.
 Volunteers: No business listing menu items in dashboard (they don't need business features).
 
 ## Recent Changes
+- **GoHighLevel Custom Fields Documentation (August 14, 2025)**: Created comprehensive GHL_CUSTOM_FIELDS_SETUP.md guide with 150+ custom fields needed for complete data synchronization. Document includes field names, types, dropdown options, tags, and automation triggers organized by user type (members, exhibitors, speakers, volunteers, sponsors).
+- **GoHighLevel API Key Update (August 14, 2025)**: Successfully updated GHL_API_KEY to connect to new GoHighLevel account. All integrations now point to new account including contact management, SMS/email notifications, and chatbot features.
+- **Membership Stats Page Fix (August 14, 2025)**: Fixed "Failed to fetch stats" error by adding credentials: 'include' to fetch requests in MembershipManagement.tsx. Stats now properly display member counts and tier distribution.
+- **Website Links Completed (August 14, 2025)**: Added https://theprocess.guru link to all Steve Ball references throughout the application. All company websites now properly linked: The Process Guru, MyT Automation, MyT AI, Wagner Caleap Consultancy.
 - **Admin Login Fix (August 12, 2025)**: Fixed admin login issues by marking admin accounts as email verified. Both admin accounts (admin@croydonba.org.uk and rithu@croydonba.co.uk) can now successfully login with password Admin2025!
 - **Critical Database Schema Fix (August 12, 2025)**: Resolved critical bug preventing all AI Summit registrations. Added missing columns: email verification fields to users table, user_id to exhibitor and volunteer tables. All registration forms now successfully save data to database.
-- **Test Data Buttons Added to Registration Forms (August 2025)**: Added "Fill with Test Data" buttons to all AI Summit registration forms that appear only in development mode. These buttons instantly populate forms with realistic test data, generate unique emails to avoid duplicates, and significantly speed up testing workflow. Buttons have a distinctive yellow color with test tube emoji (🧪) for easy identification.
-- **Password Fields Added to All Registration Forms (August 2025)**: Added password creation fields to all AI Summit registration forms. Users must now create passwords during registration to access their QR codes and event badges later. Added clear "Create Your Account" sections with password/confirm password fields in attendee, exhibitor, and volunteer forms (speaker and sponsor forms already had them).
-- **Required Fields Update for All Registration Forms (August 2025)**: Made email and mobile phone numbers required fields in all AI Summit registration forms (attendees, speakers, exhibitors, volunteers, sponsors). All forms now properly validate that users provide complete contact information for better event communication and coordination.
-- **AI Summit Attendee Registration Fix (August 2025)**: Removed inappropriate "Role at the Event" dropdown from main registration form. Main registration is now exclusively for general attendees, with separate dedicated forms for speakers, sponsors, exhibitors, and volunteers. Each participant type uses their own registration button and tailored form.
 
 ## System Architecture
 ### Frontend Architecture
