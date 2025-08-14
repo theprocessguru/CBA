@@ -61,7 +61,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Home size={18} />
           </Button>
           <Link href="/dashboard">
-            <a className="font-bold text-lg">My Business</a>
+            <a className="font-bold text-lg">
+              {user?.isAdmin ? 'Admin Dashboard' : 
+               user?.participantType === 'student' ? 'Student Portal' :
+               user?.participantType === 'volunteer' ? 'Volunteer Portal' :
+               'My Business'}
+            </a>
           </Link>
         </div>
         <Button 
@@ -83,7 +88,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         >
           <div className="p-4 bg-primary text-white hidden md:block">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-bold">My Business Dashboard</h1>
+              <h1 className="text-lg font-bold">
+                {user?.isAdmin ? 'Admin Dashboard' : 
+                 user?.participantType === 'student' ? 'Student Portal' :
+                 user?.participantType === 'volunteer' ? 'Volunteer Portal' :
+                 'My Business Dashboard'}
+              </h1>
               <Button 
                 variant="ghost" 
                 size="icon" 
@@ -121,159 +131,22 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <Separator className="my-4" />
             
             <nav className="space-y-1">
-              <Link href="/dashboard">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/dashboard' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <LayoutDashboard className={`mr-3 h-4 w-4 ${
-                    location === '/dashboard' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Dashboard
-                </a>
-              </Link>
-              
-              {/* Hide business-related items for volunteers */}
-              {user?.participantType !== 'volunteer' && (
+              {/* ADMIN USERS - Only admin tasks */}
+              {user?.isAdmin ? (
                 <>
-                  <Link href="/dashboard/business-profile">
+                  <Link href="/dashboard">
                     <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                      location === '/dashboard/business-profile' 
+                      location === '/dashboard' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
                     }`}>
-                      <Building className={`mr-3 h-4 w-4 ${
-                        location === '/dashboard/business-profile' ? 'text-white' : 'text-neutral-500'
+                      <LayoutDashboard className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard' ? 'text-white' : 'text-neutral-500'
                       }`} />
-                      Business Profile
+                      Admin Dashboard
                     </a>
                   </Link>
-                  
-                  <Link href="/dashboard/products-services">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                      location === '/dashboard/products-services' 
-                        ? 'bg-primary text-white' 
-                        : 'text-neutral-700 hover:bg-neutral-100'
-                    }`}>
-                      <Package className={`mr-3 h-4 w-4 ${
-                        location === '/dashboard/products-services' ? 'text-white' : 'text-neutral-500'
-                      }`} />
-                      Products & Services
-                    </a>
-                  </Link>
-                  
-                  <Link href="/dashboard/special-offers">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                      location === '/dashboard/special-offers' 
-                        ? 'bg-primary text-white' 
-                        : 'text-neutral-700 hover:bg-neutral-100'
-                    }`}>
-                      <Tag className={`mr-3 h-4 w-4 ${
-                        location === '/dashboard/special-offers' ? 'text-white' : 'text-neutral-500'
-                      }`} />
-                      Special Offers
-                    </a>
-                  </Link>
-                </>
-              )}
-              
-              <Link href="/dashboard/member-directory">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/dashboard/member-directory' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <Users className={`mr-3 h-4 w-4 ${
-                    location === '/dashboard/member-directory' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Member Directory
-                </a>
-              </Link>
-              
-              <Link href="/dashboard/affiliate">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/dashboard/affiliate' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <DollarSign className={`mr-3 h-4 w-4 ${
-                    location === '/dashboard/affiliate' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Affiliate Programme
-                </a>
-              </Link>
-              
-              <Link href="/my-personal-badge">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/my-personal-badge' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <QrCode className={`mr-3 h-4 w-4 ${
-                    location === '/my-personal-badge' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  My Personal Badge
-                </a>
-              </Link>
-              
-              <Link href="/enhanced-personal-badge">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/enhanced-personal-badge' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <QrCode className={`mr-3 h-4 w-4 ${
-                    location === '/enhanced-personal-badge' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  Enhanced Event Badges
-                </a>
-              </Link>
-              
-              <Link href="/my-qr-code">
-                <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  location === '/my-qr-code' 
-                    ? 'bg-primary text-white' 
-                    : 'text-neutral-700 hover:bg-neutral-100'
-                }`}>
-                  <Calendar className={`mr-3 h-4 w-4 ${
-                    location === '/my-qr-code' ? 'text-white' : 'text-neutral-500'
-                  }`} />
-                  My Events & Badges
-                </a>
-              </Link>
 
-              {user?.participantType === 'exhibitor' && (
-                <>
-                  <Link href="/exhibitor-scanner">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                      location === '/exhibitor-scanner' 
-                        ? 'bg-primary text-white' 
-                        : 'text-neutral-700 hover:bg-neutral-100'
-                    }`}>
-                      <QrCode className={`mr-3 h-4 w-4 ${
-                        location === '/exhibitor-scanner' ? 'text-white' : 'text-neutral-500'
-                      }`} />
-                      Scan Visitors
-                    </a>
-                  </Link>
-                  <Link href="/exhibitor-visitors">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                      location === '/exhibitor-visitors' 
-                        ? 'bg-primary text-white' 
-                        : 'text-neutral-700 hover:bg-neutral-100'
-                    }`}>
-                      <Users className={`mr-3 h-4 w-4 ${
-                        location === '/exhibitor-visitors' ? 'text-white' : 'text-neutral-500'
-                      }`} />
-                      Exhibition Visitors
-                    </a>
-                  </Link>
-                </>
-              )}
-              
-              {user?.isAdmin && (
-                <>
                   <Link href="/dashboard/analytics">
                     <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/analytics' 
@@ -296,7 +169,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       <Crown className={`mr-3 h-4 w-4 ${
                         location === '/dashboard/membership-management' ? 'text-white' : 'text-neutral-500'
                       }`} />
-                      Membership Tiers
+                      Membership Management
                     </a>
                   </Link>
 
@@ -325,7 +198,20 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       Content Reports
                     </a>
                   </Link>
-                  
+
+                  <Link href="/dashboard/event-management">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/event-management' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Calendar className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/event-management' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Event Management
+                    </a>
+                  </Link>
+
                   <Link href="/mood-dashboard">
                     <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/mood-dashboard' 
@@ -338,7 +224,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       Event Mood Dashboard
                     </a>
                   </Link>
-                  
+
                   <Link href="/admin/affiliates">
                     <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/admin/affiliates' 
@@ -352,7 +238,169 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     </a>
                   </Link>
                 </>
+              ) : (
+                <>
+                  {/* NON-ADMIN USERS */}
+                  <Link href="/dashboard">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <LayoutDashboard className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Dashboard
+                    </a>
+                  </Link>
+                  
+                  {/* Business features - only for business members, not volunteers or students */}
+                  {user?.participantType !== 'volunteer' && user?.participantType !== 'student' && (
+                    <>
+                      <Link href="/dashboard/business-profile">
+                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          location === '/dashboard/business-profile' 
+                            ? 'bg-primary text-white' 
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}>
+                          <Building className={`mr-3 h-4 w-4 ${
+                            location === '/dashboard/business-profile' ? 'text-white' : 'text-neutral-500'
+                          }`} />
+                          Business Profile
+                        </a>
+                      </Link>
+                      
+                      <Link href="/dashboard/products-services">
+                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          location === '/dashboard/products-services' 
+                            ? 'bg-primary text-white' 
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}>
+                          <Package className={`mr-3 h-4 w-4 ${
+                            location === '/dashboard/products-services' ? 'text-white' : 'text-neutral-500'
+                          }`} />
+                          Products & Services
+                        </a>
+                      </Link>
+                      
+                      <Link href="/dashboard/special-offers">
+                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          location === '/dashboard/special-offers' 
+                            ? 'bg-primary text-white' 
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}>
+                          <Tag className={`mr-3 h-4 w-4 ${
+                            location === '/dashboard/special-offers' ? 'text-white' : 'text-neutral-500'
+                          }`} />
+                          Special Offers
+                        </a>
+                      </Link>
+                    </>
+                  )}
+                  
+                  {/* Common features for all non-admin users */}
+                  <Link href="/dashboard/member-directory">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/dashboard/member-directory' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Users className={`mr-3 h-4 w-4 ${
+                        location === '/dashboard/member-directory' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Member Directory
+                    </a>
+                  </Link>
+                  
+                  {/* Affiliate programme - not for students or volunteers */}
+                  {user?.participantType !== 'volunteer' && user?.participantType !== 'student' && (
+                    <Link href="/dashboard/affiliate">
+                      <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        location === '/dashboard/affiliate' 
+                          ? 'bg-primary text-white' 
+                          : 'text-neutral-700 hover:bg-neutral-100'
+                      }`}>
+                        <DollarSign className={`mr-3 h-4 w-4 ${
+                          location === '/dashboard/affiliate' ? 'text-white' : 'text-neutral-500'
+                        }`} />
+                        Affiliate Programme
+                      </a>
+                    </Link>
+                  )}
+                  
+                  {/* Event and badge features - for all non-admin users */}
+                  <Link href="/my-personal-badge">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/my-personal-badge' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <QrCode className={`mr-3 h-4 w-4 ${
+                        location === '/my-personal-badge' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      My Personal Badge
+                    </a>
+                  </Link>
+                  
+                  <Link href="/enhanced-personal-badge">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/enhanced-personal-badge' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <QrCode className={`mr-3 h-4 w-4 ${
+                        location === '/enhanced-personal-badge' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Enhanced Event Badges
+                    </a>
+                  </Link>
+                  
+                  <Link href="/my-qr-code">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/my-qr-code' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Calendar className={`mr-3 h-4 w-4 ${
+                        location === '/my-qr-code' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      My Events & Badges
+                    </a>
+                  </Link>
+
+                  {/* Exhibitor-specific features */}
+                  {user?.participantType === 'exhibitor' && (
+                    <>
+                      <Link href="/exhibitor-scanner">
+                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          location === '/exhibitor-scanner' 
+                            ? 'bg-primary text-white' 
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}>
+                          <QrCode className={`mr-3 h-4 w-4 ${
+                            location === '/exhibitor-scanner' ? 'text-white' : 'text-neutral-500'
+                          }`} />
+                          Scan Visitors
+                        </a>
+                      </Link>
+                      <Link href="/exhibitor-visitors">
+                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                          location === '/exhibitor-visitors' 
+                            ? 'bg-primary text-white' 
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}>
+                          <Users className={`mr-3 h-4 w-4 ${
+                            location === '/exhibitor-visitors' ? 'text-white' : 'text-neutral-500'
+                          }`} />
+                          Exhibition Visitors
+                        </a>
+                      </Link>
+                    </>
+                  )}
+                </>
               )}
+              
+
             </nav>
             
             <Separator className="my-4" />
