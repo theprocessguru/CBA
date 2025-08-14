@@ -121,12 +121,14 @@ export default function EditJob() {
       });
       navigate("/jobs/my-jobs");
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      const errorMessage = error?.message || "Failed to update job posting. Please try again.";
       toast({
         title: "Update failed",
-        description: "Failed to update job posting. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
+      console.error("Job update error:", error);
     },
   });
 
@@ -179,8 +181,9 @@ export default function EditJob() {
     );
   }
 
-  // Check if user owns this job
-  if (job.userId !== user.id) {
+  // Check if user owns this job or is admin
+  const isAdmin = (user as any).isAdmin || (user as any).role === 'admin';
+  if (job.userId !== user.id && !isAdmin) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>

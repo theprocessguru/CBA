@@ -7588,10 +7588,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.id;
       const jobId = parseInt(req.params.id);
       
-      // Check ownership
+      // Check ownership or admin
       const [job] = await db.select().from(jobPostings).where(eq(jobPostings.id, jobId));
       
-      if (!job || job.userId !== userId) {
+      if (!job) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+      
+      // Allow edit if user owns the job OR is an admin
+      const isAdmin = req.user.role === 'admin' || req.user.isAdmin;
+      if (job.userId !== userId && !isAdmin) {
         return res.status(403).json({ message: "Unauthorized to edit this job" });
       }
       
