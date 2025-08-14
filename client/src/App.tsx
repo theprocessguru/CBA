@@ -92,6 +92,7 @@ import PersonTypes from "@/pages/admin/person-types";
 import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
+import EditJob from "@/pages/edit-job";
 import MyJobs from "@/pages/my-jobs";
 import { EventMoodDemo } from "@/pages/EventMoodDemo";
 
@@ -239,6 +240,13 @@ function Router() {
         <ProtectedRoute>
           <MainLayout>
             <MyJobs />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/jobs/:id/edit">
+        <ProtectedRoute>
+          <MainLayout>
+            <EditJob />
           </MainLayout>
         </ProtectedRoute>
       </Route>
