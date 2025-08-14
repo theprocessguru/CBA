@@ -48,7 +48,9 @@ const MembershipManagement = () => {
   const { data: stats, isLoading: isLoadingStats, error: statsError } = useQuery<MembershipStats>({
     queryKey: ['/api/admin/membership-stats'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/membership-stats');
+      const response = await fetch('/api/admin/membership-stats', {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch stats: ${response.statusText}`);
       }
@@ -64,7 +66,9 @@ const MembershipManagement = () => {
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (tierFilter !== 'all') params.append('tier', tierFilter);
       
-      const response = await fetch(`/api/admin/members?${params.toString()}`);
+      const response = await fetch(`/api/admin/members?${params.toString()}`, {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch members: ${response.statusText}`);
       }
