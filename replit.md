@@ -8,6 +8,9 @@ Preferred communication style: Simple, everyday language.
 Volunteers: No business listing menu items in dashboard (they don't need business features).
 
 ## Recent Changes
+- **Multiple Event Types Support (August 14, 2025)**: Added comprehensive events management system supporting networking events, workshops, summits, conferences, exhibitions, and seminars. Created new database tables for generic event management including registrations, exhibitors, speakers, volunteers, and sponsors.
+- **Exhibition Stand Management (August 14, 2025)**: Added stand location, stand number, and stand size fields to AI Summit exhibitor registrations for proper exhibition space management. Exhibitors can now specify their exact stand details during registration.
+- **Jobs Board Confirmed (August 14, 2025)**: Confirmed jobs board is fully implemented with job postings, applications, and saved searches functionality. Accessible via Membership dropdown in navigation at /jobs.
 - **GoHighLevel Custom Fields Documentation (August 14, 2025)**: Created comprehensive GHL_CUSTOM_FIELDS_SETUP.md guide with 150+ custom fields needed for complete data synchronization. Document includes field names, types, dropdown options, tags, and automation triggers organized by user type (members, exhibitors, speakers, volunteers, sponsors).
 - **GoHighLevel API Key Update (August 14, 2025)**: Successfully updated GHL_API_KEY to connect to new GoHighLevel account. All integrations now point to new account including contact management, SMS/email notifications, and chatbot features.
 - **Membership Stats Page Fix (August 14, 2025)**: Fixed "Failed to fetch stats" error by adding credentials: 'include' to fetch requests in MembershipManagement.tsx. Stats now properly display member counts and tier distribution.

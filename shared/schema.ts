@@ -278,6 +278,155 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Events Management System - Support for multiple event types
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  eventCode: varchar("event_code").unique().notNull(), // e.g., "ai-summit-2025", "networking-jan-2025"
+  name: varchar("name").notNull(), // e.g., "AI Summit 2025", "January Networking Event"
+  type: varchar("type").notNull(), // networking, workshop, summit, conference, exhibition, seminar
+  description: text("description"),
+  venue: varchar("venue").notNull(),
+  venueAddress: text("venue_address"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  registrationStartDate: timestamp("registration_start_date"),
+  registrationEndDate: timestamp("registration_end_date"),
+  maxCapacity: integer("max_capacity"),
+  currentRegistrations: integer("current_registrations").default(0),
+  ticketPrice: decimal("ticket_price", { precision: 10, scale: 2 }),
+  memberPrice: decimal("member_price", { precision: 10, scale: 2 }),
+  earlyBirdPrice: decimal("early_bird_price", { precision: 10, scale: 2 }),
+  earlyBirdDeadline: timestamp("early_bird_deadline"),
+  imageUrl: varchar("image_url"),
+  bannerUrl: varchar("banner_url"),
+  status: varchar("status").default("draft"), // draft, published, ongoing, completed, cancelled
+  hasExhibition: boolean("has_exhibition").default(false),
+  hasSpeakers: boolean("has_speakers").default(false),
+  hasWorkshops: boolean("has_workshops").default(false),
+  hasNetworking: boolean("has_networking").default(true),
+  hasVolunteers: boolean("has_volunteers").default(false),
+  hasSponsors: boolean("has_sponsors").default(false),
+  tags: text("tags"), // JSON array of tags
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Event Registrations - Generic registration for any event type
+export const eventRegistrations = pgTable("event_registrations", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  userId: varchar("user_id").references(() => users.id),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  participantType: varchar("participant_type").default("attendee"), // attendee, speaker, exhibitor, volunteer, sponsor
+  dietaryRequirements: text("dietary_requirements"),
+  accessibilityNeeds: text("accessibility_needs"),
+  specialRequests: text("special_requests"),
+  ticketType: varchar("ticket_type"), // standard, vip, member, early_bird
+  paymentStatus: varchar("payment_status").default("pending"), // pending, paid, refunded
+  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }),
+  paymentDate: timestamp("payment_date"),
+  checkInStatus: boolean("checked_in").default(false),
+  checkInTime: timestamp("check_in_time"),
+  badgeId: varchar("badge_id").unique(),
+  registeredAt: timestamp("registered_at").defaultNow(),
+}, (table) => [
+  unique("unique_event_registration").on(table.eventId, table.email),
+]);
+
+// Event Exhibitors - For events with exhibitions
+export const eventExhibitors = pgTable("event_exhibitors", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  registrationId: integer("registration_id").references(() => eventRegistrations.id),
+  companyName: varchar("company_name").notNull(),
+  contactName: varchar("contact_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  website: varchar("website"),
+  businessDescription: text("business_description"),
+  productsServices: text("products_services"),
+  boothType: varchar("booth_type"), // standard, premium, custom
+  standLocation: varchar("stand_location"), // e.g., "Hall A", "Main Hall"
+  standNumber: varchar("stand_number"), // e.g., "A12", "B45"
+  standSize: varchar("stand_size"), // e.g., "3x3m", "6x3m"
+  electricalNeeds: boolean("electrical_needs").default(false),
+  internetNeeds: boolean("internet_needs").default(false),
+  specialRequirements: text("special_requirements"),
+  setupTime: timestamp("setup_time"),
+  breakdownTime: timestamp("breakdown_time"),
+  staffCount: integer("staff_count").default(1),
+  status: varchar("status").default("confirmed"), // pending, confirmed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event Speakers - For events with speakers
+export const eventSpeakers = pgTable("event_speakers", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  registrationId: integer("registration_id").references(() => eventRegistrations.id),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  bio: text("bio"),
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  linkedIn: varchar("linked_in"),
+  website: varchar("website"),
+  photoUrl: varchar("photo_url"),
+  sessionTitle: varchar("session_title"),
+  sessionDescription: text("session_description"),
+  sessionType: varchar("session_type"), // keynote, workshop, panel, presentation
+  sessionDuration: integer("session_duration"), // in minutes
+  sessionTime: timestamp("session_time"),
+  sessionRoom: varchar("session_room"),
+  techRequirements: text("tech_requirements"),
+  status: varchar("status").default("confirmed"), // pending, confirmed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event Volunteers - For events needing volunteers
+export const eventVolunteers = pgTable("event_volunteers", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  registrationId: integer("registration_id").references(() => eventRegistrations.id),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  role: varchar("role"), // registration, information, technical, logistics, security
+  shift: varchar("shift"), // morning, afternoon, full_day
+  experience: text("experience"),
+  availability: text("availability"),
+  tShirtSize: varchar("t_shirt_size"),
+  emergencyContact: varchar("emergency_contact"),
+  status: varchar("status").default("confirmed"), // pending, confirmed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Event Sponsors - For events with sponsorship
+export const eventSponsors = pgTable("event_sponsors", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  companyName: varchar("company_name").notNull(),
+  contactName: varchar("contact_name").notNull(),
+  email: varchar("email").notNull(),
+  phone: varchar("phone"),
+  website: varchar("website"),
+  logoUrl: varchar("logo_url"),
+  sponsorshipTier: varchar("sponsorship_tier"), // bronze, silver, gold, platinum
+  sponsorshipAmount: decimal("sponsorship_amount", { precision: 10, scale: 2 }),
+  benefits: text("benefits"), // JSON array of benefits
+  specialRequests: text("special_requests"),
+  invoiceSent: boolean("invoice_sent").default(false),
+  paymentReceived: boolean("payment_received").default(false),
+  status: varchar("status").default("pending"), // pending, confirmed, cancelled
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // AI Summit registrations table
 export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   id: serial("id").primaryKey(),
@@ -312,6 +461,9 @@ export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_regis
   productsServices: text("products_services"),
   exhibitionGoals: text("exhibition_goals"),
   boothRequirements: varchar("booth_requirements"), // Standard, Premium, Custom
+  standLocation: varchar("stand_location"), // e.g., "Hall A", "Main Exhibition Hall", "Outdoor Area"
+  standNumber: varchar("stand_number"), // e.g., "A12", "B45", "C103"
+  standSize: varchar("stand_size"), // e.g., "3x3m", "6x3m", "9x3m"
   electricalNeeds: boolean("electrical_needs").default(false),
   internetNeeds: boolean("internet_needs").default(false),
   specialRequirements: text("special_requirements"),
@@ -836,8 +988,8 @@ export const sponsorshipPackages = pgTable('sponsorship_packages', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
-// Event Sponsors
-export const eventSponsors = pgTable('event_sponsors', {
+// CBA Event Sponsors (renamed to avoid conflict with generic eventSponsors)
+export const cbaEventSponsors = pgTable('cba_event_sponsors', {
   id: serial('id').primaryKey(),
   eventId: integer('event_id').notNull().references(() => cbaEvents.id),
   packageId: integer('package_id').notNull().references(() => sponsorshipPackages.id),
@@ -1187,84 +1339,13 @@ export type ScanSession = typeof scanSessions.$inferSelect;
 export type InsertExhibitorStandVisitor = z.infer<typeof insertExhibitorStandVisitorSchema>;
 export type ExhibitorStandVisitor = typeof exhibitorStandVisitors.$inferSelect;
 
-// Legacy Event Management System (keeping for existing registrations)
-export const events = pgTable("events", {
-  id: serial("id").primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  location: varchar("location", { length: 255 }).notNull(),
-  maxCapacity: integer("max_capacity").notNull(),
-  registrationFee: numeric("registration_fee", { precision: 10, scale: 2 }).default('0'),
-  status: varchar("status", { length: 20 }).default('draft'), // draft, published, cancelled, completed
-  eventType: varchar("event_type", { length: 50 }).notNull(), // workshop, seminar, conference, networking, etc.
-  tags: text("tags").array(), // Array of category tags
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("events_start_date_idx").on(table.startDate),
-  index("events_status_idx").on(table.status),
-  index("events_type_idx").on(table.eventType),
-]);
-
-export const eventRegistrations = pgTable("event_registrations", {
-  id: serial("id").primaryKey(),
-  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
-  userId: varchar("user_id").references(() => users.id), // Link to user account
-  ticketId: varchar("ticket_id", { length: 50 }).notNull().unique(), // Generated ticket ID
-  participantName: varchar("participant_name", { length: 255 }),
-  participantEmail: varchar("participant_email", { length: 255 }),
-  participantPhone: varchar("participant_phone", { length: 20 }),
-  registrationType: varchar("registration_type", { length: 50 }),
-  specialRequirements: text("special_requirements"),
-  status: varchar("status", { length: 20 }).default('registered'), // registered, checked_in, cancelled
-  registrationDate: timestamp("registration_date").defaultNow(),
-  checkInTime: timestamp("check_in_time"),
-  checkedInBy: varchar("checked_in_by", { length: 255 }),
-}, (table) => [
-  index("event_registrations_event_idx").on(table.eventId),
-  index("event_registrations_email_idx").on(table.participantEmail),
-  index("event_registrations_status_idx").on(table.status),
-  unique("unique_event_email").on(table.eventId, table.participantEmail),
-]);
-
-export const eventSessions = pgTable("event_sessions", {
-  id: serial("id").primaryKey(),
-  eventId: integer("event_id").notNull().references(() => events.id, { onDelete: "cascade" }),
-  title: varchar("title", { length: 255 }).notNull(),
-  description: text("description"),
-  speakerName: varchar("speaker_name", { length: 255 }),
-  speakerBio: text("speaker_bio"),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time").notNull(),
-  room: varchar("room", { length: 100 }),
-  maxCapacity: integer("max_capacity"),
-  sessionType: varchar("session_type", { length: 50 }).default('session'), // session, workshop, break, lunch, etc.
-  requiresRegistration: boolean("requires_registration").default(false),
-  materials: text("materials"), // Links to presentation materials
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("event_sessions_event_idx").on(table.eventId),
-  index("event_sessions_start_time_idx").on(table.startTime),
-]);
-
-export const eventSessionRegistrations = pgTable("event_session_registrations", {
-  id: serial("id").primaryKey(),
-  sessionId: integer("session_id").notNull().references(() => eventSessions.id, { onDelete: "cascade" }),
-  registrationId: integer("registration_id").notNull().references(() => eventRegistrations.id, { onDelete: "cascade" }),
-  registeredAt: timestamp("registered_at").defaultNow(),
-}, (table) => [
-  index("event_session_registrations_session_idx").on(table.sessionId),
-  index("event_session_registrations_registration_idx").on(table.registrationId),
-  unique("unique_session_attendance").on(table.sessionId, table.registrationId),
-]);
-
-// Event Management Insert Schemas and Types
-export const insertEventSchema = createInsertSchema(events).omit({ id: true });
-export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({ id: true });
-export const insertEventSessionSchema = createInsertSchema(eventSessions).omit({ id: true });
-export const insertEventSessionRegistrationSchema = createInsertSchema(eventSessionRegistrations).omit({ id: true });
+// Event Management System Types and Schemas
+export const insertEventSchema = createInsertSchema(events).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEventRegistrationSchema = createInsertSchema(eventRegistrations).omit({ id: true, registeredAt: true });
+export const insertEventExhibitorSchema = createInsertSchema(eventExhibitors).omit({ id: true, createdAt: true });
+export const insertEventSpeakerSchema = createInsertSchema(eventSpeakers).omit({ id: true, createdAt: true });
+export const insertEventVolunteerSchema = createInsertSchema(eventVolunteers).omit({ id: true, createdAt: true });
+export const insertEventSponsorSchema = createInsertSchema(eventSponsors).omit({ id: true, createdAt: true });
 
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 export type Event = typeof events.$inferSelect;
@@ -1272,11 +1353,17 @@ export type Event = typeof events.$inferSelect;
 export type InsertEventRegistration = z.infer<typeof insertEventRegistrationSchema>;
 export type EventRegistration = typeof eventRegistrations.$inferSelect;
 
-export type InsertEventSession = z.infer<typeof insertEventSessionSchema>;
-export type EventSession = typeof eventSessions.$inferSelect;
+export type InsertEventExhibitor = z.infer<typeof insertEventExhibitorSchema>;
+export type EventExhibitor = typeof eventExhibitors.$inferSelect;
 
-export type InsertEventSessionRegistration = z.infer<typeof insertEventSessionRegistrationSchema>;
-export type EventSessionRegistration = typeof eventSessionRegistrations.$inferSelect;
+export type InsertEventSpeaker = z.infer<typeof insertEventSpeakerSchema>;
+export type EventSpeaker = typeof eventSpeakers.$inferSelect;
+
+export type InsertEventVolunteer = z.infer<typeof insertEventVolunteerSchema>;
+export type EventVolunteer = typeof eventVolunteers.$inferSelect;
+
+export type InsertEventSponsor = z.infer<typeof insertEventSponsorSchema>;
+export type EventSponsor = typeof eventSponsors.$inferSelect;
 
 // CBA Events Types
 export type InsertCBAEvent = z.infer<typeof insertCBAEventSchema>;
@@ -1372,8 +1459,8 @@ export const insertSponsorshipPackageSchema = createInsertSchema(sponsorshipPack
 export type InsertSponsorshipPackage = z.infer<typeof insertSponsorshipPackageSchema>;
 export type SponsorshipPackage = typeof sponsorshipPackages.$inferSelect;
 
-// Event Sponsor Schema and Types
-export const insertEventSponsorSchema = createInsertSchema(eventSponsors, {
+// CBA Event Sponsor Schema and Types (using cbaEventSponsors table)
+export const insertCBAEventSponsorSchema = createInsertSchema(cbaEventSponsors, {
   eventId: z.number().min(1, "Event ID is required"),
   packageId: z.number().min(1, "Package ID is required"),
   companyName: z.string().min(1, "Company name is required"),
@@ -1398,8 +1485,8 @@ export const insertEventSponsorSchema = createInsertSchema(eventSponsors, {
   updatedAt: true 
 });
 
-export type InsertEventSponsor = z.infer<typeof insertEventSponsorSchema>;
-export type EventSponsor = typeof eventSponsors.$inferSelect;
+export type InsertCBAEventSponsor = z.infer<typeof insertCBAEventSponsorSchema>;
+export type CBAEventSponsor = typeof cbaEventSponsors.$inferSelect;
 
 // Affiliate Programme Tables
 export const affiliates = pgTable("affiliates", {

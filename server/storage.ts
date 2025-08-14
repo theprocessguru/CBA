@@ -63,16 +63,10 @@ import {
   type InsertPasswordResetToken,
   events,
   eventRegistrations,
-  eventSessions,
-  eventSessionRegistrations,
   type Event,
   type InsertEvent,
   type EventRegistration,
   type InsertEventRegistration,
-  type EventSession,
-  type InsertEventSession,
-  type EventSessionRegistration,
-  type InsertEventSessionRegistration,
   cbaEvents,
   cbaEventRegistrations,
   eventAttendanceAnalytics,
@@ -300,17 +294,7 @@ export interface IStorage {
   deleteEventRegistration(id: number): Promise<void>;
   checkInEventRegistration(ticketId: string, checkedInBy: string): Promise<EventRegistration>;
 
-  // Event Sessions
-  getEventSessions(eventId: number): Promise<EventSession[]>;
-  getEventSessionById(id: number): Promise<EventSession | undefined>;
-  createEventSession(session: InsertEventSession): Promise<EventSession>;
-  updateEventSession(id: number, session: Partial<InsertEventSession>): Promise<EventSession>;
-  deleteEventSession(id: number): Promise<void>;
 
-  // Event Session Registrations
-  getEventSessionRegistrations(sessionId: number): Promise<EventSessionRegistration[]>;
-  createEventSessionRegistration(registration: InsertEventSessionRegistration): Promise<EventSessionRegistration>;
-  deleteEventSessionRegistration(sessionId: number, registrationId: number): Promise<void>;
 
   // Enhanced CBA Event Management operations
   createCBAEvent(event: InsertCBAEvent): Promise<CBAEvent>;
@@ -1820,57 +1804,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(eventRegistrations.registrationDate));
   }
 
-  // Event Sessions Implementation
-  async getEventSessions(eventId: number): Promise<EventSession[]> {
-    return await db.select().from(eventSessions)
-      .where(eq(eventSessions.eventId, eventId))
-      .orderBy(eventSessions.startTime);
-  }
 
-  async getEventSessionById(id: number): Promise<EventSession | undefined> {
-    const [session] = await db.select().from(eventSessions).where(eq(eventSessions.id, id));
-    return session;
-  }
-
-  async createEventSession(session: InsertEventSession): Promise<EventSession> {
-    const [newSession] = await db.insert(eventSessions).values(session).returning();
-    return newSession;
-  }
-
-  async updateEventSession(id: number, session: Partial<InsertEventSession>): Promise<EventSession> {
-    const [updatedSession] = await db
-      .update(eventSessions)
-      .set(session)
-      .where(eq(eventSessions.id, id))
-      .returning();
-    return updatedSession;
-  }
-
-  async deleteEventSession(id: number): Promise<void> {
-    await db.delete(eventSessions).where(eq(eventSessions.id, id));
-  }
-
-  // Event Session Registrations Implementation
-  async getEventSessionRegistrations(sessionId: number): Promise<EventSessionRegistration[]> {
-    return await db.select().from(eventSessionRegistrations)
-      .where(eq(eventSessionRegistrations.sessionId, sessionId))
-      .orderBy(desc(eventSessionRegistrations.registeredAt));
-  }
-
-  async createEventSessionRegistration(registration: InsertEventSessionRegistration): Promise<EventSessionRegistration> {
-    const [newRegistration] = await db.insert(eventSessionRegistrations).values(registration).returning();
-    return newRegistration;
-  }
-
-  async deleteEventSessionRegistration(sessionId: number, registrationId: number): Promise<void> {
-    await db.delete(eventSessionRegistrations)
-      .where(
-        and(
-          eq(eventSessionRegistrations.sessionId, sessionId),
-          eq(eventSessionRegistrations.registrationId, registrationId)
-        )
-      );
-  }
 
   // Event Scanning System Implementation
   // Scanner management
