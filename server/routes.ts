@@ -3740,11 +3740,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalPeopleTrained = Number(workshopData.total_attendees || 0);
 
       // Jobs metrics
-      const totalJobsResult = await db.execute(sql`SELECT COUNT(*) as count FROM jobs`);
+      const totalJobsResult = await db.execute(sql`SELECT COUNT(*) as count FROM job_postings`);
       const totalJobsPosted = Number(totalJobsResult.rows[0]?.count || 0);
 
       const activeJobsResult = await db.execute(sql`
-        SELECT COUNT(*) as count FROM jobs WHERE status = 'active'
+        SELECT COUNT(*) as count FROM job_postings WHERE is_active = true
       `);
       const activeJobs = Number(activeJobsResult.rows[0]?.count || 0);
 
@@ -3754,7 +3754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const jobApplicationsCount = Number(jobApplicationsResult.rows[0]?.count || 0);
 
       const avgSalaryResult = await db.execute(sql`
-        SELECT AVG(salary) as avg FROM jobs WHERE salary IS NOT NULL
+        SELECT AVG((salary_min + salary_max) / 2) as avg FROM job_postings WHERE salary_min IS NOT NULL
       `);
       const averageSalary = Number(avgSalaryResult.rows[0]?.avg || 35000);
 
@@ -10085,6 +10085,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching mood analytics:", error);
       res.status(500).json({ message: "Failed to fetch mood analytics: " + error.message });
+    }
+  });
+
+  // Jobs Board API Endpoints
+  
+  // Get all active jobs
+  app.get('/api/jobs', async (req, res) => {
+    try {
+      const jobs = await db
+        .select()
+        .from(jobPostings)
+        .where(eq(jobPostings.isActive, true))
+        .orderBy(desc(jobPostings.createdAt));
+      
+      res.json(jobs);
+    } catch (error: any) {
+      console.error("Error fetching jobs:", error);
+      res.status(500).json({ message: "Failed to fetch jobs" });
+    }
+  });
+
+  // Submit job application
+  app.post('/api/jobs/apply', isAuthenticated, async (req: any, res) => {
+    try {
+      const {
+        jobId,
+        applicantName,
+        applicantEmail,
+        applicantPhone,
+        coverLetter,
+        cvData,
+        cvFileName,
+        cvFileType,
+        linkedinProfile
+      } = req.body;
+
+      // Validate required fields
+      if (!jobId || !applicantName || !applicantEmail) {
+        return res.status(400).json({ message: "Job ID, name, and email are required" });
+      }
+
+      // Check if job exists and is active
+      const job = await db
+        .select()
+        .from(jobPostings)
+        .where(eq(jobPostings.id, jobId))
+        .limit(1);
+      
+      if (job.length === 0 || !job[0].isActive) {
+        return res.status(404).json({ message: "Job not found or no longer accepting applications" });
+      }
+
+      // Check if user has already applied
+      const existingApplication = await db
+        .select()
+        .from(jobApplications)
+        .where(
+          and(
+            eq(jobApplications.jobId, jobId),
+            eq(jobApplications.userId, req.user.id)
+          )
+        )
+        .limit(1);
+      
+      if (existingApplication.length > 0) {
+        return res.status(400).json({ message: "You have already applied for this job" });
+      }
+
+      // Create job application
+      const application = await db.insert(jobApplications).values({
+        jobId,
+        userId: req.user.id,
+        applicantName,
+        applicantEmail,
+        applicantPhone,
+        coverLetter,
+        cvData,
+        cvFileName,
+        cvFileType,
+        cvUploadedAt: cvData ? new Date() : null,
+        linkedinProfile,
+        status: "pending",
+        appliedAt: new Date()
+      }).returning();
+
+      // Send notification email to applicant
+      await emailService.sendNotificationEmail(
+        applicantEmail,
+        'Job Application Received',
+        `
+        <h2>Thank you for your application!</h2>
+        <p>Dear ${applicantName},</p>
+        
+        <p>We have received your application for the position of <strong>${job[0].title}</strong> at ${job[0].company}.</p>
+        
+        <p>Your application is now being reviewed. We will contact you if your profile matches our requirements.</p>
+        
+        <h3>Application Details:</h3>
+        <ul>
+          <li><strong>Position:</strong> ${job[0].title}</li>
+          <li><strong>Company:</strong> ${job[0].company}</li>
+          <li><strong>Location:</strong> ${job[0].location}</li>
+          <li><strong>Applied on:</strong> ${new Date().toLocaleDateString()}</li>
+        </ul>
+        
+        <p>Best regards,<br>
+        Croydon Business Association</p>
+        `
+      );
+
+      // Send notification to employer if they have an email set
+      if (job[0].applicationEmail) {
+        await emailService.sendNotificationEmail(
+          job[0].applicationEmail,
+          `New Application - ${job[0].title}`,
+          `
+          <h2>New Job Application Received</h2>
+          
+          <p>You have received a new application for the position of <strong>${job[0].title}</strong>.</p>
+          
+          <h3>Applicant Details:</h3>
+          <ul>
+            <li><strong>Name:</strong> ${applicantName}</li>
+            <li><strong>Email:</strong> ${applicantEmail}</li>
+            ${applicantPhone ? `<li><strong>Phone:</strong> ${applicantPhone}</li>` : ''}
+            ${linkedinProfile ? `<li><strong>LinkedIn:</strong> <a href="${linkedinProfile}">${linkedinProfile}</a></li>` : ''}
+            ${cvFileName ? `<li><strong>CV Attached:</strong> ${cvFileName}</li>` : ''}
+          </ul>
+          
+          ${coverLetter ? `<h3>Cover Letter:</h3><p>${coverLetter}</p>` : ''}
+          
+          <p>Log in to your account to view and manage applications.</p>
+          
+          <p>Best regards,<br>
+          Croydon Business Association</p>
+          `
+        );
+      }
+
+      res.json({ 
+        success: true, 
+        message: "Application submitted successfully",
+        applicationId: application[0].id 
+      });
+
+    } catch (error: any) {
+      console.error("Error submitting job application:", error);
+      res.status(500).json({ message: "Failed to submit application" });
+    }
+  });
+
+  // Get user's job applications
+  app.get('/api/jobs/my-applications', isAuthenticated, async (req: any, res) => {
+    try {
+      const applications = await db
+        .select({
+          id: jobApplications.id,
+          jobId: jobApplications.jobId,
+          jobTitle: jobPostings.title,
+          company: jobPostings.company,
+          applicantName: jobApplications.applicantName,
+          applicantEmail: jobApplications.applicantEmail,
+          status: jobApplications.status,
+          appliedAt: jobApplications.appliedAt,
+          reviewedAt: jobApplications.reviewedAt,
+          cvFileName: jobApplications.cvFileName
+        })
+        .from(jobApplications)
+        .leftJoin(jobPostings, eq(jobApplications.jobId, jobPostings.id))
+        .where(eq(jobApplications.userId, req.user.id))
+        .orderBy(desc(jobApplications.appliedAt));
+      
+      res.json(applications);
+    } catch (error: any) {
+      console.error("Error fetching user applications:", error);
+      res.status(500).json({ message: "Failed to fetch applications" });
+    }
+  });
+
+  // Get single job details
+  app.get('/api/jobs/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const job = await db
+        .select()
+        .from(jobPostings)
+        .where(eq(jobPostings.id, parseInt(id)))
+        .limit(1);
+      
+      if (job.length === 0) {
+        return res.status(404).json({ message: "Job not found" });
+      }
+
+      // Increment view count
+      await db
+        .update(jobPostings)
+        .set({ views: (job[0].views || 0) + 1 })
+        .where(eq(jobPostings.id, parseInt(id)));
+
+      res.json(job[0]);
+    } catch (error: any) {
+      console.error("Error fetching job details:", error);
+      res.status(500).json({ message: "Failed to fetch job details" });
     }
   });
 

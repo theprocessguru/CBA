@@ -94,6 +94,7 @@ import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
 import EditJob from "@/pages/edit-job";
 import MyJobs from "@/pages/my-jobs";
+import MyApplications from "@/pages/my-applications";
 import { EventMoodDemo } from "@/pages/EventMoodDemo";
 
 import Navbar from "@/components/layout/Navbar";
@@ -240,6 +241,13 @@ function Router() {
         <ProtectedRoute>
           <MainLayout>
             <MyJobs />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/my-applications">
+        <ProtectedRoute>
+          <MainLayout>
+            <MyApplications />
           </MainLayout>
         </ProtectedRoute>
       </Route>

@@ -1682,6 +1682,10 @@ export const jobApplications = pgTable("job_applications", {
   applicantPhone: text("applicant_phone"),
   coverLetter: text("cover_letter"),
   resumeUrl: text("resume_url"),
+  cvData: text("cv_data"), // Base64 encoded CV file
+  cvFileName: text("cv_file_name"), // Original filename
+  cvFileType: text("cv_file_type"), // MIME type
+  cvUploadedAt: timestamp("cv_uploaded_at"),
   linkedinProfile: text("linkedin_profile"),
   status: text("status").default("pending"), // pending, reviewed, shortlisted, rejected, hired
   notes: text("notes"),
@@ -1790,6 +1794,10 @@ export const insertJobApplicationSchema = createInsertSchema(jobApplications, {
   applicantPhone: z.string().optional(),
   coverLetter: z.string().optional(),
   resumeUrl: z.string().url().optional(),
+  cvData: z.string().optional(), // Base64 encoded CV
+  cvFileName: z.string().optional(),
+  cvFileType: z.string().optional(),
+  cvUploadedAt: z.date().optional(),
   linkedinProfile: z.string().url().optional(),
   status: z.enum(["pending", "reviewed", "shortlisted", "rejected", "hired"]).default("pending"),
   notes: z.string().optional(),

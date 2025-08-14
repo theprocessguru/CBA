@@ -1,44 +1,243 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { useState, useRef } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, MapPin, Clock, DollarSign, Building, Plus, Search, Filter } from "lucide-react";
-import type { JobPosting } from "@shared/schema";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  MapPin,
+  Briefcase,
+  Clock,
+  DollarSign,
+  Calendar,
+  Building,
+  Search,
+  Filter,
+  Upload,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { format } from "date-fns";
+
+interface Job {
+  id: number;
+  title: string;
+  company: string;
+  location: string;
+  jobType: string;
+  workMode: string;
+  salary?: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  description: string;
+  requirements?: string;
+  benefits?: string;
+  applicationEmail?: string;
+  applicationUrl?: string;
+  deadline?: string;
+  isActive: boolean;
+  views: number;
+  createdAt: string;
+  category?: string;
+  experienceLevel?: string;
+  tags?: string[];
+}
+
+interface JobApplication {
+  jobId: number;
+  applicantName: string;
+  applicantEmail: string;
+  applicantPhone?: string;
+  coverLetter?: string;
+  cvData?: string;
+  cvFileName?: string;
+  cvFileType?: string;
+  linkedinProfile?: string;
+}
 
 export default function Jobs() {
-  const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [jobType, setJobType] = useState("");
-  const [workMode, setWorkMode] = useState("");
-  const [category, setCategory] = useState("");
-  const [experienceLevel, setExperienceLevel] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
-
-  const { data: user } = useQuery({ queryKey: ["/api/auth/user"] });
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { data: jobs = [], isLoading } = useQuery<JobPosting[]>({
-    queryKey: ["/api/jobs", { search, location, jobType, workMode, category, experienceLevel }],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      if (search) params.append("search", search);
-      if (location) params.append("location", location);
-      if (jobType) params.append("jobType", jobType);
-      if (workMode) params.append("workMode", workMode);
-      if (category) params.append("category", category);
-      if (experienceLevel) params.append("experienceLevel", experienceLevel);
-      
-      const response = await fetch(`/api/jobs?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch jobs");
-      return response.json();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [jobTypeFilter, setJobTypeFilter] = useState("");
+  const [workModeFilter, setWorkModeFilter] = useState("");
+  
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isApplyDialogOpen, setIsApplyDialogOpen] = useState(false);
+  const [cvFile, setCvFile] = useState<File | null>(null);
+  const [applicationForm, setApplicationForm] = useState<JobApplication>({
+    jobId: 0,
+    applicantName: user?.name || "",
+    applicantEmail: user?.email || "",
+    applicantPhone: "",
+    coverLetter: "",
+    linkedinProfile: "",
+  });
+
+  // Fetch jobs
+  const { data: jobs, isLoading } = useQuery<Job[]>({
+    queryKey: ["/api/jobs"],
+  });
+
+  // Submit job application
+  const applyMutation = useMutation({
+    mutationFn: async (application: JobApplication) => {
+      return apiRequest("POST", "/api/jobs/apply", application);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Application Submitted",
+        description: "Your job application has been submitted successfully!",
+      });
+      setIsApplyDialogOpen(false);
+      setCvFile(null);
+      setApplicationForm({
+        jobId: 0,
+        applicantName: user?.name || "",
+        applicantEmail: user?.email || "",
+        applicantPhone: "",
+        coverLetter: "",
+        linkedinProfile: "",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/jobs/my-applications"] });
+    },
+    onError: () => {
+      toast({
+        title: "Application Failed",
+        description: "Failed to submit your application. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
-  const formatSalary = (job: JobPosting) => {
+  // Handle CV file upload
+  const handleCvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "CV file must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      const allowedTypes = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload a PDF or Word document",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setCvFile(file);
+      
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setApplicationForm(prev => ({
+          ...prev,
+          cvData: base64String.split(",")[1], // Remove data:type;base64, prefix
+          cvFileName: file.name,
+          cvFileType: file.type,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Open application dialog
+  const handleApplyClick = (job: Job) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to apply for jobs",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setSelectedJob(job);
+    setApplicationForm(prev => ({
+      ...prev,
+      jobId: job.id,
+    }));
+    setIsApplyDialogOpen(true);
+  };
+
+  // Submit application
+  const handleSubmitApplication = () => {
+    if (!applicationForm.applicantName || !applicationForm.applicantEmail) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    applyMutation.mutate({
+      ...applicationForm,
+      userId: user?.id || "anonymous",
+    });
+  };
+
+  // Filter jobs
+  const filteredJobs = jobs?.filter(job => {
+    const matchesSearch = !searchTerm || 
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesLocation = !locationFilter || 
+      job.location.toLowerCase().includes(locationFilter.toLowerCase());
+    
+    const matchesJobType = !jobTypeFilter || job.jobType === jobTypeFilter;
+    const matchesWorkMode = !workModeFilter || job.workMode === workModeFilter;
+    
+    return matchesSearch && matchesLocation && matchesJobType && matchesWorkMode && job.isActive;
+  });
+
+  const formatSalary = (job: Job) => {
     if (job.salary) return job.salary;
     if (job.salaryMin && job.salaryMax) {
       return `£${job.salaryMin.toLocaleString()} - £${job.salaryMax.toLocaleString()}`;
@@ -48,237 +247,269 @@ export default function Jobs() {
     return "Competitive";
   };
 
-  const formatDate = (date: string | Date | null) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const getJobTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case "full-time": return "bg-green-100 text-green-800";
-      case "part-time": return "bg-blue-100 text-blue-800";
-      case "contract": return "bg-purple-100 text-purple-800";
-      case "freelance": return "bg-orange-100 text-orange-800";
-      case "internship": return "bg-pink-100 text-pink-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getWorkModeBadgeColor = (mode: string) => {
-    switch (mode) {
-      case "remote": return "bg-indigo-100 text-indigo-800";
-      case "hybrid": return "bg-cyan-100 text-cyan-800";
-      case "onsite": return "bg-amber-100 text-amber-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Job Board</h1>
-          <p className="text-muted-foreground mt-2">
-            Find your next opportunity within the CBA network
-          </p>
-        </div>
-        {user && (
-          <Link href="/jobs/post">
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
-              Post a Job
-            </Button>
-          </Link>
-        )}
+    <div className="container mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Job Opportunities</h1>
+        <p className="text-gray-600">Find your next career opportunity</p>
       </div>
 
       {/* Search and Filters */}
       <Card className="mb-6">
         <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search jobs by title, company, or keywords..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="lg:col-span-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search jobs..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
             </div>
-            <div className="flex gap-2">
-              <Input
-                placeholder="Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full md:w-40"
-              />
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="whitespace-nowrap"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </Button>
-            </div>
+            
+            <Input
+              placeholder="Location"
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+            />
+            
+            <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Job Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="full-time">Full Time</SelectItem>
+                <SelectItem value="part-time">Part Time</SelectItem>
+                <SelectItem value="contract">Contract</SelectItem>
+                <SelectItem value="internship">Internship</SelectItem>
+                <SelectItem value="temporary">Temporary</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={workModeFilter} onValueChange={setWorkModeFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Work Mode" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">All Modes</SelectItem>
+                <SelectItem value="on-site">On-site</SelectItem>
+                <SelectItem value="remote">Remote</SelectItem>
+                <SelectItem value="hybrid">Hybrid</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-
-          {showFilters && (
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4 pt-4 border-t">
-              <Select value={jobType} onValueChange={setJobType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Job Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="full-time">Full Time</SelectItem>
-                  <SelectItem value="part-time">Part Time</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="freelance">Freelance</SelectItem>
-                  <SelectItem value="internship">Internship</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={workMode} onValueChange={setWorkMode}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Work Mode" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Modes</SelectItem>
-                  <SelectItem value="remote">Remote</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                  <SelectItem value="onsite">On-site</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="technology">Technology</SelectItem>
-                  <SelectItem value="marketing">Marketing</SelectItem>
-                  <SelectItem value="sales">Sales</SelectItem>
-                  <SelectItem value="design">Design</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                  <SelectItem value="operations">Operations</SelectItem>
-                  <SelectItem value="hr">Human Resources</SelectItem>
-                  <SelectItem value="customer-service">Customer Service</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={experienceLevel} onValueChange={setExperienceLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Experience Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="entry">Entry Level</SelectItem>
-                  <SelectItem value="junior">Junior</SelectItem>
-                  <SelectItem value="mid">Mid Level</SelectItem>
-                  <SelectItem value="senior">Senior</SelectItem>
-                  <SelectItem value="lead">Lead</SelectItem>
-                  <SelectItem value="executive">Executive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Jobs List */}
-      {isLoading ? (
-        <div className="text-center py-12">
-          <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto" />
-          <p className="mt-4 text-muted-foreground">Loading jobs...</p>
-        </div>
-      ) : jobs.length === 0 ? (
+      {/* Job Listings */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredJobs?.map((job) => (
+          <Card key={job.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start mb-2">
+                <Badge variant="secondary" className="capitalize">
+                  {job.jobType.replace("-", " ")}
+                </Badge>
+                <Badge variant="outline" className="capitalize">
+                  {job.workMode}
+                </Badge>
+              </div>
+              <CardTitle className="text-lg">{job.title}</CardTitle>
+              <CardDescription>
+                <div className="flex items-center gap-1 mb-1">
+                  <Building className="h-3 w-3" />
+                  {job.company}
+                </div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" />
+                  {job.location}
+                </div>
+              </CardDescription>
+            </CardHeader>
+            
+            <CardContent>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-gray-500" />
+                  <span>{formatSalary(job)}</span>
+                </div>
+                
+                {job.experienceLevel && (
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-gray-500" />
+                    <span className="capitalize">{job.experienceLevel} Level</span>
+                  </div>
+                )}
+                
+                {job.deadline && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-500" />
+                    <span>Apply by {format(new Date(job.deadline), "MMM d, yyyy")}</span>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-500" />
+                  <span>Posted {format(new Date(job.createdAt), "MMM d")}</span>
+                </div>
+              </div>
+              
+              <p className="text-sm text-gray-600 mt-3 line-clamp-3">
+                {job.description}
+              </p>
+            </CardContent>
+            
+            <CardFooter>
+              <Button 
+                className="w-full" 
+                onClick={() => handleApplyClick(job)}
+              >
+                Apply Now
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+
+      {filteredJobs?.length === 0 && (
         <Card>
           <CardContent className="text-center py-12">
-            <Briefcase className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No jobs found</h3>
-            <p className="text-muted-foreground">
-              Try adjusting your search criteria or check back later for new opportunities.
-            </p>
+            <AlertCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Jobs Found</h3>
+            <p className="text-gray-600">Try adjusting your search filters</p>
           </CardContent>
         </Card>
-      ) : (
-        <div className="space-y-4">
-          {jobs.map((job) => (
-            <Link key={job.id} href={`/jobs/${job.id}`}>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{job.title}</h3>
-                      <div className="flex items-center gap-4 text-muted-foreground mb-3">
-                        <div className="flex items-center gap-1">
-                          <Building className="w-4 h-4" />
-                          <span>{job.company}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          <span>{job.location}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          <span>{formatSalary(job)}</span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {job.description}
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        <Badge className={getJobTypeBadgeColor(job.jobType)}>
-                          {job.jobType.replace("-", " ")}
-                        </Badge>
-                        <Badge className={getWorkModeBadgeColor(job.workMode)}>
-                          {job.workMode}
-                        </Badge>
-                        {job.experienceLevel && (
-                          <Badge variant="outline">{job.experienceLevel}</Badge>
-                        )}
-                        {job.category && (
-                          <Badge variant="outline">{job.category}</Badge>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right ml-4">
-                      <p className="text-sm text-muted-foreground">
-                        <Clock className="w-4 h-4 inline mr-1" />
-                        {formatDate(job.createdAt)}
-                      </p>
-                      {job.deadline && (
-                        <p className="text-sm text-orange-600 mt-1">
-                          Deadline: {formatDate(job.deadline)}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
       )}
 
-      {/* User Links */}
-      {user && (
-        <div className="flex gap-4 mt-8 pt-8 border-t">
-          <Link href="/jobs/my-jobs">
-            <Button variant="outline">My Job Postings</Button>
-          </Link>
-          <Link href="/jobs/applications">
-            <Button variant="outline">My Applications</Button>
-          </Link>
-        </div>
-      )}
+      {/* Application Dialog */}
+      <Dialog open={isApplyDialogOpen} onOpenChange={setIsApplyDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Apply for {selectedJob?.title}</DialogTitle>
+            <DialogDescription>
+              at {selectedJob?.company} · {selectedJob?.location}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Full Name *</Label>
+                <Input
+                  id="name"
+                  value={applicationForm.applicantName}
+                  onChange={(e) => setApplicationForm(prev => ({ ...prev, applicantName: e.target.value }))}
+                  placeholder="Your full name"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="email">Email Address *</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={applicationForm.applicantEmail}
+                  onChange={(e) => setApplicationForm(prev => ({ ...prev, applicantEmail: e.target.value }))}
+                  placeholder="your.email@example.com"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  value={applicationForm.applicantPhone}
+                  onChange={(e) => setApplicationForm(prev => ({ ...prev, applicantPhone: e.target.value }))}
+                  placeholder="Your phone number"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="linkedin">LinkedIn Profile</Label>
+                <Input
+                  id="linkedin"
+                  value={applicationForm.linkedinProfile}
+                  onChange={(e) => setApplicationForm(prev => ({ ...prev, linkedinProfile: e.target.value }))}
+                  placeholder="linkedin.com/in/yourprofile"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="cv">Upload CV (PDF or Word, max 5MB)</Label>
+              <div className="mt-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  id="cv"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleCvUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  {cvFile ? cvFile.name : "Choose CV File"}
+                </Button>
+                {cvFile && (
+                  <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+                    <CheckCircle className="h-4 w-4" />
+                    CV uploaded successfully
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="coverLetter">Cover Letter</Label>
+              <Textarea
+                id="coverLetter"
+                value={applicationForm.coverLetter}
+                onChange={(e) => setApplicationForm(prev => ({ ...prev, coverLetter: e.target.value }))}
+                placeholder="Tell us why you're interested in this position..."
+                rows={6}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsApplyDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmitApplication}
+              disabled={applyMutation.isPending}
+            >
+              {applyMutation.isPending ? "Submitting..." : "Submit Application"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
