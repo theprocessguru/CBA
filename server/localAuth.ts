@@ -297,9 +297,19 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // Simply attach the session userId - the isAdmin middleware will check admin status
+  // Fetch fresh user data from database to ensure we have current admin status
+  const user = await storage.getUser(session.userId);
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // Attach full user data including isAdmin flag
   req.user = {
-    id: session.userId
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    isAdmin: user.isAdmin || false
   };
   next();
 };
