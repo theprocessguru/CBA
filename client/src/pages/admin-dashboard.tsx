@@ -20,7 +20,8 @@ import {
   BarChart3,
   Settings,
   FileText,
-  Heart
+  Heart,
+  Upload
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -137,12 +138,51 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold text-gray-900">Impact Dashboard</h1>
           <p className="text-gray-600 mt-1">Key metrics for funding applications and impact reporting</p>
         </div>
-        <Link href="/admin/export-report">
-          <Button>
-            <FileText className="mr-2 h-4 w-4" />
-            Export Impact Report
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/data-import">
+            <Button variant="outline">
+              <Upload className="mr-2 h-4 w-4" />
+              Import Data
+            </Button>
+          </Link>
+          <Link href="/admin/export-report">
+            <Button>
+              <FileText className="mr-2 h-4 w-4" />
+              Export Report
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h2 className="text-lg font-semibold text-blue-900 mb-3">Quick Actions</h2>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/data-import">
+            <Button variant="default" size="sm">
+              <Upload className="mr-2 h-4 w-4" />
+              Import Contacts & Companies
+            </Button>
+          </Link>
+          <Link href="/dashboard/user-management">
+            <Button variant="outline" size="sm">
+              <Users className="mr-2 h-4 w-4" />
+              Manage Users
+            </Button>
+          </Link>
+          <Link href="/dashboard/event-management">
+            <Button variant="outline" size="sm">
+              <Calendar className="mr-2 h-4 w-4" />
+              Manage Events
+            </Button>
+          </Link>
+          <Link href="/dashboard/membership-management">
+            <Button variant="outline" size="sm">
+              <Award className="mr-2 h-4 w-4" />
+              Manage Memberships
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Key Impact Metrics - Top Row */}
