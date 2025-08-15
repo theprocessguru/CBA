@@ -31,21 +31,56 @@ export default function DataImport() {
   // Available database fields for mapping
   const dbFields = [
     { value: '', label: 'Skip this column' },
+    // Contact Information
     { value: 'name', label: 'Business Name' },
     { value: 'email', label: 'Email Address' },
     { value: 'phone', label: 'Phone Number' },
     { value: 'website', label: 'Website' },
+    { value: 'contactFirstName', label: 'Contact First Name' },
+    { value: 'contactLastName', label: 'Contact Last Name' },
+    { value: 'contactJobTitle', label: 'Contact Job Title' },
+    
+    // Address Information
     { value: 'address', label: 'Address' },
     { value: 'city', label: 'City' },
     { value: 'postcode', label: 'Postcode' },
-    { value: 'industry', label: 'Industry' },
-    { value: 'description', label: 'Description' },
-    { value: 'employeeCount', label: 'Employee Count' },
-    { value: 'foundedYear', label: 'Founded Year' },
+    { value: 'country', label: 'Country' },
+    
+    // Business Information
+    { value: 'industry', label: 'Industry/Sector' },
+    { value: 'description', label: 'Business Description' },
+    { value: 'employeeCount', label: 'Number of Employees' },
+    { value: 'foundedYear', label: 'Year Founded' },
+    { value: 'turnover', label: 'Annual Turnover' },
+    { value: 'businessType', label: 'Business Type (Ltd, LLP, Sole Trader, etc)' },
+    
+    // Companies House Data
+    { value: 'companiesHouseNumber', label: 'Companies House Number' },
+    { value: 'sicCode', label: 'SIC Code' },
+    { value: 'vatNumber', label: 'VAT Number' },
+    { value: 'registeredAddress', label: 'Registered Address' },
+    { value: 'incorporationDate', label: 'Incorporation Date' },
+    { value: 'accountsFilingDate', label: 'Accounts Filing Date' },
+    { value: 'confirmationStatementDate', label: 'Confirmation Statement Date' },
+    { value: 'companyStatus', label: 'Company Status (Active/Dormant/Dissolved)' },
+    
+    // Membership Information
+    { value: 'membershipTier', label: 'Membership Tier' },
+    { value: 'membershipStatus', label: 'Membership Status' },
+    { value: 'joinDate', label: 'Join Date' },
+    { value: 'renewalDate', label: 'Renewal Date' },
+    
+    // Social Media
     { value: 'socialMedia.facebook', label: 'Facebook URL' },
-    { value: 'socialMedia.twitter', label: 'Twitter URL' },
+    { value: 'socialMedia.twitter', label: 'Twitter/X URL' },
     { value: 'socialMedia.linkedin', label: 'LinkedIn URL' },
     { value: 'socialMedia.instagram', label: 'Instagram URL' },
+    { value: 'socialMedia.youtube', label: 'YouTube URL' },
+    
+    // Additional Fields
+    { value: 'tags', label: 'Tags (comma-separated)' },
+    { value: 'notes', label: 'Notes' },
+    { value: 'source', label: 'Data Source' },
   ];
 
   // Upload and preview CSV/Excel file
@@ -177,6 +212,110 @@ export default function DataImport() {
     setImportStep('upload');
   };
 
+  // Generate CSV template with all fields
+  const downloadTemplate = () => {
+    const headers = [
+      'Business Name',
+      'Email Address',
+      'Phone Number',
+      'Website',
+      'Contact First Name',
+      'Contact Last Name',
+      'Contact Job Title',
+      'Address',
+      'City',
+      'Postcode',
+      'Country',
+      'Industry/Sector',
+      'Business Description',
+      'Number of Employees',
+      'Year Founded',
+      'Annual Turnover',
+      'Business Type',
+      'Companies House Number',
+      'SIC Code',
+      'VAT Number',
+      'Registered Address',
+      'Incorporation Date',
+      'Accounts Filing Date',
+      'Confirmation Statement Date',
+      'Company Status',
+      'Membership Tier',
+      'Membership Status',
+      'Join Date',
+      'Renewal Date',
+      'Facebook URL',
+      'Twitter URL',
+      'LinkedIn URL',
+      'Instagram URL',
+      'YouTube URL',
+      'Tags',
+      'Notes',
+      'Data Source'
+    ];
+    
+    const sampleData = [
+      [
+        'Example Business Ltd',
+        'contact@example.com',
+        '020 1234 5678',
+        'https://example.com',
+        'John',
+        'Smith',
+        'Managing Director',
+        '123 Business Street',
+        'Croydon',
+        'CR0 1AA',
+        'UK',
+        'Technology',
+        'Leading provider of innovative solutions',
+        '10-50',
+        '2015',
+        '£1,000,000',
+        'Limited Company',
+        '12345678',
+        '62012',
+        'GB123456789',
+        '123 Registered Street, London',
+        '01/01/2015',
+        '31/12/2024',
+        '01/01/2025',
+        'Active',
+        'Gold',
+        'Active',
+        '01/01/2024',
+        '01/01/2025',
+        'https://facebook.com/example',
+        'https://twitter.com/example',
+        'https://linkedin.com/company/example',
+        'https://instagram.com/example',
+        'https://youtube.com/example',
+        'technology,croydon,member',
+        'Key account',
+        'Companies House'
+      ]
+    ];
+    
+    const csvContent = [headers, ...sampleData]
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'business_import_template.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    toast({
+      title: "Template Downloaded",
+      description: "Use this template to prepare your business data for import",
+    });
+  };
+
   return (
     <>
       <Helmet>
@@ -187,8 +326,9 @@ export default function DataImport() {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Import</h1>
-            <p className="text-lg text-gray-600">Upload and import existing business lists into the database</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Business Data Import</h1>
+            <p className="text-lg text-gray-600">Import business data with Companies House information</p>
+            <p className="text-sm text-blue-600 mt-2">All imported data automatically syncs to MyT Automation with 150+ custom fields</p>
           </div>
 
           {/* Progress Steps */}
@@ -278,20 +418,32 @@ export default function DataImport() {
                 )}
 
                 <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Supported Columns</h4>
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="font-semibold text-gray-900">Need a Template?</h4>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={downloadTemplate}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download CSV Template
+                    </Button>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Download our comprehensive CSV template with all fields including Companies House data.
+                    The template includes:
+                  </p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                    <span>• Business Name</span>
-                    <span>• Email Address</span>
-                    <span>• Phone Number</span>
-                    <span>• Website</span>
-                    <span>• Address</span>
-                    <span>• City</span>
-                    <span>• Postcode</span>
-                    <span>• Industry</span>
-                    <span>• Description</span>
-                    <span>• Employee Count</span>
-                    <span>• Founded Year</span>
-                    <span>• Social Media URLs</span>
+                    <span>• Business Details</span>
+                    <span>• Contact Information</span>
+                    <span>• Companies House Data</span>
+                    <span>• Address & Location</span>
+                    <span>• Financial Information</span>
+                    <span>• Membership Status</span>
+                    <span>• Social Media Links</span>
+                    <span>• VAT & Tax Numbers</span>
+                    <span>• And much more...</span>
                   </div>
                 </div>
               </CardContent>

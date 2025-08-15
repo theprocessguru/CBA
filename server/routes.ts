@@ -1377,19 +1377,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newBusiness = await storage.createBusiness(validatedData);
           imported++;
 
-          // Auto-sync to MyT Automation if enabled
+          // Enhanced sync to MyT Automation with all custom fields
           const mytAutomationService = getMyTAutomationService();
           if (mytAutomationService && businessData.email) {
             try {
-              await mytAutomationService.syncBusinessMember({
+              // Prepare comprehensive member data for MyT sync
+              const memberData: any = {
                 email: businessData.email,
-                firstName: '',
-                lastName: '',
-                businessName: businessData.name,
-                membershipTier: 'Standard'
-              });
+                firstName: businessData.contactFirstName || '',
+                lastName: businessData.contactLastName || '',
+                phone: businessData.phone || '',
+                company: businessData.name,
+                jobTitle: businessData.contactJobTitle || '',
+                membershipTier: businessData.membershipTier || 'Standard',
+                membershipStatus: businessData.membershipStatus || 'active',
+                businessType: businessData.businessType || '',
+                industry: businessData.industry || '',
+                employeeCount: businessData.employeeCount || '',
+                turnover: businessData.turnover || '',
+                website: businessData.website || '',
+                address: businessData.address || '',
+                city: businessData.city || '',
+                postcode: businessData.postcode || '',
+                country: businessData.country || 'UK',
+                // Companies House data
+                companiesHouseNumber: businessData.companiesHouseNumber || '',
+                sicCode: businessData.sicCode || '',
+                vatNumber: businessData.vatNumber || '',
+                registeredAddress: businessData.registeredAddress || '',
+                incorporationDate: businessData.incorporationDate || '',
+                accountsFilingDate: businessData.accountsFilingDate || '',
+                confirmationStatementDate: businessData.confirmationStatementDate || '',
+                companyStatus: businessData.companyStatus || '',
+                // Social media
+                facebook: businessData.socialMedia?.facebook || '',
+                twitter: businessData.socialMedia?.twitter || '',
+                linkedin: businessData.socialMedia?.linkedin || '',
+                instagram: businessData.socialMedia?.instagram || '',
+                youtube: businessData.socialMedia?.youtube || '',
+                // Additional
+                tags: businessData.tags || [],
+                notes: businessData.notes || '',
+                source: businessData.source || 'CSV Import',
+                importDate: new Date().toISOString()
+              };
+              
+              // Use the comprehensive sync method
+              await mytAutomationService.syncBusinessMember(memberData);
+              console.log(`Business ${businessData.email} synced to MyT Automation with all custom fields`);
             } catch (ghlError) {
               console.error(`Failed to sync business ${businessData.email} to MyT Automation:`, ghlError);
+              // Don't fail the import if MyT sync fails
             }
           }
         } catch (error) {
