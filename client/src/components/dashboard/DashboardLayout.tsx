@@ -21,7 +21,8 @@ import {
   Calendar,
   QrCode,
   Heart,
-  DollarSign
+  DollarSign,
+  Upload
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -183,6 +184,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/user-management' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       User Management
+                    </a>
+                  </Link>
+                  
+                  <Link href="/data-import">
+                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      location === '/data-import' 
+                        ? 'bg-primary text-white' 
+                        : 'text-neutral-700 hover:bg-neutral-100'
+                    }`}>
+                      <Upload className={`mr-3 h-4 w-4 ${
+                        location === '/data-import' ? 'text-white' : 'text-neutral-500'
+                      }`} />
+                      Data Import
                     </a>
                   </Link>
                   
