@@ -206,6 +206,18 @@ export class MyTAutomationService {
         isBusinessVerified: member.isBusinessVerified,
         isBusinessActive: member.isBusinessActive,
         
+        // Companies House Fields
+        companiesHouseNumber: member.companiesHouseNumber,
+        sicCode: member.sicCode,
+        vatNumber: member.vatNumber,
+        registeredAddress: member.registeredAddress,
+        incorporationDate: member.incorporationDate,
+        accountsFilingDate: member.accountsFilingDate,
+        confirmationStatementDate: member.confirmationStatementDate,
+        companyStatus: member.companyStatus,
+        businessType: member.businessType,
+        turnover: member.turnover,
+        
         // Financial Fields
         stripeCustomerId: member.stripeCustomerId,
         stripeSubscriptionId: member.stripeSubscriptionId,
