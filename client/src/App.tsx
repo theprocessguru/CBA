@@ -434,6 +434,11 @@ function Router() {
           <AdminDataImport />
         </MainLayout>
       </Route>
+      <Route path="/data-import">
+        <MainLayout>
+          <DataImport />
+        </MainLayout>
+      </Route>
       <Route path="/admin/badge-scanner">
         <MainLayout>
           <BadgeScanner />
