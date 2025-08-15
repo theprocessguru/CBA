@@ -72,18 +72,49 @@ export class MyTAutomationService {
         const existingContact = await this.getContactByEmail(contactData.email);
         
         if (existingContact) {
+          // For updates, remove email to avoid duplicate error
+          const updateData = { ...contactData };
+          delete updateData.email; // Don't send email when updating
+          
+          // Merge tags instead of replacing
+          if (updateData.tags && existingContact.tags) {
+            const existingTags = new Set(existingContact.tags);
+            updateData.tags.forEach(tag => existingTags.add(tag));
+            updateData.tags = Array.from(existingTags);
+          }
+          
           // Update existing contact
-          const response = await this.api.put(`/contacts/${existingContact.id}`, contactData);
-          return response.data.contact;
+          try {
+            const response = await this.api.put(`/contacts/${existingContact.id}`, updateData);
+            return response.data.contact || existingContact;
+          } catch (updateError: any) {
+            console.log('Update failed, returning existing contact:', updateError.response?.data);
+            // If update fails, return existing contact
+            return existingContact;
+          }
         }
       }
 
       // Create new contact
       const response = await this.api.post('/contacts', contactData);
       return response.data.contact;
-    } catch (error) {
-      console.error('Error upserting GHL contact:', error);
-      throw new Error('Failed to create or update contact in Go High Level');
+    } catch (error: any) {
+      console.error('Error upserting MyT Automation contact:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status
+      });
+      
+      // Check if it's a duplicate error
+      if (error.response?.data?.message?.includes('duplicate')) {
+        // Try to get existing contact and return it
+        if (contactData.email) {
+          const existing = await this.getContactByEmail(contactData.email);
+          if (existing) return existing;
+        }
+      }
+      
+      throw new Error('Failed to create or update contact in MyT Automation');
     }
   }
 
