@@ -4779,30 +4779,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const speakerFirstName = speakerNameParts[0] || '';
               const speakerLastName = speakerNameParts.slice(1).join(' ') || '';
 
-              const speakerGhlData = {
+              // Use enhanced sync for speaker data
+              const speakerData = {
                 email: speakerAttendee.email,
                 firstName: speakerFirstName,
                 lastName: speakerLastName,
                 phone: phone,
-                companyName: companyName,
-                tags: [
-                  'AI_Summit_2025',
-                  'Speaker_Interest',
-                  'Exhibitor_Speaker',
-                  'Dual_Registration'
-                ],
-                customFields: {
-                  company_name: companyName,
-                  job_title: speakerAttendee.jobTitle,
-                  speaker_bio: speakerAttendee.speakerBio,
-                  presentation_title: speakerAttendee.presentationTitle,
-                  presentation_description: speakerAttendee.presentationDescription,
-                  registration_type: 'Exhibitor_Speaker',
-                  source: 'exhibitor_registration'
-                }
+                company: companyName,
+                jobTitle: speakerAttendee.jobTitle,
+                bio: speakerAttendee.speakerBio,
+                sessionType: 'talk',
+                talkTitle: speakerAttendee.presentationTitle,
+                talkDescription: speakerAttendee.presentationDescription,
+                previousSpeaking: false,
+                linkedIn: speakerAttendee.linkedIn || ''
               };
 
-              await mytAutomationService.upsertContact(speakerGhlData);
+              await mytAutomationService.syncSpeaker(speakerData);
+              console.log(`Speaker synced to MyT Automation with all custom fields: ${speakerAttendee.email}`);
             }
           } catch (speakerGhlError) {
             console.error("Failed to sync speaker attendee to MyT Automation:", speakerGhlError);
@@ -4839,6 +4833,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("AI Summit exhibitor registration error:", error);
       res.status(500).json({ 
         message: "Exhibitor registration failed. Please try again or contact support." 
+      });
+    }
+  });
+
+  // Test MyT Automation connection and sync
+  app.get('/api/test-myt-automation', isAuthenticated, async (req: any, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      
+      if (!mytAutomationService) {
+        return res.status(503).json({ 
+          success: false,
+          message: "MyT Automation service not configured. Please check GHL_API_KEY environment variable." 
+        });
+      }
+
+      // Test connection
+      const isConnected = await mytAutomationService.testConnection();
+      if (!isConnected) {
+        return res.status(503).json({ 
+          success: false,
+          message: "Unable to connect to MyT Automation. Please verify your API key." 
+        });
+      }
+
+      // Get current user data for test sync
+      const user = await storage.getUser(req.user.id);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: "User not found" 
+        });
+      }
+
+      // Sync the current user with all custom fields
+      const contact = await mytAutomationService.syncBusinessMember(user);
+
+      res.json({ 
+        success: true,
+        message: "MyT Automation connection successful and user synced!",
+        connectionStatus: "connected",
+        syncedContact: {
+          id: contact.id,
+          email: contact.email,
+          tags: contact.tags,
+          customFieldsCount: Object.keys(contact.customFields || {}).length
+        }
+      });
+    } catch (error: any) {
+      console.error("MyT Automation test error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to test MyT Automation connection",
+        error: error.message 
       });
     }
   });
@@ -4971,7 +5019,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .orderBy(desc(aiSummitRegistrations.id))
         .limit(1);
 
-      // Sync with MyT Automation (Go High Level)
+      // Sync with MyT Automation using enhanced sync with all custom fields
       try {
         const mytAutomationService = getMyTAutomationService();
         if (mytAutomationService) {
@@ -4980,38 +5028,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const firstName = nameParts[0] || '';
           const lastName = nameParts.slice(1).join(' ') || '';
 
-          // Prepare MyT Automation contact data
-          const ghlContactData = {
+          // Prepare full attendee data for enhanced sync
+          const attendeeData = {
             email,
             firstName,
             lastName,
             phone: phoneNumber,
-            companyName: company,
-            tags: [
-              'AI_Summit_2025',
-              'Event_Registration',
-              ...(participantType ? [`Participant_${participantType.replace(/[^a-zA-Z0-9]/g, '_')}`] : []),
-              ...(participantType === 'speaker' ? ['AI_Summit_Speaker'] : []),
-              ...(businessType ? [`Business_Type_${businessType.replace(/[^a-zA-Z0-9]/g, '_')}`] : []),
-              ...(aiInterest ? [`AI_Interest_${aiInterest.replace(/[^a-zA-Z0-9]/g, '_')}`] : [])
-            ],
-            customFields: {
-              job_title: jobTitle,
-              business_type: businessType,
-              ai_interest: aiInterest,
-              participant_type: participantType || 'attendee',
-              custom_role: customRole,
-              accessibility_needs: accessibilityNeeds,
-              registration_comments: comments,
-              event_name: 'First AI Summit Croydon 2025',
-              event_date: 'October 1st, 2025',
-              registration_date: new Date().toISOString()
-            }
+            company,
+            jobTitle,
+            title: customRole,
+            businessType,
+            aiInterest,
+            accessibilityNeeds,
+            participantRoles: participantType ? [participantType] : ['attendee'],
+            customRole,
+            primaryRole: participantType || 'attendee',
+            eventCheckedIn: false,
+            aiSummitRegistered: true,
+            badgeId: badge?.badgeId,
+            badgeDesign: badge?.design || 'standard',
+            badgeColor: badge?.color || 'blue',
+            accessLevel: badge?.accessLevel || 'basic'
           };
 
-          // Create or update contact in MyT Automation
-          const ghlContact = await mytAutomationService.upsertContact(ghlContactData);
-          console.log(`AI Summit registration synced to MyT Automation: Contact ID ${ghlContact.id}`);
+          // Use the enhanced sync method
+          const ghlContact = await mytAutomationService.syncAISummitAttendee(attendeeData);
+          console.log(`AI Summit registration synced to MyT Automation with all custom fields: Contact ID ${ghlContact.id}`);
         }
       } catch (ghlError) {
         console.error("Failed to sync AI Summit registration to MyT Automation:", ghlError);

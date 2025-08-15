@@ -107,34 +107,346 @@ export class MyTAutomationService {
     }
   }
 
-  // Sync business member to GHL
-  async syncBusinessMember(member: {
-    email: string;
-    firstName?: string;
-    lastName?: string;
-    businessName?: string;
-    phone?: string;
-    membershipTier?: string;
-  }): Promise<GHLContact> {
-    const contactData: Partial<GHLContact> = {
+  // Sync business member to MyT Automation with ALL custom fields
+  async syncBusinessMember(member: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['CBA_Member'];
+    
+    // Add tier-specific tags
+    if (member.membershipTier) {
+      tags.push(`CBA_${member.membershipTier.replace(/\s+/g, '_')}`);
+    }
+    if (member.membershipStatus === 'active') tags.push('Active_Member');
+    if (member.isTrialMember) tags.push('CBA_Trial_Member');
+    if (member.emailVerified) tags.push('Email_Verified');
+    if (member.isAdmin) tags.push('CBA_Admin');
+
+    const contactData: Partial<MyTAutomationContact> = {
       email: member.email,
       firstName: member.firstName,
       lastName: member.lastName,
       phone: member.phone,
-      companyName: member.businessName,
-      tags: ['CBA_Member'],
+      companyName: member.company || member.businessName,
+      tags,
       customFields: {
-        membership_tier: member.membershipTier || 'Standard',
-        business_name: member.businessName,
-        sync_source: 'CBA_Directory'
+        // Core User Fields
+        membershipTier: member.membershipTier,
+        membershipStatus: member.membershipStatus,
+        isTrialMember: member.isTrialMember,
+        trialDonationPaid: member.trialDonationPaid,
+        donationAmount: member.donationAmount,
+        donationDate: member.donationDate,
+        membershipStartDate: member.membershipStartDate,
+        membershipEndDate: member.membershipEndDate,
+        accountStatus: member.accountStatus,
+        suspensionReason: member.suspensionReason,
+        suspendedAt: member.suspendedAt,
+        suspendedBy: member.suspendedBy,
+        isAdmin: member.isAdmin,
+        emailVerified: member.emailVerified,
+        
+        // Professional Information
+        company: member.company,
+        jobTitle: member.jobTitle,
+        title: member.title,
+        bio: member.bio,
+        qrHandle: member.qrHandle,
+        isProfileHidden: member.isProfileHidden,
+        
+        // Student/Volunteer Information
+        university: member.university,
+        studentId: member.studentId,
+        course: member.course,
+        yearOfStudy: member.yearOfStudy,
+        communityRole: member.communityRole,
+        volunteerExperience: member.volunteerExperience,
+        
+        // Business Profile Fields
+        businessName: member.businessName,
+        businessDescription: member.businessDescription,
+        businessAddress: member.businessAddress,
+        businessCity: member.businessCity,
+        businessPostcode: member.businessPostcode,
+        businessPhone: member.businessPhone,
+        businessEmail: member.businessEmail,
+        businessWebsite: member.businessWebsite,
+        businessCategory: member.businessCategory,
+        businessEstablished: member.businessEstablished,
+        employeeCount: member.employeeCount,
+        isBusinessVerified: member.isBusinessVerified,
+        isBusinessActive: member.isBusinessActive,
+        
+        // Financial Fields
+        stripeCustomerId: member.stripeCustomerId,
+        stripeSubscriptionId: member.stripeSubscriptionId,
+        lastPaymentDate: member.lastPaymentDate,
+        lastPaymentAmount: member.lastPaymentAmount,
+        totalLifetimeValue: member.totalLifetimeValue,
+        outstandingBalance: member.outstandingBalance,
+        paymentMethod: member.paymentMethod,
+        
+        // Engagement Fields
+        lastInteractionDate: new Date().toISOString(),
+        totalInteractions: (member.totalInteractions || 0) + 1,
+        preferredContactMethod: member.preferredContactMethod || 'email',
+        marketingConsent: member.marketingConsent,
+        newsletterSubscribed: member.newsletterSubscribed,
+        smsOptIn: member.smsOptIn,
+        
+        // Affiliate Fields
+        isAffiliate: member.isAffiliate,
+        affiliateCode: member.affiliateCode,
+        affiliateCommissionRate: member.affiliateCommissionRate,
+        affiliateTotalEarned: member.affiliateTotalEarned,
+        affiliateTotalPaid: member.affiliateTotalPaid,
+        affiliatePaymentMethod: member.affiliatePaymentMethod,
+        affiliateStripeAccountId: member.affiliateStripeAccountId,
+        affiliateReferralCount: member.affiliateReferralCount,
+        affiliateStatus: member.affiliateStatus
       }
     };
 
-    if (member.membershipTier) {
-      contactData.tags?.push(`CBA_${member.membershipTier}`);
+    return await this.upsertContact(contactData);
+  }
+  
+  // Sync AI Summit attendee registration
+  async syncAISummitAttendee(attendee: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Attendee'];
+    
+    // Add role-specific tags
+    if (attendee.participantRoles) {
+      const roles = Array.isArray(attendee.participantRoles) ? attendee.participantRoles : [attendee.participantRoles];
+      roles.forEach((role: string) => {
+        tags.push(`AI_Summit_${role.charAt(0).toUpperCase() + role.slice(1)}`);
+      });
     }
+    if (attendee.eventCheckedIn) tags.push('AI_Summit_Checked_In');
+    if (attendee.badgeId) tags.push('Badge_Issued');
+
+    const contactData: Partial<MyTAutomationContact> = {
+      email: attendee.email,
+      firstName: attendee.firstName,
+      lastName: attendee.lastName,
+      phone: attendee.phone,
+      companyName: attendee.company,
+      tags,
+      customFields: {
+        // AI Summit Fields
+        aiSummitRegistered: true,
+        businessType: attendee.businessType,
+        aiInterest: attendee.aiInterest,
+        accessibilityNeeds: attendee.accessibilityNeeds,
+        participantRoles: attendee.participantRoles?.join(','),
+        customRole: attendee.customRole,
+        primaryRole: attendee.primaryRole || 'attendee',
+        
+        // Badge Information
+        badgeId: attendee.badgeId,
+        badgeDesign: attendee.badgeDesign,
+        badgeColor: attendee.badgeColor,
+        accessLevel: attendee.accessLevel,
+        badgePrinted: attendee.badgePrinted,
+        badgePrintedAt: attendee.badgePrintedAt,
+        
+        // Check-in Tracking
+        eventCheckedIn: attendee.eventCheckedIn,
+        checkInTime: attendee.checkInTime,
+        checkOutTime: attendee.checkOutTime,
+        checkInLocation: attendee.checkInLocation,
+        checkInMethod: attendee.checkInMethod,
+        eventAttendanceNotes: attendee.eventAttendanceNotes,
+        
+        // Contact Info
+        company: attendee.company,
+        jobTitle: attendee.jobTitle,
+        title: attendee.title
+      }
+    };
 
     return await this.upsertContact(contactData);
+  }
+  
+  // Sync exhibitor registration
+  async syncExhibitor(exhibitor: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Exhibitor'];
+    if (exhibitor.previousExhibitor) tags.push('Previous_Exhibitor');
+
+    const contactData: Partial<MyTAutomationContact> = {
+      email: exhibitor.contactEmail,
+      firstName: exhibitor.contactName?.split(' ')[0],
+      lastName: exhibitor.contactName?.split(' ').slice(1).join(' '),
+      phone: exhibitor.phone,
+      companyName: exhibitor.exhibitorCompanyName,
+      tags,
+      customFields: {
+        // Exhibitor Specific Fields
+        exhibitorCompanyName: exhibitor.exhibitorCompanyName,
+        exhibitorContactName: exhibitor.contactName,
+        exhibitorWebsite: exhibitor.exhibitorWebsite,
+        productsServices: exhibitor.productsServices,
+        exhibitionGoals: exhibitor.exhibitionGoals,
+        boothRequirements: exhibitor.boothRequirements,
+        electricalNeeds: exhibitor.electricalNeeds,
+        internetNeeds: exhibitor.internetNeeds,
+        specialRequirements: exhibitor.specialRequirements,
+        marketingMaterials: exhibitor.marketingMaterials,
+        numberOfExhibitorAttendees: exhibitor.numberOfExhibitorAttendees,
+        previousExhibitor: exhibitor.previousExhibitor,
+        referralSource: exhibitor.referralSource,
+        
+        // General AI Summit Fields
+        aiSummitRegistered: true,
+        primaryRole: 'exhibitor',
+        participantRoles: 'exhibitor'
+      }
+    };
+
+    return await this.upsertContact(contactData);
+  }
+  
+  // Sync speaker registration
+  async syncSpeaker(speaker: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Speaker'];
+    if (speaker.previousSpeaking) tags.push('Previous_Speaker');
+
+    const contactData: Partial<MyTAutomationContact> = {
+      email: speaker.email,
+      firstName: speaker.firstName,
+      lastName: speaker.lastName,
+      phone: speaker.phone,
+      companyName: speaker.company,
+      tags,
+      customFields: {
+        // Speaker Specific Fields
+        speakerLinkedIn: speaker.linkedIn,
+        speakerBio: speaker.bio,
+        sessionType: speaker.sessionType,
+        talkTitle: speaker.talkTitle,
+        talkDescription: speaker.talkDescription,
+        talkDuration: speaker.talkDuration,
+        audienceLevel: speaker.audienceLevel,
+        speakingExperience: speaker.speakingExperience,
+        previousSpeaking: speaker.previousSpeaking,
+        techRequirements: speaker.techRequirements,
+        availableSlots: speaker.availableSlots,
+        motivationToSpeak: speaker.motivationToSpeak,
+        keyTakeaways: speaker.keyTakeaways,
+        interactiveElements: speaker.interactiveElements,
+        handoutsProvided: speaker.handoutsProvided,
+        
+        // General AI Summit Fields
+        aiSummitRegistered: true,
+        primaryRole: 'speaker',
+        participantRoles: 'speaker'
+      }
+    };
+
+    return await this.upsertContact(contactData);
+  }
+  
+  // Sync volunteer registration
+  async syncVolunteer(volunteer: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Volunteer'];
+
+    const contactData: Partial<MyTAutomationContact> = {
+      email: volunteer.email,
+      firstName: volunteer.firstName,
+      lastName: volunteer.lastName,
+      phone: volunteer.phone,
+      tags,
+      customFields: {
+        // Volunteer Specific Fields
+        volunteerRole: volunteer.volunteerRole,
+        volunteerShift: volunteer.volunteerShift,
+        volunteerAvailability: volunteer.volunteerAvailability,
+        emergencyContact: volunteer.emergencyContact,
+        tShirtSize: volunteer.tShirtSize,
+        dietaryRequirements: volunteer.dietaryRequirements,
+        
+        // General Volunteer Info
+        volunteerExperience: volunteer.volunteerExperience,
+        communityRole: volunteer.communityRole,
+        
+        // General AI Summit Fields
+        aiSummitRegistered: true,
+        primaryRole: 'volunteer',
+        participantRoles: 'volunteer'
+      }
+    };
+
+    return await this.upsertContact(contactData);
+  }
+  
+  // Sync sponsor registration
+  async syncSponsor(sponsor: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Sponsor'];
+    if (sponsor.sponsorshipTier) {
+      tags.push(`Sponsor_${sponsor.sponsorshipTier}`);
+    }
+
+    const contactData: Partial<MyTAutomationContact> = {
+      email: sponsor.contactEmail,
+      firstName: sponsor.contactName?.split(' ')[0],
+      lastName: sponsor.contactName?.split(' ').slice(1).join(' '),
+      phone: sponsor.contactPhone,
+      companyName: sponsor.companyName,
+      tags,
+      customFields: {
+        // Sponsor Specific Fields
+        sponsorshipTier: sponsor.sponsorshipTier,
+        sponsorshipAmount: sponsor.sponsorshipAmount,
+        sponsorshipBenefits: sponsor.sponsorshipBenefits,
+        sponsorLogoUrl: sponsor.logoUrl,
+        sponsorDescription: sponsor.companyDescription,
+        sponsorWebsite: sponsor.companyWebsite,
+        sponsorIndustry: sponsor.industry,
+        sponsorFounded: sponsor.founded,
+        sponsorEmployees: sponsor.employees,
+        sponsorLocation: sponsor.location,
+        sponsorSpecialties: sponsor.specialties,
+        sponsorAchievements: sponsor.achievements,
+        sponsorContactPerson: sponsor.contactName,
+        sponsorContactEmail: sponsor.contactEmail,
+        sponsorContactPhone: sponsor.contactPhone,
+        sponsorMarketingNeeds: sponsor.marketingNeeds,
+        sponsorEventGoals: sponsor.eventGoals,
+        sponsorBoothStaff: sponsor.boothStaff,
+        sponsorSocialLinkedIn: sponsor.socialLinkedIn,
+        sponsorSocialTwitter: sponsor.socialTwitter,
+        
+        // General AI Summit Fields
+        aiSummitRegistered: true,
+        primaryRole: 'sponsor',
+        participantRoles: 'sponsor'
+      }
+    };
+
+    return await this.upsertContact(contactData);
+  }
+  
+  // Sync workshop registration
+  async syncWorkshopRegistration(registration: any): Promise<MyTAutomationContact> {
+    const tags: string[] = ['Workshop_Registered'];
+    
+    const existingContact = await this.getContactByEmail(registration.email);
+    if (!existingContact) {
+      throw new Error('Contact must exist before workshop registration');
+    }
+
+    const updatedFields = {
+      ...existingContact.customFields,
+      registeredWorkshops: registration.workshops?.join(', '),
+      workshopExperienceLevel: registration.experienceLevel,
+      workshopSpecificInterests: registration.specificInterests,
+      workshopAccessibilityNeeds: registration.accessibilityNeeds,
+      workshopCheckedIn: registration.checkedIn,
+      workshopNoShow: registration.noShow
+    };
+
+    return await this.upsertContact({
+      email: registration.email,
+      tags: [...(existingContact.tags || []), ...tags],
+      customFields: updatedFields
+    });
   }
 
   // Create workflow trigger for new member
