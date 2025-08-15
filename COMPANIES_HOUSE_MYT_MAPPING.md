@@ -27,11 +27,15 @@ This document shows the exact mapping between Companies House data fields and My
 | Accounting Reference Date | `accounting_reference_date` | Text | "31-12" |
 | Confirmation Statement | `confirmation_statement_last_made_up_to` | Text | "2025-01-01" |
 
-### Additional Fields
+### Companies House Status Fields
 | Data Field | MyT Custom Field Name | Type | Example |
 |------------|----------------------|------|---------|
 | Has Been Liquidated | `has_been_liquidated` | Boolean | false |
 | Has Insolvency History | `has_insolvency_history` | Boolean | false |
+
+### HMRC/Tax Fields (Not from Companies House)
+| Data Field | MyT Custom Field Name | Type | Example |
+|------------|----------------------|------|---------|
 | VAT Number | `vat_number` | Text | "GB123456789" |
 
 ### Financial Information
@@ -51,17 +55,23 @@ When you import data via `/data-import`:
 
 ## CSV Template Columns
 
-The downloadable CSV template includes these Companies House columns:
-- Companies House Number
-- SIC Code  
-- VAT Number
-- Registered Address
-- Incorporation Date
-- Accounts Filing Date
-- Confirmation Statement Date
-- Company Status
-- Business Type
-- Annual Turnover
+The downloadable CSV template includes:
+
+**Companies House columns:**
+- company_number
+- sic_codes  
+- registered_office_address
+- date_of_creation
+- accounting_reference_date
+- confirmation_statement_last_made_up_to
+- company_status
+- company_type
+- jurisdiction
+- has_been_liquidated
+- has_insolvency_history
+
+**HMRC/Tax columns:**
+- vat_number (stored separately from Companies House data)
 
 ## Testing the Sync
 

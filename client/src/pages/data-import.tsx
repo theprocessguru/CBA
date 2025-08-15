@@ -66,7 +66,9 @@ export default function DataImport() {
     { value: 'jurisdiction', label: 'Jurisdiction' },
     { value: 'has_been_liquidated', label: 'Has Been Liquidated' },
     { value: 'has_insolvency_history', label: 'Has Insolvency History' },
-    { value: 'vat_number', label: 'VAT Number' },
+    
+    // Tax/HMRC Data
+    { value: 'vat_number', label: 'VAT Number (HMRC)' },
     
     // Membership Information
     { value: 'membershipTier', label: 'Membership Tier' },

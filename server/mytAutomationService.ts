@@ -232,7 +232,7 @@ export class MyTAutomationService {
           has_been_liquidated: businessData.has_been_liquidated || false,
           has_insolvency_history: businessData.has_insolvency_history || false,
           
-          // Additional business fields (non-CH standard)
+          // HMRC/Tax fields (not Companies House)
           vat_number: businessData.vatNumber || businessData.vat_number,
           turnover: businessData.turnover,
           employee_count: businessData.employeeCount || businessData.employee_count,
