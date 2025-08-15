@@ -1377,56 +1377,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newBusiness = await storage.createBusiness(validatedData);
           imported++;
 
-          // Enhanced sync to MyT Automation with all custom fields
+          // Enhanced sync to MyT Automation - Creates both Company and Contact
           const mytAutomationService = getMyTAutomationService();
-          if (mytAutomationService && businessData.email) {
+          if (mytAutomationService) {
             try {
-              // Prepare comprehensive member data for MyT sync
-              const memberData: any = {
+              // Sync both Company (with Companies House data) and Contact (with person data)
+              const { contact, company } = await mytAutomationService.syncBusinessWithCompany({
+                // Company data
+                name: businessData.name,
+                businessName: businessData.name,
+                website: businessData.website,
+                phone: businessData.phone,
+                address: businessData.address,
+                city: businessData.city,
+                postcode: businessData.postcode,
+                country: businessData.country || 'UK',
+                
+                // Contact data
                 email: businessData.email,
                 firstName: businessData.contactFirstName || '',
                 lastName: businessData.contactLastName || '',
-                phone: businessData.phone || '',
-                company: businessData.name,
                 jobTitle: businessData.contactJobTitle || '',
+                
+                // Business details
+                businessType: businessData.businessType,
+                industry: businessData.industry,
+                employeeCount: businessData.employeeCount,
+                turnover: businessData.turnover,
+                description: businessData.description,
+                
+                // Companies House data
+                companiesHouseNumber: businessData.companiesHouseNumber,
+                sicCode: businessData.sicCode,
+                vatNumber: businessData.vatNumber,
+                registeredAddress: businessData.registeredAddress,
+                incorporationDate: businessData.incorporationDate,
+                accountsFilingDate: businessData.accountsFilingDate,
+                confirmationStatementDate: businessData.confirmationStatementDate,
+                companyStatus: businessData.companyStatus,
+                
+                // Membership data
                 membershipTier: businessData.membershipTier || 'Standard',
                 membershipStatus: businessData.membershipStatus || 'active',
-                businessType: businessData.businessType || '',
-                industry: businessData.industry || '',
-                employeeCount: businessData.employeeCount || '',
-                turnover: businessData.turnover || '',
-                website: businessData.website || '',
-                address: businessData.address || '',
-                city: businessData.city || '',
-                postcode: businessData.postcode || '',
-                country: businessData.country || 'UK',
-                // Companies House data
-                companiesHouseNumber: businessData.companiesHouseNumber || '',
-                sicCode: businessData.sicCode || '',
-                vatNumber: businessData.vatNumber || '',
-                registeredAddress: businessData.registeredAddress || '',
-                incorporationDate: businessData.incorporationDate || '',
-                accountsFilingDate: businessData.accountsFilingDate || '',
-                confirmationStatementDate: businessData.confirmationStatementDate || '',
-                companyStatus: businessData.companyStatus || '',
+                
                 // Social media
-                facebook: businessData.socialMedia?.facebook || '',
-                twitter: businessData.socialMedia?.twitter || '',
-                linkedin: businessData.socialMedia?.linkedin || '',
-                instagram: businessData.socialMedia?.instagram || '',
-                youtube: businessData.socialMedia?.youtube || '',
-                // Additional
+                socialMedia: businessData.socialMedia,
+                
+                // Metadata
                 tags: businessData.tags || [],
                 notes: businessData.notes || '',
                 source: businessData.source || 'CSV Import',
                 importDate: new Date().toISOString()
-              };
+              });
               
-              // Use the comprehensive sync method
-              await mytAutomationService.syncBusinessMember(memberData);
-              console.log(`Business ${businessData.email} synced to MyT Automation with all custom fields`);
+              if (company) {
+                console.log(`Company "${company.name}" synced to MyT Automation with Companies House data`);
+              }
+              if (contact) {
+                console.log(`Contact "${contact.email}" linked to company and synced`);
+              }
             } catch (ghlError) {
-              console.error(`Failed to sync business ${businessData.email} to MyT Automation:`, ghlError);
+              console.error(`Failed to sync business to MyT Automation:`, ghlError);
               // Don't fail the import if MyT sync fails
             }
           }

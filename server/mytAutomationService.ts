@@ -19,6 +19,17 @@ export interface MyTAutomationOpportunity {
   contactId: string;
 }
 
+export interface MyTAutomationCompany {
+  id: string;
+  name: string;
+  website?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  customFields?: Record<string, any>;
+}
+
 export class MyTAutomationService {
   private api: AxiosInstance;
   private apiKey: string;
@@ -136,6 +147,133 @@ export class MyTAutomationService {
       console.error('Error removing tags from GHL contact:', error);
       throw new Error('Failed to remove tags from contact');
     }
+  }
+
+  // Get company by name
+  async getCompanyByName(name: string): Promise<MyTAutomationCompany | null> {
+    try {
+      const response = await this.api.get('/companies', {
+        params: { name }
+      });
+      const companies = response.data.companies || [];
+      return companies.length > 0 ? companies[0] : null;
+    } catch (error) {
+      console.error('Error fetching MyT Automation company:', error);
+      return null;
+    }
+  }
+
+  // Create or update company
+  async upsertCompany(companyData: Partial<MyTAutomationCompany>): Promise<MyTAutomationCompany> {
+    try {
+      // Check if company exists
+      if (companyData.name) {
+        const existingCompany = await this.getCompanyByName(companyData.name);
+        
+        if (existingCompany) {
+          // Update existing company
+          const updateData = { ...companyData };
+          delete updateData.name; // Don't send name when updating
+          
+          try {
+            const response = await this.api.put(`/companies/${existingCompany.id}`, updateData);
+            return response.data.company || existingCompany;
+          } catch (updateError: any) {
+            console.log('Company update failed, returning existing:', updateError.response?.data);
+            return existingCompany;
+          }
+        }
+      }
+
+      // Create new company
+      const response = await this.api.post('/companies', companyData);
+      return response.data.company;
+    } catch (error: any) {
+      console.error('Error upserting MyT Automation company:', error);
+      throw new Error('Failed to create or update company in MyT Automation');
+    }
+  }
+
+  // Link contact to company
+  async linkContactToCompany(contactId: string, companyId: string): Promise<void> {
+    try {
+      await this.api.put(`/contacts/${contactId}`, { companyId });
+    } catch (error) {
+      console.error('Error linking contact to company:', error);
+    }
+  }
+
+  // Sync business with separate Company and Contact entities
+  async syncBusinessWithCompany(businessData: any): Promise<{ contact: MyTAutomationContact; company?: MyTAutomationCompany }> {
+    // First, create/update the Company with Companies House data
+    let company: MyTAutomationCompany | undefined;
+    
+    if (businessData.name || businessData.businessName || businessData.company) {
+      const companyName = businessData.name || businessData.businessName || businessData.company;
+      
+      const companyData: Partial<MyTAutomationCompany> = {
+        name: companyName,
+        website: businessData.website || businessData.businessWebsite,
+        phone: businessData.phone || businessData.businessPhone,
+        address: businessData.address || businessData.businessAddress,
+        city: businessData.city || businessData.businessCity,
+        postalCode: businessData.postcode || businessData.businessPostcode,
+        customFields: {
+          // Companies House specific fields
+          companiesHouseNumber: businessData.companiesHouseNumber,
+          sicCode: businessData.sicCode,
+          vatNumber: businessData.vatNumber,
+          registeredAddress: businessData.registeredAddress,
+          incorporationDate: businessData.incorporationDate,
+          accountsFilingDate: businessData.accountsFilingDate,
+          confirmationStatementDate: businessData.confirmationStatementDate,
+          companyStatus: businessData.companyStatus,
+          businessType: businessData.businessType,
+          turnover: businessData.turnover,
+          employeeCount: businessData.employeeCount,
+          industry: businessData.industry,
+          businessCategory: businessData.businessCategory,
+          businessEstablished: businessData.businessEstablished || businessData.foundedYear,
+          
+          // Additional business fields
+          businessDescription: businessData.description || businessData.businessDescription,
+          membershipTier: businessData.membershipTier,
+          membershipStatus: businessData.membershipStatus,
+          
+          // Social media
+          facebook: businessData.facebook || businessData.socialMedia?.facebook,
+          twitter: businessData.twitter || businessData.socialMedia?.twitter,
+          linkedin: businessData.linkedin || businessData.socialMedia?.linkedin,
+          instagram: businessData.instagram || businessData.socialMedia?.instagram,
+          youtube: businessData.youtube || businessData.socialMedia?.youtube,
+          
+          // Metadata
+          dataSource: businessData.source || businessData.dataSource || 'CSV Import',
+          importDate: businessData.importDate || new Date().toISOString(),
+          notes: businessData.notes
+        }
+      };
+      
+      try {
+        company = await this.upsertCompany(companyData);
+        console.log(`Company synced to MyT Automation: ${companyName}`);
+      } catch (error) {
+        console.error(`Failed to sync company ${companyName}:`, error);
+      }
+    }
+    
+    // Then create/update the Contact with person data
+    const contact = await this.syncBusinessMember({
+      ...businessData,
+      companyId: company?.id // Link to company if created
+    });
+    
+    // Link contact to company if both exist
+    if (contact.id && company?.id) {
+      await this.linkContactToCompany(contact.id, company.id);
+    }
+    
+    return { contact, company };
   }
 
   // Sync business member to MyT Automation with ALL custom fields
