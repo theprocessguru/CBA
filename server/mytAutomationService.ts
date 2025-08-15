@@ -219,21 +219,26 @@ export class MyTAutomationService {
         city: businessData.city || businessData.businessCity,
         postalCode: businessData.postcode || businessData.businessPostcode,
         customFields: {
-          // Companies House specific fields
-          companiesHouseNumber: businessData.companiesHouseNumber,
-          sicCode: businessData.sicCode,
-          vatNumber: businessData.vatNumber,
-          registeredAddress: businessData.registeredAddress,
-          incorporationDate: businessData.incorporationDate,
-          accountsFilingDate: businessData.accountsFilingDate,
-          confirmationStatementDate: businessData.confirmationStatementDate,
-          companyStatus: businessData.companyStatus,
-          businessType: businessData.businessType,
+          // Companies House exact field names
+          company_number: businessData.companiesHouseNumber || businessData.company_number,
+          sic_codes: businessData.sicCode || businessData.sic_codes,
+          registered_office_address: businessData.registeredAddress || businessData.registered_office_address,
+          date_of_creation: businessData.incorporationDate || businessData.date_of_creation,
+          accounting_reference_date: businessData.accountsFilingDate || businessData.accounting_reference_date,
+          confirmation_statement_last_made_up_to: businessData.confirmationStatementDate || businessData.confirmation_statement_last_made_up_to,
+          company_status: businessData.companyStatus || businessData.company_status,
+          company_type: businessData.businessType || businessData.company_type,
+          jurisdiction: businessData.jurisdiction || 'england-wales',
+          has_been_liquidated: businessData.has_been_liquidated || false,
+          has_insolvency_history: businessData.has_insolvency_history || false,
+          
+          // Additional business fields (non-CH standard)
+          vat_number: businessData.vatNumber || businessData.vat_number,
           turnover: businessData.turnover,
-          employeeCount: businessData.employeeCount,
+          employee_count: businessData.employeeCount || businessData.employee_count,
           industry: businessData.industry,
-          businessCategory: businessData.businessCategory,
-          businessEstablished: businessData.businessEstablished || businessData.foundedYear,
+          business_category: businessData.businessCategory || businessData.business_category,
+          business_established: businessData.businessEstablished || businessData.foundedYear,
           
           // Additional business fields
           businessDescription: businessData.description || businessData.businessDescription,

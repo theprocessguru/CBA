@@ -54,15 +54,19 @@ export default function DataImport() {
     { value: 'turnover', label: 'Annual Turnover' },
     { value: 'businessType', label: 'Business Type (Ltd, LLP, Sole Trader, etc)' },
     
-    // Companies House Data
-    { value: 'companiesHouseNumber', label: 'Companies House Number' },
-    { value: 'sicCode', label: 'SIC Code' },
-    { value: 'vatNumber', label: 'VAT Number' },
-    { value: 'registeredAddress', label: 'Registered Address' },
-    { value: 'incorporationDate', label: 'Incorporation Date' },
-    { value: 'accountsFilingDate', label: 'Accounts Filing Date' },
-    { value: 'confirmationStatementDate', label: 'Confirmation Statement Date' },
-    { value: 'companyStatus', label: 'Company Status (Active/Dormant/Dissolved)' },
+    // Companies House Data (exact field names)
+    { value: 'company_number', label: 'Company Number' },
+    { value: 'sic_codes', label: 'SIC Codes' },
+    { value: 'registered_office_address', label: 'Registered Office Address' },
+    { value: 'date_of_creation', label: 'Date of Creation' },
+    { value: 'accounting_reference_date', label: 'Accounting Reference Date' },
+    { value: 'confirmation_statement_last_made_up_to', label: 'Confirmation Statement Date' },
+    { value: 'company_status', label: 'Company Status' },
+    { value: 'company_type', label: 'Company Type' },
+    { value: 'jurisdiction', label: 'Jurisdiction' },
+    { value: 'has_been_liquidated', label: 'Has Been Liquidated' },
+    { value: 'has_insolvency_history', label: 'Has Insolvency History' },
+    { value: 'vat_number', label: 'VAT Number' },
     
     // Membership Information
     { value: 'membershipTier', label: 'Membership Tier' },
@@ -231,24 +235,31 @@ export default function DataImport() {
       'Number of Employees',
       'Year Founded',
       'Annual Turnover',
-      'Business Type',
-      'Companies House Number',
-      'SIC Code',
-      'VAT Number',
-      'Registered Address',
-      'Incorporation Date',
-      'Accounts Filing Date',
-      'Confirmation Statement Date',
-      'Company Status',
+      // Companies House exact field names
+      'company_number',
+      'sic_codes',
+      'registered_office_address',
+      'date_of_creation',
+      'accounting_reference_date',
+      'confirmation_statement_last_made_up_to',
+      'company_status',
+      'company_type',
+      'jurisdiction',
+      'has_been_liquidated',
+      'has_insolvency_history',
+      'vat_number',
+      // Membership fields
       'Membership Tier',
       'Membership Status',
       'Join Date',
       'Renewal Date',
+      // Social media
       'Facebook URL',
       'Twitter URL',
       'LinkedIn URL',
       'Instagram URL',
       'YouTube URL',
+      // Metadata
       'Tags',
       'Notes',
       'Data Source'
@@ -272,24 +283,31 @@ export default function DataImport() {
         '10-50',
         '2015',
         '£1,000,000',
-        'Limited Company',
-        '12345678',
-        '62012',
-        'GB123456789',
-        '123 Registered Street, London',
-        '01/01/2015',
-        '31/12/2024',
-        '01/01/2025',
-        'Active',
+        // Companies House data with exact field names
+        '12345678',  // company_number
+        '62012,62020',  // sic_codes (can be multiple)
+        '123 Registered Street, London, SW1A 1AA',  // registered_office_address
+        '2015-01-01',  // date_of_creation
+        '31-12',  // accounting_reference_date (day-month format)
+        '2025-01-01',  // confirmation_statement_last_made_up_to
+        'active',  // company_status (lowercase)
+        'ltd',  // company_type (lowercase)
+        'england-wales',  // jurisdiction
+        'false',  // has_been_liquidated
+        'false',  // has_insolvency_history
+        'GB123456789',  // vat_number
+        // Membership data
         'Gold',
         'Active',
         '01/01/2024',
         '01/01/2025',
+        // Social media
         'https://facebook.com/example',
         'https://twitter.com/example',
         'https://linkedin.com/company/example',
         'https://instagram.com/example',
         'https://youtube.com/example',
+        // Metadata
         'technology,croydon,member',
         'Key account',
         'Companies House'

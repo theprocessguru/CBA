@@ -1406,15 +1406,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 turnover: businessData.turnover,
                 description: businessData.description,
                 
-                // Companies House data
-                companiesHouseNumber: businessData.companiesHouseNumber,
-                sicCode: businessData.sicCode,
-                vatNumber: businessData.vatNumber,
-                registeredAddress: businessData.registeredAddress,
-                incorporationDate: businessData.incorporationDate,
-                accountsFilingDate: businessData.accountsFilingDate,
-                confirmationStatementDate: businessData.confirmationStatementDate,
-                companyStatus: businessData.companyStatus,
+                // Companies House data (exact field names)
+                company_number: businessData.company_number || businessData.companiesHouseNumber,
+                sic_codes: businessData.sic_codes || businessData.sicCode,
+                registered_office_address: businessData.registered_office_address || businessData.registeredAddress,
+                date_of_creation: businessData.date_of_creation || businessData.incorporationDate,
+                accounting_reference_date: businessData.accounting_reference_date || businessData.accountsFilingDate,
+                confirmation_statement_last_made_up_to: businessData.confirmation_statement_last_made_up_to || businessData.confirmationStatementDate,
+                company_status: businessData.company_status || businessData.companyStatus,
+                company_type: businessData.company_type || businessData.businessType,
+                jurisdiction: businessData.jurisdiction,
+                has_been_liquidated: businessData.has_been_liquidated,
+                has_insolvency_history: businessData.has_insolvency_history,
+                vat_number: businessData.vat_number || businessData.vatNumber,
                 
                 // Membership data
                 membershipTier: businessData.membershipTier || 'Standard',

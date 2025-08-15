@@ -5,27 +5,34 @@ This document shows the exact mapping between Companies House data fields and My
 
 ## Companies House Fields Synced
 
-### Core Company Information
+### Core Company Information (Exact CH Field Names)
 | Data Field | MyT Custom Field Name | Type | Example |
 |------------|----------------------|------|---------|
-| Company Name | `businessName` | Text | "Example Ltd" |
-| Companies House Number | `companiesHouseNumber` | Text | "12345678" |
-| Company Status | `companyStatus` | Text | "Active" / "Dormant" / "Dissolved" |
-| Business Type | `businessType` | Text | "Limited Company" / "LLP" / "Sole Trader" |
+| Company Name | `name` | Text | "Example Ltd" |
+| Company Number | `company_number` | Text | "12345678" |
+| Company Status | `company_status` | Text | "active" / "dormant" / "dissolved" |
+| Company Type | `company_type` | Text | "ltd" / "llp" / "plc" |
 
 ### Registration Details
 | Data Field | MyT Custom Field Name | Type | Example |
 |------------|----------------------|------|---------|
-| Incorporation Date | `incorporationDate` | Text | "01/01/2015" |
-| Registered Address | `registeredAddress` | Text | "123 High Street, London" |
-| SIC Code | `sicCode` | Text | "62012" |
-| VAT Number | `vatNumber` | Text | "GB123456789" |
+| Date of Creation | `date_of_creation` | Text | "2015-01-01" |
+| Registered Office Address | `registered_office_address` | Text | "123 High Street, London, SW1A 1AA" |
+| SIC Codes | `sic_codes` | Text | "62012, 62020" |
+| Jurisdiction | `jurisdiction` | Text | "england-wales" |
 
 ### Filing Dates
 | Data Field | MyT Custom Field Name | Type | Example |
 |------------|----------------------|------|---------|
-| Accounts Filing Date | `accountsFilingDate` | Text | "31/12/2024" |
-| Confirmation Statement Date | `confirmationStatementDate` | Text | "01/01/2025" |
+| Accounting Reference Date | `accounting_reference_date` | Text | "31-12" |
+| Confirmation Statement | `confirmation_statement_last_made_up_to` | Text | "2025-01-01" |
+
+### Additional Fields
+| Data Field | MyT Custom Field Name | Type | Example |
+|------------|----------------------|------|---------|
+| Has Been Liquidated | `has_been_liquidated` | Boolean | false |
+| Has Insolvency History | `has_insolvency_history` | Boolean | false |
+| VAT Number | `vat_number` | Text | "GB123456789" |
 
 ### Financial Information
 | Data Field | MyT Custom Field Name | Type | Example |
