@@ -488,6 +488,15 @@ export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   website: varchar("website"),
   linkedIn: varchar("linked_in"),
   bio: text("bio"),
+  // Speaker prefixed fields for frontend compatibility
+  speakerName: varchar("speaker_name"),
+  speakerEmail: varchar("speaker_email"),
+  speakerPhone: varchar("speaker_phone"),
+  speakerCompany: varchar("speaker_company"),
+  speakerJobTitle: varchar("speaker_job_title"),
+  speakerWebsite: varchar("speaker_website"),
+  speakerLinkedIn: varchar("speaker_linked_in"),
+  speakerBio: text("speaker_bio"),
   sessionType: varchar("session_type").default("talk"), // talk, workshop
   talkTitle: varchar("talk_title"),
   talkDescription: text("talk_description"),
@@ -504,6 +513,8 @@ export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   agreesToTerms: boolean("agrees_to_terms").default(false),
   source: varchar("source"), // Track source of registration (direct, exhibitor_registration, etc.)
   registeredAt: timestamp("registered_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(), // Add for compatibility
+  status: varchar("status").default("pending"), // Add status field for frontend
 });
 
 // Personal Badges - Reusable across all events with role-based styling

@@ -3922,11 +3922,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/speakers', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { aiSummitSpeakerInterests } = await import("@shared/schema");
-      const { desc } = await import("drizzle-orm");
       const speakers = await db
         .select()
         .from(aiSummitSpeakerInterests)
-        .orderBy(desc(aiSummitSpeakerInterests.createdAt));
+        .orderBy(desc(aiSummitSpeakerInterests.registeredAt));
       
       res.json(speakers);
     } catch (error) {
