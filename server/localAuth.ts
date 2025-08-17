@@ -40,43 +40,8 @@ export function getSession() {
     proxy: true, // Always trust proxy in Replit
   });
   
-  // Wrap session middleware to add debugging and handle session token
-  return async (req: Request, res: Response, next: any) => {
-    // Check for session token in headers (for Replit preview)
-    const sessionToken = req.headers['x-session-token'] as string;
-    
-    if (sessionToken && sessionToken !== 'null' && sessionToken !== 'undefined') {
-      console.log('Session token from header:', sessionToken);
-      // Manually load session from store
-      sessionStore.get(sessionToken, (err: any, sessionData: any) => {
-        if (!err && sessionData) {
-          console.log('Session loaded from store:', sessionData?.userId);
-          req.sessionID = sessionToken;
-          req.session = Object.assign(req.session || {}, sessionData);
-          // Mark session as loaded
-          if (req.session) {
-            req.session.cookie = req.session.cookie || {};
-          }
-        }
-        
-        sessionMiddleware(req, res, () => {
-          // Only set header if not already sent
-          if (req.session && req.sessionID && !res.headersSent) {
-            res.setHeader('X-Session-ID', req.sessionID);
-          }
-          next();
-        });
-      });
-    } else {
-      sessionMiddleware(req, res, () => {
-        // Only set header if not already sent
-        if (req.session && req.sessionID && !res.headersSent) {
-          res.setHeader('X-Session-ID', req.sessionID);
-        }
-        next();
-      });
-    }
-  };
+  // Return the session middleware directly
+  return sessionMiddleware;
 }
 
 export async function setupLocalAuth(app: Express) {
@@ -366,83 +331,25 @@ export async function setupLocalAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  // Check for session token in headers first (for Replit preview)
-  const sessionToken = req.headers['x-session-token'] as string;
+  const session = req.session as any;
   
-  if (sessionToken && sessionToken !== 'null' && sessionToken !== 'undefined') {
-    // Try to load session from token
-    const sessionStore = req.sessionStore as any;
-    
-    return new Promise((resolve) => {
-      sessionStore.get(sessionToken, async (err: any, sessionData: any) => {
-        if (!err && sessionData && sessionData.userId) {
-          console.log("Session check PASSED via token - User ID:", sessionData.userId);
-          
-          // Fetch fresh user data from database
-          const user = await storage.getUser(sessionData.userId);
-          if (!user) {
-            console.log("Session check FAILED - User not found:", sessionData.userId);
-            res.status(401).json({ message: "Unauthorized" });
-            return resolve();
-          }
-          
-          // Attach full user data including isAdmin flag
-          req.user = {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            isAdmin: user.isAdmin || false
-          };
-          
-          console.log("Session check PASSED - User authenticated:", user.email);
-          next();
-          return resolve();
-        } else {
-          // Fall back to regular session check
-          checkRegularSession();
-          resolve();
-        }
-      });
-    });
-  } else {
-    // Use regular session check
-    checkRegularSession();
+  if (!session.userId) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-  
-  function checkRegularSession() {
-    const session = req.session as any;
-    
-    console.log("Session check - Session ID:", req.sessionID);
-    console.log("Session check - User ID in session:", session?.userId);
-    console.log("Session check - Full session:", JSON.stringify(session));
-    
-    if (!session.userId) {
-      console.log("Session check FAILED - No userId in session");
-      return res.status(401).json({ message: "Unauthorized" });
-    }
 
-    // Fetch fresh user data from database to ensure we have current admin status
-    storage.getUser(session.userId).then(user => {
-      if (!user) {
-        console.log("Session check FAILED - User not found:", session.userId);
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-
-      console.log("Session check PASSED - User authenticated:", user.email);
-      
-      // Attach full user data including isAdmin flag
-      req.user = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isAdmin: user.isAdmin || false
-      };
-      next();
-    }).catch(error => {
-      console.error("Session check error:", error);
-      res.status(500).json({ message: "Server error during authentication" });
-    });
+  // Fetch fresh user data from database to ensure we have current admin status
+  const user = await storage.getUser(session.userId);
+  if (!user) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
+
+  // Attach full user data including isAdmin flag
+  req.user = {
+    id: user.id,
+    email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    isAdmin: user.isAdmin || false
+  };
+  next();
 };

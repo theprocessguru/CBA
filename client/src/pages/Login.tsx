@@ -28,11 +28,6 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data) => {
-      // Store session ID in localStorage for Replit preview workaround
-      if (data?.sessionId) {
-        localStorage.setItem('sessionToken', data.sessionId);
-      }
-      
       toast({
         title: "Welcome back!",
         description: "You've been successfully logged in.",
