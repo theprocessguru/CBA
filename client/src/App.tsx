@@ -486,6 +486,13 @@ function Router() {
           </MainLayout>
         </AdminRoute>
       </Route>
+      <Route path="/admin/user-management">
+        <AdminRoute>
+          <MainLayout>
+            <UserManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
       <Route path="/admin/scanner-management">
         <AdminRoute>
           <MainLayout>

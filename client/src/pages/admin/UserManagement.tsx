@@ -397,7 +397,7 @@ const UserManagement = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
+                          {user.createdAt ? formatDistanceToNow(new Date(user.createdAt), { addSuffix: true }) : 'Unknown'}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center space-x-2">
