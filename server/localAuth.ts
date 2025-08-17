@@ -28,9 +28,10 @@ export function getSession() {
     name: 'connect.sid',
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production' && process.env.REPLIT_DOMAINS, // Enable secure cookies in production
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Allow cross-site cookies in production
+      secure: false, // Allow cookies in development (HTTP)
+      sameSite: 'lax', // Standard same-site policy
       maxAge: sessionTtl,
+      path: '/', // Ensure cookie is available on all paths
     },
   });
 }
@@ -301,16 +302,24 @@ export async function setupLocalAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const session = req.session as any;
   
+  console.log("Session check - Session ID:", req.sessionID);
+  console.log("Session check - User ID in session:", session?.userId);
+  console.log("Session check - Full session:", JSON.stringify(session));
+  
   if (!session.userId) {
+    console.log("Session check FAILED - No userId in session");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   // Fetch fresh user data from database to ensure we have current admin status
   const user = await storage.getUser(session.userId);
   if (!user) {
+    console.log("Session check FAILED - User not found:", session.userId);
     return res.status(401).json({ message: "Unauthorized" });
   }
 
+  console.log("Session check PASSED - User authenticated:", user.email);
+  
   // Attach full user data including isAdmin flag
   req.user = {
     id: user.id,
