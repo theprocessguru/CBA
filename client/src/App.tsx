@@ -90,6 +90,7 @@ import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
+import OnboardingManagement from "@/pages/admin/OnboardingManagement";
 import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
@@ -645,6 +646,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <SpeakerManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/onboarding">
+        <AdminRoute>
+          <MainLayout>
+            <OnboardingManagement />
           </MainLayout>
         </AdminRoute>
       </Route>

@@ -3933,6 +3933,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Onboarding API
+  app.post('/api/onboarding/send', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: 'User ID is required' });
+      }
+      
+      const { onboardingService } = await import("./onboardingService");
+      await onboardingService.sendOnboarding(userId);
+      
+      res.json({ success: true, message: 'Onboarding sent successfully' });
+    } catch (error) {
+      console.error('Error sending onboarding:', error);
+      res.status(500).json({ message: 'Failed to send onboarding' });
+    }
+  });
+  
+  app.post('/api/onboarding/bulk', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userIds } = req.body;
+      
+      if (!userIds || !Array.isArray(userIds)) {
+        return res.status(400).json({ message: 'User IDs array is required' });
+      }
+      
+      const { onboardingService } = await import("./onboardingService");
+      await onboardingService.bulkSendOnboarding(userIds);
+      
+      res.json({ success: true, message: `Onboarding sent to ${userIds.length} users` });
+    } catch (error) {
+      console.error('Error sending bulk onboarding:', error);
+      res.status(500).json({ message: 'Failed to send bulk onboarding' });
+    }
+  });
+
   // Admin Membership Tier Management API
   
   // Get all membership tiers
@@ -5146,6 +5183,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (badgeError) {
         console.error("Failed to create attendee badge:", badgeError);
         // Don't fail the registration if badge creation fails
+      }
+
+      // Send onboarding welcome message based on participant type
+      try {
+        // First, ensure user has the correct person type assigned
+        const { personTypes, userPersonTypes } = await import("@shared/schema");
+        
+        // Map participant type to person type
+        const typeMapping: Record<string, string> = {
+          'exhibitor': 'exhibitor',
+          'speaker': 'speaker',
+          'sponsor': 'sponsor',
+          'volunteer': 'volunteer',
+          'vip': 'vip',
+          'team': 'team_member',
+          'media': 'media',
+          'attendee': 'attendee'
+        };
+        
+        const personTypeName = typeMapping[participantType] || 'attendee';
+        
+        // Get or create the person type
+        const [personType] = await db
+          .select()
+          .from(personTypes)
+          .where(eq(personTypes.name, personTypeName));
+        
+        if (personType) {
+          // Check if user already has this person type
+          const existingUserType = await db
+            .select()
+            .from(userPersonTypes)
+            .where(and(
+              eq(userPersonTypes.userId, user.id),
+              eq(userPersonTypes.personTypeId, personType.id)
+            ));
+          
+          // If not, add it
+          if (existingUserType.length === 0) {
+            await db.insert(userPersonTypes).values({
+              userId: user.id,
+              personTypeId: personType.id,
+              isPrimary: true,
+              assignedAt: new Date()
+            });
+          }
+        }
+        
+        // Send onboarding
+        const { onboardingService } = await import("./onboardingService");
+        await onboardingService.sendOnboarding(user.id);
+        console.log(`Onboarding sent for ${participantType || 'attendee'}: ${email}`);
+      } catch (onboardingError) {
+        console.error('Failed to send onboarding:', onboardingError);
+        // Don't fail registration if onboarding fails
       }
 
       // Send verification email if email service is available and user not verified
