@@ -29,24 +29,23 @@ export default function Login() {
     },
     onSuccess: (data) => {
       // Store auth token if provided (for Replit environment)
-      if (data?.authToken) {
-        localStorage.setItem('authToken', data.authToken);
+      if (data?.authToken || data?.sessionId) {
+        localStorage.setItem('authToken', data.authToken || data.sessionId);
       }
       
       toast({
         title: "Welcome back!",
         description: "You've been successfully logged in.",
       });
+      
+      // Invalidate and refetch auth queries to ensure state updates
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      // Small delay to ensure session is established
+      queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+      
+      // Force page reload to ensure authentication state is properly established
       setTimeout(() => {
-        // Redirect admin users to dashboard, others to home
-        if (data?.user?.isAdmin) {
-          setLocation("/dashboard");
-        } else {
-          setLocation("/");
-        }
-      }, 100);
+        window.location.reload();
+      }, 500);
     },
     onError: (error) => {
       toast({
