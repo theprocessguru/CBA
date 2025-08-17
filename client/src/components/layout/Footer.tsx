@@ -36,22 +36,22 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-medium mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><Link href="/"><a className="text-neutral-400 hover:text-white transition">Home</a></Link></li>
-              <li><Link href="/about"><a className="text-neutral-400 hover:text-white transition">About Us</a></Link></li>
-              <li><Link href="/directory"><a className="text-neutral-400 hover:text-white transition">Member Directory</a></Link></li>
-              <li><Link href="/marketplace"><a className="text-neutral-400 hover:text-white transition">Marketplace</a></Link></li>
+              <li><Link href="/" className="text-neutral-400 hover:text-white transition">Home</Link></li>
+              <li><Link href="/about" className="text-neutral-400 hover:text-white transition">About Us</Link></li>
+              <li><Link href="/directory" className="text-neutral-400 hover:text-white transition">Member Directory</Link></li>
+              <li><Link href="/marketplace" className="text-neutral-400 hover:text-white transition">Marketplace</Link></li>
               <li><a href="#" className="text-neutral-400 hover:text-white transition">Events</a></li>
-              <li><Link href="/contact"><a className="text-neutral-400 hover:text-white transition">Contact</a></Link></li>
+              <li><Link href="/contact" className="text-neutral-400 hover:text-white transition">Contact</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-lg font-medium mb-4">Member Resources</h4>
             <ul className="space-y-2">
-              <li><Link href="/login"><a className="text-neutral-400 hover:text-white transition">Login / Register</a></Link></li>
+              <li><Link href="/login" className="text-neutral-400 hover:text-white transition">Login / Register</Link></li>
               <li><a href="#" className="text-neutral-400 hover:text-white transition">Member Benefits</a></li>
-              <li><Link href="/dashboard/business-profile"><a className="text-neutral-400 hover:text-white transition">Update Your Profile</a></Link></li>
-              <li><Link href="/dashboard/special-offers"><a className="text-neutral-400 hover:text-white transition">Create Special Offers</a></Link></li>
+              <li><Link href="/dashboard/business-profile" className="text-neutral-400 hover:text-white transition">Update Your Profile</Link></li>
+              <li><Link href="/dashboard/special-offers" className="text-neutral-400 hover:text-white transition">Create Special Offers</Link></li>
               <li><a href="#" className="text-neutral-400 hover:text-white transition">Business Resources</a></li>
               <li><a href="#" className="text-neutral-400 hover:text-white transition">Support</a></li>
             </ul>

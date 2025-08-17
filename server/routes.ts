@@ -6910,7 +6910,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create event (admin only)
   app.post("/api/events", isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const event = await storage.createEvent(req.body);
+      // Validate and convert date strings to Date objects
+      const eventData = {
+        ...req.body,
+        startDate: req.body.startDate ? new Date(req.body.startDate) : undefined,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
+        registrationStartDate: req.body.registrationStartDate ? new Date(req.body.registrationStartDate) : undefined,
+        registrationEndDate: req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : undefined,
+        earlyBirdDeadline: req.body.earlyBirdDeadline ? new Date(req.body.earlyBirdDeadline) : undefined,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const event = await storage.createEvent(eventData);
       res.status(201).json(event);
     } catch (error) {
       console.error("Error creating event:", error);
