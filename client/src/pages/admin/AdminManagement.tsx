@@ -34,10 +34,7 @@ export default function AdminManagement() {
   // Create administrator mutation
   const createAdminMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      return apiRequest('/api/admin/users/create-admin', {
-        method: 'POST',
-        body: JSON.stringify(data)
-      });
+      return apiRequest('POST', '/api/admin/users/create-admin', data);
     },
     onSuccess: (data) => {
       toast({

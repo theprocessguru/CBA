@@ -1703,7 +1703,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createUser(newAdmin);
 
       // Send welcome email with temporary password
-      const emailService = new EmailService();
       const emailResult = await emailService.sendAdminWelcomeEmail(
         email,
         `${firstName} ${lastName}`,
