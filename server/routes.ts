@@ -3917,6 +3917,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Speaker Management API
+  app.get('/api/admin/speakers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitSpeakerInterests } = await import("@shared/schema");
+      const speakers = await db
+        .select()
+        .from(aiSummitSpeakerInterests)
+        .orderBy(desc(aiSummitSpeakerInterests.createdAt));
+      
+      res.json(speakers);
+    } catch (error) {
+      console.error('Error fetching speakers:', error);
+      res.status(500).json({ message: 'Failed to fetch speakers' });
+    }
+  });
+
   // Admin Membership Tier Management API
   
   // Get all membership tiers

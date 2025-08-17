@@ -89,6 +89,7 @@ import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
+import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
@@ -637,6 +638,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <AffiliateManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/speakers">
+        <AdminRoute>
+          <MainLayout>
+            <SpeakerManagement />
           </MainLayout>
         </AdminRoute>
       </Route>
