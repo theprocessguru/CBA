@@ -422,9 +422,31 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div className="pt-2">
               <button 
                 onClick={() => {
-                  fetch('/api/auth/logout', { method: 'POST' })
-                    .then(() => window.location.href = '/')
-                    .catch(() => window.location.href = '/');
+                  // Clear auth token
+                  localStorage.removeItem('authToken');
+                  
+                  // Make logout request with auth header
+                  const authToken = localStorage.getItem('authToken');
+                  const headers: HeadersInit = {
+                    'Content-Type': 'application/json'
+                  };
+                  if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                  }
+                  
+                  fetch('/api/auth/logout', { 
+                    method: 'POST',
+                    credentials: 'include',
+                    headers
+                  })
+                    .then(() => {
+                      localStorage.removeItem('authToken');
+                      window.location.href = '/';
+                    })
+                    .catch(() => {
+                      localStorage.removeItem('authToken');
+                      window.location.href = '/';
+                    });
                 }}
                 className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-neutral-700 hover:bg-neutral-100 w-full text-left"
               >

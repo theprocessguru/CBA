@@ -219,10 +219,17 @@ export async function setupLocalAuth(app: Express) {
 
   // Logout endpoint
   app.post('/api/auth/logout', (req: Request, res: Response) => {
+    // Clear auth token if provided
+    const authToken = req.headers['authorization']?.replace('Bearer ', '');
+    if (authToken) {
+      authTokens.delete(authToken);
+    }
+    
     req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({ message: "Failed to logout" });
       }
+      res.clearCookie('cba.sid');
       res.json({ success: true });
     });
   });
