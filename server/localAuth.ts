@@ -49,8 +49,8 @@ export function getSession() {
     }
     
     sessionMiddleware(req, res, () => {
-      // Force session cookie on every response
-      if (req.session && req.sessionID) {
+      // Only set header if not already sent
+      if (req.session && req.sessionID && !res.headersSent) {
         res.setHeader('X-Session-ID', req.sessionID);
       }
       next();
