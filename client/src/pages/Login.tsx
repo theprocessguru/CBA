@@ -29,8 +29,9 @@ export default function Login() {
     },
     onSuccess: (data) => {
       // Store auth token if provided (for Replit environment)
-      if (data?.authToken || data?.sessionId) {
-        localStorage.setItem('authToken', data.authToken || data.sessionId);
+      if (data?.authToken) {
+        localStorage.setItem('authToken', data.authToken);
+        console.log("Auth token stored:", data.authToken);
       }
       
       toast({
@@ -40,12 +41,15 @@ export default function Login() {
       
       // Invalidate and refetch auth queries to ensure state updates
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
       
-      // Force page reload to ensure authentication state is properly established
+      // Small delay to let the token be stored, then redirect
       setTimeout(() => {
-        window.location.reload();
-      }, 500);
+        if (data?.user?.isAdmin) {
+          setLocation("/admin");
+        } else {
+          setLocation("/dashboard");
+        }
+      }, 100);
     },
     onError: (error) => {
       toast({

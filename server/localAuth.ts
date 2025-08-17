@@ -353,23 +353,15 @@ export async function setupLocalAuth(app: Express) {
 const authTokens = new Map<string, { userId: string; expiresAt: Date }>();
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
-  console.log("=== AUTH MIDDLEWARE DEBUG ===");
-  console.log("Session ID:", req.sessionID);
-  console.log("Session data:", req.session);
-  console.log("Headers:", req.headers.authorization ? "Bearer token present" : "No bearer token");
-  
   // First check for auth token in header (for Replit environment)
   const authToken = req.headers['authorization']?.replace('Bearer ', '');
   
   if (authToken) {
-    console.log("Checking auth token:", authToken);
     const tokenData = authTokens.get(authToken);
     if (tokenData && tokenData.expiresAt > new Date()) {
-      console.log("Token is valid for user:", tokenData.userId);
       // Token is valid, fetch user
       const user = await storage.getUser(tokenData.userId);
       if (user) {
-        console.log("User found via token:", user.email);
         req.user = {
           id: user.id,
           email: user.email,
@@ -379,29 +371,22 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         };
         return next();
       }
-    } else {
-      console.log("Token is invalid or expired");
     }
   }
   
   // Fall back to session-based auth
   const session = req.session as any;
-  console.log("Checking session userId:", session?.userId);
   
   if (!session?.userId) {
-    console.log("No session userId found - UNAUTHORIZED");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   // Fetch fresh user data from database to ensure we have current admin status
-  console.log("Fetching user from database:", session.userId);
   const user = await storage.getUser(session.userId);
   if (!user) {
-    console.log("User not found in database - UNAUTHORIZED");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  console.log("User found via session:", user.email, "isAdmin:", user.isAdmin);
   // Attach full user data including isAdmin flag
   req.user = {
     id: user.id,
@@ -410,6 +395,5 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     lastName: user.lastName,
     isAdmin: user.isAdmin || false
   };
-  console.log("AUTH SUCCESSFUL - proceeding to next middleware");
   next();
 };
