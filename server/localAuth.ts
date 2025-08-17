@@ -40,8 +40,14 @@ export function getSession() {
     proxy: true, // Always trust proxy in Replit
   });
   
-  // Wrap session middleware to add debugging
+  // Wrap session middleware to add debugging and handle session token
   return (req: Request, res: Response, next: any) => {
+    // Check for session token in headers (for Replit preview)
+    const sessionToken = req.headers['x-session-token'] as string;
+    if (sessionToken && sessionToken !== 'null' && sessionToken !== 'undefined') {
+      req.sessionID = sessionToken;
+    }
+    
     sessionMiddleware(req, res, () => {
       // Force session cookie on every response
       if (req.session && req.sessionID) {
