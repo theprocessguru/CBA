@@ -35,7 +35,12 @@ export default function Login() {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       // Small delay to ensure session is established
       setTimeout(() => {
-        setLocation("/");
+        // Redirect admin users to dashboard, others to home
+        if (data?.user?.isAdmin) {
+          setLocation("/dashboard");
+        } else {
+          setLocation("/");
+        }
       }, 100);
     },
     onError: (error) => {
