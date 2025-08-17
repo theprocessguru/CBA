@@ -12,6 +12,7 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import AuthTest from "@/pages/auth-test";
 import Directory from "@/pages/directory";
 import Business from "@/pages/business";
 import Marketplace from "@/pages/marketplace";
@@ -185,6 +186,9 @@ function Router() {
       </Route>
       <Route path="/reset-password">
         <ResetPassword />
+      </Route>
+      <Route path="/auth-test">
+        <AuthTest />
       </Route>
       
       {/* Home Route - Shows dashboard for authenticated users, landing page for others */}
