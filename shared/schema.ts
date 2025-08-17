@@ -281,33 +281,16 @@ export const passwordResetTokens = pgTable("password_reset_tokens", {
 // Events Management System - Support for multiple event types
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
-  eventCode: varchar("event_code").unique().notNull(), // e.g., "ai-summit-2025", "networking-jan-2025"
-  name: varchar("name").notNull(), // e.g., "AI Summit 2025", "January Networking Event"
-  type: varchar("type").notNull(), // networking, workshop, summit, conference, exhibition, seminar
+  title: varchar("title").notNull(), // e.g., "AI Summit 2025", "January Networking Event"
+  eventType: varchar("event_type").notNull(), // networking, workshop, summit, conference, exhibition, seminar
   description: text("description"),
-  venue: varchar("venue").notNull(),
-  venueAddress: text("venue_address"),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
-  registrationStartDate: timestamp("registration_start_date"),
-  registrationEndDate: timestamp("registration_end_date"),
+  location: varchar("location").notNull(),
   maxCapacity: integer("max_capacity"),
-  currentRegistrations: integer("current_registrations").default(0),
-  ticketPrice: decimal("ticket_price", { precision: 10, scale: 2 }),
-  memberPrice: decimal("member_price", { precision: 10, scale: 2 }),
-  earlyBirdPrice: decimal("early_bird_price", { precision: 10, scale: 2 }),
-  earlyBirdDeadline: timestamp("early_bird_deadline"),
-  imageUrl: varchar("image_url"),
-  bannerUrl: varchar("banner_url"),
+  registrationFee: decimal("registration_fee", { precision: 10, scale: 2 }),
   status: varchar("status").default("draft"), // draft, published, ongoing, completed, cancelled
-  hasExhibition: boolean("has_exhibition").default(false),
-  hasSpeakers: boolean("has_speakers").default(false),
-  hasWorkshops: boolean("has_workshops").default(false),
-  hasNetworking: boolean("has_networking").default(true),
-  hasVolunteers: boolean("has_volunteers").default(false),
-  hasSponsors: boolean("has_sponsors").default(false),
   tags: text("tags"), // JSON array of tags
-  createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

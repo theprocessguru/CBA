@@ -64,7 +64,9 @@ const UserManagement = () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (selectedStatus !== "all") params.append('status', selectedStatus);
-      return fetch(`/api/admin/users?${params}`).then(res => res.json());
+      return fetch(`/api/admin/users?${params}`, {
+        credentials: 'include'
+      }).then(res => res.json());
     },
   });
 
@@ -227,9 +229,9 @@ const UserManagement = () => {
 
   const statusCounts = {
     all: users?.length || 0,
-    active: users?.filter(u => u.accountStatus === "active").length || 0,
-    suspended: users?.filter(u => u.accountStatus === "suspended").length || 0,
-    closed: users?.filter(u => u.accountStatus === "closed").length || 0,
+    active: users?.filter((u) => u.accountStatus === "active").length || 0,
+    suspended: users?.filter((u) => u.accountStatus === "suspended").length || 0,
+    closed: users?.filter((u) => u.accountStatus === "closed").length || 0,
   };
 
   if (isLoading) {
