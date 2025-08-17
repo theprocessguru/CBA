@@ -20,19 +20,23 @@ export function getSession() {
     throw new Error('SESSION_SECRET environment variable is required');
   }
   
+  // Check if we're running on Replit - cookies need special handling in preview
+  const isReplit = process.env.REPLIT_DOMAINS ? true : false;
+  
   return session({
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Changed to true to ensure session is created
     name: 'connect.sid',
     cookie: {
       httpOnly: true,
-      secure: false, // Allow cookies in development (HTTP)
-      sameSite: 'lax', // Standard same-site policy
+      secure: false, // Must be false for HTTP in dev
+      sameSite: 'lax', // Use lax for same-site requests
       maxAge: sessionTtl,
       path: '/', // Ensure cookie is available on all paths
     },
+    proxy: isReplit, // Trust proxy headers on Replit
   });
 }
 
