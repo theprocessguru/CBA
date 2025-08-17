@@ -70,7 +70,8 @@ import {
   jobPostings,
   jobApplications,
   jobSavedSearches,
-  type AISummitRegistration
+  type AISummitRegistration,
+  emailTemplates
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -3967,6 +3968,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error sending bulk onboarding:', error);
       res.status(500).json({ message: 'Failed to send bulk onboarding' });
+    }
+  });
+
+  // Admin email template management routes
+  app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const templates = await db
+        .select()
+        .from(emailTemplates)
+        .orderBy(emailTemplates.personType);
+
+      res.json(templates);
+    } catch (error) {
+      console.error('Error fetching email templates:', error);
+      res.status(500).json({ message: 'Failed to fetch email templates' });
+    }
+  });
+
+  app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const [template] = await db
+        .insert(emailTemplates)
+        .values({
+          ...req.body,
+          lastUpdatedBy: req.user.id
+        })
+        .returning();
+
+      res.json(template);
+    } catch (error) {
+      console.error('Error creating email template:', error);
+      res.status(500).json({ message: 'Failed to create email template' });
+    }
+  });
+
+  app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const [template] = await db
+        .update(emailTemplates)
+        .set({
+          ...req.body,
+          lastUpdatedBy: req.user.id,
+          updatedAt: new Date()
+        })
+        .where(eq(emailTemplates.id, parseInt(req.params.id)))
+        .returning();
+
+      res.json(template);
+    } catch (error) {
+      console.error('Error updating email template:', error);
+      res.status(500).json({ message: 'Failed to update email template' });
+    }
+  });
+
+  app.delete('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await db
+        .delete(emailTemplates)
+        .where(eq(emailTemplates.id, parseInt(req.params.id)));
+
+      res.json({ message: 'Template deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting email template:', error);
+      res.status(500).json({ message: 'Failed to delete email template' });
+    }
+  });
+
+  app.post('/api/admin/email-templates/test', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { subject, htmlContent, testEmail } = req.body;
+      
+      const emailService = new EmailService();
+      if (emailService.isConfigured()) {
+        await emailService.sendEmail(
+          testEmail || req.user.email || 'admin@croydonba.org.uk',
+          subject,
+          htmlContent
+        );
+        res.json({ message: 'Test email sent successfully' });
+      } else {
+        res.status(503).json({ message: 'Email service not configured' });
+      }
+    } catch (error) {
+      console.error('Error sending test email:', error);
+      res.status(500).json({ message: 'Failed to send test email' });
+    }
+  });
+
+  // Initialize default email templates
+  app.post('/api/admin/email-templates/initialize', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { EmailTemplateService } = await import("./emailTemplateService");
+      const service = new EmailTemplateService();
+      await service.initializeDefaultTemplates();
+      res.json({ message: 'Default templates initialized successfully' });
+    } catch (error) {
+      console.error('Error initializing templates:', error);
+      res.status(500).json({ message: 'Failed to initialize templates' });
     }
   });
 

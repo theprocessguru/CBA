@@ -1,8 +1,9 @@
 import { db } from "./db";
-import { users, personTypes, userPersonTypes } from "@shared/schema";
+import { users, personTypes, userPersonTypes, emailTemplates, onboardingLog } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { EmailService } from "./emailService";
 import { MyTAutomationService } from "./mytAutomationService";
+import { EmailTemplateService } from "./emailTemplateService";
 
 interface OnboardingMessage {
   subject: string;
@@ -36,8 +37,42 @@ export class OnboardingService {
     return userTypes.map(ut => ut.typeName);
   }
 
-  // Get welcome message based on user type
-  private getWelcomeMessage(userType: string, user: UserWithTypes): OnboardingMessage {
+  // Get welcome message based on user type from database or fallback to default
+  private async getWelcomeMessage(userType: string, user: UserWithTypes): Promise<OnboardingMessage> {
+    const emailTemplateService = new EmailTemplateService();
+    const template = await emailTemplateService.getTemplate(userType);
+    
+    if (template) {
+      // Prepare data for variable replacement
+      const data = {
+        firstName: user.firstName || "Member",
+        lastName: user.lastName || "",
+        fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Valued Member",
+        email: user.email,
+        company: user.company || "",
+        membershipTier: user.membershipTier || "Starter Tier",
+        // Add more variables as needed
+        venue: "Croydon Conference Centre",
+        badgeId: user.id.slice(0, 8).toUpperCase(),
+        eventName: "AI Summit 2025",
+        eventDate: "March 28, 2025"
+      };
+
+      return {
+        subject: emailTemplateService.replaceVariables(template.subject, data),
+        htmlContent: emailTemplateService.replaceVariables(template.htmlContent, data),
+        smsContent: template.smsContent ? emailTemplateService.replaceVariables(template.smsContent, data) : undefined,
+        mytTags: template.mytTags || [],
+        mytWorkflow: template.mytWorkflow || undefined
+      };
+    }
+
+    // Fallback to hardcoded message if no template found
+    return this.getDefaultWelcomeMessage(userType, user);
+  }
+
+  // Fallback welcome messages if no template in database
+  private getDefaultWelcomeMessage(userType: string, user: UserWithTypes): OnboardingMessage {
     const firstName = user.firstName || "Member";
     const fullName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Valued Member";
     
@@ -476,7 +511,7 @@ export class OnboardingService {
         membershipTier: user.membershipTier || undefined
       };
       
-      const message = this.getWelcomeMessage(primaryType, userWithTypes);
+      const message = await this.getWelcomeMessage(primaryType, userWithTypes);
       
       // Send welcome email
       const emailService = new EmailService();

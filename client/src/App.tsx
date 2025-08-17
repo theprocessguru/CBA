@@ -91,6 +91,7 @@ import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
+import EmailTemplates from "@/pages/admin/EmailTemplates";
 import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
@@ -653,6 +654,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <OnboardingManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/email-templates">
+        <AdminRoute>
+          <MainLayout>
+            <EmailTemplates />
           </MainLayout>
         </AdminRoute>
       </Route>

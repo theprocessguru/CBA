@@ -716,6 +716,31 @@ export const membershipTiers = pgTable("membership_tiers", {
 export type MembershipTier = typeof membershipTiers.$inferSelect;
 export type InsertMembershipTier = typeof membershipTiers.$inferInsert;
 
+// Email Templates table for customizable messages
+export const emailTemplates = pgTable("email_templates", {
+  id: serial("id").primaryKey(),
+  personType: varchar("person_type").notNull(), // volunteer, vip, speaker, exhibitor, sponsor, etc.
+  templateName: varchar("template_name").notNull(), // friendly name for the template
+  subject: text("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  smsContent: text("sms_content"),
+  mytTags: jsonb("myt_tags").$type<string[]>().default([]),
+  mytWorkflow: varchar("myt_workflow"),
+  variables: jsonb("variables").$type<string[]>().default([]), // List of available variables like {{firstName}}, {{company}}, etc.
+  isActive: boolean("is_active").default(true),
+  lastUpdatedBy: varchar("last_updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+
 // CBA Events management system
 export const cbaEvents = pgTable("cba_events", {
   id: serial("id").primaryKey(),

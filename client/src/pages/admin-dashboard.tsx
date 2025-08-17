@@ -195,6 +195,12 @@ export default function AdminDashboard() {
               Onboarding
             </Button>
           </Link>
+          <Link href="/admin/email-templates">
+            <Button variant="outline" size="sm">
+              <Mail className="mr-2 h-4 w-4" />
+              Email Templates
+            </Button>
+          </Link>
         </div>
       </div>
 
