@@ -176,7 +176,18 @@ export async function setupLocalAuth(app: Express) {
         isAdmin: user.isAdmin || false,
       };
 
-      // Explicitly save the session
+      // Generate auth token for Replit environment
+      const authToken = crypto.randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // Token expires in 7 days
+      
+      // Store token
+      authTokens.set(authToken, {
+        userId: user.id,
+        expiresAt
+      });
+      
+      // Explicitly save the session (for non-Replit environments)
       req.session.save((err) => {
         if (err) {
           console.error("Session save error:", err);
@@ -190,6 +201,7 @@ export async function setupLocalAuth(app: Express) {
         res.json({ 
           success: true,
           sessionId: req.sessionID, // Include session ID for debugging
+          authToken, // Include auth token for Replit environment
           user: {
             id: user.id,
             email: user.email,
@@ -330,7 +342,32 @@ export async function setupLocalAuth(app: Express) {
 
 }
 
+// Simple in-memory token store for Replit environment
+const authTokens = new Map<string, { userId: string; expiresAt: Date }>();
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // First check for auth token in header (for Replit environment)
+  const authToken = req.headers['authorization']?.replace('Bearer ', '');
+  
+  if (authToken) {
+    const tokenData = authTokens.get(authToken);
+    if (tokenData && tokenData.expiresAt > new Date()) {
+      // Token is valid, fetch user
+      const user = await storage.getUser(tokenData.userId);
+      if (user) {
+        req.user = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isAdmin: user.isAdmin || false
+        };
+        return next();
+      }
+    }
+  }
+  
+  // Fall back to session-based auth
   const session = req.session as any;
   
   if (!session.userId) {

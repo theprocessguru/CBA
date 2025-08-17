@@ -28,6 +28,11 @@ export default function Login() {
       return response.json();
     },
     onSuccess: (data) => {
+      // Store auth token if provided (for Replit environment)
+      if (data?.authToken) {
+        localStorage.setItem('authToken', data.authToken);
+      }
+      
       toast({
         title: "Welcome back!",
         description: "You've been successfully logged in.",
