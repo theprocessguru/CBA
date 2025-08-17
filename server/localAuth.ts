@@ -41,20 +41,41 @@ export function getSession() {
   });
   
   // Wrap session middleware to add debugging and handle session token
-  return (req: Request, res: Response, next: any) => {
+  return async (req: Request, res: Response, next: any) => {
     // Check for session token in headers (for Replit preview)
     const sessionToken = req.headers['x-session-token'] as string;
-    if (sessionToken && sessionToken !== 'null' && sessionToken !== 'undefined') {
-      req.sessionID = sessionToken;
-    }
     
-    sessionMiddleware(req, res, () => {
-      // Only set header if not already sent
-      if (req.session && req.sessionID && !res.headersSent) {
-        res.setHeader('X-Session-ID', req.sessionID);
-      }
-      next();
-    });
+    if (sessionToken && sessionToken !== 'null' && sessionToken !== 'undefined') {
+      console.log('Session token from header:', sessionToken);
+      // Manually load session from store
+      sessionStore.get(sessionToken, (err: any, sessionData: any) => {
+        if (!err && sessionData) {
+          console.log('Session loaded from store:', sessionData?.userId);
+          req.sessionID = sessionToken;
+          req.session = Object.assign(req.session || {}, sessionData);
+          // Mark session as loaded
+          if (req.session) {
+            req.session.cookie = req.session.cookie || {};
+          }
+        }
+        
+        sessionMiddleware(req, res, () => {
+          // Only set header if not already sent
+          if (req.session && req.sessionID && !res.headersSent) {
+            res.setHeader('X-Session-ID', req.sessionID);
+          }
+          next();
+        });
+      });
+    } else {
+      sessionMiddleware(req, res, () => {
+        // Only set header if not already sent
+        if (req.session && req.sessionID && !res.headersSent) {
+          res.setHeader('X-Session-ID', req.sessionID);
+        }
+        next();
+      });
+    }
   };
 }
 
@@ -72,7 +93,7 @@ export async function setupLocalAuth(app: Express) {
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Origin', origin === '*' ? '*' : origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Session-Token');
     
     if (req.method === 'OPTIONS') {
       return res.sendStatus(200);
