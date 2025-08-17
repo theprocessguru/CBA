@@ -23,26 +23,56 @@ export function getSession() {
   // Check if we're running on Replit - cookies need special handling in preview
   const isReplit = process.env.REPLIT_DOMAINS ? true : false;
   
-  return session({
+  const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
-    resave: false,
-    saveUninitialized: true, // Changed to true to ensure session is created
-    name: 'connect.sid',
+    resave: true, // Force session save
+    saveUninitialized: false, // Don't create empty sessions
+    rolling: true, // Reset expiry on activity
+    name: 'connect.sid', // Standard session name
     cookie: {
       httpOnly: true,
-      secure: false, // Must be false for HTTP in dev
-      sameSite: 'lax', // Use lax for same-site requests
+      secure: false, // False for HTTP
+      sameSite: 'none', // None for cross-origin in Replit iframe
       maxAge: sessionTtl,
-      path: '/', // Ensure cookie is available on all paths
+      path: '/',
     },
-    proxy: isReplit, // Trust proxy headers on Replit
+    proxy: true, // Always trust proxy in Replit
   });
+  
+  // Wrap session middleware to add debugging
+  return (req: Request, res: Response, next: any) => {
+    sessionMiddleware(req, res, () => {
+      // Force session cookie on every response
+      if (req.session && req.sessionID) {
+        res.setHeader('X-Session-ID', req.sessionID);
+      }
+      next();
+    });
+  };
 }
 
 export async function setupLocalAuth(app: Express) {
+  // Trust proxy for Replit environment - MUST be before session
   app.set("trust proxy", 1);
+  
+  // Session middleware MUST come before CORS
   app.use(getSession());
+  
+  // Add CORS headers after session for cookie support
+  app.use((req, res, next) => {
+    // For Replit preview, we need specific CORS handling
+    const origin = req.headers.origin || req.headers.referer || '*';
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Origin', origin === '*' ? '*' : origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+      return res.sendStatus(200);
+    }
+    next();
+  });
 
   // Register endpoint
   app.post('/api/auth/register', async (req: Request, res: Response) => {
