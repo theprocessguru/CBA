@@ -152,18 +152,33 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, error } = useAuth();
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Skeleton className="h-24 w-24 rounded-full" />
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+          <p className="text-gray-600">Checking admin access...</p>
+        </div>
       </div>
     );
   }
 
   if (!user || !(user as any).isAdmin) {
-    return <NotFound />;
+    // For admin routes, redirect to login if not authenticated/admin
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 100);
+    
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-red-50 to-orange-100">
+        <div className="text-center space-y-4">
+          <p className="text-red-600">Admin access required</p>
+          <p className="text-gray-600">Redirecting to login...</p>
+        </div>
+      </div>
+    );
   }
 
   return <>{children}</>;

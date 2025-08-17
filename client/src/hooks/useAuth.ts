@@ -21,6 +21,10 @@ export function useAuth() {
       
       if (!response.ok) {
         if (response.status === 401) {
+          // Clear invalid token from localStorage
+          if (authToken) {
+            localStorage.removeItem('authToken');
+          }
           return null; // Not authenticated
         }
         throw new Error(`Auth check failed: ${response.status}`);
@@ -29,9 +33,9 @@ export function useAuth() {
       return response.json();
     },
     retry: false,
-    staleTime: 30000, // 30 seconds
+    staleTime: 5000, // Reduced to 5 seconds for faster auth refresh
     refetchInterval: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true, // Recheck when user returns to tab
     refetchOnMount: true, // Always check on mount
     gcTime: 0, // Don't cache failed results
     networkMode: 'online', // Skip if offline
