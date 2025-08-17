@@ -75,6 +75,56 @@ export class MyTAutomationService {
     }
   }
 
+  // Create new contact
+  async createContact(contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
+    try {
+      const response = await this.api.post('/contacts', contactData);
+      return response.data.contact;
+    } catch (error: any) {
+      console.error('Error creating MyT Automation contact:', error);
+      throw new Error('Failed to create contact in MyT Automation');
+    }
+  }
+
+  // Update existing contact
+  async updateContact(contactId: string, contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
+    try {
+      const updateData = { ...contactData };
+      // Remove email to avoid duplicate error
+      delete updateData.email;
+      
+      const response = await this.api.put(`/contacts/${contactId}`, updateData);
+      return response.data.contact;
+    } catch (error: any) {
+      console.error('Error updating MyT Automation contact:', error);
+      throw new Error('Failed to update contact in MyT Automation');
+    }
+  }
+
+  // Add contact to workflow
+  async addContactToWorkflow(contactId: string, workflowId: string): Promise<void> {
+    try {
+      await this.api.post(`/contacts/${contactId}/workflow/${workflowId}`);
+      console.log(`Added contact ${contactId} to workflow ${workflowId}`);
+    } catch (error) {
+      console.error('Error adding contact to workflow:', error);
+      // Don't throw - workflows might not be set up yet
+    }
+  }
+
+  // Send SMS via MyT Automation
+  async sendSMS(contactId: string, message: string): Promise<void> {
+    try {
+      await this.api.post(`/contacts/${contactId}/sms`, {
+        message: message
+      });
+      console.log(`SMS sent to contact ${contactId}`);
+    } catch (error) {
+      console.error('Error sending SMS via MyT Automation:', error);
+      // Don't throw - SMS might not be configured
+    }
+  }
+
   // Create or update contact
   async upsertContact(contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
     try {

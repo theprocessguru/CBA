@@ -1,12 +1,15 @@
 import { db } from "./db";
 import { users, personTypes, userPersonTypes } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
-import { sendEmail } from "./emailService";
+import { EmailService } from "./emailService";
+import { MyTAutomationService } from "./mytAutomationService";
 
 interface OnboardingMessage {
   subject: string;
   htmlContent: string;
   smsContent?: string;
+  mytTags?: string[];
+  mytWorkflow?: string;
 }
 
 interface UserWithTypes {
@@ -41,6 +44,8 @@ export class OnboardingService {
     const messages: Record<string, OnboardingMessage> = {
       volunteer: {
         subject: "Welcome to the CBA Volunteer Team! 🌟",
+        mytTags: ["volunteer", "ai-summit-2025", "onboarded", "volunteer-active"],
+        mytWorkflow: "volunteer-onboarding-sequence",
         htmlContent: `
           <h2>Welcome ${firstName}!</h2>
           <p>Thank you for joining our volunteer community at the Croydon Business Association!</p>
@@ -73,6 +78,8 @@ export class OnboardingService {
       
       vip: {
         subject: "VIP Welcome - Exclusive Access to Croydon Business Association",
+        mytTags: ["vip", "ai-summit-2025", "onboarded", "vip-active", "priority-support"],
+        mytWorkflow: "vip-concierge-sequence",
         htmlContent: `
           <h2>Welcome ${fullName}</h2>
           <p>We're honored to have you as a VIP member of the Croydon Business Association.</p>
@@ -105,6 +112,8 @@ export class OnboardingService {
       
       speaker: {
         subject: "Speaker Welcome - AI Summit 2025 🎤",
+        mytTags: ["speaker", "ai-summit-2025", "onboarded", "speaker-confirmed"],
+        mytWorkflow: "speaker-preparation-sequence",
         htmlContent: `
           <h2>Welcome ${fullName}!</h2>
           <p>Thank you for joining us as a speaker at the AI Summit 2025!</p>
@@ -140,6 +149,8 @@ export class OnboardingService {
       
       exhibitor: {
         subject: "Exhibitor Welcome Pack - AI Summit 2025 🏢",
+        mytTags: ["exhibitor", "ai-summit-2025", "onboarded", "exhibitor-active"],
+        mytWorkflow: "exhibitor-onboarding-sequence",
         htmlContent: `
           <h2>Welcome ${fullName} from ${user.company || "your company"}!</h2>
           <p>Thank you for exhibiting at the AI Summit 2025!</p>
@@ -182,6 +193,8 @@ export class OnboardingService {
       
       sponsor: {
         subject: "Sponsor Welcome - Thank You for Your Partnership! 🤝",
+        mytTags: ["sponsor", "ai-summit-2025", "onboarded", "sponsor-active", "vip-partner"],
+        mytWorkflow: "sponsor-partnership-sequence",
         htmlContent: `
           <h2>Dear ${fullName},</h2>
           <p>On behalf of the entire Croydon Business Association, thank you for your sponsorship!</p>
@@ -220,6 +233,8 @@ export class OnboardingService {
       
       team_member: {
         subject: "Welcome to the CBA Team! 🎉",
+        mytTags: ["team-member", "staff", "onboarded", "internal-team"],
+        mytWorkflow: "team-member-onboarding-sequence",
         htmlContent: `
           <h2>Welcome to the team, ${firstName}!</h2>
           <p>We're excited to have you join the Croydon Business Association team!</p>
@@ -259,6 +274,8 @@ export class OnboardingService {
       
       student: {
         subject: "Student Welcome - Unlock Your Future! 🎓",
+        mytTags: ["student", "education", "onboarded", "student-active"],
+        mytWorkflow: "student-engagement-sequence",
         htmlContent: `
           <h2>Welcome ${firstName}!</h2>
           <p>Great to have you join the CBA Student Community!</p>
@@ -299,6 +316,8 @@ export class OnboardingService {
       
       councillor: {
         subject: "Councillor Welcome - Partnership for Croydon's Success",
+        mytTags: ["councillor", "government", "onboarded", "councillor-active"],
+        mytWorkflow: "councillor-engagement-sequence",
         htmlContent: `
           <h2>Dear Councillor ${fullName},</h2>
           <p>We're honored to welcome you to the Croydon Business Association network.</p>
@@ -338,6 +357,8 @@ export class OnboardingService {
       
       media: {
         subject: "Media Accreditation Confirmed - Full Access Granted 📰",
+        mytTags: ["media", "press", "onboarded", "media-active"],
+        mytWorkflow: "media-relations-sequence",
         htmlContent: `
           <h2>Welcome ${fullName} from ${user.company || "your organization"}!</h2>
           <p>Your media accreditation for CBA events has been approved.</p>
@@ -374,6 +395,8 @@ export class OnboardingService {
       // Default for regular attendees/members
       attendee: {
         subject: "Welcome to Croydon Business Association! 🎉",
+        mytTags: ["attendee", "member", "onboarded", "attendee-active"],
+        mytWorkflow: "member-onboarding-sequence",
         htmlContent: `
           <h2>Welcome ${firstName}!</h2>
           <p>Thank you for joining the Croydon Business Association community!</p>
@@ -456,21 +479,79 @@ export class OnboardingService {
       const message = this.getWelcomeMessage(primaryType, userWithTypes);
       
       // Send welcome email
-      await sendEmail(
-        user.email,
-        message.subject,
-        message.htmlContent
-      );
+      const emailService = new EmailService();
+      if (emailService.isConfigured()) {
+        await emailService.sendEmail(
+          user.email,
+          message.subject,
+          message.htmlContent
+        );
+      } else {
+        console.log(`Email service not configured. Would send to ${user.email}: ${message.subject}`);
+      }
       
-      // If phone number exists and SMS content is defined, send SMS
-      if (user.phone && message.smsContent) {
-        // Here you would integrate with your SMS service (e.g., Twilio, MyT Automation)
-        console.log(`SMS to ${user.phone}: ${message.smsContent}`);
-        // await sendSMS(user.phone, message.smsContent);
+      // Sync with MyT Automation
+      try {
+        const mytService = new MyTAutomationService();
+        
+        // Check if contact exists or create new one
+        let contact = await mytService.getContactByEmail(user.email);
+        
+        if (!contact) {
+          // Create new contact in MyT Automation
+          contact = await mytService.createContact({
+            email: user.email,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            phone: user.phone || '',
+            companyName: user.company || '',
+            tags: message.mytTags || [],
+            customFields: {
+              membership_tier: user.membershipTier || 'Starter',
+              person_type: primaryType,
+              onboarded: true,
+              onboarding_date: new Date().toISOString()
+            }
+          });
+          console.log(`Created new MyT Automation contact for ${user.email}`);
+        } else {
+          // Update existing contact with tags
+          const existingTags = contact.tags || [];
+          const newTags = message.mytTags || [];
+          const combinedTags = [...new Set([...existingTags, ...newTags])];
+          
+          await mytService.updateContact(contact.id, {
+            tags: combinedTags,
+            customFields: {
+              ...contact.customFields,
+              membership_tier: user.membershipTier || 'Starter',
+              person_type: primaryType,
+              onboarded: true,
+              onboarding_date: new Date().toISOString()
+            }
+          });
+          console.log(`Updated MyT Automation contact for ${user.email} with tags: ${newTags.join(', ')}`);
+        }
+        
+        // Add contact to workflow if specified
+        if (message.mytWorkflow && contact) {
+          await mytService.addContactToWorkflow(contact.id, message.mytWorkflow);
+          console.log(`Added ${user.email} to workflow: ${message.mytWorkflow}`);
+        }
+        
+        // Send SMS via MyT Automation if available
+        if (user.phone && message.smsContent) {
+          await mytService.sendSMS(contact.id, message.smsContent);
+          console.log(`SMS sent to ${user.phone} via MyT Automation`);
+        }
+        
+      } catch (error) {
+        console.error('Error syncing with MyT Automation:', error);
+        // Don't throw - we still want to complete onboarding even if MyT sync fails
       }
       
       // Log onboarding completion
-      console.log(`Onboarding sent to ${user.email} as ${primaryType}`);
+      console.log(`Onboarding completed for ${user.email} as ${primaryType}`);
       
       // Update user to mark onboarding as sent (optional)
       await db
