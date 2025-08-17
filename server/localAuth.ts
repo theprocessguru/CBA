@@ -157,6 +157,10 @@ export async function setupLocalAuth(app: Express) {
           return res.status(500).json({ message: "Failed to save session" });
         }
         
+        console.log("Login successful - Session saved for user:", user.email);
+        console.log("Session ID after save:", req.sessionID);
+        console.log("Session data after save:", req.session);
+        
         res.json({ 
           success: true, 
           user: {
