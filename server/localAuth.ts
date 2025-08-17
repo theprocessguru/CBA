@@ -27,13 +27,13 @@ export function getSession() {
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
     resave: true, // Force session save
-    saveUninitialized: false, // Don't create empty sessions
-    rolling: true, // Reset expiry on activity
-    name: 'connect.sid', // Standard session name
+    saveUninitialized: true, // Create sessions immediately
+    rolling: false, // Don't reset expiry
+    name: 'cba.sid', // Custom name to avoid conflicts
     cookie: {
       httpOnly: true,
       secure: false, // False for HTTP
-      sameSite: 'none', // None for cross-origin in Replit iframe
+      sameSite: 'lax', // Lax for same-site
       maxAge: sessionTtl,
       path: '/',
     },
@@ -196,7 +196,8 @@ export async function setupLocalAuth(app: Express) {
         console.log("Session data after save:", req.session);
         
         res.json({ 
-          success: true, 
+          success: true,
+          sessionId: req.sessionID, // Include session ID for debugging
           user: {
             id: user.id,
             email: user.email,
