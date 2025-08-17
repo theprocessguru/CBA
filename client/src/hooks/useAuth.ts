@@ -33,6 +33,8 @@ export function useAuth() {
     refetchInterval: false,
     refetchOnWindowFocus: false,
     refetchOnMount: true, // Always check on mount
+    gcTime: 0, // Don't cache failed results
+    networkMode: 'online', // Skip if offline
   });
 
   // When user is null (401 response), treat as not loading and not authenticated

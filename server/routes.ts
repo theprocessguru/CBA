@@ -3785,7 +3785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workshopDataResult = await db.execute(sql`
         SELECT 
           COUNT(*) as count,
-          SUM(COALESCE("maxCapacity", 0)) as total_attendees
+          SUM(COALESCE(max_capacity, 0)) as total_attendees
         FROM cba_events
         WHERE event_type = 'workshop'
       `);
