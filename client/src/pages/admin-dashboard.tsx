@@ -110,27 +110,143 @@ export default function AdminDashboard() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
+      <div className="flex min-h-screen bg-gray-50">
+        <AdminSidebar />
+        <div className="flex-1 p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      <AdminSidebar />
+      <div className="flex-1">
+        <AdminContent metrics={metrics} />
+      </div>
+    </div>
+  );
+}
+
+function AdminSidebar() {
+  return (
+    <div className="w-64 bg-white shadow-lg">
+      <div className="p-4 border-b">
+        <h2 className="text-lg font-semibold text-gray-800">Admin Dashboard</h2>
+      </div>
+      <nav className="p-4 space-y-2">
+        <Link href="/admin">
+          <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+            <BarChart3 size={18} />
+            <span>Dashboard</span>
+          </div>
+        </Link>
+        
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">User Management</p>
+          <Link href="/admin/user-management">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Users size={18} />
+              <span>Team Users</span>
+            </div>
+          </Link>
+          <Link href="/admin/administrators">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <UserCheck size={18} />
+              <span>Administrators</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Events & Content</p>
+          <Link href="/admin/events">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Calendar size={18} />
+              <span>Events</span>
+            </div>
+          </Link>
+          <Link href="/admin/speakers">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Users size={18} />
+              <span>Speakers</span>
+            </div>
+          </Link>
+          <Link href="/admin/onboarding">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Send size={18} />
+              <span>Onboarding</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">System</p>
+          <Link href="/admin/analytics">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Activity size={18} />
+              <span>Analytics</span>
+            </div>
+          </Link>
+          <Link href="/admin/email-templates">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Mail size={18} />
+              <span>Email Templates</span>
+            </div>
+          </Link>
+          <Link href="/admin/contact-import">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Upload size={18} />
+              <span>Contact Import</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Membership</p>
+          <Link href="/admin/membership-management">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Heart size={18} />
+              <span>Membership</span>
+            </div>
+          </Link>
+          <Link href="/admin/affiliates">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Target size={18} />
+              <span>Affiliates</span>
+            </div>
+          </Link>
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
+  if (!metrics) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="text-center py-8">
+          <p className="text-gray-500">Loading impact metrics...</p>
+        </div>
+      </div>
+    );
+  }
+
   // Calculate some derived metrics
-  const totalStakeholders = metrics ? 
-    Object.values(metrics.stakeholderPercentages).reduce((a, b) => a + b, 0) : 0;
+  const totalStakeholders = Object.values(metrics.stakeholderPercentages).reduce((a, b) => a + b, 0);
   
-  const membershipFillRate = metrics ? 
-    ((metrics.membersByTier.bronze + metrics.membersByTier.silver + 
-      metrics.membersByTier.gold + metrics.membersByTier.platinum) / 
-     metrics.totalMembers * 100) : 0;
+  const membershipFillRate = ((metrics.membersByTier.bronze + metrics.membersByTier.silver + 
+    metrics.membersByTier.gold + metrics.membersByTier.platinum) / 
+   metrics.totalMembers * 100);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
