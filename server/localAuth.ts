@@ -149,15 +149,23 @@ export async function setupLocalAuth(app: Express) {
         isAdmin: user.isAdmin || false,
       };
 
-      res.json({ 
-        success: true, 
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          isAdmin: user.isAdmin || false,
+      // Explicitly save the session
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.status(500).json({ message: "Failed to save session" });
         }
+        
+        res.json({ 
+          success: true, 
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            isAdmin: user.isAdmin || false,
+          }
+        });
       });
     } catch (error) {
       console.error("Login error:", error);
