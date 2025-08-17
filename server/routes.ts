@@ -3927,7 +3927,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(aiSummitSpeakerInterests)
         .orderBy(desc(aiSummitSpeakerInterests.registeredAt));
       
-      res.json(speakers);
+      // Map database columns to frontend expected format
+      const mappedSpeakers = speakers.map(speaker => ({
+        id: speaker.id,
+        userId: speaker.userId,
+        speakerName: speaker.name,
+        speakerEmail: speaker.email,
+        speakerPhone: speaker.phone || '',
+        speakerCompany: speaker.company || '',
+        speakerJobTitle: speaker.jobTitle || '',
+        speakerWebsite: speaker.website || '',
+        speakerLinkedIn: speaker.linkedIn || '',
+        speakerBio: speaker.bio || '',
+        sessionType: speaker.sessionType || 'talk',
+        talkTitle: speaker.talkTitle || '',
+        talkDescription: speaker.talkDescription || '',
+        talkDuration: speaker.talkDuration || '',
+        audienceLevel: speaker.audienceLevel || '',
+        speakingExperience: speaker.speakingExperience || '',
+        previousSpeaking: speaker.previousSpeaking || false,
+        techRequirements: speaker.techRequirements || '',
+        availableSlots: speaker.availableSlots || '',
+        motivationToSpeak: speaker.motivationToSpeak || '',
+        keyTakeaways: speaker.keyTakeaways || '',
+        interactiveElements: speaker.interactiveElements || false,
+        handoutsProvided: speaker.handoutsProvided || false,
+        createdAt: speaker.registeredAt || speaker.createdAt,
+        status: speaker.status || 'pending'
+      }));
+      
+      res.json(mappedSpeakers);
     } catch (error) {
       console.error('Error fetching speakers:', error);
       res.status(500).json({ message: 'Failed to fetch speakers' });
@@ -6848,37 +6877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get speakers for event management
-  app.get("/api/admin/speakers", isAuthenticated, async (req, res) => {
-    try {
-      if (!req.user?.isAdmin) {
-        return res.status(403).json({ error: "Admin access required" });
-      }
 
-      // Get all users who have registered as speakers for any event
-      const speakers = await db
-        .select({
-          id: users.id,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          title: users.title,
-          company: users.company,
-        })
-        .from(users)
-        .where(
-          or(
-            sql`${users.participantType} = 'speaker'`,
-            sql`${users.participantType} LIKE '%speaker%'`
-          )
-        );
-
-      res.json(speakers);
-    } catch (error) {
-      console.error("Error fetching speakers:", error);
-      res.status(500).json({ error: "Failed to fetch speakers" });
-    }
-  });
 
   // Get all events (public endpoint)
   app.get("/api/events", async (req, res) => {
