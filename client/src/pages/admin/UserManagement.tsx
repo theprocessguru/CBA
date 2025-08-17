@@ -60,13 +60,31 @@ const UserManagement = () => {
 
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users', searchTerm, selectedStatus === "all" ? undefined : selectedStatus],
-    queryFn: () => {
+    queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (selectedStatus !== "all") params.append('status', selectedStatus);
-      return fetch(`/api/admin/users?${params}`, {
-        credentials: 'include'
-      }).then(res => res.json());
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add auth token if available (for Replit environment)
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
+      const response = await fetch(`/api/admin/users?${params}`, {
+        credentials: 'include',
+        headers,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users: ${response.status}`);
+      }
+      
+      return response.json();
     },
   });
 
@@ -228,10 +246,10 @@ const UserManagement = () => {
   };
 
   const statusCounts = {
-    all: users?.length || 0,
-    active: users?.filter((u) => u.accountStatus === "active").length || 0,
-    suspended: users?.filter((u) => u.accountStatus === "suspended").length || 0,
-    closed: users?.filter((u) => u.accountStatus === "closed").length || 0,
+    all: Array.isArray(users) ? users.length : 0,
+    active: Array.isArray(users) ? users.filter((u) => u.accountStatus === "active").length : 0,
+    suspended: Array.isArray(users) ? users.filter((u) => u.accountStatus === "suspended").length : 0,
+    closed: Array.isArray(users) ? users.filter((u) => u.accountStatus === "closed").length : 0,
   };
 
   if (isLoading) {
@@ -339,7 +357,7 @@ const UserManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {users.map((user) => {
+                  {(Array.isArray(users) ? users : []).map((user) => {
                     const statusInfo = getStatusBadge(user.accountStatus || "active");
                     return (
                       <TableRow key={user.id}>
