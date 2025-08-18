@@ -1322,7 +1322,7 @@ export const eventMoodAggregations = pgTable("event_mood_aggregations", {
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
-// Enhanced Event System Types
+// Enhanced Event System Types (main definitions)
 export type InsertCBAEvent = z.infer<typeof insertCBAEventSchema>;
 export type CBAEvent = typeof cbaEvents.$inferSelect;
 
@@ -1394,12 +1394,7 @@ export type EventVolunteer = typeof eventVolunteers.$inferSelect;
 export type InsertEventSponsor = z.infer<typeof insertEventSponsorSchema>;
 export type EventSponsor = typeof eventSponsors.$inferSelect;
 
-// CBA Events Types
-export type InsertCBAEvent = z.infer<typeof insertCBAEventSchema>;
-export type CBAEvent = typeof cbaEvents.$inferSelect;
-
-export type InsertCBAEventRegistration = z.infer<typeof insertCBAEventRegistrationSchema>;
-export type CBAEventRegistration = typeof cbaEventRegistrations.$inferSelect;
+// Additional Event System Types
 
 // Membership Tier Schema and Types
 export const insertMembershipTierSchema = createInsertSchema(membershipTiers, {
@@ -1418,8 +1413,7 @@ export const insertMembershipTierSchema = createInsertSchema(membershipTiers, {
   icon: z.string().min(1, "Icon is required"),
 });
 
-export type InsertMembershipTier = z.infer<typeof insertMembershipTierSchema>;
-export type MembershipTier = typeof membershipTiers.$inferSelect;
+// Note: MembershipTier types defined earlier in the file
 
 // Benefits table for managing all membership benefits
 export const benefits = pgTable("benefits", {
