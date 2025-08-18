@@ -4122,33 +4122,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(aiSummitSpeakerInterests)
         .orderBy(desc(aiSummitSpeakerInterests.registeredAt));
       
-      // Map database columns to frontend expected format
+      // Map database columns to frontend expected format  
       const mappedSpeakers = speakers.map(speaker => ({
         id: speaker.id,
-        userId: speaker.userId,
-        speakerName: speaker.speakerName || speaker.name,
-        speakerEmail: speaker.speakerEmail || speaker.email,
-        speakerPhone: speaker.speakerPhone || speaker.phone || '',
-        speakerCompany: speaker.speakerCompany || speaker.company || '',
-        speakerJobTitle: speaker.speakerJobTitle || speaker.jobTitle || '',
-        speakerWebsite: speaker.speakerWebsite || speaker.website || '',
-        speakerLinkedIn: speaker.speakerLinkedIn || speaker.linkedIn || '',
-        speakerBio: speaker.speakerBio || speaker.bio || '',
-        sessionType: speaker.sessionType || 'talk',
-        talkTitle: speaker.talkTitle || '',
-        talkDescription: speaker.talkDescription || '',
-        talkDuration: speaker.talkDuration || '',
-        audienceLevel: speaker.audienceLevel || '',
-        speakingExperience: speaker.speakingExperience || '',
-        previousSpeaking: speaker.previousSpeaking || false,
-        techRequirements: speaker.techRequirements || '',
-        availableSlots: speaker.availableSlots || '',
-        motivationToSpeak: speaker.motivationToSpeak || '',
-        keyTakeaways: speaker.keyTakeaways || '',
-        interactiveElements: speaker.interactiveElements || false,
-        handoutsProvided: speaker.handoutsProvided || false,
-        createdAt: speaker.registeredAt || speaker.createdAt,
-        status: speaker.status || 'pending'
+        userId: speaker.user_id,
+        speakerName: speaker.name || '',
+        speakerEmail: speaker.email || '',
+        speakerPhone: speaker.phone || '',
+        speakerCompany: speaker.company || '',
+        speakerJobTitle: speaker.job_title || '',
+        speakerWebsite: speaker.website || '',
+        speakerLinkedIn: speaker.linked_in || '',
+        speakerBio: speaker.bio || '',
+        sessionType: speaker.session_type || 'talk',
+        talkTitle: speaker.talk_title || '',
+        talkDescription: speaker.talk_description || '',
+        talkDuration: speaker.talk_duration || '',
+        audienceLevel: speaker.audience_level || '',
+        speakingExperience: speaker.speaking_experience || '',
+        previousSpeaking: speaker.previous_speaking || false,
+        techRequirements: speaker.tech_requirements || '',
+        availableSlots: speaker.available_slots || '',
+        motivationToSpeak: speaker.motivation_to_speak || '',
+        keyTakeaways: speaker.key_takeaways || '',
+        interactiveElements: speaker.interactive_elements || false,
+        handoutsProvided: speaker.handouts_provided || false,
+        createdAt: speaker.registered_at,
+        status: 'pending' // Default status as it doesn't exist in DB
       }));
       
       res.json(mappedSpeakers);
