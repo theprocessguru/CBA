@@ -7309,10 +7309,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Time slot not found" });
       }
 
-      // Check current registrations
+      // Check current registrations against room capacity limits
       const registrations = await db.select().from(timeSlotRegistrations).where(eq(timeSlotRegistrations.timeSlotId, slotId));
-      if (registrations.length >= slot.maxCapacity) {
-        return res.status(400).json({ error: "Time slot is fully booked" });
+      
+      // Enforce strict capacity limits: Auditorium=80, Classroom=65
+      let maxAllowed = slot.maxCapacity;
+      if (slot.room === 'Auditorium' && maxAllowed > 80) {
+        maxAllowed = 80;
+      } else if (slot.room === 'Classroom' && maxAllowed > 65) {
+        maxAllowed = 65;
+      }
+      
+      if (registrations.length >= maxAllowed) {
+        return res.status(400).json({ 
+          error: `Time slot is fully booked. ${slot.room} capacity: ${maxAllowed} people` 
+        });
       }
 
       // Check if user already registered

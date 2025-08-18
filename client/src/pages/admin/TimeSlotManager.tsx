@@ -218,12 +218,20 @@ export default function TimeSlotManager() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="room">Room</Label>
-            <Input
-              id="room"
-              value={formData.room}
-              onChange={(e) => setFormData({ ...formData, room: e.target.value })}
-              required
-            />
+            <Select value={formData.room} onValueChange={(value) => {
+              const capacity = value === 'Auditorium' ? 80 : value === 'Classroom' ? 65 : 50;
+              setFormData({ ...formData, room: value, maxCapacity: capacity });
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select room" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Auditorium">Auditorium (80 seats)</SelectItem>
+                <SelectItem value="Classroom">Classroom (65 seats)</SelectItem>
+                <SelectItem value="Lobby">Lobby (50 seats)</SelectItem>
+                <SelectItem value="Break Area">Break Area (No limit)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="maxCapacity">Max Capacity</Label>
@@ -233,7 +241,10 @@ export default function TimeSlotManager() {
               value={formData.maxCapacity}
               onChange={(e) => setFormData({ ...formData, maxCapacity: parseInt(e.target.value) })}
               required
+              className="bg-gray-50"
+              readOnly
             />
+            <p className="text-xs text-gray-500 mt-1">Automatically set based on room selection</p>
           </div>
         </div>
 

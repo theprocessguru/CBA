@@ -156,8 +156,17 @@ export default function AttendeeBooking() {
           if (slot.slotType === 'break') return null; // Don't show breaks for booking
           
           const registered = isRegistered(slot.id);
-          const isFull = slot.currentAttendees >= slot.maxCapacity;
-          const availableSeats = slot.maxCapacity - slot.currentAttendees;
+          
+          // Enforce strict capacity limits: Auditorium=80, Classroom=65
+          let maxAllowed = slot.maxCapacity;
+          if (slot.room === 'Auditorium' && maxAllowed > 80) {
+            maxAllowed = 80;
+          } else if (slot.room === 'Classroom' && maxAllowed > 65) {
+            maxAllowed = 65;
+          }
+          
+          const isFull = slot.currentAttendees >= maxAllowed;
+          const availableSeats = maxAllowed - slot.currentAttendees;
 
           return (
             <Card key={slot.id} className={`${registered ? 'ring-2 ring-green-500' : ''}`}>
@@ -189,7 +198,9 @@ export default function AttendeeBooking() {
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <Users className="w-4 h-4 mr-1" />
-                      {availableSeats} of {slot.maxCapacity} seats available
+                      {availableSeats} of {maxAllowed} seats available
+                      {slot.room === 'Auditorium' && <span className="ml-1 text-xs">(Auditorium max: 80)</span>}
+                      {slot.room === 'Classroom' && <span className="ml-1 text-xs">(Classroom max: 65)</span>}
                     </div>
                   </div>
                 </div>
