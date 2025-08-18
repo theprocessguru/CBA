@@ -104,6 +104,8 @@ import EditJob from "@/pages/edit-job";
 import MyJobs from "@/pages/my-jobs";
 import MyApplications from "@/pages/my-applications";
 import { EventMoodDemo } from "@/pages/EventMoodDemo";
+import BusinessEventManagement from "@/pages/BusinessEventManagement";
+import BusinessEvents from "@/pages/BusinessEvents";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";

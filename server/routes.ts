@@ -71,7 +71,13 @@ import {
   jobApplications,
   jobSavedSearches,
   type AISummitRegistration,
-  emailTemplates
+  emailTemplates,
+  businessEvents,
+  businessEventRegistrations,
+  insertBusinessEventSchema,
+  insertBusinessEventRegistrationSchema,
+  type BusinessEvent,
+  type BusinessEventRegistration
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -11538,6 +11544,382 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching job details:", error);
       res.status(500).json({ message: "Failed to fetch job details" });
+    }
+  });
+
+  // =============================================================================
+  // BUSINESS EVENTS API - For business owners to promote their own events
+  // =============================================================================
+
+  // Get all approved business events (public)
+  app.get("/api/business-events", async (req: Request, res: Response) => {
+    try {
+      const events = await db
+        .select({
+          id: businessEvents.id,
+          businessId: businessEvents.businessId,
+          eventName: businessEvents.eventName,
+          eventSlug: businessEvents.eventSlug,
+          description: businessEvents.description,
+          eventType: businessEvents.eventType,
+          eventDate: businessEvents.eventDate,
+          startTime: businessEvents.startTime,
+          endTime: businessEvents.endTime,
+          venue: businessEvents.venue,
+          venueAddress: businessEvents.venueAddress,
+          maxCapacity: businessEvents.maxCapacity,
+          currentRegistrations: businessEvents.currentRegistrations,
+          isTicketed: businessEvents.isTicketed,
+          ticketPrice: businessEvents.ticketPrice,
+          memberDiscount: businessEvents.memberDiscount,
+          registrationRequired: businessEvents.registrationRequired,
+          registrationDeadline: businessEvents.registrationDeadline,
+          isFeatured: businessEvents.isFeatured,
+          tags: businessEvents.tags,
+          imageUrl: businessEvents.imageUrl,
+          contactEmail: businessEvents.contactEmail,
+          contactPhone: businessEvents.contactPhone,
+          websiteUrl: businessEvents.websiteUrl,
+          socialLinks: businessEvents.socialLinks,
+          specialOffers: businessEvents.specialOffers,
+          requirements: businessEvents.requirements,
+          createdAt: businessEvents.createdAt,
+          businessName: businesses.name,
+          businessAddress: businesses.address,
+          businessLogo: businesses.logoUrl,
+        })
+        .from(businessEvents)
+        .leftJoin(businesses, eq(businessEvents.businessId, businesses.id))
+        .where(and(
+          eq(businessEvents.isActive, true),
+          eq(businessEvents.isApproved, true),
+          gte(businessEvents.eventDate, new Date().toISOString().split('T')[0]) // Only future events
+        ))
+        .orderBy(desc(businessEvents.isFeatured), asc(businessEvents.eventDate));
+
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching business events:", error);
+      res.status(500).json({ message: "Failed to fetch business events" });
+    }
+  });
+
+  // Get business events for a specific business owner
+  app.get("/api/my-business-events", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      
+      // Get the user's business ID
+      const business = await db
+        .select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.userId, userId))
+        .limit(1);
+        
+      if (business.length === 0) {
+        return res.status(400).json({ message: "No business found for this user" });
+      }
+
+      const events = await db
+        .select()
+        .from(businessEvents)
+        .where(eq(businessEvents.businessId, business[0].id))
+        .orderBy(desc(businessEvents.createdAt));
+
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching user's business events:", error);
+      res.status(500).json({ message: "Failed to fetch business events" });
+    }
+  });
+
+  // Create a new business event
+  app.post("/api/business-events", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      
+      // Get the user's business ID
+      const business = await db
+        .select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.userId, userId))
+        .limit(1);
+        
+      if (business.length === 0) {
+        return res.status(400).json({ message: "No business found for this user" });
+      }
+
+      // Generate event slug from event name
+      const eventSlug = req.body.eventName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+      const eventData = {
+        ...req.body,
+        businessId: business[0].id,
+        eventSlug: `${eventSlug}-${Date.now()}`, // Add timestamp to ensure uniqueness
+        isApproved: false, // Requires admin approval
+      };
+
+      const validation = insertBusinessEventSchema.safeParse(eventData);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid event data", 
+          errors: fromZodError(validation.error).toString() 
+        });
+      }
+
+      const [newEvent] = await db
+        .insert(businessEvents)
+        .values(validation.data)
+        .returning();
+
+      res.status(201).json(newEvent);
+    } catch (error) {
+      console.error("Error creating business event:", error);
+      res.status(500).json({ message: "Failed to create business event" });
+    }
+  });
+
+  // Update business event
+  app.put("/api/business-events/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      
+      // Get the user's business ID
+      const business = await db
+        .select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.userId, userId))
+        .limit(1);
+        
+      if (business.length === 0) {
+        return res.status(400).json({ message: "No business found for this user" });
+      }
+
+      // Check if event belongs to this business
+      const existingEvent = await db
+        .select()
+        .from(businessEvents)
+        .where(and(
+          eq(businessEvents.id, eventId),
+          eq(businessEvents.businessId, business[0].id)
+        ))
+        .limit(1);
+
+      if (existingEvent.length === 0) {
+        return res.status(404).json({ message: "Event not found or not owned by this business" });
+      }
+
+      const eventData = {
+        ...req.body,
+        updatedAt: new Date(),
+      };
+
+      const [updatedEvent] = await db
+        .update(businessEvents)
+        .set(eventData)
+        .where(eq(businessEvents.id, eventId))
+        .returning();
+
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating business event:", error);
+      res.status(500).json({ message: "Failed to update business event" });
+    }
+  });
+
+  // Delete business event
+  app.delete("/api/business-events/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user?.id;
+      
+      // Get the user's business ID
+      const business = await db
+        .select({ id: businesses.id })
+        .from(businesses)
+        .where(eq(businesses.userId, userId))
+        .limit(1);
+        
+      if (business.length === 0) {
+        return res.status(400).json({ message: "No business found for this user" });
+      }
+
+      // Check if event belongs to this business
+      const existingEvent = await db
+        .select()
+        .from(businessEvents)
+        .where(and(
+          eq(businessEvents.id, eventId),
+          eq(businessEvents.businessId, business[0].id)
+        ))
+        .limit(1);
+
+      if (existingEvent.length === 0) {
+        return res.status(404).json({ message: "Event not found or not owned by this business" });
+      }
+
+      await db
+        .delete(businessEvents)
+        .where(eq(businessEvents.id, eventId));
+
+      res.json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting business event:", error);
+      res.status(500).json({ message: "Failed to delete business event" });
+    }
+  });
+
+  // Register for a business event
+  app.post("/api/business-events/:id/register", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const eventId = parseInt(req.params.id);
+      const userId = req.user?.id;
+
+      // Check if event exists and is active
+      const event = await db
+        .select()
+        .from(businessEvents)
+        .where(and(
+          eq(businessEvents.id, eventId),
+          eq(businessEvents.isActive, true),
+          eq(businessEvents.isApproved, true)
+        ))
+        .limit(1);
+
+      if (event.length === 0) {
+        return res.status(404).json({ message: "Event not found or not available" });
+      }
+
+      // Check if user is already registered
+      const existingRegistration = await db
+        .select()
+        .from(businessEventRegistrations)
+        .where(and(
+          eq(businessEventRegistrations.eventId, eventId),
+          eq(businessEventRegistrations.userId, userId)
+        ))
+        .limit(1);
+
+      if (existingRegistration.length > 0) {
+        return res.status(400).json({ message: "Already registered for this event" });
+      }
+
+      // Check capacity
+      if (event[0].maxCapacity && event[0].currentRegistrations >= event[0].maxCapacity) {
+        return res.status(400).json({ message: "Event is full" });
+      }
+
+      // Calculate ticket price (apply member discount if applicable)
+      let actualPrice = event[0].ticketPrice || 0;
+      const user = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      const isMember = user[0]?.membershipStatus === 'active';
+      
+      if (isMember && event[0].memberDiscount > 0) {
+        actualPrice = Math.round(actualPrice * (1 - event[0].memberDiscount / 100));
+      }
+
+      // Create registration
+      const registrationData = {
+        eventId,
+        userId,
+        actualPrice,
+        ticketType: isMember ? 'member' : 'regular',
+        paymentStatus: actualPrice === 0 ? 'paid' : 'pending',
+      };
+
+      const [registration] = await db
+        .insert(businessEventRegistrations)
+        .values(registrationData)
+        .returning();
+
+      // Update event registration count
+      await db
+        .update(businessEvents)
+        .set({ 
+          currentRegistrations: sql`${businessEvents.currentRegistrations} + 1`,
+          updatedAt: new Date()
+        })
+        .where(eq(businessEvents.id, eventId));
+
+      res.status(201).json(registration);
+    } catch (error) {
+      console.error("Error registering for business event:", error);
+      res.status(500).json({ message: "Failed to register for event" });
+    }
+  });
+
+  // Admin routes for business events
+  app.get("/api/admin/business-events", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const events = await db
+        .select({
+          id: businessEvents.id,
+          businessId: businessEvents.businessId,
+          eventName: businessEvents.eventName,
+          eventSlug: businessEvents.eventSlug,
+          description: businessEvents.description,
+          eventType: businessEvents.eventType,
+          eventDate: businessEvents.eventDate,
+          startTime: businessEvents.startTime,
+          endTime: businessEvents.endTime,
+          venue: businessEvents.venue,
+          maxCapacity: businessEvents.maxCapacity,
+          currentRegistrations: businessEvents.currentRegistrations,
+          isTicketed: businessEvents.isTicketed,
+          ticketPrice: businessEvents.ticketPrice,
+          isActive: businessEvents.isActive,
+          isFeatured: businessEvents.isFeatured,
+          isApproved: businessEvents.isApproved,
+          createdAt: businessEvents.createdAt,
+          businessName: businesses.name,
+          businessOwner: users.firstName,
+          businessOwnerEmail: users.email,
+        })
+        .from(businessEvents)
+        .leftJoin(businesses, eq(businessEvents.businessId, businesses.id))
+        .leftJoin(users, eq(businesses.userId, users.id))
+        .orderBy(desc(businessEvents.createdAt));
+
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching business events for admin:", error);
+      res.status(500).json({ message: "Failed to fetch business events" });
+    }
+  });
+
+  // Admin approve/reject business event
+  app.patch("/api/admin/business-events/:id/approval", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const eventId = parseInt(req.params.id);
+      const { isApproved } = req.body;
+
+      const [updatedEvent] = await db
+        .update(businessEvents)
+        .set({ 
+          isApproved: isApproved,
+          updatedAt: new Date()
+        })
+        .where(eq(businessEvents.id, eventId))
+        .returning();
+
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating business event approval:", error);
+      res.status(500).json({ message: "Failed to update event approval" });
     }
   });
 

@@ -1037,6 +1037,55 @@ export const cbaEventSponsors = pgTable('cba_event_sponsors', {
   updatedAt: timestamp('updated_at').defaultNow()
 });
 
+// Business Events - for business owners to promote their own events
+export const businessEvents = pgTable("business_events", {
+  id: serial("id").primaryKey(),
+  businessId: integer("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  eventName: varchar("event_name").notNull(),
+  eventSlug: varchar("event_slug").notNull(), // URL-friendly identifier
+  description: text("description"),
+  eventType: varchar("event_type").notNull(), // product_launch, workshop, grand_opening, sale, community_event, networking, other
+  eventDate: date("event_date").notNull(),
+  startTime: time("start_time").notNull(),
+  endTime: time("end_time").notNull(),
+  venue: varchar("venue").notNull(), // Could be their business address or external venue
+  venueAddress: text("venue_address"),
+  maxCapacity: integer("max_capacity"), // Optional capacity limit
+  currentRegistrations: integer("current_registrations").default(0),
+  isTicketed: boolean("is_ticketed").default(false), // Free or ticketed event
+  ticketPrice: integer("ticket_price").default(0), // in pence
+  memberDiscount: integer("member_discount").default(0), // percentage discount for CBA members
+  registrationRequired: boolean("registration_required").default(true),
+  registrationDeadline: timestamp("registration_deadline"),
+  isActive: boolean("is_active").default(true),
+  isFeatured: boolean("is_featured").default(false), // Admin can feature business events
+  isApproved: boolean("is_approved").default(false), // Admin approval for public listing
+  tags: text("tags"), // JSON array of event tags
+  imageUrl: text("image_url"),
+  contactEmail: varchar("contact_email"),
+  contactPhone: varchar("contact_phone"),
+  websiteUrl: varchar("website_url"),
+  socialLinks: jsonb("social_links").$type<{facebook?: string, instagram?: string, twitter?: string}>(),
+  specialOffers: text("special_offers"), // Any special offers for attendees
+  requirements: text("requirements"), // Age restrictions, dress code, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Business Event Registrations
+export const businessEventRegistrations = pgTable("business_event_registrations", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => businessEvents.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  registrationDate: timestamp("registration_date").defaultNow(),
+  attendanceStatus: varchar("attendance_status").default("registered"), // registered, attended, no_show, cancelled
+  paymentStatus: varchar("payment_status").default("pending"), // pending, paid, refunded (for ticketed events)
+  ticketType: varchar("ticket_type"), // regular, member, student, etc.
+  actualPrice: integer("actual_price").default(0), // Price paid after discounts
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
   user: one(users, {
@@ -1055,6 +1104,26 @@ export const businessesRelations = relations(businesses, ({ one, many }) => ({
   buyerTransactions: many(transactions, { relationName: "buyerTransactions" }),
   initiatedBarterExchanges: many(barterExchanges, { relationName: "initiatedBarterExchanges" }),
   respondedBarterExchanges: many(barterExchanges, { relationName: "respondedBarterExchanges" }),
+  businessEvents: many(businessEvents),
+}));
+
+export const businessEventsRelations = relations(businessEvents, ({ one, many }) => ({
+  business: one(businesses, {
+    fields: [businessEvents.businessId],
+    references: [businesses.id],
+  }),
+  registrations: many(businessEventRegistrations),
+}));
+
+export const businessEventRegistrationsRelations = relations(businessEventRegistrations, ({ one }) => ({
+  event: one(businessEvents, {
+    fields: [businessEventRegistrations.eventId],
+    references: [businessEvents.id],
+  }),
+  user: one(users, {
+    fields: [businessEventRegistrations.userId],
+    references: [users.id],
+  }),
 }));
 
 export const productsRelations = relations(products, ({ one }) => ({
@@ -1167,6 +1236,25 @@ export const insertAISummitWorkshopSchema = createInsertSchema(aiSummitWorkshops
 export const insertAISummitWorkshopRegistrationSchema = createInsertSchema(aiSummitWorkshopRegistrations).omit({ id: true });
 export const insertAISummitSpeakingSessionSchema = createInsertSchema(aiSummitSpeakingSessions).omit({ id: true });
 export const insertAISummitSpeakingSessionRegistrationSchema = createInsertSchema(aiSummitSessionRegistrations).omit({ id: true });
+
+export const insertBusinessEventSchema = createInsertSchema(businessEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  currentRegistrations: true,
+  isApproved: true,
+});
+
+export const insertBusinessEventRegistrationSchema = createInsertSchema(businessEventRegistrations).omit({
+  id: true,
+  createdAt: true,
+  registrationDate: true,
+});
+
+export type InsertBusinessEvent = z.infer<typeof insertBusinessEventSchema>;
+export type BusinessEvent = typeof businessEvents.$inferSelect;
+export type BusinessEventRegistration = typeof businessEventRegistrations.$inferSelect;
+export type InsertBusinessEventRegistration = z.infer<typeof insertBusinessEventRegistrationSchema>;
 
 // Enhanced Event System Schemas
 export const insertCBAEventSchema = createInsertSchema(cbaEvents, {
