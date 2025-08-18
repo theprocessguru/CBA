@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -26,6 +26,7 @@ interface Event {
   status: string;
   eventType: string;
   tags: string[];
+  imageUrl?: string;
   createdAt: string;
 }
 
@@ -47,6 +48,9 @@ export default function EventManagement() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRegistrationsDialog, setShowRegistrationsDialog] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch all events
   const { data: events = [], isLoading: eventsLoading } = useQuery<Event[]>({
@@ -127,7 +131,43 @@ export default function EventManagement() {
     },
   });
 
-  const handleCreateEvent = (formData: FormData) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File too large",
+          description: "Please select an image under 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setImageFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreateEvent = async (formData: FormData) => {
+    let imageUrl = formData.get("imageUrl") as string || undefined;
+    
+    // If there's an image file, convert to base64
+    if (imageFile) {
+      const reader = new FileReader();
+      imageUrl = await new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(imageFile);
+      });
+    }
+
     const eventData = {
       title: formData.get("title"),
       description: formData.get("description"),
@@ -139,13 +179,27 @@ export default function EventManagement() {
       status: formData.get("status") || "draft",
       eventType: formData.get("eventType") || "workshop",
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
+      imageUrl: imageUrl,
     };
 
     createEventMutation.mutate(eventData);
   };
 
-  const handleEditEvent = (formData: FormData) => {
+  const handleEditEvent = async (formData: FormData) => {
     if (!selectedEvent) return;
+
+    let imageUrl = formData.get("imageUrl") as string || selectedEvent.imageUrl;
+    
+    // If there's an image file, convert to base64
+    if (imageFile) {
+      const reader = new FileReader();
+      imageUrl = await new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          resolve(reader.result as string);
+        };
+        reader.readAsDataURL(imageFile);
+      });
+    }
 
     const eventData = {
       id: selectedEvent.id,
@@ -159,6 +213,7 @@ export default function EventManagement() {
       status: formData.get("status"),
       eventType: formData.get("eventType"),
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
+      imageUrl: imageUrl,
     };
 
     updateEventMutation.mutate(eventData);
@@ -273,6 +328,74 @@ export default function EventManagement() {
           defaultValue={event?.tags?.join(", ")} 
           placeholder="e.g., business, networking, training"
         />
+      </div>
+
+      <div>
+        <Label>Event Logo/Image</Label>
+        <div className="space-y-2">
+          {imagePreview && (
+            <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+              <img 
+                src={imagePreview} 
+                alt="Event preview" 
+                className="w-full h-full object-cover"
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="absolute top-2 right-2"
+                onClick={() => {
+                  setImageFile(null);
+                  setImagePreview(null);
+                  if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                  }
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+              id="image-upload"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              {imageFile ? 'Change Image' : 'Upload Image'}
+            </Button>
+            {imageFile && (
+              <span className="text-sm text-muted-foreground">
+                {imageFile.name}
+              </span>
+            )}
+          </div>
+          
+          {!imageFile && (
+            <>
+              <div className="text-sm text-muted-foreground">OR</div>
+              <Input 
+                name="imageUrl" 
+                type="url"
+                placeholder="Enter image URL (optional)"
+                defaultValue={event?.imageUrl && !imageFile ? event.imageUrl : ''}
+                disabled={!!imageFile}
+              />
+            </>
+          )}
+        </div>
       </div>
 
       <Button type="submit" className="w-full" disabled={createEventMutation.isPending || updateEventMutation.isPending}>

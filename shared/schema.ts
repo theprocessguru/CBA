@@ -1169,7 +1169,8 @@ export const insertCBAEventSchema = createInsertSchema(cbaEvents, {
   startTime: z.string().transform((val) => new Date(val)),
   endTime: z.string().transform((val) => new Date(val)),
   registrationDeadline: z.string().optional().transform((val) => val ? new Date(val) : undefined),
-}).omit({ id: true });
+  imageUrl: z.string().optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true, currentRegistrations: true });
 
 // Event time slot schemas and types
 export const insertEventTimeSlotSchema = createInsertSchema(eventTimeSlots, {
