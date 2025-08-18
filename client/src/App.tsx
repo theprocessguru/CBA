@@ -94,6 +94,7 @@ import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
 import EmailTemplates from "@/pages/admin/EmailTemplates";
+import SpeakerSlotSelection from "@/pages/SpeakerSlotSelection";
 import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
 import PostJob from "@/pages/post-job";
@@ -363,6 +364,13 @@ function Router() {
         <MainLayout>
           <AISummitSponsorPage />
         </MainLayout>
+      </Route>
+      <Route path="/speaker-slot-selection">
+        <ProtectedRoute>
+          <MainLayout>
+            <SpeakerSlotSelection />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       <Route path="/workshop-registration">
         <MainLayout>

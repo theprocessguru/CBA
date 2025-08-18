@@ -7291,7 +7291,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Book time slot for speaker
+  app.post("/api/time-slots/:slotId/book", isAuthenticated, async (req, res) => {
+    try {
+      const { slotId } = req.params;
+      const { speakerId } = req.body;
+      const userId = (req.user as any)?.id;
 
+      // Verify the user is booking for themselves or is admin
+      if (speakerId !== userId && !req.user?.isAdmin) {
+        return res.status(403).json({ error: "Can only book slots for yourself" });
+      }
+
+      // Check if slot exists and is available
+      const [slot] = await db
+        .select()
+        .from(eventTimeSlots)
+        .where(eq(eventTimeSlots.id, parseInt(slotId)));
+
+      if (!slot) {
+        return res.status(404).json({ error: "Time slot not found" });
+      }
+
+      if (slot.isBreak) {
+        return res.status(400).json({ error: "Cannot book break slots" });
+      }
+
+      // Check if slot is already booked
+      const existingSpeakers = await db
+        .select()
+        .from(timeSlotSpeakers)
+        .where(eq(timeSlotSpeakers.timeSlotId, parseInt(slotId)));
+
+      if (existingSpeakers.length > 0) {
+        return res.status(400).json({ error: "Time slot is already booked" });
+      }
+
+      // Check if speaker already has a slot booked
+      const speakerSlots = await db
+        .select()
+        .from(timeSlotSpeakers)
+        .where(eq(timeSlotSpeakers.speakerId, speakerId));
+
+      if (speakerSlots.length > 0) {
+        return res.status(400).json({ error: "You already have a time slot booked" });
+      }
+
+      // Book the slot
+      const [booking] = await db
+        .insert(timeSlotSpeakers)
+        .values({
+          timeSlotId: parseInt(slotId),
+          speakerId: speakerId,
+          role: "speaker",
+          displayOrder: 0,
+        })
+        .returning();
+
+      res.json({ 
+        message: "Time slot booked successfully",
+        booking,
+        slot: slot 
+      });
+    } catch (error) {
+      console.error("Error booking time slot:", error);
+      res.status(500).json({ error: "Failed to book time slot" });
+    }
+  });
+
+  // Get speaker profile/data
+  app.get("/api/speaker/profile", isAuthenticated, async (req, res) => {
+    try {
+      const userId = (req.user as any)?.id;
+
+      // Get speaker interest data
+      const [speakerData] = await db
+        .select()
+        .from(aiSummitSpeakerInterests)
+        .where(eq(aiSummitSpeakerInterests.userId, userId));
+
+      if (!speakerData) {
+        return res.status(404).json({ error: "Speaker profile not found" });
+      }
+
+      res.json({
+        name: speakerData.name,
+        email: speakerData.email,
+        company: speakerData.company,
+        talkTitle: speakerData.talkTitle,
+        talkDescription: speakerData.talkDescription,
+        sessionType: speakerData.sessionType,
+      });
+    } catch (error) {
+      console.error("Error fetching speaker profile:", error);
+      res.status(500).json({ error: "Failed to fetch speaker profile" });
+    }
+  });
 
   // Get all events (public endpoint)
   app.get("/api/events", async (req, res) => {
