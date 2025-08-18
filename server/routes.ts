@@ -1826,6 +1826,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Resend admin welcome email with new password
+  app.post('/api/admin/users/:userId/resend-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { alternativeEmail } = req.body; // Optional alternative email
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.isAdmin) {
+        return res.status(400).json({ message: "User is not an administrator" });
+      }
+      
+      // Generate new temporary password
+      const tempPassword = `CBA${Math.random().toString(36).substring(2, 8).toUpperCase()}2025!`;
+      
+      // Hash the new password
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+      
+      // Update user's password
+      await storage.updateUser(userId, { passwordHash });
+      
+      // Use alternative email if provided, otherwise use user's email
+      const emailToUse = alternativeEmail || user.email;
+      const fullName = `${user.firstName} ${user.lastName}`;
+      
+      // Send welcome email with new temporary password
+      const emailResult = await emailService.sendAdminWelcomeEmail(
+        emailToUse,
+        fullName,
+        tempPassword
+      );
+      
+      if (!emailResult.success) {
+        // If email fails, return the password so it can be shared manually
+        return res.json({
+          success: false,
+          message: `Email failed: ${emailResult.message}. Please share the password manually.`,
+          tempPassword,
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName
+          }
+        });
+      }
+      
+      res.json({ 
+        success: true,
+        message: `Welcome email resent to ${emailToUse} with new temporary password.`,
+        emailSentTo: emailToUse
+      });
+    } catch (error) {
+      console.error("Error resending admin welcome email:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to resend welcome email" 
+      });
+    }
+  });
+
   // User registration management endpoints
   
   // Get user's current registrations
