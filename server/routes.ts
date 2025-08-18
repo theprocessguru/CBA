@@ -1680,7 +1680,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const tempPassword = `CBA${Math.random().toString(36).substring(2, 8).toUpperCase()}2025!`;
       
       // Hash the password
-      const bcrypt = require('bcrypt');
       const passwordHash = await bcrypt.hash(tempPassword, 10);
       
       // Create QR handle from name
@@ -1696,11 +1695,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         passwordHash,
         qrHandle,
         accountStatus: 'active',
+        emailVerified: true, // Mark email as verified for admin accounts
+        participantType: 'team' as const, // Admins are team members
         createdAt: new Date(),
         updatedAt: new Date()
       };
 
       await storage.createUser(newAdmin);
+
+      // Send onboarding message for team members
+      try {
+        const { onboardingService } = await import("./onboardingService");
+        await onboardingService.sendWelcomeMessage({
+          userId: newAdmin.id,
+          email: newAdmin.email,
+          firstName: newAdmin.firstName,
+          lastName: newAdmin.lastName,
+          personType: 'team',
+          company: 'Croydon Business Association'
+        });
+      } catch (onboardingError) {
+        console.error("Failed to send onboarding message:", onboardingError);
+      }
+
+      // Tag in MyT Automation
+      try {
+        const mytService = getMyTAutomationService();
+        if (mytService) {
+          await mytService.upsertContact({
+            email: newAdmin.email,
+            firstName: newAdmin.firstName,
+            lastName: newAdmin.lastName,
+            phone: '',
+            tags: ['team-member', 'admin', 'onboarding-complete']
+          });
+        }
+      } catch (mytError) {
+        console.error("Failed to tag in MyT Automation:", mytError);
+      }
 
       // Send welcome email with temporary password
       const emailResult = await emailService.sendAdminWelcomeEmail(
