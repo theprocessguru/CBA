@@ -204,7 +204,7 @@ export default function SpeakerSlotSelection() {
         <CardHeader>
           <CardTitle>Available Time Slots</CardTitle>
           <CardDescription>
-            Select your preferred presentation time. Slots are 30 minutes each.
+            Select your preferred presentation time. Most slots are 1 hour each - only 5 total slots available.
           </CardDescription>
         </CardHeader>
         <CardContent>
