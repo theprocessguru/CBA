@@ -254,6 +254,7 @@ export default function EventManagement() {
               <SelectItem value="networking">Networking</SelectItem>
               <SelectItem value="training">Training</SelectItem>
               <SelectItem value="conference">Conference</SelectItem>
+              <SelectItem value="summit">Summit</SelectItem>
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
