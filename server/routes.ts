@@ -4682,9 +4682,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put('/api/admin/events/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const eventData = insertCBAEventSchema.partial().parse(req.body);
       
-      eventData.updatedAt = new Date();
+      // Convert date strings to Date objects before validation
+      const preprocessedData = {
+        ...req.body,
+        eventDate: req.body.eventDate ? new Date(req.body.eventDate) : undefined,
+        startTime: req.body.startTime ? new Date(req.body.startTime) : undefined,
+        endTime: req.body.endTime ? new Date(req.body.endTime) : undefined,
+        registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
+        updatedAt: new Date()
+      };
+      
+      // Remove undefined values to avoid validation issues
+      Object.keys(preprocessedData).forEach(key => {
+        if (preprocessedData[key] === undefined) {
+          delete preprocessedData[key];
+        }
+      });
+      
+      const eventData = insertCBAEventSchema.partial().parse(preprocessedData);
       
       const updatedEvent = await db
         .update(cbaEvents)
@@ -7759,7 +7775,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/events/:id", isAuthenticated, isAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const event = await storage.updateEvent(id, req.body);
+      
+      // Validate and convert date strings to Date objects
+      const eventData = {
+        ...req.body,
+        startDate: req.body.startDate ? new Date(req.body.startDate) : undefined,
+        endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
+        registrationStartDate: req.body.registrationStartDate ? new Date(req.body.registrationStartDate) : undefined,
+        registrationEndDate: req.body.registrationEndDate ? new Date(req.body.registrationEndDate) : undefined,
+        earlyBirdDeadline: req.body.earlyBirdDeadline ? new Date(req.body.earlyBirdDeadline) : undefined,
+        updatedAt: new Date()
+      };
+      
+      // Remove undefined values to avoid overwriting existing data with undefined
+      Object.keys(eventData).forEach(key => {
+        if (eventData[key] === undefined) {
+          delete eventData[key];
+        }
+      });
+      
+      const event = await storage.updateEvent(id, eventData);
       res.json(event);
     } catch (error) {
       console.error("Error updating event:", error);
