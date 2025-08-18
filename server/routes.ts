@@ -4201,8 +4201,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         website,
         linkedIn,
         speakingExperience,
+        previousSpeaking,
         techRequirements,
-        keyTakeaways
+        motivationToSpeak,
+        keyTakeaways,
+        interactiveElements,
+        handoutsProvided
       } = req.body;
 
       if (!attendeeId || !talkTitle || !talkDescription || !keyTakeaways) {
@@ -4236,13 +4240,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         talkDuration: talkDuration || '30',
         audienceLevel: audienceLevel || 'intermediate',
         speakingExperience: speakingExperience || '',
-        previousSpeaking: false,
+        previousSpeaking: previousSpeaking || false,
         techRequirements: techRequirements || '',
         availableSlots: JSON.stringify([]),
-        motivationToSpeak: `Converted from attendee registration on ${new Date().toLocaleDateString()}`,
+        motivationToSpeak: motivationToSpeak || `Converted from attendee registration on ${new Date().toLocaleDateString()}`,
         keyTakeaways,
-        interactiveElements: false,
-        handoutsProvided: false,
+        interactiveElements: interactiveElements || false,
+        handoutsProvided: handoutsProvided || false,
         agreesToTerms: true,
         source: "admin_conversion",
         registeredAt: new Date()

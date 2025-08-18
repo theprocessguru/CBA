@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Users, UserCheck, Calendar, AlertCircle } from "lucide-react";
+import { ArrowLeft, Users, UserCheck, Calendar, AlertCircle, Zap } from "lucide-react";
 import { Link } from "wouter";
 
 interface PotentialSpeaker {
@@ -32,14 +32,18 @@ export default function SpeakerRecovery() {
     talkTitle: '',
     talkDescription: '',
     talkDuration: '30',
-    audienceLevel: 'intermediate',
+    audienceLevel: 'Beginner',
     sessionType: 'talk',
     bio: '',
     website: '',
     linkedIn: '',
     speakingExperience: '',
+    previousSpeaking: false,
     techRequirements: '',
-    keyTakeaways: ''
+    motivationToSpeak: '',
+    keyTakeaways: '',
+    interactiveElements: false,
+    handoutsProvided: false
   });
   
   const { toast } = useToast();
@@ -69,14 +73,18 @@ export default function SpeakerRecovery() {
         talkTitle: '',
         talkDescription: '',
         talkDuration: '30',
-        audienceLevel: 'intermediate',
+        audienceLevel: 'Beginner',
         sessionType: 'talk',
         bio: '',
         website: '',
         linkedIn: '',
         speakingExperience: '',
+        previousSpeaking: false,
         techRequirements: '',
-        keyTakeaways: ''
+        motivationToSpeak: '',
+        keyTakeaways: '',
+        interactiveElements: false,
+        handoutsProvided: false
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/speakers'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/potential-speakers'] });
@@ -340,6 +348,154 @@ export default function SpeakerRecovery() {
                         onChange={(e) => setConvertForm(prev => ({ ...prev, linkedIn: e.target.value }))}
                         placeholder="https://linkedin.com/in/..."
                       />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="audienceLevel">Audience Level</Label>
+                    <Select
+                      value={convertForm.audienceLevel}
+                      onValueChange={(value) => setConvertForm(prev => ({ ...prev, audienceLevel: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Beginner">Beginner</SelectItem>
+                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                        <SelectItem value="Advanced">Advanced</SelectItem>
+                        <SelectItem value="All Levels">All Levels</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="speakingExperience">Speaking Experience</Label>
+                    <Textarea
+                      id="speakingExperience"
+                      value={convertForm.speakingExperience}
+                      onChange={(e) => setConvertForm(prev => ({ ...prev, speakingExperience: e.target.value }))}
+                      placeholder="Tell us about your speaking background and experience"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="motivationToSpeak">Motivation to Speak</Label>
+                    <Textarea
+                      id="motivationToSpeak"
+                      value={convertForm.motivationToSpeak}
+                      onChange={(e) => setConvertForm(prev => ({ ...prev, motivationToSpeak: e.target.value }))}
+                      placeholder="Why do you want to speak at this event?"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="techRequirements">Technical Requirements</Label>
+                    <Textarea
+                      id="techRequirements"
+                      value={convertForm.techRequirements}
+                      onChange={(e) => setConvertForm(prev => ({ ...prev, techRequirements: e.target.value }))}
+                      placeholder="Any specific technical needs for your presentation?"
+                      rows={2}
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="previousSpeaking"
+                      checked={convertForm.previousSpeaking}
+                      onChange={(e) => setConvertForm(prev => ({ ...prev, previousSpeaking: e.target.checked }))}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="previousSpeaking">Have spoken at events before</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="interactiveElements"
+                      checked={convertForm.interactiveElements}
+                      onChange={(e) => setConvertForm(prev => ({ ...prev, interactiveElements: e.target.checked }))}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="interactiveElements">Will include interactive elements</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="handoutsProvided"
+                      checked={convertForm.handoutsProvided}
+                      onChange={(e) => setConvertForm(prev => ({ ...prev, handoutsProvided: e.target.checked }))}
+                      className="w-4 h-4"
+                    />
+                    <Label htmlFor="handoutsProvided">Will provide handouts or materials</Label>
+                  </div>
+
+                  {/* Autofill Helper */}
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap className="h-4 w-4 text-yellow-600" />
+                      <span className="text-sm font-medium text-yellow-800">Quick Fill Templates</span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs bg-yellow-100 hover:bg-yellow-200 border-yellow-300"
+                        onClick={() => {
+                          setConvertForm(prev => ({
+                            ...prev,
+                            talkTitle: "Business Leadership in the AI Era",
+                            audienceLevel: "All Levels",
+                            talkDuration: "30",
+                            previousSpeaking: true,
+                            motivationToSpeak: "Share insights on leading businesses through digital transformation"
+                          }));
+                        }}
+                      >
+                        CEO Template
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs bg-yellow-100 hover:bg-yellow-200 border-yellow-300"
+                        onClick={() => {
+                          setConvertForm(prev => ({
+                            ...prev,
+                            talkTitle: "Founder's Journey: Building with AI",
+                            audienceLevel: "Beginner",
+                            talkDuration: "45",
+                            previousSpeaking: false,
+                            motivationToSpeak: "Inspire other entrepreneurs with practical AI applications"
+                          }));
+                        }}
+                      >
+                        Founder Template
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-xs bg-yellow-100 hover:bg-yellow-200 border-yellow-300"
+                        onClick={() => {
+                          setConvertForm(prev => ({
+                            ...prev,
+                            talkTitle: "AI Tools for Business Success",
+                            audienceLevel: "Intermediate",
+                            talkDuration: "30",
+                            techRequirements: "Projector, microphone",
+                            interactiveElements: true
+                          }));
+                        }}
+                      >
+                        Tech Demo
+                      </Button>
                     </div>
                   </div>
 
