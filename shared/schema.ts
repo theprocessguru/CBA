@@ -1831,3 +1831,29 @@ export const insertJobSavedSearchSchema = createInsertSchema(jobSavedSearches, {
 
 export type InsertJobSavedSearch = z.infer<typeof insertJobSavedSearchSchema>;
 export type JobSavedSearch = typeof jobSavedSearches.$inferSelect;
+
+// Email communications tracking
+export const emailCommunications = pgTable("email_communications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  subject: varchar("subject").notNull(),
+  content: text("content"),
+  emailType: varchar("email_type").notNull(), // onboarding, newsletter, notification, etc.
+  status: varchar("status").default("sent"), // sent, failed, pending
+  sentAt: timestamp("sent_at").defaultNow(),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  metadata: jsonb("metadata"), // Store additional data like template used, tags, etc.
+});
+
+export const insertEmailCommunicationSchema = createInsertSchema(emailCommunications, {
+  userId: z.string().min(1, "User ID is required"),
+  subject: z.string().min(1, "Subject is required"),
+  content: z.string().optional(),
+  emailType: z.string().min(1, "Email type is required"),
+  status: z.enum(["sent", "failed", "pending"]).default("sent"),
+  metadata: z.any().optional(),
+}).omit({ id: true, sentAt: true, openedAt: true, clickedAt: true });
+
+export type InsertEmailCommunication = z.infer<typeof insertEmailCommunicationSchema>;
+export type EmailCommunication = typeof emailCommunications.$inferSelect;

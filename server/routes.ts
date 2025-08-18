@@ -4158,6 +4158,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get email communications for a user
+  app.get('/api/admin/users/:userId/emails', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { emailCommunications } = await import("@shared/schema");
+      
+      const emails = await db
+        .select()
+        .from(emailCommunications)
+        .where(eq(emailCommunications.userId, userId))
+        .orderBy(desc(emailCommunications.sentAt));
+      
+      res.json(emails);
+    } catch (error) {
+      console.error('Error fetching user emails:', error);
+      res.status(500).json({ message: 'Failed to fetch email communications' });
+    }
+  });
+
   // Onboarding API
   app.post('/api/onboarding/send', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

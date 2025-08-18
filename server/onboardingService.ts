@@ -513,17 +513,42 @@ export class OnboardingService {
       
       const message = await this.getWelcomeMessage(primaryType, userWithTypes);
       
-      // Send welcome email
+      // Send welcome email and record it
       const emailService = new EmailService();
-      if (emailService.isConfigured()) {
-        await emailService.sendEmail(
-          user.email,
-          message.subject,
-          message.htmlContent
-        );
-      } else {
-        console.log(`Email service not configured. Would send to ${user.email}: ${message.subject}`);
+      let emailStatus = 'pending';
+      
+      try {
+        if (emailService.isConfigured()) {
+          await emailService.sendEmail(
+            user.email,
+            message.subject,
+            message.htmlContent
+          );
+          emailStatus = 'sent';
+        } else {
+          console.log(`Email service not configured. Would send to ${user.email}: ${message.subject}`);
+          emailStatus = 'failed';
+        }
+      } catch (error) {
+        console.error(`Failed to send email to ${user.email}:`, error);
+        emailStatus = 'failed';
       }
+      
+      // Record email communication
+      const { emailCommunications } = await import("@shared/schema");
+      await db.insert(emailCommunications).values({
+        userId: user.id,
+        subject: message.subject,
+        content: message.htmlContent,
+        emailType: 'onboarding',
+        status: emailStatus,
+        metadata: {
+          personType: primaryType,
+          mytTags: message.mytTags,
+          mytWorkflow: message.mytWorkflow,
+          templateUsed: `onboarding_${primaryType}`
+        }
+      });
       
       // Sync with MyT Automation
       try {

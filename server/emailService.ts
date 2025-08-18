@@ -76,6 +76,28 @@ export class EmailService {
   }
 
   /**
+   * Send a general email
+   */
+  async sendEmail(
+    recipientEmail: string,
+    subject: string,
+    htmlContent: string
+  ): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error('Email service not configured');
+    }
+
+    const mailOptions = {
+      from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+      to: recipientEmail,
+      subject: subject,
+      html: htmlContent,
+    };
+
+    await this.transporter!.sendMail(mailOptions);
+  }
+
+  /**
    * Send email verification link
    */
   async sendVerificationEmail(

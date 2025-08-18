@@ -21,6 +21,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { 
   Send, 
   Users, 
@@ -29,7 +36,9 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  Sparkles
+  Sparkles,
+  Eye,
+  FileText
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -54,11 +63,28 @@ interface PersonType {
   icon?: string;
 }
 
+interface EmailCommunication {
+  id: number;
+  userId: string;
+  subject: string;
+  content?: string;
+  emailType: string;
+  status: string;
+  sentAt: string;
+  openedAt?: string;
+  clickedAt?: string;
+  metadata?: any;
+}
+
 export default function OnboardingManagement() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [selectedUserForEmails, setSelectedUserForEmails] = useState<User | null>(null);
+  const [userEmails, setUserEmails] = useState<EmailCommunication[]>([]);
+  const [loadingEmails, setLoadingEmails] = useState(false);
 
   // Fetch all users
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
@@ -110,6 +136,37 @@ export default function OnboardingManagement() {
       });
     },
   });
+
+  // Fetch email history for a user
+  const fetchUserEmails = async (user: User) => {
+    setLoadingEmails(true);
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}/emails`, {
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const emails = await response.json();
+        setUserEmails(emails);
+        setSelectedUserForEmails(user);
+        setShowEmailModal(true);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch email history",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch email history",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingEmails(false);
+    }
+  };
 
   // Filter users based on search and type
   const filteredUsers = users.filter(user => {
@@ -347,15 +404,26 @@ export default function OnboardingManagement() {
                     {format(new Date(user.createdAt), "MMM d, yyyy")}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => sendOnboarding.mutate(user.id)}
-                      disabled={sendOnboarding.isPending}
-                    >
-                      <Mail className="mr-1 h-3 w-3" />
-                      Send
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => fetchUserEmails(user)}
+                        disabled={loadingEmails}
+                      >
+                        <Eye className="mr-1 h-3 w-3" />
+                        Emails
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => sendOnboarding.mutate(user.id)}
+                        disabled={sendOnboarding.isPending}
+                      >
+                        <Mail className="mr-1 h-3 w-3" />
+                        Send
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -369,6 +437,81 @@ export default function OnboardingManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Email History Modal */}
+      <Dialog open={showEmailModal} onOpenChange={setShowEmailModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Email History - {selectedUserForEmails?.firstName} {selectedUserForEmails?.lastName}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedUserForEmails?.email}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 space-y-4">
+            {userEmails.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                <p>No emails have been sent to this user yet</p>
+              </div>
+            ) : (
+              userEmails.map((email) => (
+                <Card key={email.id} className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h4 className="font-semibold text-lg">{email.subject}</h4>
+                      <div className="flex gap-2 mt-1">
+                        <Badge variant="outline">
+                          {email.emailType}
+                        </Badge>
+                        <Badge 
+                          className={
+                            email.status === 'sent' 
+                              ? 'bg-green-100 text-green-800' 
+                              : email.status === 'failed'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }
+                        >
+                          {email.status}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {format(new Date(email.sentAt), "MMM d, yyyy h:mm a")}
+                    </div>
+                  </div>
+                  
+                  {email.content && (
+                    <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                      <div 
+                        className="text-sm prose prose-sm max-w-none"
+                        dangerouslySetInnerHTML={{ __html: email.content }}
+                      />
+                    </div>
+                  )}
+                  
+                  {email.metadata && (
+                    <div className="mt-3 text-sm text-gray-600">
+                      {email.metadata.personType && (
+                        <p>Person Type: <span className="font-medium">{email.metadata.personType}</span></p>
+                      )}
+                      {email.metadata.templateUsed && (
+                        <p>Template: <span className="font-medium">{email.metadata.templateUsed}</span></p>
+                      )}
+                      {email.metadata.mytTags && email.metadata.mytTags.length > 0 && (
+                        <p>Tags: <span className="font-medium">{email.metadata.mytTags.join(', ')}</span></p>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
