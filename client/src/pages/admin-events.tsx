@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -17,7 +17,10 @@ import {
   DollarSign,
   CheckCircle,
   AlertCircle,
-  Star
+  Star,
+  Upload,
+  Image,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -92,6 +95,9 @@ export default function AdminEventsPage() {
   const { user, isAuthenticated } = useAuth();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventData | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -121,6 +127,32 @@ export default function AdminEventsPage() {
       isRecurring: false,
     },
   });
+
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+      setImageFile(file);
+      // Set the base64 string to the form
+      form.setValue('imageUrl', reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Fetch events
   const { data: events = [], isLoading, refetch } = useQuery<EventData[]>({
@@ -208,6 +240,8 @@ export default function AdminEventsPage() {
 
   const handleEdit = (event: EventData) => {
     setEditingEvent(event);
+    setImageFile(null);
+    setImagePreview(event.imageUrl || null);
     form.reset({
       eventName: event.eventName,
       eventSlug: event.eventSlug,
@@ -266,6 +300,8 @@ export default function AdminEventsPage() {
           if (!open) {
             setIsCreateOpen(false);
             setEditingEvent(null);
+            setImageFile(null);
+            setImagePreview(null);
             form.reset();
           }
         }}>
@@ -612,11 +648,74 @@ export default function AdminEventsPage() {
                     control={form.control}
                     name="imageUrl"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Image URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="https://example.com/image.jpg" />
-                        </FormControl>
+                      <FormItem className="md:col-span-2">
+                        <FormLabel>Event Logo/Image</FormLabel>
+                        <div className="space-y-2">
+                          {imagePreview && (
+                            <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                              <img 
+                                src={imagePreview} 
+                                alt="Event preview" 
+                                className="w-full h-full object-cover"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="absolute top-2 right-2"
+                                onClick={() => {
+                                  setImageFile(null);
+                                  setImagePreview(null);
+                                  field.onChange('');
+                                  if (fileInputRef.current) {
+                                    fileInputRef.current.value = '';
+                                  }
+                                }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-2">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              onChange={handleFileUpload}
+                              className="hidden"
+                              id="image-upload"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="flex items-center gap-2"
+                            >
+                              <Upload className="w-4 h-4" />
+                              {imageFile ? 'Change Image' : 'Upload Image'}
+                            </Button>
+                            {imageFile && (
+                              <span className="text-sm text-muted-foreground">
+                                {imageFile.name}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {!imageFile && (
+                            <>
+                              <div className="text-sm text-muted-foreground">OR</div>
+                              <FormControl>
+                                <Input 
+                                  {...field} 
+                                  type="url"
+                                  placeholder="Enter image URL (optional)"
+                                  disabled={!!imageFile}
+                                />
+                              </FormControl>
+                            </>
+                          )}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -658,6 +757,8 @@ export default function AdminEventsPage() {
                     onClick={() => {
                       setIsCreateOpen(false);
                       setEditingEvent(null);
+                      setImageFile(null);
+                      setImagePreview(null);
                       form.reset();
                     }}
                   >
