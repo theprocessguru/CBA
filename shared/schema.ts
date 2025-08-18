@@ -790,6 +790,19 @@ export const timeSlotSpeakers = pgTable("time_slot_speakers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Time slot registrations for attendee seat booking with QR code tracking
+export const timeSlotRegistrations = pgTable("time_slot_registrations", {
+  id: serial("id").primaryKey(),
+  timeSlotId: integer("time_slot_id").notNull().references(() => eventTimeSlots.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: varchar("badge_id"), // QR code badge ID for tracking
+  registeredAt: timestamp("registered_at").defaultNow(),
+  attendanceStatus: varchar("attendance_status").default("booked"), // booked, attended, no-show
+  scannedAt: timestamp("scanned_at"), // When QR code was scanned
+  scannedBy: varchar("scanned_by"), // Who scanned the QR code
+  notes: text("notes"), // Any special notes for the registration
+});
+
 // Event registrations with enhanced tracking  
 export const cbaEventRegistrations = pgTable("cba_event_registrations", {
   id: serial("id").primaryKey(),
@@ -1177,10 +1190,17 @@ export const insertTimeSlotSpeakerSchema = createInsertSchema(timeSlotSpeakers).
   createdAt: true,
 });
 
+export const insertTimeSlotRegistrationSchema = createInsertSchema(timeSlotRegistrations).omit({
+  id: true,
+  registeredAt: true,
+});
+
 export type EventTimeSlot = typeof eventTimeSlots.$inferSelect;
 export type InsertEventTimeSlot = z.infer<typeof insertEventTimeSlotSchema>;
 export type TimeSlotSpeaker = typeof timeSlotSpeakers.$inferSelect;
 export type InsertTimeSlotSpeaker = z.infer<typeof insertTimeSlotSpeakerSchema>;
+export type TimeSlotRegistration = typeof timeSlotRegistrations.$inferSelect;
+export type InsertTimeSlotRegistration = z.infer<typeof insertTimeSlotRegistrationSchema>;
 export const insertCBAEventRegistrationSchema = createInsertSchema(cbaEventRegistrations).omit({ id: true });
 export const insertEventAttendanceAnalyticsSchema = createInsertSchema(eventAttendanceAnalytics).omit({ id: true });
 export const insertPersonalBadgeEventSchema = createInsertSchema(personalBadgeEvents).omit({ id: true });

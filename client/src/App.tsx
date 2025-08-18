@@ -86,6 +86,7 @@ import { ExhibitorVisitors } from "@/pages/ExhibitorVisitors";
 import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 import EventTimeSlots from "@/pages/admin/EventTimeSlots";
 import TimeSlotManager from "@/pages/admin/TimeSlotManager";
+import AttendeeBooking from "@/pages/AttendeeBooking";
 import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
@@ -681,6 +682,13 @@ function Router() {
             <TimeSlotManager />
           </MainLayout>
         </AdminRoute>
+      </Route>
+      <Route path="/book-sessions">
+        <ProtectedRoute>
+          <MainLayout>
+            <AttendeeBooking />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/affiliates">
         <AdminRoute>

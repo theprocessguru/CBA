@@ -7290,6 +7290,203 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== TIME SLOT BOOKING SYSTEM ====================
+
+  // Register for a time slot (attendees book seats in advance)
+  app.post('/api/events/:eventId/time-slots/:slotId/register', isAuthenticated, async (req, res) => {
+    try {
+      const slotId = parseInt(req.params.slotId);
+      const userId = req.user?.claims?.sub || req.user?.id;
+      const { badgeId } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User ID not found" });
+      }
+
+      // Check if slot exists and has capacity
+      const [slot] = await db.select().from(eventTimeSlots).where(eq(eventTimeSlots.id, slotId));
+      if (!slot) {
+        return res.status(404).json({ error: "Time slot not found" });
+      }
+
+      // Check current registrations
+      const registrations = await db.select().from(timeSlotRegistrations).where(eq(timeSlotRegistrations.timeSlotId, slotId));
+      if (registrations.length >= slot.maxCapacity) {
+        return res.status(400).json({ error: "Time slot is fully booked" });
+      }
+
+      // Check if user already registered
+      const existingRegistration = registrations.find(r => r.userId === userId);
+      if (existingRegistration) {
+        return res.status(400).json({ error: "Already registered for this time slot" });
+      }
+
+      // Create registration
+      const [registration] = await db.insert(timeSlotRegistrations).values({
+        timeSlotId: slotId,
+        userId,
+        badgeId,
+        attendanceStatus: 'booked'
+      }).returning();
+
+      // Update current attendees count
+      await db.update(eventTimeSlots)
+        .set({ currentAttendees: registrations.length + 1 })
+        .where(eq(eventTimeSlots.id, slotId));
+
+      res.json({ success: true, registration });
+    } catch (error) {
+      console.error('Error registering for time slot:', error);
+      res.status(500).json({ error: 'Failed to register for time slot' });
+    }
+  });
+
+  // Cancel time slot registration
+  app.delete('/api/events/:eventId/time-slots/:slotId/register', isAuthenticated, async (req, res) => {
+    try {
+      const slotId = parseInt(req.params.slotId);
+      const userId = req.user?.claims?.sub || req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User ID not found" });
+      }
+
+      // Delete registration
+      const deletedRegistrations = await db.delete(timeSlotRegistrations)
+        .where(and(
+          eq(timeSlotRegistrations.timeSlotId, slotId),
+          eq(timeSlotRegistrations.userId, userId)
+        ))
+        .returning();
+
+      if (deletedRegistrations.length === 0) {
+        return res.status(404).json({ error: "Registration not found" });
+      }
+
+      // Update current attendees count
+      const remainingRegistrations = await db.select().from(timeSlotRegistrations)
+        .where(eq(timeSlotRegistrations.timeSlotId, slotId));
+      
+      await db.update(eventTimeSlots)
+        .set({ currentAttendees: remainingRegistrations.length })
+        .where(eq(eventTimeSlots.id, slotId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error cancelling time slot registration:', error);
+      res.status(500).json({ error: 'Failed to cancel registration' });
+    }
+  });
+
+  // Get user's time slot registrations
+  app.get('/api/my-time-slot-registrations', isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User ID not found" });
+      }
+
+      const registrations = await db.select({
+        id: timeSlotRegistrations.id,
+        timeSlotId: timeSlotRegistrations.timeSlotId,
+        badgeId: timeSlotRegistrations.badgeId,
+        registeredAt: timeSlotRegistrations.registeredAt,
+        attendanceStatus: timeSlotRegistrations.attendanceStatus,
+        scannedAt: timeSlotRegistrations.scannedAt,
+        title: eventTimeSlots.title,
+        description: eventTimeSlots.description,
+        slotType: eventTimeSlots.slotType,
+        startTime: eventTimeSlots.startTime,
+        endTime: eventTimeSlots.endTime,
+        room: eventTimeSlots.room
+      })
+      .from(timeSlotRegistrations)
+      .leftJoin(eventTimeSlots, eq(timeSlotRegistrations.timeSlotId, eventTimeSlots.id))
+      .where(eq(timeSlotRegistrations.userId, userId))
+      .orderBy(eventTimeSlots.startTime);
+
+      res.json(registrations);
+    } catch (error) {
+      console.error('Error fetching time slot registrations:', error);
+      res.status(500).json({ error: 'Failed to fetch registrations' });
+    }
+  });
+
+  // Get time slot registration details (admin only)
+  app.get('/api/events/:eventId/time-slots/:slotId/registrations', isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const slotId = parseInt(req.params.slotId);
+
+      const registrations = await db.select({
+        id: timeSlotRegistrations.id,
+        userId: timeSlotRegistrations.userId,
+        badgeId: timeSlotRegistrations.badgeId,
+        registeredAt: timeSlotRegistrations.registeredAt,
+        attendanceStatus: timeSlotRegistrations.attendanceStatus,
+        scannedAt: timeSlotRegistrations.scannedAt,
+        scannedBy: timeSlotRegistrations.scannedBy,
+        userName: users.firstName,
+        userLastName: users.lastName,
+        userEmail: users.email,
+        userCompany: users.company
+      })
+      .from(timeSlotRegistrations)
+      .leftJoin(users, eq(timeSlotRegistrations.userId, users.id))
+      .where(eq(timeSlotRegistrations.timeSlotId, slotId))
+      .orderBy(timeSlotRegistrations.registeredAt);
+
+      res.json(registrations);
+    } catch (error) {
+      console.error('Error fetching time slot registrations:', error);
+      res.status(500).json({ error: 'Failed to fetch registrations' });
+    }
+  });
+
+  // Mark attendance via QR code scan (admin/volunteer only)
+  app.post('/api/events/:eventId/time-slots/:slotId/scan-attendance', isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin && req.user?.participantType !== 'volunteer') {
+        return res.status(403).json({ error: "Admin or volunteer access required" });
+      }
+
+      const slotId = parseInt(req.params.slotId);
+      const { badgeId } = req.body;
+      const scannedBy = req.user?.claims?.sub || req.user?.id;
+
+      // Find registration by badge ID
+      const [registration] = await db.select()
+        .from(timeSlotRegistrations)
+        .where(and(
+          eq(timeSlotRegistrations.timeSlotId, slotId),
+          eq(timeSlotRegistrations.badgeId, badgeId)
+        ));
+
+      if (!registration) {
+        return res.status(404).json({ error: "Registration not found for this badge and time slot" });
+      }
+
+      // Update attendance
+      const [updatedRegistration] = await db.update(timeSlotRegistrations)
+        .set({
+          attendanceStatus: 'attended',
+          scannedAt: new Date(),
+          scannedBy
+        })
+        .where(eq(timeSlotRegistrations.id, registration.id))
+        .returning();
+
+      res.json({ success: true, registration: updatedRegistration });
+    } catch (error) {
+      console.error('Error scanning attendance:', error);
+      res.status(500).json({ error: 'Failed to scan attendance' });
+    }
+  });
+
   // Create a new time slot
   app.post("/api/events/:eventId/time-slots", isAuthenticated, async (req, res) => {
     try {
