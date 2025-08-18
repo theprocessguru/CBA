@@ -7182,6 +7182,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new time slot (admin only)
+  app.post('/api/events/:eventId/time-slots', isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const eventId = parseInt(req.params.eventId);
+      const { title, description, slotType, startTime, endTime, room, maxCapacity, isBreak } = req.body;
+
+      const [newSlot] = await db.insert(eventTimeSlots).values({
+        eventId,
+        title,
+        description,
+        slotType,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        room,
+        maxCapacity,
+        currentAttendees: 0,
+        isBreak: isBreak || false,
+        displayOrder: 99 // Will be adjusted automatically
+      }).returning();
+
+      res.json(newSlot);
+    } catch (error) {
+      console.error('Error creating time slot:', error);
+      res.status(500).json({ error: 'Failed to create time slot' });
+    }
+  });
+
+  // Update time slot (admin only)
+  app.put('/api/events/:eventId/time-slots/:slotId', isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const slotId = parseInt(req.params.slotId);
+      const { title, description, slotType, startTime, endTime, room, maxCapacity, isBreak } = req.body;
+
+      const [updatedSlot] = await db.update(eventTimeSlots)
+        .set({
+          title,
+          description,
+          slotType,
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+          room,
+          maxCapacity,
+          isBreak: isBreak || false
+        })
+        .where(eq(eventTimeSlots.id, slotId))
+        .returning();
+
+      res.json(updatedSlot);
+    } catch (error) {
+      console.error('Error updating time slot:', error);
+      res.status(500).json({ error: 'Failed to update time slot' });
+    }
+  });
+
+  // Delete time slot (admin only)
+  app.delete('/api/events/:eventId/time-slots/:slotId', isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const slotId = parseInt(req.params.slotId);
+
+      // First remove any speaker assignments
+      await db.delete(timeSlotSpeakers).where(eq(timeSlotSpeakers.timeSlotId, slotId));
+
+      // Then delete the slot
+      await db.delete(eventTimeSlots).where(eq(eventTimeSlots.id, slotId));
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting time slot:', error);
+      res.status(500).json({ error: 'Failed to delete time slot' });
+    }
+  });
+
+  // Assign speaker to time slot (admin only)
+  app.post('/api/events/:eventId/time-slots/:slotId/assign-speaker', isAuthenticated, async (req, res) => {
+    try {
+      if (!req.user?.isAdmin) {
+        return res.status(403).json({ error: "Admin access required" });
+      }
+
+      const slotId = parseInt(req.params.slotId);
+      const { speakerId } = req.body;
+
+      const [assignment] = await db.insert(timeSlotSpeakers).values({
+        timeSlotId: slotId,
+        speakerId,
+        role: 'speaker',
+        displayOrder: 0
+      }).returning();
+
+      res.json(assignment);
+    } catch (error) {
+      console.error('Error assigning speaker:', error);
+      res.status(500).json({ error: 'Failed to assign speaker' });
+    }
+  });
+
   // Create a new time slot
   app.post("/api/events/:eventId/time-slots", isAuthenticated, async (req, res) => {
     try {

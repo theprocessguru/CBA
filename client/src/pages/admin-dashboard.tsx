@@ -593,6 +593,12 @@ function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
                 Attendance Reports
               </Button>
             </Link>
+            <Link href="/admin/time-slot-manager">
+              <Button variant="outline" className="w-full justify-start">
+                <Clock className="mr-2 h-4 w-4" />
+                Time Slot Manager
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

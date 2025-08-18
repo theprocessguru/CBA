@@ -85,6 +85,7 @@ import UserTypes from "@/pages/admin/UserTypes";
 import { ExhibitorVisitors } from "@/pages/ExhibitorVisitors";
 import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 import EventTimeSlots from "@/pages/admin/EventTimeSlots";
+import TimeSlotManager from "@/pages/admin/TimeSlotManager";
 import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
@@ -671,6 +672,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <EventTimeSlots />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/time-slot-manager">
+        <AdminRoute>
+          <MainLayout>
+            <TimeSlotManager />
           </MainLayout>
         </AdminRoute>
       </Route>
