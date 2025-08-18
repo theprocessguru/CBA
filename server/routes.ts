@@ -4177,7 +4177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userId: aiSummitRegistrations.userId
         })
         .from(aiSummitRegistrations)
-        .where(gte(aiSummitRegistrations.registeredAt, new Date('2025-08-17')))
+        .where(gte(aiSummitRegistrations.registeredAt, new Date('2025-08-11')))
         .orderBy(desc(aiSummitRegistrations.registeredAt));
 
       res.json(recentAttendees);

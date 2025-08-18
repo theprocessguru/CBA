@@ -149,8 +149,8 @@ export default function SpeakerRecovery() {
               <div>
                 <p className="font-medium text-amber-800">Recovery Tool for Missing Speakers</p>
                 <p className="text-sm text-amber-700">
-                  This shows recent attendees (since Aug 17) who might have filled speaker forms but were saved as general attendees.
-                  You can convert them to proper speakers here.
+                  This shows recent attendees (since Aug 11) who might have filled speaker forms but were saved as general attendees.
+                  Includes registrations from Ben's radio appearance week and weekend form assistance.
                 </p>
               </div>
             </div>
@@ -166,7 +166,7 @@ export default function SpeakerRecovery() {
                 Recent Attendees ({potentialSpeakers?.length || 0})
               </CardTitle>
               <CardDescription>
-                Weekend registrations (Aug 17-18) that might be speakers
+                Recent registrations (since Aug 11) that might be speakers
               </CardDescription>
             </CardHeader>
             <CardContent>
