@@ -204,7 +204,7 @@ export default function SpeakerSlotSelection() {
         <CardHeader>
           <CardTitle>Available Time Slots</CardTitle>
           <CardDescription>
-            Select your preferred presentation time. Most slots are 1 hour each - only 5 total slots available.
+            Choose from 30-minute or 1-hour presentation slots. Mix of short demos and deep-dive sessions available.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -228,6 +228,9 @@ export default function SpeakerSlotSelection() {
                       <span className="flex items-center gap-1">
                         <Clock className="h-4 w-4" />
                         {format(new Date(slot.startTime), "h:mm a")} - {format(new Date(slot.endTime), "h:mm a")}
+                        <Badge variant="outline" className="ml-2 text-xs">
+                          {Math.round((new Date(slot.endTime).getTime() - new Date(slot.startTime).getTime()) / 60000)} mins
+                        </Badge>
                       </span>
                       <span className="flex items-center gap-1">
                         <MapPin className="h-4 w-4" />
