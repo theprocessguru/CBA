@@ -4664,31 +4664,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new event
   app.post('/api/admin/events', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      // Helper function to safely parse dates
-      const parseDate = (dateValue: any) => {
+      // Helper function to extract date portion (YYYY-MM-DD format)
+      const extractDate = (dateValue: any) => {
         if (!dateValue) return undefined;
-        if (dateValue instanceof Date) return dateValue;
-        
         try {
-          const parsed = new Date(dateValue);
-          if (isNaN(parsed.getTime())) {
-            console.warn('Invalid date value:', dateValue);
-            return undefined;
-          }
-          return parsed;
+          const date = new Date(dateValue);
+          if (isNaN(date.getTime())) return undefined;
+          return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
         } catch (error) {
           console.warn('Error parsing date:', dateValue, error);
           return undefined;
         }
       };
 
-      // Convert date strings to Date objects before validation
+      // Helper function to extract time portion (HH:MM:SS format)
+      const extractTime = (dateValue: any) => {
+        if (!dateValue) return undefined;
+        try {
+          const date = new Date(dateValue);
+          if (isNaN(date.getTime())) return undefined;
+          return date.toTimeString().split(' ')[0]; // Returns HH:MM:SS
+        } catch (error) {
+          console.warn('Error parsing time:', dateValue, error);
+          return undefined;
+        }
+      };
+
+      // Convert date/time strings to separate date and time fields
       const preprocessedData = {
         ...req.body,
-        eventDate: parseDate(req.body.startDate) || parseDate(req.body.eventDate),
-        startTime: parseDate(req.body.startDate) || parseDate(req.body.startTime),
-        endTime: parseDate(req.body.endDate) || parseDate(req.body.endTime),
-        registrationDeadline: parseDate(req.body.registrationDeadline),
+        // Handle eventDate field
+        eventDate: req.body.eventDate || extractDate(req.body.startDate),
+        // Handle startTime field
+        startTime: req.body.startTime || extractTime(req.body.startDate),
+        // Handle endTime field  
+        endTime: req.body.endTime || extractTime(req.body.endDate),
+        registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -4719,35 +4730,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      // Helper function to safely parse dates
-      const parseDate = (dateValue: any) => {
+      // Helper function to extract date portion (YYYY-MM-DD format)
+      const extractDate = (dateValue: any) => {
         if (!dateValue) return undefined;
-        if (dateValue instanceof Date) return dateValue;
-        
         try {
-          const parsed = new Date(dateValue);
-          if (isNaN(parsed.getTime())) {
-            console.warn('Invalid date value:', dateValue);
-            return undefined;
-          }
-          return parsed;
+          const date = new Date(dateValue);
+          if (isNaN(date.getTime())) return undefined;
+          return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
         } catch (error) {
           console.warn('Error parsing date:', dateValue, error);
           return undefined;
         }
       };
 
-      // Convert date strings to Date objects before validation
+      // Helper function to extract time portion (HH:MM:SS format)
+      const extractTime = (dateValue: any) => {
+        if (!dateValue) return undefined;
+        try {
+          const date = new Date(dateValue);
+          if (isNaN(date.getTime())) return undefined;
+          return date.toTimeString().split(' ')[0]; // Returns HH:MM:SS
+        } catch (error) {
+          console.warn('Error parsing time:', dateValue, error);
+          return undefined;
+        }
+      };
+
+      // Convert date/time strings to separate date and time fields
       // Handle both frontend field names (startDate/endDate) and backend field names (eventDate/startTime/endTime)
       const preprocessedData = {
         ...req.body,
-        // Map frontend startDate to backend eventDate if provided
-        eventDate: parseDate(req.body.startDate) || parseDate(req.body.eventDate),
-        // Map frontend startDate to backend startTime if provided (assuming same day/time)
-        startTime: parseDate(req.body.startDate) || parseDate(req.body.startTime),
-        // Map frontend endDate to backend endTime if provided
-        endTime: parseDate(req.body.endDate) || parseDate(req.body.endTime),
-        registrationDeadline: parseDate(req.body.registrationDeadline),
+        // Handle eventDate field
+        eventDate: req.body.eventDate || extractDate(req.body.startDate),
+        // Handle startTime field
+        startTime: req.body.startTime || extractTime(req.body.startDate),
+        // Handle endTime field  
+        endTime: req.body.endTime || extractTime(req.body.endDate),
+        registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
         updatedAt: new Date()
       };
       

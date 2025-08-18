@@ -169,14 +169,14 @@ export default function EventManagement() {
     }
 
     const eventData = {
-      title: formData.get("title"),
+      eventName: formData.get("title"),
       description: formData.get("description"),
-      startDate: formData.get("startDate"),
-      endDate: formData.get("endDate"),
-      location: formData.get("location"),
+      eventDate: formData.get("eventDate"),
+      startTime: formData.get("startTime"),
+      endTime: formData.get("endTime"),
+      venue: formData.get("location"),
       maxCapacity: parseInt(formData.get("maxCapacity") as string) || 100,
       registrationFee: parseFloat(formData.get("registrationFee") as string) || 0,
-      status: formData.get("status") || "draft",
       eventType: formData.get("eventType") || "workshop",
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
       imageUrl: imageUrl,
@@ -203,14 +203,14 @@ export default function EventManagement() {
 
     const eventData = {
       id: selectedEvent.id,
-      title: formData.get("title"),
+      eventName: formData.get("title"),
       description: formData.get("description"),
-      startDate: formData.get("startDate"),
-      endDate: formData.get("endDate"),
-      location: formData.get("location"),
+      eventDate: formData.get("eventDate"),
+      startTime: formData.get("startTime"),
+      endTime: formData.get("endTime"),
+      venue: formData.get("location"),
       maxCapacity: parseInt(formData.get("maxCapacity") as string) || 100,
       registrationFee: parseFloat(formData.get("registrationFee") as string) || 0,
-      status: formData.get("status"),
       eventType: formData.get("eventType"),
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
       imageUrl: imageUrl,
@@ -240,7 +240,7 @@ export default function EventManagement() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label htmlFor="title">Event Title</Label>
-          <Input name="title" defaultValue={event?.title} required />
+          <Input name="title" defaultValue={event?.eventName} required />
         </div>
         <div>
           <Label htmlFor="eventType">Event Type</Label>
@@ -266,22 +266,31 @@ export default function EventManagement() {
         <Textarea name="description" defaultValue={event?.description} rows={3} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
-          <Label htmlFor="startDate">Start Date & Time</Label>
+          <Label htmlFor="eventDate">Event Date</Label>
           <Input 
-            type="datetime-local" 
-            name="startDate" 
-            defaultValue={event?.startDate ? new Date(event.startDate).toISOString().slice(0, 16) : ""}
+            type="date" 
+            name="eventDate" 
+            defaultValue={event?.eventDate || ""}
             required 
           />
         </div>
         <div>
-          <Label htmlFor="endDate">End Date & Time</Label>
+          <Label htmlFor="startTime">Start Time</Label>
           <Input 
-            type="datetime-local" 
-            name="endDate" 
-            defaultValue={event?.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : ""}
+            type="time" 
+            name="startTime" 
+            defaultValue={event?.startTime || ""}
+            required 
+          />
+        </div>
+        <div>
+          <Label htmlFor="endTime">End Time</Label>
+          <Input 
+            type="time" 
+            name="endTime" 
+            defaultValue={event?.endTime || ""}
             required 
           />
         </div>
@@ -289,7 +298,7 @@ export default function EventManagement() {
 
       <div>
         <Label htmlFor="location">Location</Label>
-        <Input name="location" defaultValue={event?.location} placeholder="Event venue address" required />
+        <Input name="location" defaultValue={event?.venue} placeholder="Event venue address" required />
       </div>
 
       <div className="grid grid-cols-3 gap-4">

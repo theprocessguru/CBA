@@ -3,6 +3,8 @@ import {
   text,
   varchar,
   timestamp,
+  date,
+  time,
   jsonb,
   index,
   serial,
@@ -731,9 +733,9 @@ export const cbaEvents = pgTable("cba_events", {
   eventSlug: varchar("event_slug").notNull(), // URL-friendly identifier
   description: text("description"),
   eventType: varchar("event_type").notNull(), // workshop, networking, summit, webinar, social
-  eventDate: timestamp("event_date").notNull(),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time").notNull(),
+  eventDate: date("event_date").notNull(),
+  startTime: time("start_time").notNull(),
+  endTime: time("end_time").notNull(),
   venue: varchar("venue").notNull(),
   venueAddress: text("venue_address"),
   maxCapacity: integer("max_capacity").notNull(),
@@ -762,8 +764,9 @@ export const eventTimeSlots = pgTable("event_time_slots", {
   title: varchar("title").notNull(), // e.g., "Opening Keynote", "Break", "Panel Discussion"
   description: text("description"),
   slotType: varchar("slot_type").notNull(), // presentation, panel, break, networking, workshop, q&a
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time").notNull(),
+  slotDate: date("slot_date").notNull(), // Date of the time slot
+  startTime: time("start_time").notNull(),
+  endTime: time("end_time").notNull(),
   room: varchar("room"), // Room or location within venue
   maxCapacity: integer("max_capacity"),
   currentAttendees: integer("current_attendees").default(0),
