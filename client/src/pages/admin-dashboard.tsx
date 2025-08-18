@@ -23,7 +23,8 @@ import {
   Heart,
   Upload,
   Send,
-  Mail
+  Mail,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -180,6 +181,12 @@ function AdminSidebar() {
               <span>Speakers</span>
             </div>
           </Link>
+          <Link href="/ai-summit">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Sparkles size={18} />
+              <span>AI Summit</span>
+            </div>
+          </Link>
           <Link href="/admin/onboarding">
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Send size={18} />
@@ -304,6 +311,12 @@ function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
             <Button variant="outline" size="sm">
               <Users className="mr-2 h-4 w-4" />
               View Speakers
+            </Button>
+          </Link>
+          <Link href="/ai-summit">
+            <Button variant="outline" size="sm">
+              <Sparkles className="mr-2 h-4 w-4" />
+              AI Summit Registration
             </Button>
           </Link>
           <Link href="/admin/onboarding">
