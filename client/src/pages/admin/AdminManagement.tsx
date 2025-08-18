@@ -6,14 +6,46 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Shield, UserPlus, Mail, Key, CheckCircle, XCircle } from "lucide-react";
+import { Shield, UserPlus, Mail, Key, CheckCircle, XCircle, Edit2, Trash2, MoreVertical, RefreshCw } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
   const [formData, setFormData] = useState({
+    email: "",
+    firstName: "",
+    lastName: ""
+  });
+  const [editFormData, setEditFormData] = useState({
     email: "",
     firstName: "",
     lastName: ""
@@ -57,6 +89,80 @@ export default function AdminManagement() {
     }
   });
 
+  // Edit administrator mutation
+  const editAdminMutation = useMutation({
+    mutationFn: async (data: { userId: string; updates: typeof editFormData }) => {
+      return apiRequest('PUT', `/api/admin/users/${data.userId}/edit`, data.updates);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Administrator details updated successfully"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setShowEditDialog(false);
+      setSelectedAdmin(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update administrator",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Delete administrator mutation
+  const deleteAdminMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest('DELETE', `/api/admin/users/${userId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Administrator Removed",
+        description: "Administrator privileges have been revoked"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setShowDeleteDialog(false);
+      setSelectedAdmin(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove administrator",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Reset password mutation
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest('POST', `/api/admin/users/${userId}/resend-welcome`, {});
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        toast({
+          title: "Password Reset",
+          description: `New password sent to ${data.emailSentTo}`
+        });
+      } else {
+        toast({
+          title: "Password Reset",
+          description: `New password: ${data.tempPassword}`,
+          variant: "warning"
+        });
+      }
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset password",
+        variant: "destructive"
+      });
+    }
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -71,6 +177,50 @@ export default function AdminManagement() {
     }
 
     createAdminMutation.mutate(formData);
+  };
+
+  const handleEdit = (admin: any) => {
+    setSelectedAdmin(admin);
+    setEditFormData({
+      email: admin.email,
+      firstName: admin.firstName,
+      lastName: admin.lastName
+    });
+    setShowEditDialog(true);
+  };
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate email domain
+    if (!editFormData.email.endsWith('@croydonba.org.uk')) {
+      toast({
+        title: "Invalid Email",
+        description: "Administrator email must be @croydonba.org.uk domain",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    editAdminMutation.mutate({
+      userId: selectedAdmin.id,
+      updates: editFormData
+    });
+  };
+
+  const handleDelete = (admin: any) => {
+    setSelectedAdmin(admin);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = () => {
+    if (selectedAdmin) {
+      deleteAdminMutation.mutate(selectedAdmin.id);
+    }
+  };
+
+  const handleResetPassword = (admin: any) => {
+    resetPasswordMutation.mutate(admin.id);
   };
 
   return (
@@ -217,6 +367,31 @@ export default function AdminManagement() {
                           Suspended
                         </Badge>
                       )}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(admin)}>
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Edit Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleResetPassword(admin)}>
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Reset Password
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            onClick={() => handleDelete(admin)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remove Admin
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))
@@ -259,6 +434,78 @@ export default function AdminManagement() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Administrator</DialogTitle>
+            <DialogDescription>
+              Update administrator details. Email must use @croydonba.org.uk domain.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleEditSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-firstName">First Name</Label>
+                <Input
+                  id="edit-firstName"
+                  value={editFormData.firstName}
+                  onChange={(e) => setEditFormData({ ...editFormData, firstName: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-lastName">Last Name</Label>
+                <Input
+                  id="edit-lastName"
+                  value={editFormData.lastName}
+                  onChange={(e) => setEditFormData({ ...editFormData, lastName: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="edit-email">Email Address</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editFormData.email}
+                onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                required
+                placeholder="user@croydonba.org.uk"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={editAdminMutation.isPending}>
+                {editAdminMutation.isPending ? "Updating..." : "Update"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Administrator</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove {selectedAdmin?.firstName} {selectedAdmin?.lastName} as an administrator? 
+              This will revoke their admin privileges and deactivate their account.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedAdmin(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Remove Admin
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

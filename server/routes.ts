@@ -1826,6 +1826,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update administrator details
+  app.put('/api/admin/users/:userId/edit', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const { email, firstName, lastName } = req.body;
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.isAdmin) {
+        return res.status(400).json({ message: "User is not an administrator" });
+      }
+      
+      // Validate email domain if email is being changed
+      if (email && email !== user.email && !email.endsWith('@croydonba.org.uk')) {
+        return res.status(400).json({ 
+          message: "Administrator email must use @croydonba.org.uk domain" 
+        });
+      }
+      
+      // Check if new email is already in use
+      if (email && email !== user.email) {
+        const existingUser = await storage.getUserByEmail(email);
+        if (existingUser) {
+          return res.status(400).json({ 
+            message: "Email address is already in use" 
+          });
+        }
+      }
+      
+      // Update user details
+      const updates: any = {};
+      if (email) updates.email = email;
+      if (firstName) updates.firstName = firstName;
+      if (lastName) updates.lastName = lastName;
+      
+      // Update QR handle if name changed
+      if (firstName && firstName !== user.firstName) {
+        updates.qrHandle = `${firstName.toUpperCase()}-CBA-2025`;
+      }
+      
+      const updatedUser = await storage.updateUser(userId, updates);
+      
+      res.json({ 
+        success: true,
+        message: "Administrator details updated successfully",
+        user: updatedUser
+      });
+    } catch (error) {
+      console.error("Error updating administrator:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to update administrator" 
+      });
+    }
+  });
+
+  // Delete administrator
+  app.delete('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const currentUserId = req.user.id;
+      
+      // Prevent self-deletion
+      if (userId === currentUserId) {
+        return res.status(400).json({ 
+          message: "Cannot delete your own administrator account" 
+        });
+      }
+      
+      // Get the user
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (!user.isAdmin) {
+        return res.status(400).json({ message: "User is not an administrator" });
+      }
+      
+      // Soft delete by removing admin privileges and deactivating
+      await storage.updateUser(userId, { 
+        isAdmin: false,
+        accountStatus: 'inactive' as const
+      });
+      
+      res.json({ 
+        success: true,
+        message: "Administrator privileges removed and account deactivated"
+      });
+    } catch (error) {
+      console.error("Error deleting administrator:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to delete administrator" 
+      });
+    }
+  });
+
   // Resend admin welcome email with new password
   app.post('/api/admin/users/:userId/resend-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
