@@ -102,6 +102,7 @@ export default function SpeakerSlotSelection() {
       case 'panel': return 'bg-purple-100 text-purple-800';
       case 'demo': return 'bg-orange-100 text-orange-800';
       case 'break': return 'bg-gray-100 text-gray-800';
+      case 'transition': return 'bg-gray-100 text-gray-800';
       case 'closing': return 'bg-indigo-100 text-indigo-800';
       default: return 'bg-gray-100 text-gray-800';
     }
@@ -118,6 +119,7 @@ export default function SpeakerSlotSelection() {
   const availableSlots = (timeSlots as TimeSlot[]).filter(slot => 
     !slot.isBreak && 
     slot.slotType !== 'closing' && 
+    slot.slotType !== 'transition' &&
     (!slot.speakers || slot.speakers.length === 0)
   );
 
@@ -204,7 +206,7 @@ export default function SpeakerSlotSelection() {
         <CardHeader>
           <CardTitle>Available Time Slots</CardTitle>
           <CardDescription>
-            Choose from 30-minute or 1-hour presentation slots. Mix of short demos and deep-dive sessions available.
+            Choose from 25-minute or 50-minute presentation slots (includes Q&A time). Room transitions handled automatically.
           </CardDescription>
         </CardHeader>
         <CardContent>
