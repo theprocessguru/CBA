@@ -89,11 +89,11 @@ export default function EventManagement() {
   // Update event mutation
   const updateEventMutation = useMutation({
     mutationFn: async ({ id, ...eventData }: any) => {
-      const response = await apiRequest("PUT", `/api/events/${id}`, eventData);
+      const response = await apiRequest("PUT", `/api/admin/events/${id}`, eventData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setShowEditDialog(false);
       setSelectedEvent(null);
       toast({
@@ -113,10 +113,10 @@ export default function EventManagement() {
   // Delete event mutation
   const deleteEventMutation = useMutation({
     mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/events/${id}`);
+      await apiRequest("DELETE", `/api/admin/events/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       toast({
         title: "Event Deleted",
         description: "Event has been deleted successfully",
