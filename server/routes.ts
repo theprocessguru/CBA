@@ -4158,6 +4158,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get potential speakers (recent attendees who might actually be speakers)
+  app.get('/api/admin/potential-speakers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Get recent AI Summit attendees (especially from weekend Aug 17-18)
+      const recentAttendees = await db
+        .select({
+          id: aiSummitRegistrations.id,
+          name: aiSummitRegistrations.name,
+          email: aiSummitRegistrations.email,
+          company: aiSummitRegistrations.company,
+          jobTitle: aiSummitRegistrations.jobTitle,
+          phoneNumber: aiSummitRegistrations.phoneNumber,
+          aiInterest: aiSummitRegistrations.aiInterest,
+          businessType: aiSummitRegistrations.businessType,
+          comments: aiSummitRegistrations.comments,
+          registeredAt: aiSummitRegistrations.registeredAt,
+          userId: aiSummitRegistrations.userId
+        })
+        .from(aiSummitRegistrations)
+        .where(gte(aiSummitRegistrations.registeredAt, new Date('2025-08-17')))
+        .orderBy(desc(aiSummitRegistrations.registeredAt));
+
+      res.json(recentAttendees);
+    } catch (error) {
+      console.error('Error fetching potential speakers:', error);
+      res.status(500).json({ message: 'Failed to fetch potential speakers' });
+    }
+  });
+
+  // Convert attendee to speaker
+  app.post('/api/admin/convert-to-speaker', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const {
+        attendeeId,
+        talkTitle,
+        talkDescription,
+        talkDuration,
+        audienceLevel,
+        sessionType,
+        bio,
+        website,
+        linkedIn,
+        speakingExperience,
+        techRequirements,
+        keyTakeaways
+      } = req.body;
+
+      if (!attendeeId || !talkTitle || !talkDescription || !keyTakeaways) {
+        return res.status(400).json({ message: 'Required fields missing: attendeeId, talkTitle, talkDescription, keyTakeaways' });
+      }
+
+      // Get the attendee data
+      const [attendee] = await db
+        .select()
+        .from(aiSummitRegistrations)
+        .where(eq(aiSummitRegistrations.id, parseInt(attendeeId)));
+
+      if (!attendee) {
+        return res.status(404).json({ message: 'Attendee not found' });
+      }
+
+      // Create speaker interest record
+      const speakerInterest = await storage.createAISummitSpeakerInterest({
+        userId: attendee.userId,
+        name: attendee.name,
+        email: attendee.email,
+        phone: attendee.phoneNumber || '',
+        company: attendee.company || '',
+        jobTitle: attendee.jobTitle || '',
+        website: website || '',
+        linkedIn: linkedIn || '',
+        bio: bio || '',
+        sessionType: sessionType || 'talk',
+        talkTitle,
+        talkDescription,
+        talkDuration: talkDuration || '30',
+        audienceLevel: audienceLevel || 'intermediate',
+        speakingExperience: speakingExperience || '',
+        previousSpeaking: false,
+        techRequirements: techRequirements || '',
+        availableSlots: JSON.stringify([]),
+        motivationToSpeak: `Converted from attendee registration on ${new Date().toLocaleDateString()}`,
+        keyTakeaways,
+        interactiveElements: false,
+        handoutsProvided: false,
+        agreesToTerms: true,
+        source: "admin_conversion",
+        registeredAt: new Date()
+      });
+
+      // Update the user's participant type to speaker
+      if (attendee.userId) {
+        await db
+          .update(users)
+          .set({ participantType: 'speaker' })
+          .where(eq(users.id, attendee.userId));
+      }
+
+      // Update the main registration to reflect speaker role
+      await db
+        .update(aiSummitRegistrations)
+        .set({
+          participantRoles: JSON.stringify(['speaker']),
+          customRole: sessionType || 'talk',
+          comments: `${attendee.comments ? attendee.comments + ' | ' : ''}CONVERTED TO SPEAKER: ${talkTitle}`
+        })
+        .where(eq(aiSummitRegistrations.id, parseInt(attendeeId)));
+
+      res.json({ 
+        success: true, 
+        message: 'Successfully converted attendee to speaker',
+        speakerInterestId: speakerInterest.id 
+      });
+    } catch (error) {
+      console.error('Error converting to speaker:', error);
+      res.status(500).json({ message: 'Failed to convert to speaker' });
+    }
+  });
+
   // Get email communications for a user
   app.get('/api/admin/users/:userId/emails', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

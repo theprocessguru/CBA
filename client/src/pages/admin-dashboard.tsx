@@ -181,6 +181,12 @@ function AdminSidebar() {
               <span>Speakers</span>
             </div>
           </Link>
+          <Link href="/admin/speaker-recovery">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <UserCheck size={18} />
+              <span>Speaker Recovery</span>
+            </div>
+          </Link>
           <Link href="/ai-summit">
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Sparkles size={18} />

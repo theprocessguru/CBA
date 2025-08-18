@@ -91,6 +91,7 @@ import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
+import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
 import EmailTemplates from "@/pages/admin/EmailTemplates";
 import Jobs from "@/pages/jobs";
@@ -676,6 +677,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <SpeakerManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/speaker-recovery">
+        <AdminRoute>
+          <MainLayout>
+            <SpeakerRecovery />
           </MainLayout>
         </AdminRoute>
       </Route>
