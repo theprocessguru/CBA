@@ -4664,7 +4664,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new event
   app.post('/api/admin/events', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const eventData = insertCBAEventSchema.parse(req.body);
+      // Helper function to safely parse dates
+      const parseDate = (dateValue: any) => {
+        if (!dateValue) return undefined;
+        if (dateValue instanceof Date) return dateValue;
+        
+        try {
+          const parsed = new Date(dateValue);
+          if (isNaN(parsed.getTime())) {
+            console.warn('Invalid date value:', dateValue);
+            return undefined;
+          }
+          return parsed;
+        } catch (error) {
+          console.warn('Error parsing date:', dateValue, error);
+          return undefined;
+        }
+      };
+
+      // Convert date strings to Date objects before validation
+      const preprocessedData = {
+        ...req.body,
+        eventDate: parseDate(req.body.startDate) || parseDate(req.body.eventDate),
+        startTime: parseDate(req.body.startDate) || parseDate(req.body.startTime),
+        endTime: parseDate(req.body.endDate) || parseDate(req.body.endTime),
+        registrationDeadline: parseDate(req.body.registrationDeadline),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      // Remove undefined values to avoid validation issues
+      Object.keys(preprocessedData).forEach(key => {
+        if (preprocessedData[key] === undefined) {
+          delete preprocessedData[key];
+        }
+      });
+
+      const eventData = insertCBAEventSchema.parse(preprocessedData);
       
       // Set creator
       eventData.createdBy = req.user.id;
@@ -4683,13 +4719,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
+      // Helper function to safely parse dates
+      const parseDate = (dateValue: any) => {
+        if (!dateValue) return undefined;
+        if (dateValue instanceof Date) return dateValue;
+        
+        try {
+          const parsed = new Date(dateValue);
+          if (isNaN(parsed.getTime())) {
+            console.warn('Invalid date value:', dateValue);
+            return undefined;
+          }
+          return parsed;
+        } catch (error) {
+          console.warn('Error parsing date:', dateValue, error);
+          return undefined;
+        }
+      };
+
       // Convert date strings to Date objects before validation
+      // Handle both frontend field names (startDate/endDate) and backend field names (eventDate/startTime/endTime)
       const preprocessedData = {
         ...req.body,
-        eventDate: req.body.eventDate ? new Date(req.body.eventDate) : undefined,
-        startTime: req.body.startTime ? new Date(req.body.startTime) : undefined,
-        endTime: req.body.endTime ? new Date(req.body.endTime) : undefined,
-        registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
+        // Map frontend startDate to backend eventDate if provided
+        eventDate: parseDate(req.body.startDate) || parseDate(req.body.eventDate),
+        // Map frontend startDate to backend startTime if provided (assuming same day/time)
+        startTime: parseDate(req.body.startDate) || parseDate(req.body.startTime),
+        // Map frontend endDate to backend endTime if provided
+        endTime: parseDate(req.body.endDate) || parseDate(req.body.endTime),
+        registrationDeadline: parseDate(req.body.registrationDeadline),
         updatedAt: new Date()
       };
       
