@@ -607,7 +607,7 @@ export default function EventManagement() {
                         </div>
                       </div>
                       <div className="mt-2 text-xs text-muted-foreground">
-                        Ticket ID: {registration.ticketId} | Registered: {format(new Date(registration.registrationDate), "MMM dd, yyyy 'at' h:mm a")}
+                        Ticket ID: {registration.ticketId} | Status: {registration.status}
                       </div>
                     </CardContent>
                   </Card>
