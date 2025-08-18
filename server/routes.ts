@@ -6074,10 +6074,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
         registeredAt: new Date()
       });
 
+      // Also create main AI Summit registration with proper speaker role
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+      const mainRegistration = await db
+        .insert(aiSummitRegistrations)
+        .values({
+          name,
+          email,
+          company,
+          jobTitle,
+          phoneNumber: phone,
+          businessType: company ? 'Limited Company' : 'Individual',
+          aiInterest: 'Speaking and Education',
+          participantRoles: JSON.stringify(['speaker']),
+          customRole: sessionType || 'talk',
+          emailVerified: true, // Auto-verify speaker accounts
+          emailVerificationToken,
+          userId: user.id,
+          registeredAt: new Date(),
+          comments: `Speaker Registration: ${talkTitle}`
+        })
+        .returning();
+
       res.json({ 
         success: true, 
         message: "Speaker account created successfully! You can now log in with your email and password. Our program committee will review your proposal and contact you soon.",
         speakerInterestId: speakerInterest.id,
+        registrationId: mainRegistration[0]?.id,
         userId: user.id
       });
 
