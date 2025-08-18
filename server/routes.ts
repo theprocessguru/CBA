@@ -4588,6 +4588,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get published events (public endpoint)
+  app.get('/api/events', async (req, res) => {
+    try {
+      const publishedEvents = await storage.getPublishedEvents();
+      res.json(publishedEvents);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  // Get user's event registrations
+  app.get('/api/user/event-registrations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const registrations = await storage.getUserEventRegistrations(userId);
+      res.json(registrations);
+    } catch (error) {
+      console.error("Error fetching event registrations:", error);
+      res.status(500).json({ message: "Failed to fetch registrations" });
+    }
+  });
+
+  // Register for an event
+  app.post('/api/events/:eventId/register', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      const userId = req.user.id;
+      const registrationData = req.body;
+
+      // Check if event exists and is published
+      const event = await storage.getEventById(parseInt(eventId));
+      if (!event || event.status !== 'published') {
+        return res.status(404).json({ message: "Event not found or not available for registration" });
+      }
+
+      // Create registration
+      const registration = await storage.createEventRegistration({
+        eventId: parseInt(eventId),
+        userId,
+        participantName: registrationData.participantName || `${req.user.firstName} ${req.user.lastName}`,
+        participantEmail: registrationData.participantEmail || req.user.email,
+        registrationType: registrationData.registrationType || 'general',
+        ticketId: `TICKET-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+        status: 'confirmed'
+      });
+
+      res.json({ success: true, registration });
+    } catch (error) {
+      console.error("Error registering for event:", error);
+      res.status(500).json({ message: "Failed to register for event" });
+    }
+  });
+
   // API endpoint for sponsorship inquiries
   app.post('/api/sponsorship/inquire', async (req, res) => {
     try {
