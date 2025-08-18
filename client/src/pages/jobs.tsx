@@ -100,7 +100,7 @@ export default function Jobs() {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [applicationForm, setApplicationForm] = useState<JobApplication>({
     jobId: 0,
-    applicantName: user?.name || "",
+    applicantName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : "",
     applicantEmail: user?.email || "",
     applicantPhone: "",
     coverLetter: "",
@@ -115,7 +115,7 @@ export default function Jobs() {
   // Submit job application
   const applyMutation = useMutation({
     mutationFn: async (application: JobApplication) => {
-      return apiRequest("POST", "/api/jobs/apply", application);
+      return apiRequest("POST", `/api/jobs/${application.jobId}/apply`, application);
     },
     onSuccess: () => {
       toast({
@@ -126,7 +126,7 @@ export default function Jobs() {
       setCvFile(null);
       setApplicationForm({
         jobId: 0,
-        applicantName: user?.name || "",
+        applicantName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : "",
         applicantEmail: user?.email || "",
         applicantPhone: "",
         coverLetter: "",
@@ -231,8 +231,8 @@ export default function Jobs() {
     const matchesLocation = !locationFilter || 
       job.location.toLowerCase().includes(locationFilter.toLowerCase());
     
-    const matchesJobType = !jobTypeFilter || job.jobType === jobTypeFilter;
-    const matchesWorkMode = !workModeFilter || job.workMode === workModeFilter;
+    const matchesJobType = !jobTypeFilter || jobTypeFilter === "all" || job.jobType === jobTypeFilter;
+    const matchesWorkMode = !workModeFilter || workModeFilter === "all" || job.workMode === workModeFilter;
     
     return matchesSearch && matchesLocation && matchesJobType && matchesWorkMode && job.isActive;
   });
@@ -296,7 +296,7 @@ export default function Jobs() {
                 <SelectValue placeholder="Job Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="full-time">Full Time</SelectItem>
                 <SelectItem value="part-time">Part Time</SelectItem>
                 <SelectItem value="contract">Contract</SelectItem>
@@ -310,7 +310,7 @@ export default function Jobs() {
                 <SelectValue placeholder="Work Mode" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Modes</SelectItem>
+                <SelectItem value="all">All Modes</SelectItem>
                 <SelectItem value="on-site">On-site</SelectItem>
                 <SelectItem value="remote">Remote</SelectItem>
                 <SelectItem value="hybrid">Hybrid</SelectItem>
