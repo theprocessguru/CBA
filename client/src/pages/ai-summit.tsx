@@ -2237,8 +2237,8 @@ const AISummit = () => {
                     </p>
                   </div>
 
-                  {/* Test Data Button - Only show in development */}
-                  {import.meta.env.DEV && (
+                  {/* Test Data Button - Only show to authenticated admins */}
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
                     <div className="flex justify-center">
                       <Button
                         type="button"
@@ -2263,7 +2263,7 @@ const AISummit = () => {
                         }}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                       >
-                        🧪 Fill with Test Data (Dev Only)
+                        🧪 Fill with Test Data (Admin Only)
                       </Button>
                     </div>
                   )}
@@ -2309,7 +2309,7 @@ const AISummit = () => {
 
                 <form onSubmit={handleExhibitorRegistration} className="space-y-4">
                   {/* Test Data Button for Exhibitor Form */}
-                  {import.meta.env.DEV && (
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
                     <div className="flex justify-center mb-4">
                       <Button
                         type="button"
@@ -2344,7 +2344,7 @@ const AISummit = () => {
                         }}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                       >
-                        🧪 Fill with Test Data (Dev Only)
+                        🧪 Fill with Test Data (Admin Only)
                       </Button>
                     </div>
                   )}
@@ -2766,7 +2766,7 @@ const AISummit = () => {
 
                 <form onSubmit={handleSpeakerSubmission} className="space-y-6">
                   {/* Test Data Button for Speaker Form */}
-                  {import.meta.env.DEV && (
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
                     <div className="flex justify-center mb-4">
                       <Button
                         type="button"
@@ -2804,7 +2804,7 @@ const AISummit = () => {
                         }}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                       >
-                        🧪 Fill with Test Data (Dev Only)
+                        🧪 Fill with Test Data (Admin Only)
                       </Button>
                     </div>
                   )}
@@ -3201,7 +3201,7 @@ const AISummit = () => {
 
                 <form onSubmit={handleVolunteerRegistration} className="space-y-4">
                   {/* Test Data Button for Volunteer Form */}
-                  {import.meta.env.DEV && (
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
                     <div className="flex justify-center mb-4">
                       <Button
                         type="button"
@@ -3228,7 +3228,7 @@ const AISummit = () => {
                         }}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                       >
-                        🧪 Fill with Test Data (Dev Only)
+                        🧪 Fill with Test Data (Admin Only)
                       </Button>
                     </div>
                   )}
@@ -3688,7 +3688,7 @@ const AISummit = () => {
 
                 <form onSubmit={handleSponsorRegistration} className="space-y-4">
                   {/* Test Data Button for Sponsor Form */}
-                  {import.meta.env.DEV && (
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
                     <div className="flex justify-center mb-4">
                       <Button
                         type="button"
@@ -3715,7 +3715,7 @@ const AISummit = () => {
                         }}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
                       >
-                        🧪 Fill with Test Data (Dev Only)
+                        🧪 Fill with Test Data (Admin Only)
                       </Button>
                     </div>
                   )}
