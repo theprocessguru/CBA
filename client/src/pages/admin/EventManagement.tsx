@@ -16,11 +16,16 @@ import { format } from "date-fns";
 
 interface Event {
   id: number;
+  eventName: string;
   title: string;
   description: string;
+  eventDate: string;
   startDate: string;
   endDate: string;
+  startTime: string;
+  endTime: string;
   location: string;
+  venue: string;
   maxCapacity: number;
   registrationFee: number;
   status: string;
