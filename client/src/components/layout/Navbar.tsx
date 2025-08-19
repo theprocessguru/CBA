@@ -183,6 +183,11 @@ const Navbar = () => {
                     Dashboard
                   </Button>
                 </Link>
+                <a href="/api/logout">
+                  <Button size="sm" variant="destructive" className="text-sm px-3 py-2 whitespace-nowrap">
+                    Logout
+                  </Button>
+                </a>
               </div>
             ) : (
               <Link href="/login">
