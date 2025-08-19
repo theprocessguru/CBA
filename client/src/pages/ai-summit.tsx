@@ -1114,37 +1114,37 @@ const AISummit = () => {
                       My Schedule & Calendar
                     </a>
                   </Link>
-                  <div className="flex flex-wrap gap-3 justify-center">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 justify-center max-w-4xl mx-auto">
                     <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
                       onClick={() => setShowExhibitorForm(true)}
                     >
-                      <Building className="h-5 w-5" />
-                      <div className="flex flex-col">
-                        <span>Exhibit Your Business</span>
+                      <Building className="h-4 w-4 shrink-0" />
+                      <div className="flex flex-col text-center">
+                        <span className="text-xs leading-tight">Exhibit Your Business</span>
                         <span className="text-xs text-blue-200">From £588</span>
                       </div>
                     </button>
                     <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
                       onClick={() => setShowSpeakerForm(true)}
                     >
-                      <Mic className="h-5 w-5" />
-                      Speak at Summit
+                      <Mic className="h-4 w-4 shrink-0" />
+                      <span className="text-xs leading-tight">Speak at Summit</span>
                     </button>
                     <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
                       onClick={() => setShowVolunteerForm(true)}
                     >
-                      <UserPlus className="h-5 w-5" />
-                      Volunteer with Us
+                      <UserPlus className="h-4 w-4 shrink-0" />
+                      <span className="text-xs leading-tight">Volunteer with Us</span>
                     </button>
                     <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-purple-600 text-base px-5 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                      className="border-2 border-white text-white hover:bg-white hover:text-purple-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
                       onClick={() => setShowSponsorForm(true)}
                     >
-                      <Trophy className="h-5 w-5" />
-                      Become a Sponsor
+                      <Trophy className="h-4 w-4 shrink-0" />
+                      <span className="text-xs leading-tight">Become a Sponsor</span>
                     </button>
                   </div>
                 </div>
@@ -1791,6 +1791,133 @@ const AISummit = () => {
                 <h2 className="text-3xl font-bold text-neutral-900 mb-2">Featured Speakers</h2>
                 <p className="text-lg text-neutral-600">Learn from AI experts and industry leaders</p>
               </div>
+
+              {/* Speaker Application Process Information */}
+              <Card className="mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-2xl text-center text-blue-800 flex items-center justify-center gap-2">
+                    <Mic className="h-6 w-6" />
+                    Speaker Application Process
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Available Slots Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white p-4 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Mic className="h-4 w-4 text-blue-600" />
+                        Speaking Slots Available
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>1-hour slots (45min speaking + 15min Q&A):</span>
+                          <span className="font-semibold text-blue-600">2 available</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>30-minute slots (15min speaking + 15min Q&A):</span>
+                          <span className="font-semibold text-blue-600">6 available</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        <strong>Note:</strong> Speaking time includes 5min room setup + content + Q&A + 5min transition
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-purple-200">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Wrench className="h-4 w-4 text-purple-600" />
+                        Workshop Slots Available
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span>1-hour workshops:</span>
+                          <span className="font-semibold text-purple-600">3 available</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>30-minute workshops:</span>
+                          <span className="font-semibold text-purple-600">4 available</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        <strong>Note:</strong> Workshops require hands-on activities and participant interaction
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg border border-green-200">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                        <Building className="h-4 w-4 text-green-600" />
+                        Exhibition Hall Interview Space
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <p className="text-gray-700">
+                          <strong>Location:</strong> Main exhibition hall (where opening speech will be given)
+                        </p>
+                        <p className="text-gray-700">
+                          <strong>Format:</strong> Interviews, informal talks, and exhibitor presentations
+                        </p>
+                        <p className="text-gray-700">
+                          <strong>Duration:</strong> Flexible 10-15 minute slots throughout the day
+                        </p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        <strong>Perfect for:</strong> Product demos, company spotlights, and informal Q&A sessions
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Application Process Steps */}
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-4">Application Process (2 Simple Steps)</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</div>
+                          <div>
+                            <h5 className="font-medium text-gray-800">Initial Registration</h5>
+                            <p className="text-sm text-gray-600">Submit basic information and topic outline. Takes 2-3 minutes.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="bg-purple-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</div>
+                          <div>
+                            <h5 className="font-medium text-gray-800">Complete Speaker Profile</h5>
+                            <p className="text-sm text-gray-600">After approval, complete detailed profile at your convenience.</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                        <h5 className="font-medium text-yellow-800 mb-2">What You'll Need to Prepare:</h5>
+                        <ul className="text-sm text-yellow-700 space-y-1">
+                          <li>• Speaker bio (150-300 words)</li>
+                          <li>• High-resolution headshot photo</li>
+                          <li>• Talk/workshop title and description</li>
+                          <li>• Key takeaways for attendees</li>
+                          <li>• Technical requirements (if any)</li>
+                          <li>• Preferred time slots</li>
+                        </ul>
+                        <p className="text-xs text-yellow-600 mt-2 font-medium">
+                          Don't worry - you can gather these after initial registration!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Call to Action */}
+                  <div className="text-center">
+                    <Button 
+                      size="lg"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8"
+                      onClick={() => setShowSpeakerForm(true)}
+                    >
+                      <Mic className="mr-2 h-5 w-5" />
+                      Start Speaker Application
+                    </Button>
+                    <p className="text-sm text-gray-500 mt-2">
+                      <strong>Note:</strong> Due to high demand, slots are subject to approval and may be oversubscribed.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {speakers.map((speaker, index) => (
@@ -2754,13 +2881,16 @@ const AISummit = () => {
           </div>
         )}
 
-        {/* Speaker Interest Form Modal */}
+        {/* Speaker Interest Form Modal - Simplified Initial Registration */}
         {showSpeakerForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neutral-900">Speaker Interest - AI Summit 2025</h2>
+                  <div>
+                    <h2 className="text-2xl font-bold text-neutral-900">Speaker Application - Step 1</h2>
+                    <p className="text-sm text-gray-600 mt-1">Quick registration to express interest. Complete profile later.</p>
+                  </div>
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -2768,6 +2898,15 @@ const AISummit = () => {
                   >
                     ✕
                   </Button>
+                </div>
+
+                {/* Process Information */}
+                <div className="bg-blue-50 p-4 rounded-lg mb-6">
+                  <h4 className="font-semibold text-blue-800 mb-2">Two-Step Application Process</h4>
+                  <div className="text-sm text-blue-700 space-y-1">
+                    <p><strong>Step 1 (Now):</strong> Basic information and topic outline (2-3 minutes)</p>
+                    <p><strong>Step 2 (After approval):</strong> Complete speaker profile with detailed information</p>
+                  </div>
                 </div>
 
                 <form onSubmit={handleSpeakerSubmission} className="space-y-6">
@@ -2784,24 +2923,12 @@ const AISummit = () => {
                             phone: '07891234567',
                             company: 'AI Innovation Lab',
                             jobTitle: 'Chief Technology Officer',
-                            website: 'https://www.aiinnovationlab.com',
-                            linkedIn: 'https://linkedin.com/in/emilywatson',
-                            bio: 'Dr. Emily Watson is a renowned AI expert with over 15 years of experience in machine learning and artificial intelligence. She has published numerous papers on AI applications in business and regularly speaks at international conferences.',
+                            sessionType: 'talk',
+                            talkTitle: 'AI Tools for Small Business Growth',
+                            topicOutline: 'Overview of practical AI tools that small businesses can implement immediately to improve efficiency and customer service.',
+                            preferredDuration: '30',
                             password: 'SpeakerPass123!',
                             confirmPassword: 'SpeakerPass123!',
-                            sessionType: 'keynote',
-                            talkTitle: 'Transforming Small Business with AI: Practical Strategies',
-                            talkDescription: 'This keynote will explore practical ways small businesses can leverage AI to improve efficiency, customer service, and growth. We will cover real-world case studies, affordable AI tools, and implementation strategies that work for businesses with limited budgets.',
-                            talkDuration: '45',
-                            audienceLevel: 'Beginner',
-                            speakingExperience: 'Keynote speaker at TechSummit 2024, AI Conference London 2023, numerous workshops and webinars',
-                            previousSpeaking: 'Yes',
-                            techRequirements: 'HDMI connection, clicker, microphone',
-                            availableSlots: ['morning', 'afternoon'],
-                            motivationToSpeak: 'Passionate about democratizing AI for small businesses',
-                            keyTakeaways: '1. Understanding AI basics\n2. Identifying AI opportunities in your business\n3. Implementing AI on a budget\n4. Measuring AI ROI',
-                            interactiveElements: 'Live demos, Q&A session, audience polls',
-                            handoutsProvided: 'Yes',
                             agreesToTerms: true
                           };
                           Object.entries(testData).forEach(([key, value]) => {
@@ -2814,9 +2941,9 @@ const AISummit = () => {
                       </Button>
                     </div>
                   )}
-                  {/* Personal Information */}
+                  {/* Basic Information for Initial Registration */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-neutral-800">Personal Information</h3>
+                    <h3 className="text-lg font-semibold text-neutral-800">Contact Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="speakerName">Full Name *</Label>
@@ -2875,41 +3002,67 @@ const AISummit = () => {
                         />
                       </div>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="speakerWebsite">Website (Optional)</Label>
-                        <Input
-                          id="speakerWebsite"
-                          type="url"
-                          value={speakerData.website}
-                          onChange={(e) => handleSpeakerInputChange('website', e.target.value)}
-                          placeholder="https://your-website.com"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="speakerLinkedIn">LinkedIn Profile (Optional)</Label>
-                        <Input
-                          id="speakerLinkedIn"
-                          type="url"
-                          value={speakerData.linkedIn}
-                          onChange={(e) => handleSpeakerInputChange('linkedIn', e.target.value)}
-                          placeholder="https://linkedin.com/in/yourprofile"
-                        />
-                      </div>
+                  {/* Session Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Session Information</h3>
+                    <div>
+                      <Label htmlFor="sessionType">Session Type *</Label>
+                      <select
+                        id="sessionType"
+                        value={speakerData.sessionType}
+                        onChange={(e) => handleSpeakerInputChange('sessionType', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      >
+                        <option value="">Select session type...</option>
+                        <option value="talk">Speaking Session (Talk)</option>
+                        <option value="workshop">Workshop (Hands-on)</option>
+                        <option value="exhibition-interview">Exhibition Hall Interview/Demo</option>
+                      </select>
                     </div>
 
                     <div>
-                      <Label htmlFor="speakerBio">Bio/Background *</Label>
-                      <Textarea
-                        id="speakerBio"
+                      <Label htmlFor="talkTitle">Session Title *</Label>
+                      <Input
+                        id="talkTitle"
+                        type="text"
                         required
-                        value={speakerData.bio}
-                        onChange={(e) => handleSpeakerInputChange('bio', e.target.value)}
-                        placeholder="Brief background about yourself, your expertise, and why you're qualified to speak on AI topics (200-300 words)..."
+                        value={speakerData.talkTitle}
+                        onChange={(e) => handleSpeakerInputChange('talkTitle', e.target.value)}
+                        placeholder="Give your talk/workshop a clear, engaging title"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="topicOutline">Topic Outline *</Label>
+                      <Textarea
+                        id="topicOutline"
+                        required
+                        value={speakerData.topicOutline}
+                        onChange={(e) => handleSpeakerInputChange('topicOutline', e.target.value)}
+                        placeholder="Briefly describe what your session will cover and key points you'll discuss (200-400 words)..."
                         rows={4}
                       />
                     </div>
+
+                    <div>
+                      <Label htmlFor="preferredDuration">Preferred Duration *</Label>
+                      <select
+                        id="preferredDuration"
+                        value={speakerData.preferredDuration}
+                        onChange={(e) => handleSpeakerInputChange('preferredDuration', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      >
+                        <option value="">Select duration...</option>
+                        <option value="30">30 minutes (15min speaking + 15min Q&A)</option>
+                        <option value="60">60 minutes (45min speaking + 15min Q&A)</option>
+                      </select>
+                      <p className="text-xs text-gray-500 mt-1">Duration includes setup time and Q&A</p>
+                    </div>
+                  </div>
                     
                     {/* Account Creation Fields */}
                     <div className="bg-blue-50 p-4 rounded-lg space-y-4 mt-4">
@@ -2967,192 +3120,465 @@ const AISummit = () => {
                     </div>
                   </div>
 
-                  {/* Talk Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-neutral-800">Session Details</h3>
-                    <div>
-                      <Label htmlFor="sessionType">Session Type *</Label>
-                      <Select 
-                        value={speakerData.sessionType || "talk"} 
-                        onValueChange={(value) => handleSpeakerInputChange('sessionType', value)}
+
+
+                  {/* Terms and Agreement */}
+                  <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
+                    <Checkbox
+                      id="speakerAgreesToTerms"
+                      checked={speakerData.agreesToTerms}
+                      onCheckedChange={(checked) => handleSpeakerInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="speakerAgreesToTerms" className="text-sm">
+                      I agree to the speaker terms and conditions and understand that speaker selection is subject to approval *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowSpeakerForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      disabled={speakerMutation.isPending || !speakerData.agreesToTerms}
+                    >
+                      {speakerMutation.isPending ? "Submitting..." : "Register Speaker Interest"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Volunteer Registration Form Modal */}
+        {showVolunteerForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neutral-900">Volunteer Registration - AI Summit 2025</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowVolunteerForm(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleVolunteerRegistration} className="space-y-4">
+                  {/* Test Data Button for Volunteer Form */}
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            name: "Alex Thompson",
+                            email: `volunteer${Math.floor(Math.random() * 10000)}@example.com`,
+                            phone: "07543210987",
+                            emergencyContact: "Jane Thompson - 07777888999",
+                            role: "registration",
+                            shift: "full-day",
+                            experience: "Volunteered at TechConf 2024, local charity events",
+                            availability: "Available for the full day, happy to help wherever needed",
+                            password: "Volunteer123!",
+                            confirmPassword: "Volunteer123!",
+                            motivation: "Passionate about AI and want to contribute to the community",
+                            tShirtSize: "M",
+                            dietaryRequirements: "Vegetarian",
+                            agreesToTerms: true
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleVolunteerInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
                       >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select session type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="talk">
-                            <div className="flex flex-col">
-                              <span className="font-medium">Speaking/Presentation</span>
-                              <span className="text-xs text-gray-500">Share knowledge, insights, or case studies</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="workshop">
-                            <div className="flex flex-col">
-                              <span className="font-medium">Workshop/Hands-on Session</span>
-                              <span className="text-xs text-gray-500">Interactive session with practical activities</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                        🧪 Fill with Test Data (Admin Only)
+                      </Button>
                     </div>
-                    <div>
-                      <Label htmlFor="talkTitle">
-                        {speakerData.sessionType === 'workshop' ? 'Workshop Title *' : 'Talk Title *'}
-                      </Label>
-                      <Input
-                        id="talkTitle"
-                        type="text"
-                        required
-                        value={speakerData.talkTitle}
-                        onChange={(e) => handleSpeakerInputChange('talkTitle', e.target.value)}
-                        placeholder={speakerData.sessionType === 'workshop' ? 
-                          "Enter your workshop title (e.g., 'Building Your First AI Chatbot')" : 
-                          "Enter your talk title (e.g., 'AI Tools for Small Business Growth')"
-                        }
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="talkDescription">
-                        {speakerData.sessionType === 'workshop' ? 'Workshop Description *' : 'Talk Description *'}
-                      </Label>
-                      <Textarea
-                        id="talkDescription"
-                        required
-                        value={speakerData.talkDescription}
-                        onChange={(e) => handleSpeakerInputChange('talkDescription', e.target.value)}
-                        placeholder={speakerData.sessionType === 'workshop' ? 
-                          "Detailed description of your workshop: What will participants do? What tools/skills will they practice? What will they build or create? (300-500 words)..." :
-                          "Detailed description of your talk content, key points you'll cover, and learning outcomes for attendees (300-500 words)..."
-                        }
-                        rows={5}
-                      />
-                    </div>
-
+                  )}
+                  {/* Personal Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Personal Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="talkDuration">Preferred Duration</Label>
-                        <Select value={speakerData.talkDuration} onValueChange={(value) => handleSpeakerInputChange('talkDuration', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select duration" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {speakerData.sessionType === 'workshop' ? (
-                              <>
-                                <SelectItem value="15">15 minutes (short workshop)</SelectItem>
-                                <SelectItem value="45">45 minutes (full workshop)</SelectItem>
-                              </>
-                            ) : (
-                              <>
-                                <SelectItem value="15">15 minutes (standard talk)</SelectItem>
-                                <SelectItem value="45">45 minutes (extended talk)</SelectItem>
-                              </>
-                            )}
-                          </SelectContent>
-                        </Select>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {speakerData.sessionType === 'workshop' ? 
-                            "Workshops need more time for hands-on activities" : 
-                            "Remember: 5min room entry + content + 5min Q&A + 5min exit"
-                          }
-                        </p>
+                        <Label htmlFor="volunteerName">Full Name *</Label>
+                        <Input
+                          id="volunteerName"
+                          type="text"
+                          required
+                          value={volunteerData.name}
+                          onChange={(e) => handleVolunteerInputChange('name', e.target.value)}
+                          placeholder="Enter your full name"
+                        />
                       </div>
                       <div>
-                        <Label htmlFor="audienceLevel">Target Audience Level</Label>
-                        <Select value={speakerData.audienceLevel} onValueChange={(value) => handleSpeakerInputChange('audienceLevel', value)}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select audience level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Beginner">Beginner (No AI experience)</SelectItem>
-                            <SelectItem value="Intermediate">Intermediate (Some AI knowledge)</SelectItem>
-                            <SelectItem value="Advanced">Advanced (AI practitioners)</SelectItem>
-                            <SelectItem value="Mixed">Mixed (All levels)</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <Label htmlFor="volunteerEmail">Email Address *</Label>
+                        <Input
+                          id="volunteerEmail"
+                          type="email"
+                          required
+                          value={volunteerData.email}
+                          onChange={(e) => handleVolunteerInputChange('email', e.target.value)}
+                          placeholder="your.email@example.com"
+                        />
                       </div>
                     </div>
-
                     <div>
-                      <Label htmlFor="keyTakeaways">Key Takeaways *</Label>
-                      <Textarea
-                        id="keyTakeaways"
+                      <Label htmlFor="volunteerPhone">Phone Number *</Label>
+                      <Input
+                        id="volunteerPhone"
+                        type="tel"
                         required
-                        value={speakerData.keyTakeaways}
-                        onChange={(e) => handleSpeakerInputChange('keyTakeaways', e.target.value)}
-                        placeholder="List 3-5 key takeaways attendees will gain from your talk..."
-                        rows={3}
+                        value={volunteerData.phone}
+                        onChange={(e) => handleVolunteerInputChange('phone', e.target.value)}
+                        placeholder="Your contact number"
                       />
                     </div>
                   </div>
 
-                  {/* Speaking Experience */}
+                  {/* Volunteer Preferences */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-neutral-800">Speaking Experience</h3>
+                    <h3 className="text-lg font-semibold text-neutral-800">Volunteer Preferences</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="volunteerRole">Preferred Role *</Label>
+                        <select
+                          id="volunteerRole"
+                          value={volunteerData.role}
+                          onChange={(e) => handleVolunteerInputChange('role', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        >
+                          <option value="">Select a role...</option>
+                          <option value="registration">Registration Desk</option>
+                          <option value="speaker-assistance">Speaker Assistance</option>
+                          <option value="networking">Networking Support</option>
+                          <option value="technical">Technical Support</option>
+                          <option value="catering">Catering Assistance</option>
+                          <option value="general">General Helper</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="volunteerShift">Preferred Shift *</Label>
+                        <select
+                          id="volunteerShift"
+                          value={volunteerData.shift}
+                          onChange={(e) => handleVolunteerInputChange('shift', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        >
+                          <option value="">Select a shift...</option>
+                          <option value="morning">Morning (8:00 AM - 12:00 PM)</option>
+                          <option value="afternoon">Afternoon (12:00 PM - 4:00 PM)</option>
+                          <option value="full-day">Full Day (8:00 AM - 4:00 PM)</option>
+                          <option value="setup">Setup Only (8:00 AM - 10:00 AM)</option>
+                          <option value="cleanup">Cleanup Only (4:00 PM - 6:00 PM)</option>
+                        </select>
+                      </div>
+                    </div>
                     <div>
-                      <Label htmlFor="speakingExperience">Previous Speaking Experience</Label>
+                      <Label htmlFor="volunteerExperience">Previous Volunteer Experience</Label>
                       <Textarea
-                        id="speakingExperience"
-                        value={speakerData.speakingExperience}
-                        onChange={(e) => handleSpeakerInputChange('speakingExperience', e.target.value)}
-                        placeholder="Describe your previous speaking experience, events you've spoken at, topics covered, etc. (If this is your first time, please mention that)..."
+                        id="volunteerExperience"
+                        value={volunteerData.experience}
+                        onChange={(e) => handleVolunteerInputChange('experience', e.target.value)}
+                        placeholder="Tell us about any previous volunteer experience at events or relevant skills..."
                         rows={3}
                       />
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="previousSpeaking"
-                        checked={speakerData.previousSpeaking}
-                        onCheckedChange={(checked) => handleSpeakerInputChange('previousSpeaking', !!checked)}
-                      />
-                      <Label htmlFor="previousSpeaking">I have spoken at professional events before</Label>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="interactiveElements"
-                        checked={speakerData.interactiveElements}
-                        onCheckedChange={(checked) => handleSpeakerInputChange('interactiveElements', !!checked)}
-                      />
-                      <Label htmlFor="interactiveElements">My talk will include interactive elements (Q&A, demos, activities)</Label>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="handoutsProvided"
-                        checked={speakerData.handoutsProvided}
-                        onCheckedChange={(checked) => handleSpeakerInputChange('handoutsProvided', !!checked)}
-                      />
-                      <Label htmlFor="handoutsProvided">I will provide handouts or resources for attendees</Label>
                     </div>
                   </div>
 
                   {/* Additional Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-neutral-800">Additional Information</h3>
-                    <div>
-                      <Label htmlFor="motivationToSpeak">Why do you want to speak at the AI Summit?</Label>
-                      <Textarea
-                        id="motivationToSpeak"
-                        value={speakerData.motivationToSpeak}
-                        onChange={(e) => handleSpeakerInputChange('motivationToSpeak', e.target.value)}
-                        placeholder="Tell us about your motivation and how your talk will benefit the Croydon business community..."
-                        rows={3}
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="tShirtSize">T-Shirt Size</Label>
+                        <select
+                          id="tShirtSize"
+                          value={volunteerData.tShirtSize}
+                          onChange={(e) => handleVolunteerInputChange('tShirtSize', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select size...</option>
+                          <option value="XS">XS</option>
+                          <option value="S">S</option>
+                          <option value="M">M</option>
+                          <option value="L">L</option>
+                          <option value="XL">XL</option>
+                          <option value="XXL">XXL</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="emergencyContact">Emergency Contact</Label>
+                        <Input
+                          id="emergencyContact"
+                          type="text"
+                          value={volunteerData.emergencyContact}
+                          onChange={(e) => handleVolunteerInputChange('emergencyContact', e.target.value)}
+                          placeholder="Name and phone number"
+                        />
+                      </div>
                     </div>
-
                     <div>
-                      <Label htmlFor="techRequirements">Technical Requirements</Label>
+                      <Label htmlFor="volunteerAvailability">Availability & Special Notes</Label>
                       <Textarea
-                        id="techRequirements"
-                        value={speakerData.techRequirements}
-                        onChange={(e) => handleSpeakerInputChange('techRequirements', e.target.value)}
-                        placeholder="Any specific technical requirements for your presentation (projector, microphone, internet, specific software, etc.)..."
+                        id="volunteerAvailability"
+                        value={volunteerData.availability}
+                        onChange={(e) => handleVolunteerInputChange('availability', e.target.value)}
+                        placeholder="Any specific availability constraints or special notes..."
                         rows={2}
                       />
                     </div>
+                    <div>
+                      <Label htmlFor="dietaryRequirements">Dietary Requirements (for volunteer lunch)</Label>
+                      <Input
+                        id="dietaryRequirements"
+                        type="text"
+                        value={volunteerData.dietaryRequirements}
+                        onChange={(e) => handleVolunteerInputChange('dietaryRequirements', e.target.value)}
+                        placeholder="Any dietary restrictions or preferences"
+                      />
+                    </div>
                   </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-green-50 rounded-lg">
+                    <Checkbox
+                      id="volunteerAgreesToTerms"
+                      checked={volunteerData.agreesToTerms}
+                      onCheckedChange={(checked) => handleVolunteerInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="volunteerAgreesToTerms" className="text-sm">
+                      I agree to volunteer at the AI Summit 2025 and understand the responsibilities and commitment required *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowVolunteerForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      disabled={volunteerMutation.isPending || !volunteerData.agreesToTerms}
+                    >
+                      {volunteerMutation.isPending ? "Submitting..." : "Register as Volunteer"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sponsor Registration Form Modal */}
+        {showSponsorForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-neutral-900">Sponsor Registration - AI Summit 2025</h2>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setShowSponsorForm(false)}
+                  >
+                    ✕
+                  </Button>
+                </div>
+
+                <form onSubmit={handleSponsorRegistration} className="space-y-4">
+                  {/* Test Data Button for Sponsor Form */}
+                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          const testData = {
+                            companyName: "TechCorp Solutions",
+                            contactName: "Michael Johnson",
+                            contactEmail: `sponsor${Math.floor(Math.random() * 10000)}@techcorp.com`,
+                            contactPhone: "02012345678",
+                            sponsorshipLevel: "Gold",
+                            website: "https://www.techcorp.com",
+                            companyDescription: "Leading technology solutions provider specializing in AI and ML services",
+                            sponsorshipGoals: "Brand visibility, lead generation, and networking with AI community",
+                            marketingOpportunities: "logo-placement,exhibition-booth,speaking-opportunity",
+                            additionalRequests: "Prefer keynote speaking slot and prime booth location",
+                            password: "Sponsor123!",
+                            confirmPassword: "Sponsor123!",
+                            agreesToTerms: true
+                          };
+                          Object.entries(testData).forEach(([key, value]) => {
+                            handleSponsorInputChange(key, value);
+                          });
+                        }}
+                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                      >
+                        🧪 Fill with Test Data (Admin Only)
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Company Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Company Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="companyName">Company Name *</Label>
+                        <Input
+                          id="companyName"
+                          type="text"
+                          required
+                          value={sponsorData.companyName}
+                          onChange={(e) => handleSponsorInputChange('companyName', e.target.value)}
+                          placeholder="Your company name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contactName">Contact Person *</Label>
+                        <Input
+                          id="contactName"
+                          type="text"
+                          required
+                          value={sponsorData.contactName}
+                          onChange={(e) => handleSponsorInputChange('contactName', e.target.value)}
+                          placeholder="Your full name"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="contactEmail">Email Address *</Label>
+                        <Input
+                          id="contactEmail"
+                          type="email"
+                          required
+                          value={sponsorData.contactEmail}
+                          onChange={(e) => handleSponsorInputChange('contactEmail', e.target.value)}
+                          placeholder="contact@company.com"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="contactPhone">Phone Number *</Label>
+                        <Input
+                          id="contactPhone"
+                          type="tel"
+                          required
+                          value={sponsorData.contactPhone}
+                          onChange={(e) => handleSponsorInputChange('contactPhone', e.target.value)}
+                          placeholder="Your contact number"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="website">Company Website</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        value={sponsorData.website}
+                        onChange={(e) => handleSponsorInputChange('website', e.target.value)}
+                        placeholder="https://yourcompany.com"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sponsorship Details */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Sponsorship Details</h3>
+                    <div>
+                      <Label htmlFor="sponsorshipLevel">Preferred Sponsorship Level *</Label>
+                      <select
+                        id="sponsorshipLevel"
+                        value={sponsorData.sponsorshipLevel}
+                        onChange={(e) => handleSponsorInputChange('sponsorshipLevel', e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        required
+                      >
+                        <option value="">Select sponsorship level...</option>
+                        <option value="Title">Title Sponsor (£5,000+)</option>
+                        <option value="Platinum">Platinum Sponsor (£3,000)</option>
+                        <option value="Gold">Gold Sponsor (£2,000)</option>
+                        <option value="Silver">Silver Sponsor (£1,000)</option>
+                        <option value="Bronze">Bronze Sponsor (£500)</option>
+                        <option value="Community">Community Partner (£250)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="companyDescription">Company Description</Label>
+                      <Textarea
+                        id="companyDescription"
+                        value={sponsorData.companyDescription}
+                        onChange={(e) => handleSponsorInputChange('companyDescription', e.target.value)}
+                        placeholder="Brief description of your company and what you do..."
+                        rows={3}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sponsorshipGoals">Sponsorship Goals</Label>
+                      <Textarea
+                        id="sponsorshipGoals"
+                        value={sponsorData.sponsorshipGoals}
+                        onChange={(e) => handleSponsorInputChange('sponsorshipGoals', e.target.value)}
+                        placeholder="What are you hoping to achieve through sponsorship? (e.g., brand visibility, lead generation, community engagement)"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-2 p-4 bg-purple-50 rounded-lg">
+                    <Checkbox
+                      id="sponsorAgreesToTerms"
+                      checked={sponsorData.agreesToTerms}
+                      onCheckedChange={(checked) => handleSponsorInputChange('agreesToTerms', !!checked)}
+                      required
+                    />
+                    <Label htmlFor="sponsorAgreesToTerms" className="text-sm">
+                      I agree to the sponsorship terms and conditions and authorize contact regarding sponsorship opportunities *
+                    </Label>
+                  </div>
+
+                  <div className="flex gap-4 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowSponsorForm(false)}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                      disabled={sponsorMutation.isPending || !sponsorData.agreesToTerms}
+                    >
+                      {sponsorMutation.isPending ? "Submitting..." : "Submit Sponsorship Interest"}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
 
                   <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
                     <Checkbox
