@@ -183,11 +183,17 @@ const Navbar = () => {
                     Dashboard
                   </Button>
                 </Link>
-                <a href="/api/logout">
-                  <Button size="sm" variant="destructive" className="text-sm px-3 py-2 whitespace-nowrap">
-                    Logout
-                  </Button>
-                </a>
+                <Button 
+                  size="sm" 
+                  variant="destructive" 
+                  className="text-sm px-3 py-2 whitespace-nowrap"
+                  onClick={() => {
+                    // Use window.location.href for logout to ensure proper redirect
+                    window.location.href = '/api/logout';
+                  }}
+                >
+                  Logout
+                </Button>
               </div>
             ) : (
               <Link href="/login">

@@ -219,27 +219,56 @@ export async function setupLocalAuth(app: Express) {
 
   // Logout endpoint - both GET and POST for compatibility
   const handleLogout = (req: Request, res: Response) => {
+    console.log("Logout request received:", req.method, req.path);
+    console.log("Current session ID:", req.sessionID);
+    console.log("Current session data:", req.session);
+    
     // Clear auth token if provided
     const authToken = req.headers['authorization']?.replace('Bearer ', '');
     if (authToken) {
+      console.log("Clearing auth token:", authToken.slice(0, 10) + "...");
       authTokens.delete(authToken);
     }
     
+    // Clear all auth tokens for this session if we have a userId
+    if (req.session?.userId) {
+      const userId = req.session.userId;
+      console.log("Clearing all auth tokens for user:", userId);
+      // Remove all tokens for this user
+      for (const [token, data] of authTokens.entries()) {
+        if (data.userId === userId) {
+          authTokens.delete(token);
+          console.log("Deleted token for user:", userId);
+        }
+      }
+    }
+    
+    // Clear session completely
+    const sessionId = req.sessionID;
+    console.log("Destroying session:", sessionId);
+    
+    // Clear session data immediately
+    req.session.userId = undefined;
+    req.session.user = undefined;
+    
     req.session.destroy((err) => {
       if (err) {
-        console.error("Logout error:", err);
-        if (req.method === 'GET') {
-          return res.redirect('/?error=logout-failed');
-        }
-        return res.status(500).json({ message: "Failed to logout" });
+        console.error("Session destroy error:", err);
+        // Even if session destroy fails, clear cookies and redirect
       }
-      res.clearCookie('cba.sid');
+      
+      // Clear all possible cookies with different paths and domains
+      res.clearCookie('cba.sid', { path: '/', domain: undefined });
+      res.clearCookie('connect.sid', { path: '/', domain: undefined });
+      res.clearCookie('session', { path: '/', domain: undefined });
+      
+      console.log("Logout completed - cleared session and cookies");
       
       // Redirect for GET requests, JSON response for POST
       if (req.method === 'GET') {
         res.redirect('/');
       } else {
-        res.json({ success: true });
+        res.json({ success: true, message: "Logged out successfully" });
       }
     });
   };
