@@ -2450,6 +2450,22 @@ const AISummit = () => {
                   </Button>
                 </div>
 
+                {/* Instructional Video */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Exhibition Requirements - Watch Before Registering</h3>
+                  <div style={{position: 'relative', width: '100%', height: 0, paddingBottom: '56.25%'}}>
+                    <iframe 
+                      src="https://zoom.us/clips/embed/KpJ-ALjmTby3gBGg6tMn_Q" 
+                      frameBorder="0" 
+                      allowFullScreen
+                      style={{position: 'absolute', width: '100%', height: '100%', top: 0, left: 0}}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 mt-2 italic">
+                    Please watch this brief video to understand the exhibition requirements before completing your registration.
+                  </p>
+                </div>
+
                 <form onSubmit={handleExhibitorRegistration} className="space-y-4">
                   {/* Test Data Button for Exhibitor Form */}
                   {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
