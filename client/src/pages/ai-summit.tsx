@@ -2453,12 +2453,33 @@ const AISummit = () => {
                 {/* Instructional Video */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold text-gray-800 mb-3">Exhibition Requirements - Watch Before Registering</h3>
-                  <div 
-                    dangerouslySetInnerHTML={{
-                      __html: '<div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%;"><iframe src="https://zoom.us/clips/embed/KpJ-ALjmTby3gBGg6tMn_Q" frameborder="0" allowfullscreen="allowfullscreen" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>'
-                    }}
-                  />
-                  <p className="text-sm text-gray-600 mt-2 italic">
+                  
+                  {/* Video Embed */}
+                  <div className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                    <div 
+                      dangerouslySetInnerHTML={{
+                        __html: '<div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%;"><iframe src="https://zoom.us/clips/embed/KpJ-ALjmTby3gBGg6tMn_Q" frameborder="0" allowfullscreen="allowfullscreen" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>'
+                      }}
+                    />
+                    
+                    {/* Fallback Link */}
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-600 mb-2">Video not loading? Watch it directly:</p>
+                      <a 
+                        href="https://zoom.us/clips/share/KpJ-ALjmTby3gBGg6tMn_Q" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                        Watch Exhibition Requirements Video
+                      </a>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 mt-3 italic">
                     Please watch this brief video to understand the exhibition requirements before completing your registration.
                   </p>
                 </div>
