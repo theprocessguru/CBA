@@ -430,6 +430,15 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   emailVerified: boolean("email_verified").default(false), // Email verification status
   emailVerificationToken: varchar("email_verification_token"), // Token for email verification
   emailVerificationSentAt: timestamp("email_verification_sent_at"), // When verification email was sent
+  // Pricing and billing fields for admin flexibility
+  pricingStatus: varchar("pricing_status").default("free"), // free, invoice_required, paid, complimentary
+  customPrice: decimal("custom_price", { precision: 10, scale: 2 }), // Custom price if not free
+  invoiceRequired: boolean("invoice_required").default(false), // Whether to invoice this attendee
+  invoiceNotes: text("invoice_notes"), // Admin notes about pricing/invoicing
+  adminNotes: text("admin_notes"), // General admin notes about this registration
+  paymentStatus: varchar("payment_status").default("not_required"), // not_required, pending, paid, overdue
+  invoiceSentAt: timestamp("invoice_sent_at"),
+  paidAt: timestamp("paid_at"),
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 

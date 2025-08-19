@@ -200,9 +200,9 @@ const AISummit = () => {
     date: "October 1st, 2025",
     time: "10:00 AM - 4:00 PM",
     venue: "LSBU London South Bank University Croydon",
-    price: "FREE to attend",
+    price: "Reserve your spot - No payment required",
     capacity: "Limited places available",
-    registration: "Required - Book your free ticket now"
+    registration: "Required - Reserve now, pay later if applicable"
   };
 
   const speakers = [
@@ -447,10 +447,10 @@ const AISummit = () => {
     },
     onSuccess: (data) => {
       toast({
-        title: "Registration Successful!",
+        title: "Spot Reserved Successfully!",
         description: data.requiresVerification 
-          ? "Please check your email to verify your account and access your QR codes."
-          : "Thank you for registering for the AI Summit. You'll receive a confirmation email shortly.",
+          ? "Your spot is reserved! Please check your email to verify your account and access your reservation details."
+          : "Your spot is reserved for the AI Summit! You'll receive a confirmation email with all the details.",
       });
       setShowRegistrationForm(false);
       setRegistrationData({
@@ -473,8 +473,8 @@ const AISummit = () => {
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
-          title: "Already Registered!",
-          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          title: "Spot Already Reserved!",
+          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
           variant: "default",
         });
         // Redirect to login after 2 seconds
@@ -537,8 +537,8 @@ const AISummit = () => {
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
-          title: "Already Registered!",
-          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          title: "Spot Already Reserved!",
+          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
           variant: "default",
         });
         // Redirect to login after 2 seconds
@@ -597,8 +597,8 @@ const AISummit = () => {
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
-          title: "Already Registered!",
-          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          title: "Spot Already Reserved!",
+          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
           variant: "default",
         });
         // Redirect to login after 2 seconds
@@ -644,8 +644,8 @@ const AISummit = () => {
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
-          title: "Already Registered!",
-          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          title: "Spot Already Reserved!",
+          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
           variant: "default",
         });
         // Redirect to login after 2 seconds
@@ -691,8 +691,8 @@ const AISummit = () => {
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
-          title: "Already Registered!",
-          description: "You're already registered for the AI Summit. Please login to access your account and badges.",
+          title: "Spot Already Reserved!",
+          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
           variant: "default",
         });
         // Redirect to login after 2 seconds
@@ -1603,9 +1603,9 @@ const AISummit = () => {
 
               <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
                 <CardContent className="p-6 text-center">
-                  <h3 className="font-bold text-lg mb-2">Secure Your Spot</h3>
+                  <h3 className="font-bold text-lg mb-2">Reserve Your Spot</h3>
                   <p className="text-sm text-neutral-600 mb-4">
-                    Free admission but places are limited. Register now to guarantee your attendance.
+                    No upfront payment required. Reserve your seat now and we'll handle billing separately if needed.
                   </p>
                   <Button 
                     className={`w-full font-semibold ${
@@ -1617,8 +1617,11 @@ const AISummit = () => {
                     disabled={(registrationStatus as any)?.isRegistered}
                   >
                     <UserPlus className="mr-2 h-4 w-4" />
-                    <span>{(registrationStatus as any)?.isRegistered ? "✓ Registered" : "Register Now"}</span>
+                    <span>{(registrationStatus as any)?.isRegistered ? "✓ Spot Reserved" : "Reserve Your Spot"}</span>
                   </Button>
+                  <p className="text-xs text-neutral-500 mt-2">
+                    Free for most attendees • Special rates available • Invoicing options
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -2230,7 +2233,10 @@ const AISummit = () => {
 
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      <strong>Event Details:</strong> October 1st, 2025 • 10:00 AM - 4:00 PM • LSBU Croydon • FREE Admission
+                      <strong>Event Details:</strong> October 1st, 2025 • 10:00 AM - 4:00 PM • LSBU Croydon
+                    </p>
+                    <p className="text-sm text-green-700 mt-2 font-medium">
+                      <strong>Reserve Your Spot:</strong> No payment required now. We'll contact you if any fees apply.
                     </p>
                     <p className="text-xs text-blue-600 mt-2">
                       By registering, you agree to receive event updates and information about CBA services. You can unsubscribe at any time.
@@ -2282,7 +2288,7 @@ const AISummit = () => {
                       className="flex-1 bg-blue-600 hover:bg-blue-700"
                       disabled={registerMutation.isPending}
                     >
-                      {registerMutation.isPending ? "Registering..." : "Complete Registration"}
+                      {registerMutation.isPending ? "Reserving Your Spot..." : "Reserve My Spot"}
                     </Button>
                   </div>
                 </form>
