@@ -217,8 +217,8 @@ export async function setupLocalAuth(app: Express) {
     }
   });
 
-  // Logout endpoint
-  app.post('/api/auth/logout', (req: Request, res: Response) => {
+  // Logout endpoint - both GET and POST for compatibility
+  const handleLogout = (req: Request, res: Response) => {
     // Clear auth token if provided
     const authToken = req.headers['authorization']?.replace('Bearer ', '');
     if (authToken) {
@@ -227,12 +227,25 @@ export async function setupLocalAuth(app: Express) {
     
     req.session.destroy((err) => {
       if (err) {
+        console.error("Logout error:", err);
+        if (req.method === 'GET') {
+          return res.redirect('/?error=logout-failed');
+        }
         return res.status(500).json({ message: "Failed to logout" });
       }
       res.clearCookie('cba.sid');
-      res.json({ success: true });
+      
+      // Redirect for GET requests, JSON response for POST
+      if (req.method === 'GET') {
+        res.redirect('/');
+      } else {
+        res.json({ success: true });
+      }
     });
-  });
+  };
+  
+  app.post('/api/auth/logout', handleLogout);
+  app.get('/api/logout', handleLogout);
 
   // Forgot password endpoint
   app.post('/api/auth/forgot-password', async (req: Request, res: Response) => {
