@@ -215,10 +215,7 @@ export default function Jobs() {
       return;
     }
 
-    applyMutation.mutate({
-      ...applicationForm,
-      userId: user?.id || "anonymous",
-    });
+    applyMutation.mutate(applicationForm);
   };
 
   // Filter jobs
