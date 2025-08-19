@@ -2482,7 +2482,11 @@ const AISummit = () => {
                             ]
                           };
                           Object.entries(testData).forEach(([key, value]) => {
-                            handleExhibitorInputChange(key, value);
+                            if (key !== 'attendees') {
+                              handleExhibitorInputChange(key, value as string | number | boolean);
+                            } else {
+                              setExhibitorData(prev => ({ ...prev, attendees: value as any }));
+                            }
                           });
                         }}
                         className="bg-yellow-500 hover:bg-yellow-600 text-white"
@@ -3074,57 +3078,56 @@ const AISummit = () => {
                     </div>
                   </div>
                     
-                    {/* Account Creation Fields */}
-                    <div className="bg-blue-50 p-4 rounded-lg space-y-4 mt-4">
-                      <h4 className="font-semibold text-neutral-800">Create Your Speaker Account</h4>
-                      <p className="text-sm text-gray-600">You'll need an account to manage your speaker profile and access event resources.</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="speakerPassword">Password *</Label>
-                          <div className="relative">
-                            <Input
-                              id="speakerPassword"
-                              type={showSpeakerPassword ? "text" : "password"}
-                              required
-                              value={speakerData.password || ''}
-                              onChange={(e) => handleSpeakerInputChange('password', e.target.value)}
-                              placeholder="Create a strong password"
-                              className="pr-10"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                              onClick={() => setShowSpeakerPassword(!showSpeakerPassword)}
-                            >
-                              {showSpeakerPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
+                  {/* Account Creation Fields */}
+                  <div className="bg-blue-50 p-4 rounded-lg space-y-4 mt-4">
+                    <h4 className="font-semibold text-neutral-800">Create Your Speaker Account</h4>
+                    <p className="text-sm text-gray-600">You'll need an account to manage your speaker profile and access event resources.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="speakerPassword">Password *</Label>
+                        <div className="relative">
+                          <Input
+                            id="speakerPassword"
+                            type={showSpeakerPassword ? "text" : "password"}
+                            required
+                            value={speakerData.password || ''}
+                            onChange={(e) => handleSpeakerInputChange('password', e.target.value)}
+                            placeholder="Create a strong password"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowSpeakerPassword(!showSpeakerPassword)}
+                          >
+                            {showSpeakerPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
                         </div>
-                        <div>
-                          <Label htmlFor="speakerConfirmPassword">Confirm Password *</Label>
-                          <div className="relative">
-                            <Input
-                              id="speakerConfirmPassword"
-                              type={showSpeakerConfirmPassword ? "text" : "password"}
-                              required
-                              value={speakerData.confirmPassword || ''}
-                              onChange={(e) => handleSpeakerInputChange('confirmPassword', e.target.value)}
-                              placeholder="Re-enter your password"
-                              className="pr-10"
-                            />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                              onClick={() => setShowSpeakerConfirmPassword(!showSpeakerConfirmPassword)}
-                            >
-                              {showSpeakerConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                          </div>
+                        <p className="text-xs text-gray-500 mt-1">At least 8 characters</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="speakerConfirmPassword">Confirm Password *</Label>
+                        <div className="relative">
+                          <Input
+                            id="speakerConfirmPassword"
+                            type={showSpeakerConfirmPassword ? "text" : "password"}
+                            required
+                            value={speakerData.confirmPassword || ''}
+                            onChange={(e) => handleSpeakerInputChange('confirmPassword', e.target.value)}
+                            placeholder="Re-enter your password"
+                            className="pr-10"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowSpeakerConfirmPassword(!showSpeakerConfirmPassword)}
+                          >
+                            {showSpeakerConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -3428,10 +3431,10 @@ const AISummit = () => {
                             contactName: "Michael Johnson",
                             contactEmail: `sponsor${Math.floor(Math.random() * 10000)}@techcorp.com`,
                             contactPhone: "02012345678",
-                            sponsorshipLevel: "Gold",
-                            website: "https://www.techcorp.com",
+                            packageName: "Gold",
+                            companyWebsite: "https://www.techcorp.com",
                             companyDescription: "Leading technology solutions provider specializing in AI and ML services",
-                            sponsorshipGoals: "Brand visibility, lead generation, and networking with AI community",
+                            specialRequests: "Brand visibility, lead generation, and networking with AI community",
                             marketingOpportunities: "logo-placement,exhibition-booth,speaking-opportunity",
                             additionalRequests: "Prefer keynote speaking slot and prime booth location",
                             password: "Sponsor123!",
@@ -3505,8 +3508,8 @@ const AISummit = () => {
                       <Input
                         id="website"
                         type="url"
-                        value={sponsorData.website}
-                        onChange={(e) => handleSponsorInputChange('website', e.target.value)}
+                        value={sponsorData.companyWebsite}
+                        onChange={(e) => handleSponsorInputChange('companyWebsite', e.target.value)}
                         placeholder="https://yourcompany.com"
                       />
                     </div>
@@ -3519,8 +3522,8 @@ const AISummit = () => {
                       <Label htmlFor="sponsorshipLevel">Preferred Sponsorship Level *</Label>
                       <select
                         id="sponsorshipLevel"
-                        value={sponsorData.sponsorshipLevel}
-                        onChange={(e) => handleSponsorInputChange('sponsorshipLevel', e.target.value)}
+                        value={sponsorData.packageName}
+                        onChange={(e) => handleSponsorInputChange('packageName', e.target.value)}
                         className="w-full p-2 border border-gray-300 rounded-md"
                         required
                       >
@@ -3547,8 +3550,8 @@ const AISummit = () => {
                       <Label htmlFor="sponsorshipGoals">Sponsorship Goals</Label>
                       <Textarea
                         id="sponsorshipGoals"
-                        value={sponsorData.sponsorshipGoals}
-                        onChange={(e) => handleSponsorInputChange('sponsorshipGoals', e.target.value)}
+                        value={sponsorData.specialRequests}
+                        onChange={(e) => handleSponsorInputChange('specialRequests', e.target.value)}
                         placeholder="What are you hoping to achieve through sponsorship? (e.g., brand visibility, lead generation, community engagement)"
                         rows={3}
                       />
@@ -4106,10 +4109,10 @@ const AISummit = () => {
                             contactName: "Michael Johnson",
                             contactEmail: `sponsor${Math.floor(Math.random() * 10000)}@techcorp.com`,
                             contactPhone: "02012345678",
-                            sponsorshipLevel: "Gold",
-                            website: "https://www.techcorp.com",
+                            packageName: "Gold",
+                            companyWebsite: "https://www.techcorp.com",
                             companyDescription: "Leading technology solutions provider specializing in AI and ML services",
-                            sponsorshipGoals: "Brand visibility, lead generation, and networking with AI community",
+                            specialRequests: "Brand visibility, lead generation, and networking with AI community",
                             marketingOpportunities: "logo-placement,exhibition-booth,speaking-opportunity",
                             additionalRequests: "Prefer keynote speaking slot and prime booth location",
                             password: "Sponsor123!",
