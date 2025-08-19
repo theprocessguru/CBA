@@ -22,11 +22,11 @@ Navigation: Logged-in users only see logo and action buttons (Scanner, Mobile Ba
 - **Language**: TypeScript with ES modules.
 - **Database**: PostgreSQL via Neon serverless, managed with Drizzle ORM for type-safe operations and Drizzle Kit for migrations.
 - **Authentication**: Dual system supporting Replit OAuth and traditional email/password with bcrypt.
-- **Session Management**: Express sessions with PostgreSQL store.
+- **Session Management**: Express sessions with PostgreSQL store, enhanced with blacklist mechanism for reliable logout.
 - **Data Storage**: PostgreSQL for primary data and sessions; base64 encoded images stored directly in the database.
 
 ### Core Features
-- **Authentication & Authorization**: Dual authentication, secure HTTP-only cookies, PostgreSQL session store, role-based access (admin/user), and email-based password recovery. Role-based dashboards provide tailored navigation for admins, students, volunteers, and business members.
+- **Authentication & Authorization**: Dual authentication, secure HTTP-only cookies, PostgreSQL session store with session blacklist for reliable logout, role-based access (admin/user), and email-based password recovery. Role-based dashboards provide tailored navigation for admins, students, volunteers, and business members.
 - **Business Process Management**: Workflow automation, task management, performance analytics, and integration capabilities. Includes a visual process builder, automated notification system, and real-time reporting dashboards.
 - **Membership System**: Five-tier membership system with over 245 practical business benefits, automated membership limit enforcement, usage tracking, and upgrade prompts.
 - **Event Management**: Comprehensive system supporting multiple event types (networking, workshops, summits, conferences, exhibitions, seminars) with registration calendar, venue capacity management, exhibitor management (including stand details), speaker management (with slot selection and assignment), and comprehensive sponsorship management. Includes a volunteer profile system with scanner functionality.
