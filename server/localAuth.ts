@@ -14,6 +14,10 @@ export function getSession() {
     createTableIfMissing: false,
     ttl: sessionTtl,
     tableName: "sessions",
+    // Add error handling for database connection issues
+    errorLog: (error: any) => {
+      console.error('Session store error:', error);
+    }
   });
   // Ensure SESSION_SECRET is available
   if (!process.env.SESSION_SECRET) {
@@ -221,7 +225,14 @@ export async function setupLocalAuth(app: Express) {
   const handleLogout = (req: Request, res: Response) => {
     console.log("Logout request received:", req.method, req.path);
     console.log("Current session ID:", req.sessionID);
-    console.log("Current session data:", req.session);
+    
+    const sessionId = req.sessionID;
+    
+    // Add session to blacklist immediately - this ensures logout works even if session store fails
+    if (sessionId) {
+      loggedOutSessions.add(sessionId);
+      console.log("Added session to blacklist:", sessionId);
+    }
     
     // Clear auth token if provided
     const authToken = req.headers['authorization']?.replace('Bearer ', '');
@@ -231,8 +242,9 @@ export async function setupLocalAuth(app: Express) {
     }
     
     // Clear all auth tokens for this session if we have a userId
-    if (req.session?.userId) {
-      const userId = req.session.userId;
+    const session = req.session as any;
+    if (session?.userId) {
+      const userId = session.userId;
       console.log("Clearing all auth tokens for user:", userId);
       // Remove all tokens for this user
       for (const [token, data] of authTokens.entries()) {
@@ -243,34 +255,19 @@ export async function setupLocalAuth(app: Express) {
       }
     }
     
-    // Clear session completely
-    const sessionId = req.sessionID;
-    console.log("Destroying session:", sessionId);
+    // Clear cookies immediately
+    res.clearCookie('cba.sid', { path: '/', domain: undefined });
+    res.clearCookie('connect.sid', { path: '/', domain: undefined });
+    res.clearCookie('session', { path: '/', domain: undefined });
     
-    // Clear session data immediately
-    req.session.userId = undefined;
-    req.session.user = undefined;
+    console.log("Logout completed - blacklisted session and cleared cookies");
     
-    req.session.destroy((err) => {
-      if (err) {
-        console.error("Session destroy error:", err);
-        // Even if session destroy fails, clear cookies and redirect
-      }
-      
-      // Clear all possible cookies with different paths and domains
-      res.clearCookie('cba.sid', { path: '/', domain: undefined });
-      res.clearCookie('connect.sid', { path: '/', domain: undefined });
-      res.clearCookie('session', { path: '/', domain: undefined });
-      
-      console.log("Logout completed - cleared session and cookies");
-      
-      // Redirect for GET requests, JSON response for POST
-      if (req.method === 'GET') {
-        res.redirect('/');
-      } else {
-        res.json({ success: true, message: "Logged out successfully" });
-      }
-    });
+    // Redirect for GET requests, JSON response for POST
+    if (req.method === 'GET') {
+      res.redirect('/');
+    } else {
+      res.json({ success: true, message: "Logged out successfully" });
+    }
   };
   
   app.post('/api/auth/logout', handleLogout);
@@ -394,7 +391,17 @@ export async function setupLocalAuth(app: Express) {
 // Simple in-memory token store for Replit environment
 const authTokens = new Map<string, { userId: string; expiresAt: Date }>();
 
+// Blacklist for logged out sessions - this ensures logout works even if session store fails
+const loggedOutSessions = new Set<string>();
+
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  // Check if session is blacklisted (logged out)
+  const sessionId = req.sessionID;
+  if (sessionId && loggedOutSessions.has(sessionId)) {
+    console.log("Session is blacklisted (logged out):", sessionId);
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   // First check for auth token in header (for Replit environment)
   const authToken = req.headers['authorization']?.replace('Bearer ', '');
   
@@ -411,6 +418,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
           lastName: user.lastName,
           isAdmin: user.isAdmin || false
         };
+        console.log("Authenticated via token:", user.id, user.email);
         return next();
       }
     }
@@ -420,12 +428,14 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const session = req.session as any;
   
   if (!session?.userId) {
+    console.log("No session userId found");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   // Fetch fresh user data from database to ensure we have current admin status
   const user = await storage.getUser(session.userId);
   if (!user) {
+    console.log("User not found for session userId:", session.userId);
     return res.status(401).json({ message: "Unauthorized" });
   }
 
@@ -437,5 +447,6 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     lastName: user.lastName,
     isAdmin: user.isAdmin || false
   };
+  console.log("Authenticated via session:", user.id, user.email);
   next();
 };
