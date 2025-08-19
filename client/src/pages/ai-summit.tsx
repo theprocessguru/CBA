@@ -150,6 +150,8 @@ const AISummit = () => {
     sessionType: "talk",
     talkTitle: "",
     talkDescription: "",
+    topicOutline: "",
+    preferredDuration: "",
     talkDuration: "15",
     audienceLevel: "Beginner",
     speakingExperience: "",
@@ -464,7 +466,9 @@ const AISummit = () => {
         businessType: "",
         aiInterest: "",
         accessibilityNeeds: "",
-        comments: ""
+        comments: "",
+        password: "",
+        confirmPassword: ""
       });
       // Refresh registration status
       refetchStatus();
@@ -520,6 +524,8 @@ const AISummit = () => {
         previousExhibitor: false,
         referralSource: "",
         agreesToTerms: false,
+        password: "",
+        confirmPassword: "",
         attendees: [{
           name: "",
           email: "",
@@ -580,6 +586,8 @@ const AISummit = () => {
         sessionType: "talk",
         talkTitle: "",
         talkDescription: "",
+        topicOutline: "",
+        preferredDuration: "",
         talkDuration: "15",
         audienceLevel: "Beginner",
         speakingExperience: "",
@@ -637,7 +645,9 @@ const AISummit = () => {
         emergencyContact: "",
         tShirtSize: "",
         dietaryRequirements: "",
-        agreesToTerms: false
+        agreesToTerms: false,
+        password: "",
+        confirmPassword: ""
       });
     },
     onError: (error: any) => {
@@ -3572,41 +3582,6 @@ const AISummit = () => {
                       disabled={sponsorMutation.isPending || !sponsorData.agreesToTerms}
                     >
                       {sponsorMutation.isPending ? "Submitting..." : "Submit Sponsorship Interest"}
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-                  <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
-                    <Checkbox
-                      id="speakerAgreesToTerms"
-                      checked={speakerData.agreesToTerms}
-                      onCheckedChange={(checked) => handleSpeakerInputChange('agreesToTerms', !!checked)}
-                      required
-                    />
-                    <Label htmlFor="speakerAgreesToTerms" className="text-sm">
-                      I agree to the speaker terms and conditions and understand that speaker selection is subject to program committee review *
-                    </Label>
-                  </div>
-
-                  <div className="flex gap-4 pt-4">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setShowSpeakerForm(false)}
-                      className="flex-1"
-                    >
-                      Cancel
-                    </Button>
-                    <Button 
-                      type="submit" 
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
-                      disabled={speakerMutation.isPending || !speakerData.agreesToTerms}
-                    >
-                      {speakerMutation.isPending ? "Submitting..." : "Submit Speaker Interest"}
                     </Button>
                   </div>
                 </form>
