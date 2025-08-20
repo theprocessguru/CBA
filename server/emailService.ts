@@ -482,7 +482,10 @@ Croydon Business Association
     `;
 
     try {
-      await this.transporter!.sendMail({
+      console.log(`Attempting to send email from: ${this.config!.fromEmail} to: ${to}`);
+      console.log(`SMTP Host: ${this.config!.host}:${this.config!.port}, Secure: ${this.config!.secure}`);
+      
+      const result = await this.transporter!.sendMail({
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to,
         subject: 'Password Reset - Croydon Business Association',
@@ -490,10 +493,12 @@ Croydon Business Association
         html: htmlContent,
       });
 
-      console.log(`Password reset email sent to ${to}`);
+      console.log(`Password reset email sent to ${to}. Message ID: ${result.messageId}`);
+      console.log('SMTP Response:', result.response);
       return true;
     } catch (error) {
       console.error('Failed to send password reset email:', error);
+      console.error('SMTP Error details:', error);
       // Fall back to console logging for development
       console.warn('Email failed, logging reset info:');
       console.warn(`Reset URL: ${resetUrl}`);
