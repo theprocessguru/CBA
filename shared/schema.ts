@@ -51,7 +51,7 @@ export const users = pgTable("users", {
   accountStatus: varchar("account_status").notNull().default("active"), // active, suspended, closed
   suspensionReason: text("suspension_reason"),
   suspendedAt: timestamp("suspended_at"),
-  suspendedBy: varchar("suspended_by").references(() => users.id),
+  suspendedBy: varchar("suspended_by"),
   // Personal Badge System
   qrHandle: varchar("qr_handle").unique(), // e.g., "theprocessguru"
   title: varchar("title"), // e.g., "Mayor", "Executive Mayor", "CEO", "Founder"
@@ -1007,7 +1007,7 @@ export const sponsorshipPackages = pgTable('sponsorship_packages', {
   packageLevel: integer('package_level').notNull(), // 1-4 for sorting
   price: decimal('price', { precision: 10, scale: 2 }).notNull(),
   benefits: text('benefits').array(), // Array of benefit descriptions
-  maxSponsors: integer('max_sponsors').default(null), // null means unlimited
+  maxSponsors: integer('max_sponsors'), // null means unlimited
   currentSponsors: integer('current_sponsors').default(0),
   logoPlacement: varchar('logo_placement'), // website, banner, stage, materials
   bannerAds: boolean('banner_ads').default(false),

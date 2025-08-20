@@ -247,12 +247,12 @@ export async function setupLocalAuth(app: Express) {
       const userId = session.userId;
       console.log("Clearing all auth tokens for user:", userId);
       // Remove all tokens for this user
-      for (const [token, data] of authTokens.entries()) {
+      Array.from(authTokens.entries()).forEach(([token, data]) => {
         if (data.userId === userId) {
           authTokens.delete(token);
           console.log("Deleted token for user:", userId);
         }
-      }
+      });
     }
     
     // Clear cookies immediately

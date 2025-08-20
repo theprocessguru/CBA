@@ -6,6 +6,10 @@ import {
   categories,
   memberImports,
   cbaCauses,
+  marketplaceListings,
+  barterListings,
+  transactions,
+  barterExchanges,
   aiSummitRegistrations,
   aiSummitExhibitorRegistrations,
   aiSummitSpeakerInterests,
@@ -30,6 +34,14 @@ import {
   type MemberImport,
   type InsertMemberImport,
   type CbaCause,
+  type MarketplaceListing,
+  type InsertMarketplaceListing,
+  type BarterListing,
+  type InsertBarterListing,
+  type Transaction,
+  type InsertTransaction,
+  type BarterExchange,
+  type InsertBarterExchange,
   type AISummitRegistration,
   type InsertAISummitRegistration,
   type AISummitExhibitorRegistration,
@@ -858,6 +870,199 @@ export class DatabaseStorage implements IStorage {
   // CBA Causes operations
   async listCbaCauses(): Promise<CbaCause[]> {
     return await db.select().from(cbaCauses).orderBy(cbaCauses.name);
+  }
+
+  // Marketplace Listings operations
+  async getMarketplaceListingById(id: number): Promise<MarketplaceListing | undefined> {
+    const [listing] = await db.select().from(marketplaceListings).where(eq(marketplaceListings.id, id));
+    return listing;
+  }
+
+  async getMarketplaceListingsByBusinessId(businessId: number): Promise<MarketplaceListing[]> {
+    return db.select().from(marketplaceListings).where(eq(marketplaceListings.businessId, businessId));
+  }
+
+  async createMarketplaceListing(listing: InsertMarketplaceListing): Promise<MarketplaceListing> {
+    const [newListing] = await db.insert(marketplaceListings).values(listing).returning();
+    return newListing;
+  }
+
+  async updateMarketplaceListing(id: number, listing: Partial<InsertMarketplaceListing>): Promise<MarketplaceListing> {
+    const [updatedListing] = await db
+      .update(marketplaceListings)
+      .set({ ...listing, updatedAt: new Date() })
+      .where(eq(marketplaceListings.id, id))
+      .returning();
+    return updatedListing;
+  }
+
+  async deleteMarketplaceListing(id: number): Promise<boolean> {
+    const result = await db.delete(marketplaceListings).where(eq(marketplaceListings.id, id));
+    return result.rowCount > 0;
+  }
+
+  async listMarketplaceListings(options?: { categoryId?: number; search?: string; limit?: number }): Promise<MarketplaceListing[]> {
+    let query = db.select().from(marketplaceListings).where(eq(marketplaceListings.status, 'active'));
+
+    if (options?.categoryId) {
+      query = query.where(eq(marketplaceListings.categoryId, options.categoryId));
+    }
+
+    if (options?.search) {
+      query = query.where(
+        or(
+          like(marketplaceListings.title, `%${options.search}%`),
+          like(marketplaceListings.description, `%${options.search}%`)
+        )
+      );
+    }
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    return query.orderBy(desc(marketplaceListings.createdAt));
+  }
+
+  // Barter Listings operations
+  async getBarterListingById(id: number): Promise<BarterListing | undefined> {
+    const [listing] = await db.select().from(barterListings).where(eq(barterListings.id, id));
+    return listing;
+  }
+
+  async getBarterListingsByBusinessId(businessId: number): Promise<BarterListing[]> {
+    return db.select().from(barterListings).where(eq(barterListings.businessId, businessId));
+  }
+
+  async createBarterListing(listing: InsertBarterListing): Promise<BarterListing> {
+    const [newListing] = await db.insert(barterListings).values(listing).returning();
+    return newListing;
+  }
+
+  async updateBarterListing(id: number, listing: Partial<InsertBarterListing>): Promise<BarterListing> {
+    const [updatedListing] = await db
+      .update(barterListings)
+      .set({ ...listing, updatedAt: new Date() })
+      .where(eq(barterListings.id, id))
+      .returning();
+    return updatedListing;
+  }
+
+  async deleteBarterListing(id: number): Promise<boolean> {
+    const result = await db.delete(barterListings).where(eq(barterListings.id, id));
+    return result.rowCount > 0;
+  }
+
+  async listBarterListings(options?: { categoryId?: number; search?: string; limit?: number }): Promise<BarterListing[]> {
+    let query = db.select().from(barterListings).where(eq(barterListings.status, 'active'));
+
+    if (options?.categoryId) {
+      query = query.where(eq(barterListings.categoryId, options.categoryId));
+    }
+
+    if (options?.search) {
+      query = query.where(
+        or(
+          like(barterListings.title, `%${options.search}%`),
+          like(barterListings.description, `%${options.search}%`),
+          like(barterListings.offering, `%${options.search}%`),
+          like(barterListings.lookingFor, `%${options.search}%`)
+        )
+      );
+    }
+
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+
+    return query.orderBy(desc(barterListings.createdAt));
+  }
+
+  // Transaction operations
+  async getTransactionById(id: string): Promise<Transaction | undefined> {
+    const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
+    return transaction;
+  }
+
+  async getTransactionsByBusinessId(businessId: number, role?: 'seller' | 'buyer'): Promise<Transaction[]> {
+    let query = db.select().from(transactions);
+    
+    if (role === 'seller') {
+      query = query.where(eq(transactions.sellerBusinessId, businessId));
+    } else if (role === 'buyer') {
+      query = query.where(eq(transactions.buyerBusinessId, businessId));
+    } else {
+      query = query.where(
+        or(
+          eq(transactions.sellerBusinessId, businessId),
+          eq(transactions.buyerBusinessId, businessId)
+        )
+      );
+    }
+
+    return query.orderBy(desc(transactions.createdAt));
+  }
+
+  async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
+    const [newTransaction] = await db.insert(transactions).values(transaction).returning();
+    return newTransaction;
+  }
+
+  async updateTransaction(id: string, transaction: Partial<InsertTransaction>): Promise<Transaction> {
+    const [updatedTransaction] = await db
+      .update(transactions)
+      .set(transaction)
+      .where(eq(transactions.id, id))
+      .returning();
+    return updatedTransaction;
+  }
+
+  // Barter Exchange operations
+  async getBarterExchangeById(id: string): Promise<BarterExchange | undefined> {
+    const [exchange] = await db.select().from(barterExchanges).where(eq(barterExchanges.id, id));
+    return exchange;
+  }
+
+  async getBarterExchangesByBusinessId(businessId: number, role?: 'initiator' | 'responder'): Promise<BarterExchange[]> {
+    let query = db.select().from(barterExchanges);
+    
+    if (role === 'initiator') {
+      query = query.where(eq(barterExchanges.initiatorBusinessId, businessId));
+    } else if (role === 'responder') {
+      query = query.where(eq(barterExchanges.responderBusinessId, businessId));
+    } else {
+      query = query.where(
+        or(
+          eq(barterExchanges.initiatorBusinessId, businessId),
+          eq(barterExchanges.responderBusinessId, businessId)
+        )
+      );
+    }
+
+    return query.orderBy(desc(barterExchanges.createdAt));
+  }
+
+  async createBarterExchange(exchange: InsertBarterExchange): Promise<BarterExchange> {
+    const [newExchange] = await db.insert(barterExchanges).values(exchange).returning();
+    return newExchange;
+  }
+
+  async updateBarterExchange(id: string, exchange: Partial<InsertBarterExchange>): Promise<BarterExchange> {
+    const [updatedExchange] = await db
+      .update(barterExchanges)
+      .set(exchange)
+      .where(eq(barterExchanges.id, id))
+      .returning();
+    return updatedExchange;
+  }
+
+  // Additional User methods
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users).orderBy(desc(users.createdAt));
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.getUser(id); // Reuse existing method
   }
 
   // Member Import operations
