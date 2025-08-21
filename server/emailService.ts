@@ -30,15 +30,16 @@ export class EmailService {
   }
 
   private initializeFromEnv() {
-    // Try to initialize from environment variables
-    const host = process.env.SMTP_HOST;
-    const port = process.env.SMTP_PORT;
-    const user = process.env.SMTP_USER;
-    const password = process.env.SMTP_PASSWORD;
-    const fromEmail = process.env.FROM_EMAIL;
-    const fromName = process.env.FROM_NAME || 'Croydon Business Association';
+    // Try new email settings first, then fall back to original
+    let host = process.env.NEW_SMTP_HOST || process.env.SMTP_HOST;
+    let port = process.env.NEW_SMTP_PORT || process.env.SMTP_PORT;
+    let user = process.env.NEW_SMTP_USER || process.env.SMTP_USER;
+    let password = process.env.NEW_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
+    let fromEmail = process.env.NEW_FROM_EMAIL || process.env.FROM_EMAIL;
+    let fromName = process.env.NEW_FROM_NAME || process.env.FROM_NAME || 'Croydon Business Association';
 
     if (host && port && user && password && fromEmail) {
+      console.log(`Initializing email service with: ${host}:${port} (${fromEmail})`);
       this.config = {
         host,
         port: parseInt(port),
@@ -49,6 +50,8 @@ export class EmailService {
         fromName,
       };
       this.createTransporter();
+    } else {
+      console.warn('Email service not properly configured - missing required environment variables');
     }
   }
 
