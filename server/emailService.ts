@@ -533,9 +533,9 @@ Croydon Business Association
       const result = await this.transporter!.sendMail({
         from: `"CBA Test" <${this.config!.fromEmail}>`,
         to,
-        subject: 'Test Email from CBA - Please Check',
-        text: `Test Email from Croydon Business Association\n\nHello ${userName},\n\nThis is a simple test email to verify our email system is working.\n\nIf you receive this, the email configuration is successful!\n\nBest regards,\nCBA Team`,
-        html: simpleHtml,
+        subject: 'CBA Email Test - Simple Message',
+        text: `Test from CBA System\n\nHi ${userName},\n\nThis is a test email.\n\nTime: ${new Date().toISOString()}\n\nCBA Team`,
+        html: `<p>Test from CBA System</p><p>Hi ${userName},</p><p>This is a test email.</p><p>Time: ${new Date().toISOString()}</p><p>CBA Team</p>`,
       });
 
       console.log(`Test email sent to ${to}. Message ID: ${result.messageId}`);
