@@ -2149,6 +2149,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simple test email endpoint (no auth required for testing)
+  app.post('/api/test-email', async (req: any, res) => {
+    try {
+      const { email, name } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      // Send a simple test email
+      const success = await (emailService as any).sendSimpleTestEmail(email, name || 'Test User');
+      
+      if (success) {
+        res.json({ message: "Simple test email sent successfully", email });
+      } else {
+        res.status(500).json({ message: "Failed to send test email" });
+      }
+    } catch (error) {
+      console.error("Error sending test email:", error);
+      res.status(500).json({ message: "Failed to send test email" });
+    }
+  });
+
   // Admin routes
   
   // Upload member list

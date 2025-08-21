@@ -506,6 +506,44 @@ Croydon Business Association
     }
   }
 
+  public async sendSimpleTestEmail(to: string, userName: string = 'Test User'): Promise<boolean> {
+    if (!this.isConfigured()) {
+      console.warn('Email service not configured. Test email not sent to:', to);
+      return false;
+    }
+
+    const simpleHtml = `
+      <html>
+        <body>
+          <h2>Test Email from Croydon Business Association</h2>
+          <p>Hello ${userName},</p>
+          <p>This is a simple test email to verify our email system is working.</p>
+          <p>If you receive this, the email configuration is successful!</p>
+          <p>Best regards,<br>CBA Team</p>
+        </body>
+      </html>
+    `;
+
+    try {
+      console.log(`Sending simple test email from: ${this.config!.fromEmail} to: ${to}`);
+      
+      const result = await this.transporter!.sendMail({
+        from: `"CBA Test" <${this.config!.fromEmail}>`,
+        to,
+        subject: 'Test Email from CBA - Please Check',
+        text: `Test Email from Croydon Business Association\n\nHello ${userName},\n\nThis is a simple test email to verify our email system is working.\n\nIf you receive this, the email configuration is successful!\n\nBest regards,\nCBA Team`,
+        html: simpleHtml,
+      });
+
+      console.log(`Test email sent to ${to}. Message ID: ${result.messageId}`);
+      console.log('SMTP Response:', result.response);
+      return true;
+    } catch (error) {
+      console.error('Failed to send test email:', error);
+      return false;
+    }
+  }
+
   public async sendWelcomeEmail(to: string, userName: string): Promise<boolean> {
     if (!this.isConfigured()) {
       console.warn('Email service not configured. Welcome email not sent to:', to);
