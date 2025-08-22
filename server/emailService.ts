@@ -35,7 +35,7 @@ export class EmailService {
     let port = process.env.NEW_SMTP_PORT || process.env.SMTP_PORT;
     let user = process.env.NEW_SMTP_USER || process.env.SMTP_USER;
     let password = process.env.NEW_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
-    let fromEmail = process.env.NEW_FROM_EMAIL || process.env.FROM_EMAIL;
+    let fromEmail = 'steve@croydonba.org.uk'; // Use working team email address
     let fromName = process.env.NEW_FROM_NAME || process.env.FROM_NAME || 'Croydon Business Association';
 
     if (host && port && user && password && fromEmail) {
