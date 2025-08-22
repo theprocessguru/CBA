@@ -530,12 +530,16 @@ Croydon Business Association
     try {
       console.log(`Sending simple test email from: ${this.config!.fromEmail} to: ${to}`);
       
+      // Try with just the email address, no display name
       const result = await this.transporter!.sendMail({
-        from: `"CBA Test" <${this.config!.fromEmail}>`,
+        from: this.config!.fromEmail,
         to,
-        subject: 'CBA Email Test - Simple Message',
-        text: `Test from CBA System\n\nHi ${userName},\n\nThis is a test email.\n\nTime: ${new Date().toISOString()}\n\nCBA Team`,
-        html: `<p>Test from CBA System</p><p>Hi ${userName},</p><p>This is a test email.</p><p>Time: ${new Date().toISOString()}</p><p>CBA Team</p>`,
+        subject: 'Test Message',
+        text: `Hi ${userName},\n\nThis is a test email from the CBA platform.\n\nBest regards,\nCBA Team`,
+        headers: {
+          'X-Mailer': 'CBA Platform',
+          'Reply-To': this.config!.fromEmail
+        }
       });
 
       console.log(`Test email sent to ${to}. Message ID: ${result.messageId}`);
