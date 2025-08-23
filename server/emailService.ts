@@ -35,11 +35,13 @@ export class EmailService {
     let port = process.env.NEW_SMTP_PORT || process.env.SMTP_PORT;
     let user = process.env.NEW_SMTP_USER || process.env.SMTP_USER;
     let password = process.env.NEW_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
-    let fromEmail = 'steve@croydonba.org.uk'; // Use working team email address
+    // FROM email must match the authenticated SMTP user
+    let fromEmail = user || process.env.NEW_FROM_EMAIL || process.env.FROM_EMAIL;
     let fromName = process.env.NEW_FROM_NAME || process.env.FROM_NAME || 'Croydon Business Association';
 
     if (host && port && user && password && fromEmail) {
-      console.log(`Initializing email service with: ${host}:${port} (${fromEmail})`);
+      console.log(`Initializing email service with: ${host}:${port}`);
+      console.log(`SMTP User: ${user}, From Email: ${fromEmail}`);
       this.config = {
         host,
         port: parseInt(port),
