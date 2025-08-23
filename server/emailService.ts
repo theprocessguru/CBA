@@ -39,8 +39,7 @@ export class EmailService {
     let fromName = 'Croydon Business Association';
 
     if (host && port && user && password && fromEmail) {
-      console.log(`Initializing email service with: ${host}:${port}`);
-      console.log(`SMTP User: ${user}, From Email: ${fromEmail}`);
+      console.log(`Email service initialized with Gmail SMTP`);
       this.config = {
         host,
         port: parseInt(port),
@@ -552,19 +551,6 @@ Croydon Business Association
 
       console.log(`Test email sent to ${to}. Message ID: ${result.messageId}`);
       console.log('SMTP Response:', result.response);
-      console.log('Full result:', JSON.stringify(result, null, 2));
-      
-      // Verify the email was actually sent
-      if (result.accepted && result.accepted.length > 0) {
-        console.log('Email accepted for delivery to:', result.accepted);
-      } else {
-        console.log('WARNING: Email was NOT accepted for delivery');
-      }
-      
-      if (result.rejected && result.rejected.length > 0) {
-        console.log('Email REJECTED for:', result.rejected);
-      }
-      
       return true;
     } catch (error) {
       console.error('Failed to send test email:', error);
