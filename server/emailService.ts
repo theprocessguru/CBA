@@ -68,6 +68,11 @@ export class EmailService {
         user: this.config.user,
         pass: this.config.password,
       },
+      tls: {
+        rejectUnauthorized: false
+      },
+      debug: true,
+      logger: false
     });
   }
 
@@ -532,15 +537,17 @@ Croydon Business Association
     try {
       console.log(`Sending simple test email from: ${this.config!.fromEmail} to: ${to}`);
       
-      // Try with just the email address, no display name
+      // Try with minimal headers and very simple content
       const result = await this.transporter!.sendMail({
         from: this.config!.fromEmail,
         to,
-        subject: 'Test Message',
-        text: `Hi ${userName},\n\nThis is a test email from the CBA platform.\n\nBest regards,\nCBA Team`,
+        subject: 'Hello',
+        text: `Hello ${userName}, this is a test.`,
         headers: {
-          'X-Mailer': 'CBA Platform',
-          'Reply-To': this.config!.fromEmail
+          'X-Priority': '3',
+          'X-MSMail-Priority': 'Normal',
+          'X-Mailer': 'NodeMailer',
+          'Importance': 'Normal'
         }
       });
 
