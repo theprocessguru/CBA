@@ -30,14 +30,13 @@ export class EmailService {
   }
 
   private initializeFromEnv() {
-    // Try new email settings first, then fall back to original
-    let host = process.env.NEW_SMTP_HOST || process.env.SMTP_HOST;
-    let port = process.env.NEW_SMTP_PORT || process.env.SMTP_PORT || '465'; // Use SSL port
-    let user = process.env.NEW_SMTP_USER || process.env.SMTP_USER;
-    let password = process.env.NEW_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
-    // FROM email must match the authenticated SMTP user
-    let fromEmail = user || process.env.NEW_FROM_EMAIL || process.env.FROM_EMAIL;
-    let fromName = process.env.NEW_FROM_NAME || process.env.FROM_NAME || 'Croydon Business Association';
+    // Use Gmail SMTP configuration
+    let host = 'smtp.gmail.com';
+    let port = '587';
+    let user = 'members.app.croydonba@gmail.com';
+    let password = 'czxebizjpvswmzei'; // App password
+    let fromEmail = 'members.app.croydonba@gmail.com';
+    let fromName = 'Croydon Business Association';
 
     if (host && port && user && password && fromEmail) {
       console.log(`Initializing email service with: ${host}:${port}`);
@@ -45,7 +44,7 @@ export class EmailService {
       this.config = {
         host,
         port: parseInt(port),
-        secure: port === 465 || port === '465', // Use SSL for port 465
+        secure: false, // Use STARTTLS for Gmail
         user,
         password,
         fromEmail,
