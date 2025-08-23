@@ -32,7 +32,7 @@ export class EmailService {
   private initializeFromEnv() {
     // Try new email settings first, then fall back to original
     let host = process.env.NEW_SMTP_HOST || process.env.SMTP_HOST;
-    let port = '587'; // Try STARTTLS port instead of SSL
+    let port = process.env.NEW_SMTP_PORT || process.env.SMTP_PORT || '465'; // Use SSL port
     let user = process.env.NEW_SMTP_USER || process.env.SMTP_USER;
     let password = process.env.NEW_SMTP_PASSWORD || process.env.SMTP_PASSWORD;
     // FROM email must match the authenticated SMTP user
@@ -45,7 +45,7 @@ export class EmailService {
       this.config = {
         host,
         port: parseInt(port),
-        secure: false, // Use STARTTLS instead of SSL
+        secure: port === 465 || port === '465', // Use SSL for port 465
         user,
         password,
         fromEmail,
