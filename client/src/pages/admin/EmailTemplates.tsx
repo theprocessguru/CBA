@@ -230,7 +230,7 @@ export default function EmailTemplates() {
     return preview;
   };
 
-  const filteredTemplates = selectedPersonType 
+  const filteredTemplates = selectedPersonType && selectedPersonType !== "all"
     ? templates.filter(t => t.personType === selectedPersonType)
     : templates;
 
@@ -270,13 +270,13 @@ export default function EmailTemplates() {
           <Card>
             <CardHeader>
               <CardTitle>Templates</CardTitle>
-              <div className="mt-2">
+              <div className="mt-2 space-y-2">
                 <Select value={selectedPersonType} onValueChange={setSelectedPersonType}>
                   <SelectTrigger>
                     <SelectValue placeholder="Filter by person type..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     {personTypes.map(type => (
                       <SelectItem key={type.value} value={type.value}>
                         {type.label}
@@ -284,6 +284,16 @@ export default function EmailTemplates() {
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedPersonType && selectedPersonType !== "all" && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedPersonType("")}
+                    className="w-full"
+                  >
+                    Clear Filter
+                  </Button>
+                )}
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
