@@ -29,12 +29,13 @@ interface EmailTemplate {
 }
 
 const personTypes = [
+  { value: "system", label: "System" },
   { value: "volunteer", label: "Volunteer" },
   { value: "vip", label: "VIP" },
   { value: "speaker", label: "Speaker" },
   { value: "exhibitor", label: "Exhibitor" },
   { value: "sponsor", label: "Sponsor" },
-  { value: "team_member", label: "Team Member" },
+  { value: "team", label: "Team Member" },
   { value: "student", label: "Student" },
   { value: "councillor", label: "Councillor" },
   { value: "media", label: "Media" },
@@ -55,6 +56,7 @@ export default function EmailTemplates() {
   const [previewMode, setPreviewMode] = useState(false);
   const [selectedPersonType, setSelectedPersonType] = useState<string>("");
   const [newTag, setNewTag] = useState("");
+  const [testEmail, setTestEmail] = useState("admin@croydonba.org.uk");
 
   // Fetch templates
   const { data: templates = [], isLoading } = useQuery<EmailTemplate[]>({
@@ -114,15 +116,19 @@ export default function EmailTemplates() {
   // Test email mutation
   const testEmailMutation = useMutation({
     mutationFn: async (template: EmailTemplate) => {
+      if (!testEmail) {
+        throw new Error("Please enter a test email address");
+      }
       return apiRequest("POST", "/api/admin/email-templates/test", {
-        ...template,
-        testEmail: "admin@croydonba.org.uk" // Or get from user input
+        subject: template.subject,
+        htmlContent: template.htmlContent,
+        testEmail: testEmail
       });
     },
     onSuccess: () => {
       toast({
         title: "Test Email Sent",
-        description: "Check your inbox for the test email",
+        description: `Test email sent to ${testEmail}. Check your inbox!`,
       });
     },
     onError: (error: any) => {
@@ -264,6 +270,65 @@ export default function EmailTemplates() {
         </div>
       </div>
 
+      {/* Quick Test Section */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Quick Email Test</CardTitle>
+          <CardDescription>
+            You have {templates.length} email templates in the system. Test any template by selecting it below.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <div className="flex gap-2">
+              <Select
+                value={selectedTemplate?.id?.toString() || ""}
+                onValueChange={(value) => {
+                  const template = templates.find(t => t.id?.toString() === value);
+                  if (template) {
+                    setSelectedTemplate(template);
+                    setIsCreatingNew(false);
+                  }
+                }}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select a template to test" />
+                </SelectTrigger>
+                <SelectContent>
+                  {templates.map(template => (
+                    <SelectItem key={template.id} value={template.id?.toString() || ""}>
+                      {template.templateName} ({template.personType})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Input
+                type="email"
+                placeholder="Enter test email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                className="max-w-xs"
+              />
+              <Button
+                onClick={() => selectedTemplate && testEmailMutation.mutate(selectedTemplate)}
+                disabled={!selectedTemplate || !testEmail || testEmailMutation.isPending}
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                {testEmailMutation.isPending ? "Sending..." : "Send Test"}
+              </Button>
+            </div>
+            {testEmailMutation.isSuccess && (
+              <Alert className="bg-green-50 border-green-200">
+                <AlertCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  Test email sent successfully to {testEmail}! Check your inbox.
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Template List */}
         <div className="lg:col-span-1">
@@ -345,17 +410,6 @@ export default function EmailTemplates() {
                       <Eye className="mr-2 h-4 w-4" />
                       {previewMode ? "Edit" : "Preview"}
                     </Button>
-                    {selectedTemplate.id && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => testEmailMutation.mutate(selectedTemplate)}
-                        disabled={testEmailMutation.isPending}
-                      >
-                        <Mail className="mr-2 h-4 w-4" />
-                        Send Test
-                      </Button>
-                    )}
                     <Button
                       onClick={handleSave}
                       disabled={saveMutation.isPending}
@@ -375,6 +429,25 @@ export default function EmailTemplates() {
                     )}
                   </div>
                 </div>
+                {selectedTemplate.id && (
+                  <div className="flex gap-2 mt-4">
+                    <Input
+                      type="email"
+                      placeholder="Test email address"
+                      value={testEmail}
+                      onChange={(e) => setTestEmail(e.target.value)}
+                      className="max-w-xs"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => testEmailMutation.mutate(selectedTemplate)}
+                      disabled={testEmailMutation.isPending || !testEmail}
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      {testEmailMutation.isPending ? "Sending..." : "Send Test Email"}
+                    </Button>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 {previewMode ? (
