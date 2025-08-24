@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, Save, Eye, Mail, MessageSquare, Tag, Workflow, AlertCircle, Plus, Trash2, Copy } from "lucide-react";
+import { ArrowLeft, Save, Eye, Mail, MessageSquare, Tag, Workflow, AlertCircle, Plus, Trash2, Copy, Image, Video, Link2, Code } from "lucide-react";
 import { Link } from "wouter";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface EmailTemplate {
   id?: number;
@@ -57,6 +58,11 @@ export default function EmailTemplates() {
   const [selectedPersonType, setSelectedPersonType] = useState<string>("");
   const [newTag, setNewTag] = useState("");
   const [testEmail, setTestEmail] = useState("admin@croydonba.org.uk");
+  const [imageUrl, setImageUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch templates
   const { data: templates = [], isLoading } = useQuery<EmailTemplate[]>({
@@ -208,6 +214,100 @@ export default function EmailTemplates() {
       setSelectedTemplate({
         ...selectedTemplate,
         htmlContent: newContent
+      });
+    }
+  };
+
+  const handleInsertImage = () => {
+    if (!selectedTemplate || !imageUrl) return;
+    
+    const imageHtml = `<img src="${imageUrl}" alt="Email Image" style="max-width: 100%; height: auto; display: block; margin: 20px auto;" />`;
+    
+    setSelectedTemplate({
+      ...selectedTemplate,
+      htmlContent: selectedTemplate.htmlContent + imageHtml
+    });
+    setImageUrl("");
+  };
+
+  const handleInsertVideo = () => {
+    if (!selectedTemplate || !videoUrl) return;
+    
+    // For email, we can't embed videos directly, so we create a thumbnail with a play button
+    const videoHtml = `
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="${videoUrl}" style="display: inline-block; position: relative;">
+          <img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" alt="Video Thumbnail" style="max-width: 100%; height: auto;" />
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 0; height: 0; border-left: 20px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; margin-left: 5px;"></div>
+          </div>
+        </a>
+        <p style="margin-top: 10px; color: #666;">Click to watch video</p>
+      </div>`;
+    
+    setSelectedTemplate({
+      ...selectedTemplate,
+      htmlContent: selectedTemplate.htmlContent + videoHtml
+    });
+    setVideoUrl("");
+  };
+
+  const handleInsertLink = () => {
+    if (!selectedTemplate || !linkUrl || !linkText) return;
+    
+    const linkHtml = `<a href="${linkUrl}" style="color: #3B82F6; text-decoration: underline;">${linkText}</a>`;
+    
+    setSelectedTemplate({
+      ...selectedTemplate,
+      htmlContent: selectedTemplate.htmlContent + linkHtml
+    });
+    setLinkUrl("");
+    setLinkText("");
+  };
+
+  const handleInsertLogo = () => {
+    if (!selectedTemplate) return;
+    
+    // Default CBA logo
+    const logoHtml = `
+      <div style="text-align: center; margin: 20px 0;">
+        <img src="https://croydonba.org.uk/logo.png" alt="CBA Logo" style="max-width: 200px; height: auto;" />
+      </div>`;
+    
+    setSelectedTemplate({
+      ...selectedTemplate,
+      htmlContent: logoHtml + selectedTemplate.htmlContent
+    });
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+      
+      const data = await response.json();
+      setImageUrl(data.imageUrl);
+      
+      toast({
+        title: "Image uploaded",
+        description: "Click 'Insert Image' to add it to your template"
+      });
+    } catch (error) {
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload image",
+        variant: "destructive"
       });
     }
   };
@@ -523,6 +623,136 @@ export default function EmailTemplates() {
                             ))}
                           </div>
                         </div>
+                        
+                        {/* Media insertion toolbar */}
+                        <div className="flex flex-wrap gap-2 mb-2 p-2 border rounded-lg bg-gray-50">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Image className="mr-2 h-4 w-4" />
+                                Add Image
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add Image to Email</DialogTitle>
+                                <DialogDescription>
+                                  Enter an image URL or upload an image file
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Image URL</Label>
+                                  <Input
+                                    value={imageUrl}
+                                    onChange={(e) => setImageUrl(e.target.value)}
+                                    placeholder="https://example.com/image.jpg"
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm text-gray-500">OR</span>
+                                </div>
+                                <div>
+                                  <Label>Upload Image</Label>
+                                  <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="w-full p-2 border rounded"
+                                  />
+                                </div>
+                                <Button onClick={handleInsertImage} disabled={!imageUrl}>
+                                  Insert Image
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Video className="mr-2 h-4 w-4" />
+                                Add Video Link
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add Video Link</DialogTitle>
+                                <DialogDescription>
+                                  Add a clickable video thumbnail (videos can't be embedded in emails)
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Video URL</Label>
+                                  <Input
+                                    value={videoUrl}
+                                    onChange={(e) => setVideoUrl(e.target.value)}
+                                    placeholder="https://youtube.com/watch?v=..."
+                                  />
+                                </div>
+                                <Alert>
+                                  <AlertCircle className="h-4 w-4" />
+                                  <AlertDescription>
+                                    Videos cannot play directly in emails. This will add a thumbnail image that links to your video.
+                                  </AlertDescription>
+                                </Alert>
+                                <Button onClick={handleInsertVideo} disabled={!videoUrl}>
+                                  Insert Video Link
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Link2 className="mr-2 h-4 w-4" />
+                                Add Link
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add Link</DialogTitle>
+                                <DialogDescription>
+                                  Add a clickable link to your email
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Link URL</Label>
+                                  <Input
+                                    value={linkUrl}
+                                    onChange={(e) => setLinkUrl(e.target.value)}
+                                    placeholder="https://example.com"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Link Text</Label>
+                                  <Input
+                                    value={linkText}
+                                    onChange={(e) => setLinkText(e.target.value)}
+                                    placeholder="Click here"
+                                  />
+                                </div>
+                                <Button onClick={handleInsertLink} disabled={!linkUrl || !linkText}>
+                                  Insert Link
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleInsertLogo}
+                          >
+                            <Code className="mr-2 h-4 w-4" />
+                            Add CBA Logo
+                          </Button>
+                        </div>
+                        
                         <Textarea
                           id="htmlContent"
                           name="htmlContent"
@@ -537,7 +767,10 @@ export default function EmailTemplates() {
                         <Alert className="mt-2">
                           <AlertCircle className="h-4 w-4" />
                           <AlertDescription>
-                            Available variables: {availableVariables.join(", ")}
+                            <div className="space-y-1">
+                              <p>Available variables: {availableVariables.join(", ")}</p>
+                              <p className="text-xs">Tip: You can add images, videos, and custom HTML. Images will be embedded, videos will show as clickable thumbnails.</p>
+                            </div>
                           </AlertDescription>
                         </Alert>
                       </div>
