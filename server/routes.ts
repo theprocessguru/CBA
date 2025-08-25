@@ -4854,13 +4854,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      const registrations = await db
+      // First check if this is the AI Summit event
+      const event = await db
         .select()
-        .from(cbaEventRegistrations)
-        .where(eq(cbaEventRegistrations.eventId, parseInt(id)))
-        .orderBy(cbaEventRegistrations.registeredAt);
+        .from(cbaEvents)
+        .where(eq(cbaEvents.id, parseInt(id)))
+        .limit(1);
+      
+      if (event.length > 0 && event[0].eventName === 'First AI Summit Croydon 2025') {
+        // Fetch AI Summit registrations from the special table
+        const aiSummitRegs = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .orderBy(aiSummitRegistrations.registeredAt);
+        
+        // Transform AI Summit registrations to match expected format
+        const transformedRegs = aiSummitRegs.map(reg => ({
+          id: reg.id,
+          eventId: parseInt(id),
+          attendeeName: reg.name,
+          attendeeEmail: reg.email,
+          company: reg.company,
+          jobTitle: reg.jobTitle,
+          phoneNumber: reg.phoneNumber,
+          dietaryRequirements: reg.accessibilityNeeds,
+          registrationType: JSON.parse(reg.participantRoles || '["attendee"]')[0],
+          registeredAt: reg.registeredAt,
+          customRole: reg.customRole,
+          userId: reg.userId,
+          pricingStatus: reg.pricingStatus,
+          paymentStatus: reg.paymentStatus,
+          adminNotes: reg.adminNotes
+        }));
+        
+        res.json(transformedRegs);
+      } else {
+        // Fetch regular event registrations
+        const registrations = await db
+          .select()
+          .from(cbaEventRegistrations)
+          .where(eq(cbaEventRegistrations.eventId, parseInt(id)))
+          .orderBy(cbaEventRegistrations.registeredAt);
 
-      res.json(registrations);
+        res.json(registrations);
+      }
     } catch (error) {
       console.error('Error fetching event registrations:', error);
       res.status(500).json({ message: 'Failed to fetch registrations' });

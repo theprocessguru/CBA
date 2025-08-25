@@ -37,13 +37,20 @@ interface Event {
 
 interface EventRegistration {
   id: number;
-  participantName: string;
-  participantEmail: string;
-  participantPhone: string;
+  eventId: number;
+  attendeeName: string;
+  attendeeEmail: string;
+  company?: string;
+  jobTitle?: string;
+  phoneNumber?: string;
+  dietaryRequirements?: string;
   registrationType: string;
-  status: string;
-  registrationDate: string;
-  ticketId: string;
+  registeredAt: string;
+  customRole?: string;
+  userId?: string;
+  pricingStatus?: string;
+  paymentStatus?: string;
+  adminNotes?: string;
 }
 
 export default function EventManagement() {
@@ -64,8 +71,8 @@ export default function EventManagement() {
 
   // Fetch registrations for selected event
   const { data: registrations = [], isLoading: registrationsLoading } = useQuery<EventRegistration[]>({
-    queryKey: ["/api/events", selectedEvent?.id, "registrations"],
-    enabled: !!selectedEvent,
+    queryKey: selectedEvent?.id ? [`/api/admin/events/${selectedEvent.id}/registrations`] : [],
+    enabled: !!selectedEvent && !!selectedEvent?.id,
   });
 
   // Create event mutation
@@ -631,31 +638,60 @@ export default function EventManagement() {
               <p>Loading registrations...</p>
             ) : registrations.length > 0 ? (
               <div className="space-y-3">
+                <div className="text-sm text-muted-foreground mb-4">
+                  Total Registrations: {registrations.length}
+                </div>
                 {registrations.map((registration: EventRegistration) => (
                   <Card key={registration.id}>
                     <CardContent className="pt-4">
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="font-medium">{registration.participantName}</p>
-                          <p className="text-muted-foreground">{registration.participantEmail}</p>
+                          <p className="font-medium">{registration.attendeeName}</p>
+                          <p className="text-muted-foreground">{registration.attendeeEmail}</p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Phone</p>
-                          <p>{registration.participantPhone || "Not provided"}</p>
+                          <p className="text-muted-foreground">Company</p>
+                          <p>{registration.company || "Not provided"}</p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Type</p>
-                          <p className="capitalize">{registration.registrationType}</p>
+                          <p className="text-muted-foreground">Role</p>
+                          <p className="capitalize">{registration.customRole || registration.registrationType}</p>
                         </div>
                         <div>
-                          <p className="text-muted-foreground">Status</p>
-                          <Badge className={registration.status === 'checked_in' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
-                            {registration.status}
+                          <p className="text-muted-foreground">Payment</p>
+                          <Badge className={
+                            registration.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 
+                            registration.pricingStatus === 'free' ? 'bg-blue-100 text-blue-800' : 
+                            'bg-yellow-100 text-yellow-800'
+                          }>
+                            {registration.pricingStatus || 'Unknown'}
                           </Badge>
                         </div>
                       </div>
+                      {(registration.jobTitle || registration.phoneNumber) && (
+                        <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
+                          {registration.jobTitle && (
+                            <div>
+                              <span className="text-muted-foreground">Job Title: </span>
+                              {registration.jobTitle}
+                            </div>
+                          )}
+                          {registration.phoneNumber && (
+                            <div>
+                              <span className="text-muted-foreground">Phone: </span>
+                              {registration.phoneNumber}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {registration.adminNotes && (
+                        <div className="mt-3 text-sm">
+                          <span className="text-muted-foreground">Admin Notes: </span>
+                          {registration.adminNotes}
+                        </div>
+                      )}
                       <div className="mt-2 text-xs text-muted-foreground">
-                        Ticket ID: {registration.ticketId} | Status: {registration.status}
+                        Registered: {new Date(registration.registeredAt).toLocaleDateString()}
                       </div>
                     </CardContent>
                   </Card>
