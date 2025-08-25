@@ -263,6 +263,52 @@ function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {/* Running Totals Banner - Highly Visible */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+        <h2 className="text-xl font-bold mb-4 flex items-center">
+          <Activity className="mr-2 h-6 w-6" />
+          Live Running Totals
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="text-center">
+            <div className="text-3xl font-bold">{metrics?.totalMembers || 0}</div>
+            <div className="text-sm opacity-90">Total Members</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold">{metrics?.totalPeopleTrained || 0}</div>
+            <div className="text-sm opacity-90">People Trained</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold">{metrics?.totalEventsHeld || 0}</div>
+            <div className="text-sm opacity-90">Events Held</div>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold">£{metrics?.economicImpact?.toLocaleString() || 0}</div>
+            <div className="text-sm opacity-90">Economic Impact</div>
+          </div>
+        </div>
+        <div className="mt-4 pt-4 border-t border-white/20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="opacity-75">Active Jobs:</span>
+              <span className="ml-2 font-semibold">{metrics?.activeJobs || 0}</span>
+            </div>
+            <div>
+              <span className="opacity-75">Businesses:</span>
+              <span className="ml-2 font-semibold">{metrics?.businessesSupported || 0}</span>
+            </div>
+            <div>
+              <span className="opacity-75">Applications:</span>
+              <span className="ml-2 font-semibold">{metrics?.jobApplications || 0}</span>
+            </div>
+            <div>
+              <span className="opacity-75">Partnerships:</span>
+              <span className="ml-2 font-semibold">{metrics?.partnershipsFormed || 0}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
