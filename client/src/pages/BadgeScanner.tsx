@@ -317,7 +317,7 @@ export default function BadgeScanner() {
                         )}
                       </div>
                       <span className="text-xs text-gray-500">
-                        {new Date(connection.scannedAt).toLocaleDateString()}
+                        {new Date(connection.scannedAt).toLocaleDateString('en-GB')}
                       </span>
                     </div>
                     

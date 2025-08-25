@@ -764,7 +764,7 @@ export default function EventManagement() {
                         </div>
                       )}
                       <div className="mt-2 text-xs text-muted-foreground">
-                        Registered: {new Date(registration.registeredAt).toLocaleDateString()}
+                        Registered: {new Date(registration.registeredAt).toLocaleDateString('en-GB')}
                       </div>
                     </CardContent>
                   </Card>

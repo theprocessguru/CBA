@@ -360,7 +360,7 @@ const MyProfile = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-600">Member Since</span>
                   <span className="text-sm text-gray-900">
-                    {(profile as any)?.createdAt ? new Date((profile as any).createdAt).toLocaleDateString() : "Recently joined"}
+                    {(profile as any)?.createdAt ? new Date((profile as any).createdAt).toLocaleDateString('en-GB') : "Recently joined"}
                   </span>
                 </div>
               </CardContent>

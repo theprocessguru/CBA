@@ -319,7 +319,7 @@ export default function AffiliateDashboard() {
                             {getStatusBadge(referral.membershipStatus)}
                           </TableCell>
                           <TableCell>
-                            {new Date(referral.referralDate).toLocaleDateString()}
+                            {new Date(referral.referralDate).toLocaleDateString('en-GB')}
                           </TableCell>
                           <TableCell>{formatCurrency(referral.lifetimeValue)}</TableCell>
                           <TableCell className="font-medium">
@@ -361,7 +361,7 @@ export default function AffiliateDashboard() {
                       {stats.recentCommissions.map((commission) => (
                         <TableRow key={commission.id}>
                           <TableCell>
-                            {new Date(commission.paymentDate).toLocaleDateString()}
+                            {new Date(commission.paymentDate).toLocaleDateString('en-GB')}
                           </TableCell>
                           <TableCell>{formatCurrency(commission.amount)}</TableCell>
                           <TableCell className="font-medium">
@@ -404,7 +404,7 @@ export default function AffiliateDashboard() {
                       <div className="flex justify-between items-center text-sm text-gray-600 mt-1">
                         <span>Last Payout</span>
                         <span>
-                          {new Date(stats.affiliate.lastPayoutDate).toLocaleDateString()}
+                          {new Date(stats.affiliate.lastPayoutDate).toLocaleDateString('en-GB')}
                         </span>
                       </div>
                     )}

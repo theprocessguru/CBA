@@ -502,7 +502,7 @@ export default function OrganizerScannerPage() {
                   
                   {scannedAttendee.lastScanTime && (
                     <p className="text-xs text-gray-600 mb-2">
-                      Last scan: {new Date(scannedAttendee.lastScanTime).toLocaleString()}
+                      Last scan: {new Date(scannedAttendee.lastScanTime).toLocaleString('en-GB')}
                     </p>
                   )}
                   
@@ -644,7 +644,7 @@ export default function OrganizerScannerPage() {
                           at {scan.scanLocation}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {new Date(scan.scanTimestamp).toLocaleString()}
+                          {new Date(scan.scanTimestamp).toLocaleString('en-GB')}
                           {scan.sessionDuration && ` • Session: ${Math.round(scan.sessionDuration)} min`}
                         </p>
                       </div>

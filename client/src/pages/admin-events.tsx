@@ -844,7 +844,7 @@ export default function AdminEventsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    {new Date(event.eventDate).toLocaleDateString()}
+                    {new Date(event.eventDate).toLocaleDateString('en-GB')}
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -885,7 +885,7 @@ export default function AdminEventsPage() {
                   
                   <div className="flex justify-between items-center pt-2 border-t">
                     <div className="text-xs text-gray-500">
-                      Created {new Date(event.createdAt).toLocaleDateString()}
+                      Created {new Date(event.createdAt).toLocaleDateString('en-GB')}
                     </div>
                     <div className="flex items-center gap-1">
                       {event.isActive ? (

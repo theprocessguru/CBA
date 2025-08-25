@@ -350,7 +350,7 @@ export function ExhibitorVisitors() {
                       </div>
                       <p className="text-xs text-gray-500">Lead Score</p>
                       <p className="text-xs text-gray-400 mt-2">
-                        {new Date(visitor.scanTime).toLocaleString()}
+                        {new Date(visitor.scanTime).toLocaleString('en-GB')}
                       </p>
                     </div>
                   </div>
@@ -422,7 +422,7 @@ export function ExhibitorVisitors() {
 
               <div>
                 <Label>Scan Time</Label>
-                <p className="text-sm">{new Date(selectedVisitor.scanTime).toLocaleString()}</p>
+                <p className="text-sm">{new Date(selectedVisitor.scanTime).toLocaleString('en-GB')}</p>
               </div>
 
               <div>

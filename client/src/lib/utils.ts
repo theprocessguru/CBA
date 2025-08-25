@@ -38,9 +38,10 @@ export function formatDate(dateString: string | Date | null | undefined): string
   
   const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
   
+  // UK format: DD/MM/YYYY
   return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'short',
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
   }).format(date);
 }

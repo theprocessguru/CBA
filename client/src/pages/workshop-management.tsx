@@ -129,7 +129,7 @@ export default function WorkshopManagement() {
   };
 
   const formatDateTime = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString();
+    return new Date(dateStr).toLocaleString('en-GB');
   };
 
   if (!isAuthenticated) {

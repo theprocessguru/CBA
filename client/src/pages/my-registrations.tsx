@@ -219,7 +219,7 @@ const MyRegistrations = () => {
                           
                           {registration.registrationDate && (
                             <p className="text-xs text-gray-500">
-                              Registered: {new Date(registration.registrationDate).toLocaleDateString()}
+                              Registered: {new Date(registration.registrationDate).toLocaleDateString('en-GB')}
                             </p>
                           )}
                         </div>

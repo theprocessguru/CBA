@@ -171,7 +171,7 @@ export default function WorkshopScanner() {
   };
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
+    return new Date(dateString).toLocaleString('en-GB');
   };
 
   // Show access control screen if not authorized

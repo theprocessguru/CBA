@@ -458,7 +458,7 @@ export default function EventScannerPage() {
                       <div>
                         <p className="font-medium">User: {scan.scannedUserId}</p>
                         <p className="text-sm text-gray-600">
-                          {new Date(scan.scanTimestamp).toLocaleString()}
+                          {new Date(scan.scanTimestamp).toLocaleString('en-GB')}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">

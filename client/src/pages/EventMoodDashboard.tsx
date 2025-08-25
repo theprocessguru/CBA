@@ -469,7 +469,7 @@ export default function EventMoodDashboard() {
                                 {moodType?.label} (Intensity: {entry.intensity}/10)
                               </Badge>
                               <span className="text-sm text-muted-foreground">
-                                {new Date(entry.createdAt).toLocaleTimeString()}
+                                {new Date(entry.createdAt).toLocaleTimeString('en-GB')}
                               </span>
                             </div>
                             <p className="mt-1 text-sm">{entry.comment}</p>
