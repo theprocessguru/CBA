@@ -298,13 +298,14 @@ function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupan
             <div className="text-sm opacity-90">Economic Impact</div>
           </div>
           <div className={`text-center p-2 rounded-lg ${
-            occupancy && occupancy.totalInBuilding >= 238 ? 'bg-red-500' :
-            occupancy && occupancy.totalInBuilding >= 200 ? 'bg-orange-500' :
+            occupancy && occupancy.totalInBuilding >= 450 ? 'bg-red-500' :
+            occupancy && occupancy.totalInBuilding >= 400 ? 'bg-orange-500' :
             'bg-white/10'
           }`}>
-            <div className="text-3xl font-bold">{occupancy?.totalInBuilding || 0}/250</div>
-            <div className="text-sm opacity-90">Building Capacity</div>
-            {occupancy && occupancy.totalInBuilding >= 238 && (
+            <div className="text-3xl font-bold">{occupancy?.totalInBuilding || 0}/500</div>
+            <div className="text-sm opacity-90">Current Occupancy</div>
+            <div className="text-xs opacity-75 mt-1">Daily target: 1,000</div>
+            {occupancy && occupancy.totalInBuilding >= 450 && (
               <div className="text-xs font-bold mt-1 animate-pulse">CRITICAL</div>
             )}
           </div>
