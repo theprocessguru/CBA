@@ -4438,7 +4438,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { subject, htmlContent, testEmail } = req.body;
       
-      const emailService = new EmailService();
       if (emailService.isConfigured()) {
         await emailService.sendEmail(
           testEmail || req.user.email || 'admin@croydonba.org.uk',

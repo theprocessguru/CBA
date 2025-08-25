@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { ArrowLeft, Save, Eye, Mail, MessageSquare, Tag, Workflow, AlertCircle, Plus, Trash2, Copy, Image, Video, Link2, Code } from "lucide-react";
+import { ArrowLeft, Save, Eye, Mail, MessageSquare, Tag, Workflow, AlertCircle, Plus, Trash2, Copy, Image, Video, Link2, Code, Type } from "lucide-react";
 import { Link } from "wouter";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface EmailTemplate {
   id?: number;
@@ -50,6 +52,30 @@ const availableVariables = [
   "{{eventName}}", "{{eventDate}}", "{{venue}}"
 ];
 
+// Custom toolbar for the rich text editor
+const modules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'align': [] }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['blockquote', 'code-block'],
+    ['link', 'image'],
+    ['clean']
+  ]
+};
+
+const formats = [
+  'header',
+  'bold', 'italic', 'underline', 'strike',
+  'color', 'background',
+  'align',
+  'list', 'bullet',
+  'blockquote', 'code-block',
+  'link', 'image'
+];
+
 export default function EmailTemplates() {
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
@@ -63,6 +89,7 @@ export default function EmailTemplates() {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkText, setLinkText] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editorMode, setEditorMode] = useState<"visual" | "code">("visual");
 
   // Fetch templates
   const { data: templates = [], isLoading } = useQuery<EmailTemplate[]>({
@@ -128,13 +155,13 @@ export default function EmailTemplates() {
       return apiRequest("POST", "/api/admin/email-templates/test", {
         subject: template.subject,
         htmlContent: template.htmlContent,
-        testEmail: testEmail
+        testEmail: testEmail,
       });
     },
     onSuccess: () => {
       toast({
-        title: "Test Email Sent",
-        description: `Test email sent to ${testEmail}. Check your inbox!`,
+        title: "Success",
+        description: `Test email sent to ${testEmail}`,
       });
     },
     onError: (error: any) => {
@@ -155,668 +182,602 @@ export default function EmailTemplates() {
       smsContent: "",
       mytTags: [],
       mytWorkflow: "",
-      variables: availableVariables,
-      isActive: true
+      variables: [],
+      isActive: true,
     });
     setIsCreatingNew(true);
+    setEditorMode("visual"); // Default to visual mode for new templates
+  };
+
+  const handleSelectTemplate = (template: EmailTemplate) => {
+    setSelectedTemplate(template);
+    setIsCreatingNew(false);
+    setEditorMode("visual"); // Default to visual mode when opening
   };
 
   const handleSave = () => {
     if (!selectedTemplate) return;
-    
-    if (!selectedTemplate.templateName || !selectedTemplate.subject || !selectedTemplate.htmlContent) {
+    if (!selectedTemplate.templateName || !selectedTemplate.subject) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: "Error",
+        description: "Template name and subject are required",
         variant: "destructive",
       });
       return;
     }
-    
     saveMutation.mutate(selectedTemplate);
   };
 
-  const handleDelete = (templateId: number) => {
-    if (confirm("Are you sure you want to delete this template?")) {
-      deleteMutation.mutate(templateId);
-    }
-  };
-
   const handleAddTag = () => {
-    if (!newTag.trim() || !selectedTemplate) return;
-    
-    setSelectedTemplate({
-      ...selectedTemplate,
-      mytTags: [...(selectedTemplate.mytTags || []), newTag.trim()]
-    });
-    setNewTag("");
+    if (newTag && selectedTemplate) {
+      const updatedTags = [...(selectedTemplate.mytTags || []), newTag];
+      setSelectedTemplate({ ...selectedTemplate, mytTags: updatedTags });
+      setNewTag("");
+    }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    if (!selectedTemplate) return;
-    
-    setSelectedTemplate({
-      ...selectedTemplate,
-      mytTags: selectedTemplate.mytTags?.filter(tag => tag !== tagToRemove) || []
-    });
-  };
-
-  const handleInsertVariable = (variable: string) => {
-    if (!selectedTemplate) return;
-    
-    const textarea = document.querySelector('textarea[name="htmlContent"]') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const content = selectedTemplate.htmlContent;
-      const newContent = content.substring(0, start) + variable + content.substring(end);
-      
-      setSelectedTemplate({
-        ...selectedTemplate,
-        htmlContent: newContent
-      });
+    if (selectedTemplate) {
+      const updatedTags = (selectedTemplate.mytTags || []).filter(tag => tag !== tagToRemove);
+      setSelectedTemplate({ ...selectedTemplate, mytTags: updatedTags });
     }
   };
 
-  const handleInsertImage = () => {
-    if (!selectedTemplate || !imageUrl) return;
-    
-    const imageHtml = `<img src="${imageUrl}" alt="Email Image" style="max-width: 100%; height: auto; display: block; margin: 20px auto;" />`;
-    
-    setSelectedTemplate({
-      ...selectedTemplate,
-      htmlContent: selectedTemplate.htmlContent + imageHtml
-    });
-    setImageUrl("");
-  };
-
-  const handleInsertVideo = () => {
-    if (!selectedTemplate || !videoUrl) return;
-    
-    // For email, we can't embed videos directly, so we create a thumbnail with a play button
-    const videoHtml = `
-      <div style="text-align: center; margin: 20px 0;">
-        <a href="${videoUrl}" style="display: inline-block; position: relative;">
-          <img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" alt="Video Thumbnail" style="max-width: 100%; height: auto;" />
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.7); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-            <div style="width: 0; height: 0; border-left: 20px solid white; border-top: 12px solid transparent; border-bottom: 12px solid transparent; margin-left: 5px;"></div>
-          </div>
-        </a>
-        <p style="margin-top: 10px; color: #666;">Click to watch video</p>
-      </div>`;
-    
-    setSelectedTemplate({
-      ...selectedTemplate,
-      htmlContent: selectedTemplate.htmlContent + videoHtml
-    });
-    setVideoUrl("");
-  };
-
-  const handleInsertLink = () => {
-    if (!selectedTemplate || !linkUrl || !linkText) return;
-    
-    const linkHtml = `<a href="${linkUrl}" style="color: #3B82F6; text-decoration: underline;">${linkText}</a>`;
-    
-    setSelectedTemplate({
-      ...selectedTemplate,
-      htmlContent: selectedTemplate.htmlContent + linkHtml
-    });
-    setLinkUrl("");
-    setLinkText("");
-  };
-
-  const handleInsertLogo = () => {
-    if (!selectedTemplate) return;
-    
-    // Default CBA logo
-    const logoHtml = `
-      <div style="text-align: center; margin: 20px 0;">
-        <img src="https://croydonba.org.uk/logo.png" alt="CBA Logo" style="max-width: 200px; height: auto;" />
-      </div>`;
-    
-    setSelectedTemplate({
-      ...selectedTemplate,
-      htmlContent: logoHtml + selectedTemplate.htmlContent
-    });
-  };
-
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Image must be less than 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const formData = new FormData();
     formData.append('image', file);
 
     try {
+      // Get auth token from localStorage
+      const authToken = localStorage.getItem('authToken');
+      const headers: HeadersInit = {};
+      if (authToken) {
+        headers["Authorization"] = `Bearer ${authToken}`;
+      }
+
       const response = await fetch('/api/upload/image', {
         method: 'POST',
         body: formData,
-        credentials: 'include'
+        credentials: 'include',
+        headers: headers,
       });
 
-      if (!response.ok) throw new Error('Upload failed');
-      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+
       const data = await response.json();
-      setImageUrl(data.imageUrl);
-      
+      if (selectedTemplate) {
+        const imgHtml = `<img src="${data.imageUrl}" alt="Uploaded image" style="max-width: 100%; height: auto;">`;
+        setSelectedTemplate({
+          ...selectedTemplate,
+          htmlContent: selectedTemplate.htmlContent + imgHtml
+        });
+      }
       toast({
-        title: "Image uploaded",
-        description: "Click 'Insert Image' to add it to your template"
+        title: "Success",
+        description: "Image uploaded successfully",
       });
     } catch (error) {
       toast({
-        title: "Upload failed",
+        title: "Error",
         description: "Failed to upload image",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
 
-  const renderPreview = (content: string) => {
+  const insertMediaElement = (type: 'image' | 'video' | 'link' | 'logo') => {
+    if (!selectedTemplate) return;
+
+    let htmlToInsert = '';
+    switch (type) {
+      case 'image':
+        if (imageUrl) {
+          htmlToInsert = `<img src="${imageUrl}" alt="Image" style="max-width: 100%; height: auto; display: block; margin: 20px auto;">`;
+          setImageUrl('');
+        }
+        break;
+      case 'video':
+        if (videoUrl) {
+          htmlToInsert = `
+            <div style="text-align: center; margin: 20px 0;">
+              <a href="${videoUrl}" style="display: inline-block; background: #f3f4f6; padding: 20px; border-radius: 8px; text-decoration: none;">
+                <img src="https://img.icons8.com/color/96/000000/youtube-play.png" alt="Video" style="width: 60px; height: 60px;">
+                <p style="color: #1f2937; margin-top: 10px; font-weight: 600;">Click to Watch Video</p>
+              </a>
+            </div>`;
+          setVideoUrl('');
+        }
+        break;
+      case 'link':
+        if (linkUrl && linkText) {
+          htmlToInsert = `<a href="${linkUrl}" style="color: #3B82F6; text-decoration: underline;">${linkText}</a>`;
+          setLinkUrl('');
+          setLinkText('');
+        }
+        break;
+      case 'logo':
+        htmlToInsert = `
+          <div style="text-align: center; margin: 20px 0;">
+            <img src="https://www.croydonba.org.uk/logo.png" alt="CBA Logo" style="max-width: 200px; height: auto;">
+          </div>`;
+        break;
+    }
+
+    if (htmlToInsert) {
+      setSelectedTemplate({
+        ...selectedTemplate,
+        htmlContent: selectedTemplate.htmlContent + htmlToInsert
+      });
+    }
+  };
+
+  const renderPreview = (htmlContent: string) => {
     // Replace variables with sample data for preview
-    const sampleData = {
-      firstName: "John",
-      lastName: "Doe",
-      fullName: "John Doe",
-      email: "john@example.com",
-      company: "Example Corp",
-      jobTitle: "Manager",
-      membershipTier: "Growth Tier",
-      phone: "020 1234 5678",
-      eventName: "AI Summit 2025",
-      eventDate: "March 28, 2025",
-      venue: "Croydon Conference Centre"
-    };
-
-    let preview = content;
-    Object.entries(sampleData).forEach(([key, value]) => {
-      preview = preview.replace(new RegExp(`{{${key}}}`, 'g'), value);
-    });
-
+    let preview = htmlContent;
+    preview = preview.replace(/{{firstName}}/g, 'John');
+    preview = preview.replace(/{{lastName}}/g, 'Doe');
+    preview = preview.replace(/{{fullName}}/g, 'John Doe');
+    preview = preview.replace(/{{email}}/g, 'john.doe@example.com');
+    preview = preview.replace(/{{company}}/g, 'Example Company');
+    preview = preview.replace(/{{jobTitle}}/g, 'Manager');
+    preview = preview.replace(/{{membershipTier}}/g, 'Gold');
+    preview = preview.replace(/{{phone}}/g, '+44 20 1234 5678');
+    preview = preview.replace(/{{eventName}}/g, 'AI Summit 2025');
+    preview = preview.replace(/{{eventDate}}/g, 'October 1st, 2025');
+    preview = preview.replace(/{{venue}}/g, 'LSBU Croydon');
+    
     return preview;
   };
 
-  const filteredTemplates = selectedPersonType && selectedPersonType !== "all"
+  // Filter templates by person type
+  const filteredTemplates = selectedPersonType
     ? templates.filter(t => t.personType === selectedPersonType)
     : templates;
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="mb-6">
-        <Link href="/admin-dashboard">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Admin Dashboard
-          </Button>
-        </Link>
-        
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">Email Templates</h1>
-            <p className="text-gray-600 mt-1">Manage and customize email messages for different user types</p>
-          </div>
-          <Button onClick={handleCreateNew}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create New Template
-          </Button>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <Link href="/admin">
+            <Button variant="ghost" size="sm">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Admin
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">Email Templates</h1>
         </div>
+        <Button onClick={handleCreateNew}>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Template
+        </Button>
       </div>
-
-      {/* Quick Test Section */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Quick Email Test</CardTitle>
-          <CardDescription>
-            You have {templates.length} email templates in the system. Test any template by selecting it below.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4">
-            <div className="flex gap-2">
-              <Select
-                value={selectedTemplate?.id?.toString() || ""}
-                onValueChange={(value) => {
-                  const template = templates.find(t => t.id?.toString() === value);
-                  if (template) {
-                    setSelectedTemplate(template);
-                    setIsCreatingNew(false);
-                  }
-                }}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a template to test" />
-                </SelectTrigger>
-                <SelectContent>
-                  {templates.map(template => (
-                    <SelectItem key={template.id} value={template.id?.toString() || ""}>
-                      {template.templateName} ({template.personType})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Input
-                type="email"
-                placeholder="Enter test email"
-                value={testEmail}
-                onChange={(e) => setTestEmail(e.target.value)}
-                className="max-w-xs"
-              />
-              <Button
-                onClick={() => selectedTemplate && testEmailMutation.mutate(selectedTemplate)}
-                disabled={!selectedTemplate || !testEmail || testEmailMutation.isPending}
-              >
-                <Mail className="mr-2 h-4 w-4" />
-                {testEmailMutation.isPending ? "Sending..." : "Send Test"}
-              </Button>
-            </div>
-            {testEmailMutation.isSuccess && (
-              <Alert className="bg-green-50 border-green-200">
-                <AlertCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800">
-                  Test email sent successfully to {testEmail}! Check your inbox.
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Template List */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Templates</CardTitle>
-              <div className="mt-2 space-y-2">
-                <Select value={selectedPersonType} onValueChange={setSelectedPersonType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Filter by person type..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Types</SelectItem>
-                    {personTypes.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {selectedPersonType && selectedPersonType !== "all" && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setSelectedPersonType("")}
-                    className="w-full"
-                  >
-                    Clear Filter
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {filteredTemplates.length === 0 ? (
-                <p className="text-gray-500 text-sm">No templates found</p>
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle>Templates</CardTitle>
+            <CardDescription>Manage email and SMS templates</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Filter by person type */}
+            <Select value={selectedPersonType || "all"} onValueChange={(value) => setSelectedPersonType(value === "all" ? "" : value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {personTypes.map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Template List */}
+            <div className="space-y-2">
+              {isLoading ? (
+                <p className="text-sm text-muted-foreground">Loading templates...</p>
+              ) : filteredTemplates.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No templates found</p>
               ) : (
-                filteredTemplates.map(template => (
+                filteredTemplates.map((template) => (
                   <div
                     key={template.id}
-                    className={`p-3 border rounded-lg cursor-pointer hover:bg-gray-50 ${
-                      selectedTemplate?.id === template.id ? 'border-primary bg-primary/5' : ''
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedTemplate?.id === template.id ? 'bg-accent' : 'hover:bg-accent/50'
                     }`}
-                    onClick={() => {
-                      setSelectedTemplate(template);
-                      setIsCreatingNew(false);
-                    }}
+                    onClick={() => handleSelectTemplate(template)}
                   >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium">{template.templateName}</h3>
-                        <p className="text-sm text-gray-600">{template.personType}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{template.templateName}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {personTypes.find(t => t.value === template.personType)?.label}
+                          </Badge>
+                          {template.isActive ? (
+                            <Badge variant="default" className="text-xs">Active</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="text-xs">Inactive</Badge>
+                          )}
+                        </div>
                       </div>
-                      <Badge variant={template.isActive ? "default" : "secondary"}>
-                        {template.isActive ? "Active" : "Inactive"}
-                      </Badge>
+                      <Mail className="h-4 w-4 text-muted-foreground" />
                     </div>
                   </div>
                 ))
               )}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Template Editor */}
-        <div className="lg:col-span-2">
-          {selectedTemplate ? (
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>
-                    {isCreatingNew ? "Create New Template" : "Edit Template"}
-                  </CardTitle>
-                  <div className="flex gap-2">
+        {(selectedTemplate || isCreatingNew) && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>{isCreatingNew ? 'Create Template' : 'Edit Template'}</CardTitle>
+                <div className="flex gap-2">
+                  {selectedTemplate?.id && (
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
-                      onClick={() => setPreviewMode(!previewMode)}
+                      onClick={() => deleteMutation.mutate(selectedTemplate.id!)}
                     >
-                      <Eye className="mr-2 h-4 w-4" />
-                      {previewMode ? "Edit" : "Preview"}
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                    <Button
-                      onClick={handleSave}
-                      disabled={saveMutation.isPending}
-                    >
-                      <Save className="mr-2 h-4 w-4" />
-                      Save
-                    </Button>
-                    {selectedTemplate.id && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDelete(selectedTemplate.id!)}
-                        disabled={deleteMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPreviewMode(!previewMode)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    {previewMode ? 'Edit' : 'Preview'}
+                  </Button>
+                  <Button size="sm" onClick={handleSave}>
+                    <Save className="h-4 w-4 mr-2" />
+                    Save
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {previewMode ? (
+                <div className="space-y-4">
+                  <div>
+                    <Label>Subject Preview</Label>
+                    <div className="p-3 bg-muted rounded-lg">
+                      {renderPreview(selectedTemplate?.subject || '')}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Email Preview</Label>
+                    <div className="border rounded-lg p-4 bg-white">
+                      <div dangerouslySetInnerHTML={{ 
+                        __html: renderPreview(selectedTemplate?.htmlContent || '') 
+                      }} />
+                    </div>
                   </div>
                 </div>
-                {selectedTemplate.id && (
-                  <div className="flex gap-2 mt-4">
-                    <Input
-                      type="email"
-                      placeholder="Test email address"
-                      value={testEmail}
-                      onChange={(e) => setTestEmail(e.target.value)}
-                      className="max-w-xs"
-                    />
-                    <Button
-                      variant="outline"
-                      onClick={() => testEmailMutation.mutate(selectedTemplate)}
-                      disabled={testEmailMutation.isPending || !testEmail}
-                    >
-                      <Mail className="mr-2 h-4 w-4" />
-                      {testEmailMutation.isPending ? "Sending..." : "Send Test Email"}
-                    </Button>
-                  </div>
-                )}
-              </CardHeader>
-              <CardContent>
-                {previewMode ? (
-                  <div className="space-y-4">
+              ) : (
+                <Tabs defaultValue="content" className="space-y-4">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="content">Content</TabsTrigger>
+                    <TabsTrigger value="automation">Automation</TabsTrigger>
+                    <TabsTrigger value="settings">Settings</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="content" className="space-y-4">
                     <div>
-                      <h3 className="font-medium mb-2">Email Preview</h3>
-                      <div className="p-4 border rounded-lg bg-gray-50">
-                        <p className="font-medium mb-2">Subject: {renderPreview(selectedTemplate.subject)}</p>
-                        <div 
-                          className="prose max-w-none"
-                          dangerouslySetInnerHTML={{ __html: renderPreview(selectedTemplate.htmlContent) }}
-                        />
-                      </div>
+                      <Label htmlFor="templateName">Template Name *</Label>
+                      <Input
+                        id="templateName"
+                        value={selectedTemplate?.templateName || ''}
+                        onChange={(e) => setSelectedTemplate({
+                          ...selectedTemplate!,
+                          templateName: e.target.value
+                        })}
+                        placeholder="e.g., Welcome Email"
+                      />
                     </div>
-                    {selectedTemplate.smsContent && (
-                      <div>
-                        <h3 className="font-medium mb-2">SMS Preview</h3>
-                        <div className="p-4 border rounded-lg bg-gray-50">
-                          <p>{renderPreview(selectedTemplate.smsContent)}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Tabs defaultValue="content" className="space-y-4">
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="content">Content</TabsTrigger>
-                      <TabsTrigger value="automation">Automation</TabsTrigger>
-                      <TabsTrigger value="settings">Settings</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="content" className="space-y-4">
-                      <div>
-                        <Label htmlFor="templateName">Template Name *</Label>
-                        <Input
-                          id="templateName"
-                          value={selectedTemplate.templateName}
-                          onChange={(e) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            templateName: e.target.value
-                          })}
-                          placeholder="e.g., Welcome Email for Volunteers"
-                        />
+
+                    <div>
+                      <Label htmlFor="subject">Email Subject *</Label>
+                      <Input
+                        id="subject"
+                        value={selectedTemplate?.subject || ''}
+                        onChange={(e) => setSelectedTemplate({
+                          ...selectedTemplate!,
+                          subject: e.target.value
+                        })}
+                        placeholder="e.g., Welcome to {{eventName}}!"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="htmlContent">
+                        Email Content (HTML) *
+                      </Label>
+                      
+                      {/* Editor Mode Toggle */}
+                      <div className="flex gap-2 mb-2">
+                        <Button
+                          variant={editorMode === "visual" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setEditorMode("visual")}
+                        >
+                          <Type className="h-4 w-4 mr-2" />
+                          Visual Editor
+                        </Button>
+                        <Button
+                          variant={editorMode === "code" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setEditorMode("code")}
+                        >
+                          <Code className="h-4 w-4 mr-2" />
+                          Code Editor
+                        </Button>
                       </div>
 
-                      <div>
-                        <Label htmlFor="subject">Email Subject *</Label>
-                        <Input
-                          id="subject"
-                          value={selectedTemplate.subject}
-                          onChange={(e) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            subject: e.target.value
-                          })}
-                          placeholder="e.g., Welcome to CBA {{firstName}}!"
-                        />
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <Label htmlFor="htmlContent">Email Content (HTML) *</Label>
-                          <div className="flex gap-1">
-                            {availableVariables.slice(0, 4).map(variable => (
+                      {/* Media insertion buttons */}
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {/* Add Image Dialog */}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Image className="h-4 w-4 mr-2" />
+                              Add Image
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add Image</DialogTitle>
+                              <DialogDescription>
+                                Enter an image URL or upload a file
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Image URL</Label>
+                                <Input
+                                  value={imageUrl}
+                                  onChange={(e) => setImageUrl(e.target.value)}
+                                  placeholder="https://example.com/image.jpg"
+                                />
+                              </div>
+                              <div className="text-center text-sm text-muted-foreground">OR</div>
+                              <div>
+                                <Label>Upload Image</Label>
+                                <Input
+                                  ref={fileInputRef}
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleImageUpload}
+                                />
+                              </div>
                               <Button
-                                key={variable}
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleInsertVariable(variable)}
-                                className="text-xs"
+                                onClick={() => insertMediaElement('image')}
+                                disabled={!imageUrl}
                               >
-                                {variable}
+                                Insert Image
                               </Button>
-                            ))}
-                          </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Add Video Dialog */}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Video className="h-4 w-4 mr-2" />
+                              Add Video Link
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add Video Link</DialogTitle>
+                              <DialogDescription>
+                                Enter a YouTube or Vimeo URL
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Video URL</Label>
+                                <Input
+                                  value={videoUrl}
+                                  onChange={(e) => setVideoUrl(e.target.value)}
+                                  placeholder="https://youtube.com/watch?v=..."
+                                />
+                              </div>
+                              <Button
+                                onClick={() => insertMediaElement('video')}
+                                disabled={!videoUrl}
+                              >
+                                Insert Video Link
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Add Link Dialog */}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Link2 className="h-4 w-4 mr-2" />
+                              Add Link
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add Link</DialogTitle>
+                              <DialogDescription>
+                                Enter a URL and link text
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Link URL</Label>
+                                <Input
+                                  value={linkUrl}
+                                  onChange={(e) => setLinkUrl(e.target.value)}
+                                  placeholder="https://example.com"
+                                />
+                              </div>
+                              <div>
+                                <Label>Link Text</Label>
+                                <Input
+                                  value={linkText}
+                                  onChange={(e) => setLinkText(e.target.value)}
+                                  placeholder="Click here"
+                                />
+                              </div>
+                              <Button
+                                onClick={() => insertMediaElement('link')}
+                                disabled={!linkUrl || !linkText}
+                              >
+                                Insert Link
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Add CBA Logo */}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => insertMediaElement('logo')}
+                        >
+                          Add CBA Logo
+                        </Button>
+                      </div>
+
+                      {/* Editor based on mode */}
+                      {editorMode === "visual" ? (
+                        <div className="border rounded-lg">
+                          <ReactQuill
+                            theme="snow"
+                            value={selectedTemplate?.htmlContent || ''}
+                            onChange={(content) => setSelectedTemplate({
+                              ...selectedTemplate!,
+                              htmlContent: content
+                            })}
+                            modules={modules}
+                            formats={formats}
+                            style={{ minHeight: '300px' }}
+                          />
                         </div>
-                        
-                        {/* Media insertion toolbar */}
-                        <div className="flex flex-wrap gap-2 mb-2 p-2 border rounded-lg bg-gray-50">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Image className="mr-2 h-4 w-4" />
-                                Add Image
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Add Image to Email</DialogTitle>
-                                <DialogDescription>
-                                  Enter an image URL or upload an image file
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>Image URL</Label>
-                                  <Input
-                                    value={imageUrl}
-                                    onChange={(e) => setImageUrl(e.target.value)}
-                                    placeholder="https://example.com/image.jpg"
-                                  />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm text-gray-500">OR</span>
-                                </div>
-                                <div>
-                                  <Label>Upload Image</Label>
-                                  <input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageUpload}
-                                    className="w-full p-2 border rounded"
-                                  />
-                                </div>
-                                <Button onClick={handleInsertImage} disabled={!imageUrl}>
-                                  Insert Image
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Video className="mr-2 h-4 w-4" />
-                                Add Video Link
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Add Video Link</DialogTitle>
-                                <DialogDescription>
-                                  Add a clickable video thumbnail (videos can't be embedded in emails)
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>Video URL</Label>
-                                  <Input
-                                    value={videoUrl}
-                                    onChange={(e) => setVideoUrl(e.target.value)}
-                                    placeholder="https://youtube.com/watch?v=..."
-                                  />
-                                </div>
-                                <Alert>
-                                  <AlertCircle className="h-4 w-4" />
-                                  <AlertDescription>
-                                    Videos cannot play directly in emails. This will add a thumbnail image that links to your video.
-                                  </AlertDescription>
-                                </Alert>
-                                <Button onClick={handleInsertVideo} disabled={!videoUrl}>
-                                  Insert Video Link
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button variant="outline" size="sm">
-                                <Link2 className="mr-2 h-4 w-4" />
-                                Add Link
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Add Link</DialogTitle>
-                                <DialogDescription>
-                                  Add a clickable link to your email
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>Link URL</Label>
-                                  <Input
-                                    value={linkUrl}
-                                    onChange={(e) => setLinkUrl(e.target.value)}
-                                    placeholder="https://example.com"
-                                  />
-                                </div>
-                                <div>
-                                  <Label>Link Text</Label>
-                                  <Input
-                                    value={linkText}
-                                    onChange={(e) => setLinkText(e.target.value)}
-                                    placeholder="Click here"
-                                  />
-                                </div>
-                                <Button onClick={handleInsertLink} disabled={!linkUrl || !linkText}>
-                                  Insert Link
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleInsertLogo}
-                          >
-                            <Code className="mr-2 h-4 w-4" />
-                            Add CBA Logo
-                          </Button>
-                        </div>
-                        
+                      ) : (
                         <Textarea
                           id="htmlContent"
-                          name="htmlContent"
-                          value={selectedTemplate.htmlContent}
+                          value={selectedTemplate?.htmlContent || ''}
                           onChange={(e) => setSelectedTemplate({
-                            ...selectedTemplate,
+                            ...selectedTemplate!,
                             htmlContent: e.target.value
                           })}
                           placeholder="Enter HTML content..."
                           className="min-h-[300px] font-mono text-sm"
                         />
-                        <Alert className="mt-2">
-                          <AlertCircle className="h-4 w-4" />
-                          <AlertDescription>
-                            <div className="space-y-1">
-                              <p>Available variables: {availableVariables.join(", ")}</p>
-                              <p className="text-xs">Tip: You can add images, videos, and custom HTML. Images will be embedded, videos will show as clickable thumbnails.</p>
+                      )}
+                      
+                      {/* Available Variables */}
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <div className="space-y-2">
+                            <p className="font-medium">Available variables:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {availableVariables.map((variable) => (
+                                <Button
+                                  key={variable}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs"
+                                  onClick={() => {
+                                    if (selectedTemplate) {
+                                      setSelectedTemplate({
+                                        ...selectedTemplate,
+                                        htmlContent: selectedTemplate.htmlContent + ' ' + variable
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Copy className="h-3 w-3 mr-1" />
+                                  {variable}
+                                </Button>
+                              ))}
                             </div>
-                          </AlertDescription>
-                        </Alert>
-                      </div>
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+                    </div>
 
-                      <div>
-                        <Label htmlFor="smsContent">SMS Content (Optional)</Label>
-                        <Textarea
-                          id="smsContent"
-                          value={selectedTemplate.smsContent || ""}
-                          onChange={(e) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            smsContent: e.target.value
-                          })}
-                          placeholder="Enter SMS message..."
-                          className="min-h-[100px]"
-                        />
-                        <p className="text-sm text-gray-500 mt-1">
-                          Character count: {selectedTemplate.smsContent?.length || 0} / 160
-                        </p>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="automation" className="space-y-4">
-                      <div>
-                        <Label className="flex items-center gap-2">
-                          <Tag className="h-4 w-4" />
-                          MyT Automation Tags
-                        </Label>
-                        <div className="flex gap-2 mt-2">
+                    <div>
+                      <Label htmlFor="smsContent">SMS Content (Optional)</Label>
+                      <Textarea
+                        id="smsContent"
+                        value={selectedTemplate?.smsContent || ''}
+                        onChange={(e) => setSelectedTemplate({
+                          ...selectedTemplate!,
+                          smsContent: e.target.value
+                        })}
+                        placeholder="Enter SMS content..."
+                        className="min-h-[100px]"
+                      />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="automation" className="space-y-4">
+                    <div>
+                      <Label htmlFor="mytWorkflow">MyT Workflow ID</Label>
+                      <Input
+                        id="mytWorkflow"
+                        value={selectedTemplate?.mytWorkflow || ''}
+                        onChange={(e) => setSelectedTemplate({
+                          ...selectedTemplate!,
+                          mytWorkflow: e.target.value
+                        })}
+                        placeholder="e.g., workflow_123"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>MyT Tags</Label>
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
                           <Input
                             value={newTag}
                             onChange={(e) => setNewTag(e.target.value)}
-                            placeholder="Add a tag..."
+                            placeholder="Enter tag"
                             onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
                           />
                           <Button onClick={handleAddTag} size="sm">
-                            Add
+                            <Plus className="h-4 w-4" />
                           </Button>
                         </div>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {selectedTemplate.mytTags?.map(tag => (
+                        <div className="flex flex-wrap gap-2">
+                          {selectedTemplate?.mytTags?.map((tag) => (
                             <Badge key={tag} variant="secondary">
                               {tag}
                               <button
                                 onClick={() => handleRemoveTag(tag)}
-                                className="ml-2 text-xs hover:text-red-500"
+                                className="ml-2 text-xs hover:text-destructive"
                               >
                                 ×
                               </button>
@@ -824,75 +785,77 @@ export default function EmailTemplates() {
                           ))}
                         </div>
                       </div>
+                    </div>
+                  </TabsContent>
 
-                      <div>
-                        <Label htmlFor="mytWorkflow" className="flex items-center gap-2">
-                          <Workflow className="h-4 w-4" />
-                          MyT Automation Workflow ID
-                        </Label>
-                        <Input
-                          id="mytWorkflow"
-                          value={selectedTemplate.mytWorkflow || ""}
-                          onChange={(e) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            mytWorkflow: e.target.value
-                          })}
-                          placeholder="e.g., volunteer-onboarding-sequence"
-                        />
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="settings" className="space-y-4">
-                      <div>
-                        <Label htmlFor="personType">Person Type *</Label>
-                        <Select 
-                          value={selectedTemplate.personType}
-                          onValueChange={(value) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            personType: value
-                          })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {personTypes.map(type => (
-                              <SelectItem key={type.value} value={type.value}>
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                  <TabsContent value="settings" className="space-y-4">
+                    <div>
+                      <Label htmlFor="personType">Person Type *</Label>
+                      <Select
+                        value={selectedTemplate?.personType || ''}
+                        onValueChange={(value) => setSelectedTemplate({
+                          ...selectedTemplate!,
+                          personType: value
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {personTypes.map(type => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="isActive"
-                          checked={selectedTemplate.isActive}
-                          onCheckedChange={(checked) => setSelectedTemplate({
-                            ...selectedTemplate,
-                            isActive: checked
-                          })}
-                        />
-                        <Label htmlFor="isActive">Template is active</Label>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-                )}
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <Mail className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-500 text-center">
-                  Select a template to edit or create a new one
-                </p>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="isActive"
+                        checked={selectedTemplate?.isActive || false}
+                        onCheckedChange={(checked) => setSelectedTemplate({
+                          ...selectedTemplate!,
+                          isActive: checked
+                        })}
+                      />
+                      <Label htmlFor="isActive">Template is active</Label>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
+
+      {/* Quick Test Section */}
+      {selectedTemplate && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Test Template</CardTitle>
+            <CardDescription>Send a test email to verify the template</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-2">
+              <Input
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="Enter test email address"
+                className="max-w-sm"
+              />
+              <Button
+                onClick={() => testEmailMutation.mutate(selectedTemplate)}
+                disabled={testEmailMutation.isPending || !testEmail}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                {testEmailMutation.isPending ? 'Sending...' : 'Send Test Email'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
