@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -53,6 +53,25 @@ interface EventRegistration {
   adminNotes?: string;
 }
 
+interface EventTimeSlot {
+  id: number;
+  eventId: number;
+  title: string;
+  description?: string;
+  slotType: string; // workshop, presentation, panel, break, networking, q&a
+  slotDate: string;
+  startTime: string;
+  endTime: string;
+  room?: string;
+  maxCapacity?: number;
+  currentAttendees: number;
+  speakerId?: string;
+  moderatorId?: string;
+  isBreak: boolean;
+  requiresRegistration: boolean;
+  displayOrder: number;
+}
+
 export default function EventManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -60,6 +79,8 @@ export default function EventManagement() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showRegistrationsDialog, setShowRegistrationsDialog] = useState(false);
+  const [showSubEventsDialog, setShowSubEventsDialog] = useState(false);
+  const [showCreateSubEventDialog, setShowCreateSubEventDialog] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,7 +93,13 @@ export default function EventManagement() {
   // Fetch registrations for selected event
   const { data: registrations = [], isLoading: registrationsLoading } = useQuery<EventRegistration[]>({
     queryKey: selectedEvent?.id ? [`/api/admin/events/${selectedEvent.id}/registrations`] : [],
-    enabled: !!selectedEvent && !!selectedEvent?.id,
+    enabled: !!selectedEvent && !!selectedEvent?.id && showRegistrationsDialog,
+  });
+
+  // Fetch sub-events (time slots) for selected event
+  const { data: subEvents = [], isLoading: subEventsLoading } = useQuery<EventTimeSlot[]>({
+    queryKey: selectedEvent?.id ? [`/api/events/${selectedEvent.id}/time-slots`] : [],
+    enabled: !!selectedEvent && !!selectedEvent?.id && showSubEventsDialog,
   });
 
   // Create event mutation
@@ -561,7 +588,21 @@ export default function EventManagement() {
                     </div>
                   )}
 
-                  <div className="flex space-x-2 pt-3">
+                  <div className="flex flex-wrap gap-2 pt-3">
+                    {(event.eventType === "summit" || event.eventType === "conference") && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowSubEventsDialog(true);
+                        }}
+                        className="text-xs"
+                      >
+                        <Layers className="w-3 h-3 mr-1" />
+                        Sub-Events
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"
@@ -570,8 +611,8 @@ export default function EventManagement() {
                         setShowRegistrationsDialog(true);
                       }}
                     >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
+                      <Users className="w-4 h-4 mr-1" />
+                      Attendees
                     </Button>
                     <Button
                       size="sm"
@@ -733,6 +774,187 @@ export default function EventManagement() {
               <p className="text-center text-muted-foreground py-8">No registrations yet</p>
             )}
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sub-Events Dialog */}
+      <Dialog open={showSubEventsDialog} onOpenChange={setShowSubEventsDialog}>
+        <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layers className="w-5 h-5" />
+              Sub-Events for {selectedEvent?.eventName || selectedEvent?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-muted-foreground">
+                Manage workshops, talks, and sessions within this {selectedEvent?.eventType}
+              </p>
+              <Button
+                size="sm"
+                onClick={() => setShowCreateSubEventDialog(true)}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Add Sub-Event
+              </Button>
+            </div>
+
+            {subEventsLoading ? (
+              <p>Loading sub-events...</p>
+            ) : subEvents.length > 0 ? (
+              <div className="space-y-3">
+                {subEvents.map((slot: EventTimeSlot) => (
+                  <Card key={slot.id}>
+                    <CardHeader className="pb-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-base">{slot.title}</CardTitle>
+                          <Badge variant="outline" className="mt-1">
+                            {slot.slotType}
+                          </Badge>
+                        </div>
+                        <div className="text-right text-sm">
+                          <p className="font-medium">
+                            {format(new Date(`2000-01-01 ${slot.startTime}`), "h:mm a")} - 
+                            {format(new Date(`2000-01-01 ${slot.endTime}`), "h:mm a")}
+                          </p>
+                          {slot.room && (
+                            <p className="text-muted-foreground">{slot.room}</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {slot.description && (
+                        <p className="text-sm text-muted-foreground mb-3">{slot.description}</p>
+                      )}
+                      <div className="flex items-center gap-4 text-sm">
+                        {slot.maxCapacity && (
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            <span>{slot.currentAttendees}/{slot.maxCapacity}</span>
+                          </div>
+                        )}
+                        {slot.requiresRegistration && (
+                          <Badge className="bg-blue-100 text-blue-800">
+                            Requires Registration
+                          </Badge>
+                        )}
+                        {slot.isBreak && (
+                          <Badge className="bg-gray-100 text-gray-800">
+                            Break
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground mb-4">No sub-events yet</p>
+                <p className="text-sm text-muted-foreground">
+                  Add workshops, talks, or sessions to enrich your {selectedEvent?.eventType}
+                </p>
+              </Card>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Sub-Event Dialog */}
+      <Dialog open={showCreateSubEventDialog} onOpenChange={setShowCreateSubEventDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add Sub-Event to {selectedEvent?.eventName}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const subEventData = {
+              eventId: selectedEvent?.id,
+              title: formData.get("title"),
+              description: formData.get("description"),
+              slotType: formData.get("slotType"),
+              slotDate: selectedEvent?.eventDate,
+              startTime: formData.get("startTime"),
+              endTime: formData.get("endTime"),
+              room: formData.get("room"),
+              maxCapacity: parseInt(formData.get("maxCapacity") as string) || null,
+              requiresRegistration: formData.get("requiresRegistration") === "true",
+              isBreak: formData.get("slotType") === "break"
+            };
+            // TODO: Add mutation to create sub-event
+            console.log("Creating sub-event:", subEventData);
+            setShowCreateSubEventDialog(false);
+          }} className="space-y-4">
+            <div>
+              <Label htmlFor="title">Session Title</Label>
+              <Input name="title" placeholder="e.g., AI Workshop: Getting Started" required />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="slotType">Session Type</Label>
+                <Select name="slotType" defaultValue="workshop">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="presentation">Presentation/Talk</SelectItem>
+                    <SelectItem value="panel">Panel Discussion</SelectItem>
+                    <SelectItem value="networking">Networking</SelectItem>
+                    <SelectItem value="exhibition">Exhibition</SelectItem>
+                    <SelectItem value="qa">Q&A Session</SelectItem>
+                    <SelectItem value="break">Break</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="room">Room/Location</Label>
+                <Input name="room" placeholder="e.g., Main Hall, Room A" />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea name="description" rows={3} placeholder="Brief description of the session" />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="startTime">Start Time</Label>
+                <Input type="time" name="startTime" required />
+              </div>
+              <div>
+                <Label htmlFor="endTime">End Time</Label>
+                <Input type="time" name="endTime" required />
+              </div>
+              <div>
+                <Label htmlFor="maxCapacity">Max Capacity</Label>
+                <Input type="number" name="maxCapacity" placeholder="Leave empty for unlimited" />
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input 
+                type="checkbox" 
+                name="requiresRegistration" 
+                value="true"
+                id="requiresRegistration"
+                className="rounded"
+              />
+              <Label htmlFor="requiresRegistration" className="font-normal">
+                Requires separate registration (attendees must book this session)
+              </Label>
+            </div>
+
+            <Button type="submit" className="w-full">
+              Create Sub-Event
+            </Button>
+          </form>
         </DialogContent>
       </Dialog>
     </div>
