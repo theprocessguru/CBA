@@ -38,6 +38,11 @@ interface DetailedOccupancy {
 export default function OccupancyDashboard() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  
+  // Building capacity limits
+  const BUILDING_MAX_CAPACITY = 250; // Total building capacity
+  const WARNING_THRESHOLD = 0.8; // 80% capacity warning
+  const CRITICAL_THRESHOLD = 0.95; // 95% capacity critical
 
   // Fetch current occupancy
   const { data: occupancy, isLoading: occupancyLoading } = useQuery<OccupancyData>({
@@ -147,6 +152,84 @@ export default function OccupancyDashboard() {
           </Button>
         </div>
       </div>
+
+      {/* Building Capacity Alert */}
+      {occupancy && (
+        <Card className={`${
+          occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * CRITICAL_THRESHOLD ? 'border-2 border-red-500 bg-red-50' :
+          occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * WARNING_THRESHOLD ? 'border-2 border-orange-500 bg-orange-50' :
+          'border-2 border-green-500 bg-green-50'
+        }`}>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold">Building Capacity Status</h3>
+                <p className="text-sm text-gray-600">
+                  Maximum safe capacity: {BUILDING_MAX_CAPACITY} people
+                </p>
+              </div>
+              <div className="text-right">
+                <div className={`text-3xl font-bold ${
+                  occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * CRITICAL_THRESHOLD ? 'text-red-700' :
+                  occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * WARNING_THRESHOLD ? 'text-orange-700' :
+                  'text-green-700'
+                }`}>
+                  {occupancy.totalInBuilding} / {BUILDING_MAX_CAPACITY}
+                </div>
+                <p className={`text-sm font-medium ${
+                  occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * CRITICAL_THRESHOLD ? 'text-red-600' :
+                  occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * WARNING_THRESHOLD ? 'text-orange-600' :
+                  'text-green-600'
+                }`}>
+                  {((occupancy.totalInBuilding / BUILDING_MAX_CAPACITY) * 100).toFixed(1)}% occupied
+                </p>
+              </div>
+            </div>
+            
+            {/* Capacity Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-4 relative overflow-hidden">
+              <div 
+                className={`h-full transition-all duration-500 ${
+                  occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * CRITICAL_THRESHOLD ? 'bg-red-500' :
+                  occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * WARNING_THRESHOLD ? 'bg-orange-500' :
+                  'bg-green-500'
+                }`}
+                style={{ width: `${Math.min((occupancy.totalInBuilding / BUILDING_MAX_CAPACITY) * 100, 100)}%` }}
+              />
+              {/* Warning threshold marker */}
+              <div className="absolute top-0 bottom-0 w-0.5 bg-orange-700" style={{ left: '80%' }} />
+              {/* Critical threshold marker */}
+              <div className="absolute top-0 bottom-0 w-0.5 bg-red-700" style={{ left: '95%' }} />
+            </div>
+            
+            {/* Capacity Messages */}
+            <div className="mt-3">
+              {occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY && (
+                <Badge className="bg-red-600 text-white">
+                  AT MAXIMUM CAPACITY - NO MORE ENTRIES
+                </Badge>
+              )}
+              {occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * CRITICAL_THRESHOLD && 
+               occupancy.totalInBuilding < BUILDING_MAX_CAPACITY && (
+                <Badge className="bg-red-500 text-white">
+                  CRITICAL: Approaching maximum capacity
+                </Badge>
+              )}
+              {occupancy.totalInBuilding >= BUILDING_MAX_CAPACITY * WARNING_THRESHOLD && 
+               occupancy.totalInBuilding < BUILDING_MAX_CAPACITY * CRITICAL_THRESHOLD && (
+                <Badge className="bg-orange-500 text-white">
+                  WARNING: Building at high capacity
+                </Badge>
+              )}
+              {occupancy.totalInBuilding < BUILDING_MAX_CAPACITY * WARNING_THRESHOLD && (
+                <Badge className="bg-green-500 text-white">
+                  Normal capacity - Safe to enter
+                </Badge>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Main Occupancy Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

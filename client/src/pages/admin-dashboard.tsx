@@ -54,6 +54,10 @@ interface ImpactMetrics {
   upcomingEvents: number;
   averageAttendanceRate: number;
   
+  // Building occupancy
+  currentOccupancy?: number;
+  maxBuildingCapacity?: number;
+  
   // Training metrics
   totalWorkshopsDelivered: number;
   totalPeopleTrained: number;
@@ -108,6 +112,13 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/impact-metrics'],
     enabled: isAuthenticated && (user as any)?.isAdmin
   });
+  
+  // Fetch building occupancy
+  const { data: occupancy } = useQuery<{ totalInBuilding: number }>({
+    queryKey: ['/api/ai-summit/occupancy'],
+    enabled: isAuthenticated && (user as any)?.isAdmin,
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
 
   if (isLoading) {
     return (
@@ -131,7 +142,7 @@ export default function AdminDashboard() {
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />
       <div className="flex-1">
-        <AdminContent metrics={metrics} />
+        <AdminContent metrics={metrics} occupancy={occupancy} />
       </div>
     </div>
   );
@@ -243,7 +254,7 @@ function AdminSidebar() {
   );
 }
 
-function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
+function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupancy?: { totalInBuilding: number } }) {
   if (!metrics) {
     return (
       <div className="container mx-auto p-6">
@@ -269,7 +280,7 @@ function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
           <Activity className="mr-2 h-6 w-6" />
           Live Running Totals
         </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           <div className="text-center">
             <div className="text-3xl font-bold">{metrics?.totalMembers || 0}</div>
             <div className="text-sm opacity-90">Total Members</div>
@@ -285,6 +296,17 @@ function AdminContent({ metrics }: { metrics?: ImpactMetrics }) {
           <div className="text-center">
             <div className="text-3xl font-bold">£{metrics?.economicImpact?.toLocaleString() || 0}</div>
             <div className="text-sm opacity-90">Economic Impact</div>
+          </div>
+          <div className={`text-center p-2 rounded-lg ${
+            occupancy && occupancy.totalInBuilding >= 238 ? 'bg-red-500' :
+            occupancy && occupancy.totalInBuilding >= 200 ? 'bg-orange-500' :
+            'bg-white/10'
+          }`}>
+            <div className="text-3xl font-bold">{occupancy?.totalInBuilding || 0}/250</div>
+            <div className="text-sm opacity-90">Building Capacity</div>
+            {occupancy && occupancy.totalInBuilding >= 238 && (
+              <div className="text-xs font-bold mt-1 animate-pulse">CRITICAL</div>
+            )}
           </div>
         </div>
         <div className="mt-4 pt-4 border-t border-white/20">
