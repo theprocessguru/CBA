@@ -4388,10 +4388,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/email-templates', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
+      // Extract only the fields that should be inserted
+      const { 
+        personType, 
+        templateName, 
+        subject, 
+        htmlContent, 
+        smsContent, 
+        mytTags, 
+        mytWorkflow, 
+        variables, 
+        isActive 
+      } = req.body;
+
       const [template] = await db
         .insert(emailTemplates)
         .values({
-          ...req.body,
+          personType,
+          templateName,
+          subject,
+          htmlContent,
+          smsContent,
+          mytTags,
+          mytWorkflow,
+          variables,
+          isActive,
           lastUpdatedBy: req.user.id
         })
         .returning();
@@ -4405,10 +4426,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put('/api/admin/email-templates/:id', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
+      // Extract only the fields that should be updated, excluding timestamps and IDs
+      const { 
+        personType, 
+        templateName, 
+        subject, 
+        htmlContent, 
+        smsContent, 
+        mytTags, 
+        mytWorkflow, 
+        variables, 
+        isActive 
+      } = req.body;
+
       const [template] = await db
         .update(emailTemplates)
         .set({
-          ...req.body,
+          personType,
+          templateName,
+          subject,
+          htmlContent,
+          smsContent,
+          mytTags,
+          mytWorkflow,
+          variables,
+          isActive,
           lastUpdatedBy: req.user.id,
           updatedAt: new Date()
         })
