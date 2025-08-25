@@ -557,6 +557,27 @@ export const aiSummitCheckIns = pgTable("ai_summit_check_ins", {
   staffMember: varchar("staff_member"), // Who processed the check-in
 });
 
+// Networking connections - tracks badge scans between attendees
+export const networkingConnections = pgTable("networking_connections", {
+  id: serial("id").primaryKey(),
+  scannerUserId: varchar("scanner_user_id").notNull().references(() => users.id), // Person who scanned
+  scannedUserId: varchar("scanned_user_id").notNull().references(() => users.id), // Person who was scanned
+  eventId: varchar("event_id"), // Optional: specific event where connection was made
+  eventName: varchar("event_name"), // Optional: name of the event
+  connectionNotes: text("connection_notes"), // Optional notes about the connection
+  followUpStatus: varchar("follow_up_status").default("pending"), // pending, contacted, connected
+  scannedAt: timestamp("scanned_at").defaultNow(),
+  lastInteraction: timestamp("last_interaction"),
+});
+
+export const insertNetworkingConnectionSchema = createInsertSchema(networkingConnections).omit({
+  id: true,
+  scannedAt: true,
+  lastInteraction: true,
+});
+export type InsertNetworkingConnection = z.infer<typeof insertNetworkingConnectionSchema>;
+export type NetworkingConnection = typeof networkingConnections.$inferSelect;
+
 // AI Summit volunteers table
 export const aiSummitVolunteers = pgTable("ai_summit_volunteers", {
   id: serial("id").primaryKey(),

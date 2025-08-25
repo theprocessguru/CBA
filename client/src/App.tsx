@@ -45,7 +45,7 @@ import OffersPage from "@/pages/offers";
 import ContactPage from "@/pages/contact";
 import About from "@/pages/About";
 import MyTAccounting from "@/pages/myt-accounting";
-import BadgeScanner from "@/pages/badge-scanner";
+import NetworkBadgeScanner from "@/pages/BadgeScanner";
 import WorkshopManagement from "@/pages/workshop-management";
 import WorkshopRegistration from "@/pages/workshop-registration";
 import WorkshopScanner from "@/pages/workshop-scanner";
@@ -255,6 +255,20 @@ function Router() {
         <MainLayout>
           <EventsPage />
         </MainLayout>
+      </Route>
+      <Route path="/attendee-booking">
+        <ProtectedRoute>
+          <MainLayout>
+            <AttendeeBooking />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/badge-scanner">
+        <ProtectedRoute>
+          <MainLayout>
+            <NetworkBadgeScanner />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       <Route path="/jobs">
         <MainLayout>
@@ -479,7 +493,7 @@ function Router() {
       </Route>
       <Route path="/admin/badge-scanner">
         <MainLayout>
-          <BadgeScanner />
+          <NetworkBadgeScanner />
         </MainLayout>
       </Route>
       <Route path="/admin/workshop-scanner">

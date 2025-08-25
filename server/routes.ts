@@ -73,6 +73,7 @@ import {
   type AISummitRegistration,
   emailTemplates,
   businessEvents,
+  networkingConnections,
   businessEventRegistrations,
   insertBusinessEventSchema,
   insertBusinessEventRegistrationSchema,
@@ -8928,7 +8929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // QR Code Scanning Interface Route
-  app.get('/api/user-by-qr/:qrHandle', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user-by-qr/:qrHandle', async (req: any, res) => {
     try {
       const { qrHandle } = req.params;
       
@@ -8946,19 +8947,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const userData = user[0];
       
-      // Return safe user data for scanning
+      // Return safe user data for scanning (include more details for networking)
       res.json({
         id: userData.id,
         firstName: userData.firstName,
         lastName: userData.lastName,
+        email: userData.email,
         company: userData.company,
         jobTitle: userData.jobTitle,
+        phone: userData.phone,
+        bio: userData.bio,
+        profileImageUrl: userData.profileImageUrl,
         qrHandle: userData.qrHandle,
         title: userData.title
       });
     } catch (error) {
       console.error("Error fetching user by QR handle:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Networking Connections Routes
+  app.get('/api/networking/connections', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      // Fetch all connections for the current user
+      const connections = await db
+        .select({
+          id: networkingConnections.id,
+          scannedUserId: networkingConnections.scannedUserId,
+          eventId: networkingConnections.eventId,
+          eventName: networkingConnections.eventName,
+          connectionNotes: networkingConnections.connectionNotes,
+          followUpStatus: networkingConnections.followUpStatus,
+          scannedAt: networkingConnections.scannedAt,
+          scannedUser: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            company: users.company,
+            jobTitle: users.jobTitle,
+            phone: users.phone
+          }
+        })
+        .from(networkingConnections)
+        .leftJoin(users, eq(networkingConnections.scannedUserId, users.id))
+        .where(eq(networkingConnections.scannerUserId, userId))
+        .orderBy(desc(networkingConnections.scannedAt));
+      
+      res.json(connections);
+    } catch (error) {
+      console.error("Error fetching networking connections:", error);
+      res.status(500).json({ message: "Failed to fetch connections" });
+    }
+  });
+
+  app.post('/api/networking/connections', isAuthenticated, async (req: any, res) => {
+    try {
+      const scannerUserId = req.user.id;
+      const { scannedUserId, eventId, eventName, connectionNotes } = req.body;
+      
+      // Check if connection already exists
+      const existingConnection = await db
+        .select()
+        .from(networkingConnections)
+        .where(
+          and(
+            eq(networkingConnections.scannerUserId, scannerUserId),
+            eq(networkingConnections.scannedUserId, scannedUserId)
+          )
+        )
+        .limit(1);
+      
+      if (existingConnection.length > 0) {
+        // Update existing connection
+        const [updated] = await db
+          .update(networkingConnections)
+          .set({
+            connectionNotes: connectionNotes,
+            lastInteraction: new Date()
+          })
+          .where(eq(networkingConnections.id, existingConnection[0].id))
+          .returning();
+        
+        res.json(updated);
+      } else {
+        // Create new connection
+        const [connection] = await db
+          .insert(networkingConnections)
+          .values({
+            scannerUserId,
+            scannedUserId,
+            eventId,
+            eventName,
+            connectionNotes,
+            followUpStatus: 'pending'
+          })
+          .returning();
+        
+        res.json(connection);
+      }
+    } catch (error) {
+      console.error("Error saving networking connection:", error);
+      res.status(500).json({ message: "Failed to save connection" });
     }
   });
 

@@ -15,6 +15,7 @@ import {
   ChevronUp,
   Plus,
   Gift,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Business, Offer, Product } from "@shared/schema";
@@ -153,7 +154,7 @@ const DashboardOverview = () => {
       
       <div>
         <h4 className="font-medium text-neutral-900 mb-4">Quick Actions</h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Link href="/dashboard/business-profile">
             <Button className="w-full justify-start" variant="outline">
               <Building className="mr-2 h-4 w-4" />
@@ -170,6 +171,12 @@ const DashboardOverview = () => {
             <Button className="w-full justify-start" variant="outline">
               <Tag className="mr-2 h-4 w-4" />
               Create Offer
+            </Button>
+          </Link>
+          <Link href="/badge-scanner">
+            <Button className="w-full justify-start" variant="outline">
+              <QrCode className="mr-2 h-4 w-4" />
+              Scan Badges
             </Button>
           </Link>
         </div>
