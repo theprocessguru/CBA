@@ -36,6 +36,7 @@ Navigation: Logged-in users only see logo and action buttons (Scanner, Mobile Ba
 - **Affiliate Programme**: Complete referral system with automatic enrollment, commission tracking, and Stripe integration for payouts.
 - **Admin Tools**: Business analytics dashboard focused on funding and impact reporting (total members, trained individuals, events, jobs, stakeholder percentages, economic impact KPIs), enhanced membership benefits management, event management, and contact import system. Comprehensive admin management including editing, password reset, and removal with safety features and email domain validation.
 - **Onboarding System**: Personalized welcome messages for all stakeholder types (volunteers, VIPs, attendees, team members, speakers, exhibitors, sponsors) with automatic onboarding on registration, admin management interface for manual triggers, and bulk send capabilities.
+- **Jobs Board**: Complete recruitment platform where registered businesses can post job opportunities, and attendees/students with free non-business membership can upload resumes and apply for positions. Includes job search filters, application tracking, saved searches, and QR code generation for workshop access. Features cover letter submission, application status tracking, and comprehensive job management for businesses.
 
 ## External Dependencies
 - **Database**: Neon PostgreSQL serverless database.
