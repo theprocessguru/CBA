@@ -277,14 +277,20 @@ export default function EventManagement() {
         formData.set("status", status);
         onSubmit(formData);
       }} className="space-y-4">
+        <div>
+          <Label htmlFor="title">Event Title</Label>
+          <Input name="title" defaultValue={event?.eventName || event?.title} required />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="title">Event Title</Label>
-            <Input name="title" defaultValue={event?.eventName || event?.title} required />
-          </div>
-          <div>
-            <Label htmlFor="eventType">Event Type</Label>
-            <Select value={eventType} onValueChange={setEventType}>
+            <Label htmlFor="eventType">Event Type (Select or Enter Custom)</Label>
+            <Select value={eventType} onValueChange={(value) => {
+              setEventType(value);
+              if (value !== "other") {
+                setCustomEventType("");
+              }
+            }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -296,24 +302,25 @@ export default function EventManagement() {
                 <SelectItem value="conference">Conference</SelectItem>
                 <SelectItem value="summit">Summit</SelectItem>
                 <SelectItem value="community">Community Event</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="other">Other (Use Custom Type)</SelectItem>
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label htmlFor="customEventType">Or Enter Custom Type</Label>
+            <Input 
+              name="customEventType" 
+              value={customEventType}
+              onChange={(e) => {
+                setCustomEventType(e.target.value);
+                if (e.target.value) {
+                  setEventType("other");
+                }
+              }}
+              placeholder="e.g., Hackathon, Meetup, Exhibition"
+            />
+          </div>
         </div>
-
-      {eventType === "other" && (
-        <div>
-          <Label htmlFor="customEventType">Custom Event Type</Label>
-          <Input 
-            name="customEventType" 
-            value={customEventType}
-            onChange={(e) => setCustomEventType(e.target.value)}
-            placeholder="Enter custom event type"
-            required
-          />
-        </div>
-      )}
 
       <div>
         <Label htmlFor="description">Description</Label>
