@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Users, MapPin, Calendar, Check, X } from "lucide-react";
+import { Clock, Users, MapPin, Calendar, Check, X, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 
 interface TimeSlot {
@@ -169,7 +169,12 @@ export default function AttendeeBooking() {
           const availableSeats = maxAllowed - slot.currentAttendees;
 
           return (
-            <Card key={slot.id} className={`${registered ? 'ring-2 ring-green-500' : ''}`}>
+            <Card key={slot.id} className={`${
+              registered ? 'ring-2 ring-green-500' : 
+              isFull ? 'opacity-75 bg-gray-50' :
+              availableSeats <= 5 ? 'ring-2 ring-red-400 animate-pulse' :
+              ''
+            }`}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
@@ -196,11 +201,27 @@ export default function AttendeeBooking() {
                       <MapPin className="w-4 h-4 mr-1" />
                       {slot.room}
                     </div>
-                    <div className="flex items-center text-sm text-gray-500">
-                      <Users className="w-4 h-4 mr-1" />
-                      {availableSeats} of {maxAllowed} seats available
-                      {slot.room === 'Auditorium' && <span className="ml-1 text-xs">(Auditorium max: 80)</span>}
-                      {slot.room === 'Classroom' && <span className="ml-1 text-xs">(Classroom max: 65)</span>}
+                    <div className="mt-2">
+                      {isFull ? (
+                        <Badge className="bg-red-100 text-red-800 font-bold px-3 py-1">
+                          SOLD OUT
+                        </Badge>
+                      ) : (
+                        <div className={`inline-flex items-center px-3 py-1 rounded-lg font-medium ${
+                          availableSeats <= 5 ? 'bg-red-100 text-red-800' :
+                          availableSeats <= 10 ? 'bg-orange-100 text-orange-800' :
+                          availableSeats <= 20 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          <Users className="w-4 h-4 mr-1" />
+                          <span className="font-bold text-lg">{availableSeats}</span>
+                          <span className="ml-1 text-sm">seats left</span>
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-500 mt-1">
+                        {slot.room === 'Auditorium' && 'Max capacity: 80'}
+                        {slot.room === 'Classroom' && 'Max capacity: 65'}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -237,13 +258,32 @@ export default function AttendeeBooking() {
                         <X className="w-4 h-4 mr-1" />
                         Cancel Registration
                       </Button>
+                    ) : isFull ? (
+                      <Button
+                        disabled
+                        variant="outline"
+                        className="cursor-not-allowed bg-gray-100 text-gray-500 border-gray-300"
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Sold Out
+                      </Button>
                     ) : (
                       <Button
                         onClick={() => registerMutation.mutate(slot.id)}
-                        disabled={registerMutation.isPending || isFull}
-                        className={isFull ? "opacity-50 cursor-not-allowed" : ""}
+                        disabled={registerMutation.isPending}
+                        className={`${
+                          availableSeats <= 5 ? 'bg-red-600 hover:bg-red-700' :
+                          availableSeats <= 10 ? 'bg-orange-600 hover:bg-orange-700' :
+                          ''
+                        }`}
                       >
-                        {isFull ? "Fully Booked" : "Book Seat"}
+                        {availableSeats <= 5 && (
+                          <AlertTriangle className="w-4 h-4 mr-1 animate-pulse" />
+                        )}
+                        Book Seat
+                        {availableSeats <= 5 && (
+                          <span className="ml-1 text-xs">(Only {availableSeats} left!)</span>
+                        )}
                       </Button>
                     )}
                   </div>
