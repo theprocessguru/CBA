@@ -250,11 +250,20 @@ export default function EventManagement() {
     submitText: string;
   }) => {
     const [eventType, setEventType] = useState(event?.eventType || "workshop");
+    const [customEventType, setCustomEventType] = useState("");
     const [status, setStatus] = useState(event?.status || "draft");
     
     // Reset form state when event changes
     useEffect(() => {
-      setEventType(event?.eventType || "workshop");
+      // Check if the event type is one of the predefined types
+      const predefinedTypes = ["workshop", "seminar", "networking", "training", "conference", "summit", "community"];
+      if (event?.eventType && !predefinedTypes.includes(event.eventType)) {
+        setEventType("other");
+        setCustomEventType(event.eventType);
+      } else {
+        setEventType(event?.eventType || "workshop");
+        setCustomEventType("");
+      }
       setStatus(event?.status || "draft");
     }, [event]);
     
@@ -262,7 +271,9 @@ export default function EventManagement() {
       <form onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        formData.set("eventType", eventType);
+        // Use custom event type if "other" is selected
+        const finalEventType = eventType === "other" ? customEventType : eventType;
+        formData.set("eventType", finalEventType);
         formData.set("status", status);
         onSubmit(formData);
       }} className="space-y-4">
@@ -284,11 +295,25 @@ export default function EventManagement() {
                 <SelectItem value="training">Training</SelectItem>
                 <SelectItem value="conference">Conference</SelectItem>
                 <SelectItem value="summit">Summit</SelectItem>
+                <SelectItem value="community">Community Event</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
+
+      {eventType === "other" && (
+        <div>
+          <Label htmlFor="customEventType">Custom Event Type</Label>
+          <Input 
+            name="customEventType" 
+            value={customEventType}
+            onChange={(e) => setCustomEventType(e.target.value)}
+            placeholder="Enter custom event type"
+            required
+          />
+        </div>
+      )}
 
       <div>
         <Label htmlFor="description">Description</Label>
