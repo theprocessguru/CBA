@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,8 @@ export default function EventManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setShowCreateDialog(false);
+      setImageFile(null);
+      setImagePreview(null);
       toast({
         title: "Event Created",
         description: "New event has been created successfully",
@@ -98,9 +100,11 @@ export default function EventManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
       setShowEditDialog(false);
       setSelectedEvent(null);
+      setImageFile(null);
+      setImagePreview(null);
       toast({
         title: "Event Updated",
         description: "Event has been updated successfully",
@@ -237,34 +241,47 @@ export default function EventManagement() {
     event?: Event;
     onSubmit: (formData: FormData) => void;
     submitText: string;
-  }) => (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      onSubmit(new FormData(e.currentTarget));
-    }} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="title">Event Title</Label>
-          <Input name="title" defaultValue={event?.eventName} required />
+  }) => {
+    const [eventType, setEventType] = useState(event?.eventType || "workshop");
+    const [status, setStatus] = useState(event?.status || "draft");
+    
+    // Reset form state when event changes
+    useEffect(() => {
+      setEventType(event?.eventType || "workshop");
+      setStatus(event?.status || "draft");
+    }, [event]);
+    
+    return (
+      <form onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        formData.set("eventType", eventType);
+        formData.set("status", status);
+        onSubmit(formData);
+      }} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="title">Event Title</Label>
+            <Input name="title" defaultValue={event?.eventName || event?.title} required />
+          </div>
+          <div>
+            <Label htmlFor="eventType">Event Type</Label>
+            <Select value={eventType} onValueChange={setEventType}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="workshop">Workshop</SelectItem>
+                <SelectItem value="seminar">Seminar</SelectItem>
+                <SelectItem value="networking">Networking</SelectItem>
+                <SelectItem value="training">Training</SelectItem>
+                <SelectItem value="conference">Conference</SelectItem>
+                <SelectItem value="summit">Summit</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div>
-          <Label htmlFor="eventType">Event Type</Label>
-          <Select name="eventType" defaultValue={event?.eventType || "workshop"}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="workshop">Workshop</SelectItem>
-              <SelectItem value="seminar">Seminar</SelectItem>
-              <SelectItem value="networking">Networking</SelectItem>
-              <SelectItem value="training">Training</SelectItem>
-              <SelectItem value="conference">Conference</SelectItem>
-              <SelectItem value="summit">Summit</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
 
       <div>
         <Label htmlFor="description">Description</Label>
@@ -323,7 +340,7 @@ export default function EventManagement() {
         </div>
         <div>
           <Label htmlFor="status">Status</Label>
-          <Select name="status" defaultValue={event?.status || "draft"}>
+          <Select value={status} onValueChange={setStatus}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -348,10 +365,10 @@ export default function EventManagement() {
       <div>
         <Label>Event Logo/Image</Label>
         <div className="space-y-2">
-          {imagePreview && (
+          {(imagePreview || event?.imageUrl) && (
             <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
               <img 
-                src={imagePreview} 
+                src={imagePreview || event?.imageUrl} 
                 alt="Event preview" 
                 className="w-full h-full object-cover"
               />
@@ -417,7 +434,8 @@ export default function EventManagement() {
         {submitText}
       </Button>
     </form>
-  );
+    );
+  };
 
   if (eventsLoading) {
     return <div className="flex justify-center py-8">Loading events...</div>;
@@ -430,7 +448,13 @@ export default function EventManagement() {
           <h1 className="text-3xl font-bold">Event Management</h1>
           <p className="text-muted-foreground">Create and manage general events, workshops, and seminars</p>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <Dialog open={showCreateDialog} onOpenChange={(open) => {
+          if (open) {
+            setImageFile(null);
+            setImagePreview(null);
+          }
+          setShowCreateDialog(open);
+        }}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="w-4 h-4 mr-2" />
@@ -515,6 +539,8 @@ export default function EventManagement() {
                       variant="outline"
                       onClick={() => {
                         setSelectedEvent(event);
+                        setImageFile(null);
+                        setImagePreview(event.imageUrl || null);
                         setShowEditDialog(true);
                       }}
                     >
@@ -572,14 +598,21 @@ export default function EventManagement() {
       </Tabs>
 
       {/* Edit Event Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+      <Dialog open={showEditDialog} onOpenChange={(open) => {
+        if (!open) {
+          setSelectedEvent(null);
+          setImageFile(null);
+          setImagePreview(null);
+        }
+        setShowEditDialog(open);
+      }}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Event</DialogTitle>
           </DialogHeader>
           {selectedEvent && (
             <EventForm 
-              event={selectedEvent} 
+              event={selectedEvent || undefined} 
               onSubmit={handleEditEvent} 
               submitText="Update Event" 
             />
