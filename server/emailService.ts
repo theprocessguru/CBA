@@ -22,11 +22,8 @@ export class EmailService {
     if (process.env.BASE_URL) {
       return process.env.BASE_URL;
     }
-    if (process.env.REPLIT_DOMAINS) {
-      const domain = process.env.REPLIT_DOMAINS.split(',')[0];
-      return `https://${domain}`;
-    }
-    return 'http://localhost:5000';
+    // Always use production domain for email links
+    return 'https://member.croydonba.org.uk';
   }
 
   private initializeFromEnv() {

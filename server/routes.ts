@@ -6040,7 +6040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Redirect to login page with success message
-      const baseUrl = process.env.BASE_URL || (process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : 'http://localhost:5000');
+      const baseUrl = process.env.BASE_URL || 'https://member.croydonba.org.uk';
       res.redirect(`${baseUrl}/login?verified=true`);
       
     } catch (error: any) {
