@@ -1849,12 +1849,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User is not an administrator" });
       }
       
-      // Validate email domain if email is being changed
-      if (email && email !== user.email && !email.endsWith('@croydonba.org.uk')) {
-        return res.status(400).json({ 
-          message: "Administrator email must use @croydonba.org.uk domain" 
-        });
-      }
+      // Email validation - allow any valid email format
+      // Removed domain restriction to allow personal emails (Gmail, Yahoo, etc.)
       
       // Check if new email is already in use
       if (email && email !== user.email) {

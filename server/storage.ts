@@ -1691,34 +1691,51 @@ export class DatabaseStorage implements IStorage {
     totalCheckedOut: number; 
     lastUpdated: Date 
   }> {
-    // Get the latest check-in record for each badge
-    const latestCheckIns = await db
-      .selectDistinct({
-        badgeId: aiSummitCheckIns.badgeId,
-        checkInType: aiSummitCheckIns.checkInType,
-        timestamp: aiSummitCheckIns.timestamp,
-      })
-      .from(aiSummitCheckIns)
-      .innerJoin(
-        db.select({
-          badgeId: aiSummitCheckIns.badgeId,
-          maxTimestamp: sql<Date>`MAX(${aiSummitCheckIns.timestamp})`.as('maxTimestamp'),
-        })
+    try {
+      // Get all check-ins from the database
+      const allCheckIns = await db
+        .select()
         .from(aiSummitCheckIns)
-        .groupBy(aiSummitCheckIns.badgeId)
-        .as('latest'),
-        sql`${aiSummitCheckIns.badgeId} = latest.badge_id AND ${aiSummitCheckIns.timestamp} = latest.max_timestamp`
-      );
+        .orderBy(desc(aiSummitCheckIns.timestamp));
 
-    const checkedInCount = latestCheckIns.filter(record => record.checkInType === 'check_in').length;
-    const checkedOutCount = latestCheckIns.filter(record => record.checkInType === 'check_out').length;
-    
-    return {
-      totalInBuilding: checkedInCount,
-      totalCheckedIn: latestCheckIns.filter(record => record.checkInType === 'check_in').length,
-      totalCheckedOut: latestCheckIns.filter(record => record.checkInType === 'check_out').length,
-      lastUpdated: new Date(),
-    };
+      // Group by badge ID to get latest status for each badge
+      const badgeStatusMap = new Map<string, string>();
+      
+      for (const checkIn of allCheckIns) {
+        // Only set if we haven't seen this badge yet (first one is the latest due to ordering)
+        if (!badgeStatusMap.has(checkIn.badgeId)) {
+          badgeStatusMap.set(checkIn.badgeId, checkIn.checkInType);
+        }
+      }
+
+      // Count the current statuses
+      let checkedInCount = 0;
+      let checkedOutCount = 0;
+      
+      for (const status of badgeStatusMap.values()) {
+        if (status === 'check_in') {
+          checkedInCount++;
+        } else if (status === 'check_out') {
+          checkedOutCount++;
+        }
+      }
+      
+      return {
+        totalInBuilding: checkedInCount,
+        totalCheckedIn: checkedInCount,
+        totalCheckedOut: checkedOutCount,
+        lastUpdated: new Date(),
+      };
+    } catch (error) {
+      console.error("Error in getCurrentOccupancy:", error);
+      // Return safe defaults if query fails
+      return {
+        totalInBuilding: 0,
+        totalCheckedIn: 0,
+        totalCheckedOut: 0,
+        lastUpdated: new Date(),
+      };
+    }
   }
 
   async getDetailedOccupancy(): Promise<{
