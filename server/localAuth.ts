@@ -411,13 +411,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
       // Token is valid, fetch user
       const user = await storage.getUser(tokenData.userId);
       if (user) {
-        req.user = {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          isAdmin: user.isAdmin || false
-        };
+        req.user = user; // Use the full user object
         console.log("Authenticated via token:", user.id, user.email);
         return next();
       }
@@ -440,13 +434,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   }
 
   // Attach full user data including isAdmin flag
-  req.user = {
-    id: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    isAdmin: user.isAdmin || false
-  };
+  req.user = user; // Use the full user object
   console.log("Authenticated via session:", user.id, user.email);
   next();
 };
