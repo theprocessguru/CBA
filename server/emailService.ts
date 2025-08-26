@@ -23,7 +23,7 @@ export class EmailService {
       return process.env.BASE_URL;
     }
     // Always use production domain for email links
-    return 'https://member.croydonba.org.uk';
+    return 'https://members.croydonba.org.uk';
   }
 
   private initializeFromEnv() {
