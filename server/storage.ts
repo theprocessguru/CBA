@@ -1692,11 +1692,11 @@ export class DatabaseStorage implements IStorage {
     lastUpdated: Date 
   }> {
     try {
-      // Get all check-ins from the database
+      // Get all check-ins from the database, ordered by timestamp descending
       const allCheckIns = await db
         .select()
         .from(aiSummitCheckIns)
-        .orderBy(desc(aiSummitCheckIns.timestamp));
+        .orderBy(sql`${aiSummitCheckIns.timestamp} DESC`);
 
       // Group by badge ID to get latest status for each badge
       const badgeStatusMap = new Map<string, string>();
