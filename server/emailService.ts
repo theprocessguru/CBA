@@ -111,7 +111,8 @@ export class EmailService {
   async sendVerificationEmail(
     recipientEmail: string,
     recipientName: string,
-    verificationToken: string
+    verificationToken: string,
+    participantType: string = 'attendee'
   ): Promise<{ success: boolean; message: string }> {
     if (!this.isConfigured()) {
       return {
@@ -123,11 +124,52 @@ export class EmailService {
     const baseUrl = this.getBaseUrl();
     const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
 
+    // Customize message based on participant type
+    const welcomeMessages = {
+      attendee: {
+        greeting: "Welcome to the Croydon Business Association!",
+        message: "Thank you for registering as an attendee. Once verified, you'll gain access to event information, networking opportunities, and your personalized QR code for seamless event check-ins.",
+        benefits: ["Access event schedules and updates", "Network with other attendees", "Download your event badges", "Receive important announcements"]
+      },
+      vip: {
+        greeting: "Welcome to our VIP Community!",
+        message: "We're honored to have you as a VIP member of the Croydon Business Association. Your verification unlocks exclusive access to VIP events, priority seating, and premium networking opportunities.",
+        benefits: ["VIP lounge access at events", "Priority registration for workshops", "Exclusive networking sessions", "Complimentary refreshments"]
+      },
+      volunteer: {
+        greeting: "Welcome to our Volunteer Team!",
+        message: "Thank you for joining our volunteer community! Your dedication helps make our events successful. Once verified, you'll receive your volunteer badge and access to coordinator resources.",
+        benefits: ["Access volunteer schedules", "Coordinator contact information", "Volunteer recognition program", "Training resources and guides"]
+      },
+      team: {
+        greeting: "Welcome to the CBA Team!",
+        message: "Welcome aboard! As a team member, you're at the heart of the Croydon Business Association. Verify your email to access internal tools, team resources, and your official staff credentials.",
+        benefits: ["Admin dashboard access", "Event management tools", "Team communication channels", "Staff identification badge"]
+      },
+      speaker: {
+        greeting: "Welcome, Distinguished Speaker!",
+        message: "We're thrilled to have you as a speaker at our events. Verification gives you access to speaker resources, session management tools, and your speaker badge with special privileges.",
+        benefits: ["Speaker green room access", "Presentation upload portal", "Session scheduling tools", "Professional networking opportunities"]
+      },
+      exhibitor: {
+        greeting: "Welcome to our Exhibition Network!",
+        message: "Thank you for joining as an exhibitor. Once verified, you can manage your exhibition space, access exhibitor resources, and receive your exhibitor credentials for setup and access.",
+        benefits: ["Exhibition space management", "Setup and breakdown schedules", "Lead capture tools", "Exhibitor directory listing"]
+      },
+      sponsor: {
+        greeting: "Welcome, Valued Sponsor!",
+        message: "We deeply appreciate your sponsorship of the Croydon Business Association. Verification unlocks sponsor benefits, branding opportunities, and your sponsor recognition badge.",
+        benefits: ["Brand visibility at events", "Speaking opportunities", "VIP event invitations", "Sponsorship impact reports"]
+      }
+    };
+
+    const { greeting, message, benefits } = welcomeMessages[participantType] || welcomeMessages.attendee;
+
     try {
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
-        subject: `Please Verify Your Email - Croydon Business Association`,
+        subject: `${greeting} - Please Verify Your Email`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
@@ -136,11 +178,19 @@ export class EmailService {
             </div>
             
             <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
-              <h2 style="color: #1f2937; margin-top: 0;">Hello ${recipientName}!</h2>
+              <h2 style="color: #1f2937; margin-top: 0;">${greeting}</h2>
+              <p style="color: #374151; font-size: 18px; margin: 10px 0;">Hello ${recipientName}!</p>
               
               <p style="color: #4b5563; line-height: 1.6;">
-                Thank you for registering with the Croydon Business Association. To complete your registration and access your QR codes and event badges, please verify your email address.
+                ${message}
               </p>
+              
+              <div style="background: #eff6ff; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="margin: 0 0 10px 0; color: #1e40af;">Your benefits include:</h4>
+                <ul style="margin: 0; padding-left: 20px; color: #1e40af; line-height: 1.8;">
+                  ${benefits.map(benefit => `<li>${benefit}</li>`).join('')}
+                </ul>
+              </div>
               
               <div style="text-align: center; margin: 30px 0;">
                 <a href="${verificationLink}" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
@@ -168,9 +218,11 @@ export class EmailService {
           </div>
         `,
         text: `
+          ${greeting}
+          
           Hello ${recipientName}!
           
-          Thank you for registering with the Croydon Business Association.
+          ${message}
           
           Please verify your email address by clicking the following link:
           ${verificationLink}

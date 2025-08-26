@@ -5980,7 +5980,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const emailResult = await emailService.sendVerificationEmail(
             email,
             name,
-            verificationToken
+            verificationToken,
+            participantType || 'attendee'
           );
           
           if (!emailResult.success) {
