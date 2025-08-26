@@ -190,7 +190,12 @@ export default function EmailTemplates() {
   };
 
   const handleSelectTemplate = (template: EmailTemplate) => {
-    setSelectedTemplate(template);
+    // Create a deep copy to prevent reference issues
+    setSelectedTemplate({
+      ...template,
+      mytTags: template.mytTags ? [...template.mytTags] : [],
+      variables: template.variables ? [...template.variables] : [],
+    });
     setIsCreatingNew(false);
     setEditorMode("visual"); // Default to visual mode when opening
   };
