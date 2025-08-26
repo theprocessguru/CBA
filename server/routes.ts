@@ -5998,6 +5998,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error: any) {
       console.error("AI Summit registration error:", error);
+      console.error("Registration attempt details:", { 
+        email: req.body.email, 
+        name: req.body.name, 
+        timestamp: new Date().toISOString() 
+      });
       res.status(500).json({ 
         message: "Registration failed. Please try again or contact support." 
       });
