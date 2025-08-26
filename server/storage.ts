@@ -1696,7 +1696,7 @@ export class DatabaseStorage implements IStorage {
       const allCheckIns = await db
         .select()
         .from(aiSummitCheckIns)
-        .orderBy(sql`${aiSummitCheckIns.timestamp} DESC`);
+        .orderBy(desc(aiSummitCheckIns.timestamp));
 
       // Group by badge ID to get latest status for each badge
       const badgeStatusMap = new Map<string, string>();
