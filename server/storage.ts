@@ -1696,7 +1696,7 @@ export class DatabaseStorage implements IStorage {
       const allCheckIns = await db
         .select()
         .from(aiSummitCheckIns)
-        .orderBy(desc(aiSummitCheckIns.timestamp));
+        .orderBy(desc(aiSummitCheckIns.checkInTime));
 
       // Group by badge ID to get latest status for each badge
       const badgeStatusMap = new Map<string, string>();
@@ -1755,7 +1755,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         badgeId: aiSummitCheckIns.badgeId,
         checkInType: aiSummitCheckIns.checkInType,
-        timestamp: aiSummitCheckIns.timestamp,
+        timestamp: aiSummitCheckIns.checkInTime,
         staffMember: aiSummitCheckIns.staffMember,
         name: aiSummitBadges.name,
         participantType: aiSummitBadges.participantType,
@@ -1765,14 +1765,17 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(
         db.select({
           badgeId: aiSummitCheckIns.badgeId,
-          maxTimestamp: sql<Date>`MAX(${aiSummitCheckIns.timestamp})`.as('maxTimestamp'),
+          maxTimestamp: sql<Date>`MAX(${aiSummitCheckIns.checkInTime})`.as('maxTimestamp'),
         })
         .from(aiSummitCheckIns)
         .groupBy(aiSummitCheckIns.badgeId)
         .as('latest'),
-        sql`${aiSummitCheckIns.badgeId} = latest.badge_id AND ${aiSummitCheckIns.timestamp} = latest.max_timestamp`
+        and(
+          eq(aiSummitCheckIns.badgeId, sql`latest.badge_id`),
+          eq(aiSummitCheckIns.checkInTime, sql`latest.max_timestamp`)
+        )
       )
-      .orderBy(desc(aiSummitCheckIns.timestamp));
+      .orderBy(desc(aiSummitCheckIns.checkInTime));
 
     // Group by participant type
     const byParticipantType: Record<string, { checkedIn: number; checkedOut: number }> = {};
@@ -1798,12 +1801,12 @@ export class DatabaseStorage implements IStorage {
         name: aiSummitBadges.name,
         participantType: aiSummitBadges.participantType,
         checkInType: aiSummitCheckIns.checkInType,
-        timestamp: aiSummitCheckIns.timestamp,
+        timestamp: aiSummitCheckIns.checkInTime,
         staffMember: aiSummitCheckIns.staffMember,
       })
       .from(aiSummitCheckIns)
       .innerJoin(aiSummitBadges, eq(aiSummitCheckIns.badgeId, aiSummitBadges.badgeId))
-      .orderBy(desc(aiSummitCheckIns.timestamp))
+      .orderBy(desc(aiSummitCheckIns.checkInTime))
       .limit(50);
 
     return {
@@ -1824,14 +1827,14 @@ export class DatabaseStorage implements IStorage {
     // Get check-in activity grouped by hour
     const hourlyActivity = await db
       .select({
-        hour: sql<string>`DATE_TRUNC('hour', ${aiSummitCheckIns.timestamp})`.as('hour'),
+        hour: sql<string>`DATE_TRUNC('hour', ${aiSummitCheckIns.checkInTime})`.as('hour'),
         checkInType: aiSummitCheckIns.checkInType,
         count: sql<number>`COUNT(*)`.as('count'),
       })
       .from(aiSummitCheckIns)
-      .where(sql`${aiSummitCheckIns.timestamp} >= ${hoursAgo}`)
-      .groupBy(sql`DATE_TRUNC('hour', ${aiSummitCheckIns.timestamp})`, aiSummitCheckIns.checkInType)
-      .orderBy(sql`DATE_TRUNC('hour', ${aiSummitCheckIns.timestamp})`);
+      .where(sql`${aiSummitCheckIns.checkInTime} >= ${hoursAgo}`)
+      .groupBy(sql`DATE_TRUNC('hour', ${aiSummitCheckIns.checkInTime})`, aiSummitCheckIns.checkInType)
+      .orderBy(sql`DATE_TRUNC('hour', ${aiSummitCheckIns.checkInTime})`);
 
     // Process into hourly totals
     const historyMap = new Map<string, { 
