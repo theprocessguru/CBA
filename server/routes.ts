@@ -17,6 +17,8 @@ import {
   insertInteractionSchema,
   insertAISummitVolunteerSchema,
   insertAISummitTeamMemberSchema,
+  insertMarketplaceListingSchema,
+  insertBarterListingSchema,
   aiSummitRegistrations,
   aiSummitBadges,
   personalBadges,
@@ -2368,7 +2370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         currency: "gbp", // British pounds for CBA
         description,
         metadata: {
-          userId: req.user?.id || 'anonymous',
+          userId: (req.user as any)?.id || 'anonymous',
           businessAssociation: 'CBA'
         }
       });
@@ -3601,7 +3603,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           scannedUserId = userByHandle.id;
           attendeeData = {
             badgeId: userByHandle.qrHandle,
-            name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.name,
+            name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.email || 'Unknown',
             email: userByHandle.email,
             participantType: userByHandle.participantType || 'attendee',
             company: userByHandle.company,
