@@ -5874,11 +5874,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             customRole,
             primaryRole: participantType || 'attendee',
             eventCheckedIn: false,
-            aiSummitRegistered: true,
-            badgeId: badge?.badgeId,
-            badgeDesign: badge?.design || 'standard',
-            badgeColor: badge?.color || 'blue',
-            accessLevel: badge?.accessLevel || 'basic'
+            aiSummitRegistered: true
           };
 
           // Use the enhanced sync method
