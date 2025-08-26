@@ -73,6 +73,7 @@ import QuickLogin from "@/pages/quick-login";
 import ScannerManagement from "@/pages/admin/scanner-management";
 import AdminBadges from "@/pages/admin/badges";
 import AttendanceDashboard from "@/pages/admin/attendance-dashboard";
+import VerifyEmail from "@/pages/verify-email";
 import AttendanceReport from "@/pages/admin/attendance-report";
 import MultiRoleDemo from "@/pages/multi-role-demo";
 import MobileBadgePage from "@/pages/mobile-badge";
@@ -207,6 +208,9 @@ function Router() {
       </Route>
       <Route path="/reset-password">
         <ResetPassword />
+      </Route>
+      <Route path="/verify-email">
+        <VerifyEmail />
       </Route>
       <Route path="/auth-test">
         <AuthTest />
