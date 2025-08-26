@@ -124,113 +124,110 @@ export class EmailService {
     const baseUrl = this.getBaseUrl();
     const verificationLink = `${baseUrl}/verify-email?token=${verificationToken}`;
 
-    // Customize message based on participant type
-    const welcomeMessages = {
-      attendee: {
-        greeting: "Welcome to the Croydon Business Association!",
-        message: "Thank you for registering as an attendee. Once verified, you'll gain access to event information, networking opportunities, and your personalized QR code for seamless event check-ins.",
-        benefits: ["Access event schedules and updates", "Network with other attendees", "Download your event badges", "Receive important announcements"]
-      },
-      vip: {
-        greeting: "Welcome to our VIP Community!",
-        message: "We're honored to have you as a VIP member of the Croydon Business Association. Your verification unlocks exclusive access to VIP events, priority seating, and premium networking opportunities.",
-        benefits: ["VIP lounge access at events", "Priority registration for workshops", "Exclusive networking sessions", "Complimentary refreshments"]
-      },
-      volunteer: {
-        greeting: "Welcome to our Volunteer Team!",
-        message: "Thank you for joining our volunteer community! Your dedication helps make our events successful. Once verified, you'll receive your volunteer badge and access to coordinator resources.",
-        benefits: ["Access volunteer schedules", "Coordinator contact information", "Volunteer recognition program", "Training resources and guides"]
-      },
-      team: {
-        greeting: "Welcome to the CBA Team!",
-        message: "Welcome aboard! As a team member, you're at the heart of the Croydon Business Association. Verify your email to access internal tools, team resources, and your official staff credentials.",
-        benefits: ["Admin dashboard access", "Event management tools", "Team communication channels", "Staff identification badge"]
-      },
-      speaker: {
-        greeting: "Welcome, Distinguished Speaker!",
-        message: "We're thrilled to have you as a speaker at our events. Verification gives you access to speaker resources, session management tools, and your speaker badge with special privileges.",
-        benefits: ["Speaker green room access", "Presentation upload portal", "Session scheduling tools", "Professional networking opportunities"]
-      },
-      exhibitor: {
-        greeting: "Welcome to our Exhibition Network!",
-        message: "Thank you for joining as an exhibitor. Once verified, you can manage your exhibition space, access exhibitor resources, and receive your exhibitor credentials for setup and access.",
-        benefits: ["Exhibition space management", "Setup and breakdown schedules", "Lead capture tools", "Exhibitor directory listing"]
-      },
-      sponsor: {
-        greeting: "Welcome, Valued Sponsor!",
-        message: "We deeply appreciate your sponsorship of the Croydon Business Association. Verification unlocks sponsor benefits, branding opportunities, and your sponsor recognition badge.",
-        benefits: ["Brand visibility at events", "Speaking opportunities", "VIP event invitations", "Sponsorship impact reports"]
-      }
-    };
-
-    const { greeting, message, benefits } = welcomeMessages[participantType] || welcomeMessages.attendee;
-
     try {
+      // Import db and schema
+      const { db } = await import('./db');
+      const { emailTemplates } = await import('@shared/schema');
+      const { eq, and } = await import('drizzle-orm');
+
+      // Fetch the verification template for the participant type
+      const [template] = await db
+        .select()
+        .from(emailTemplates)
+        .where(and(
+          eq(emailTemplates.personType, participantType),
+          eq(emailTemplates.templateName, `${participantType.charAt(0).toUpperCase() + participantType.slice(1)} Email Verification`)
+        ))
+        .limit(1);
+
+      let subject: string;
+      let htmlContent: string;
+
+      if (template && template.isActive) {
+        // Use database template
+        subject = template.subject;
+        htmlContent = template.htmlContent;
+        
+        // Replace variables in the template
+        const variables: Record<string, string> = {
+          '{{firstName}}': recipientName,
+          '{{recipientName}}': recipientName,
+          '{{verificationLink}}': verificationLink,
+        };
+
+        for (const [key, value] of Object.entries(variables)) {
+          subject = subject.replace(new RegExp(key, 'g'), value);
+          htmlContent = htmlContent.replace(new RegExp(key, 'g'), value);
+        }
+      } else {
+        // Fallback to generic template if specific one not found
+        const [fallbackTemplate] = await db
+          .select()
+          .from(emailTemplates)
+          .where(and(
+            eq(emailTemplates.personType, 'system'),
+            eq(emailTemplates.templateName, 'Email Verification')
+          ))
+          .limit(1);
+
+        if (fallbackTemplate && fallbackTemplate.isActive) {
+          subject = fallbackTemplate.subject;
+          htmlContent = fallbackTemplate.htmlContent;
+          
+          // Replace variables
+          const variables: Record<string, string> = {
+            '{{recipientName}}': recipientName,
+            '{{verificationLink}}': verificationLink,
+          };
+
+          for (const [key, value] of Object.entries(variables)) {
+            subject = subject.replace(new RegExp(key, 'g'), value);
+            htmlContent = htmlContent.replace(new RegExp(key, 'g'), value);
+          }
+        } else {
+          // Ultimate fallback - hardcoded template
+          subject = 'Please Verify Your Email - Croydon Business Association';
+          htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0; font-size: 28px;">Croydon Business Association</h1>
+                <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Email Verification Required</p>
+              </div>
+              
+              <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+                <h2 style="color: #1f2937; margin-top: 0;">Hello ${recipientName}!</h2>
+                
+                <p style="color: #4b5563; line-height: 1.6;">
+                  Thank you for registering with the Croydon Business Association. Please verify your email address to complete your registration.
+                </p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${verificationLink}" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
+                    Verify My Email Address
+                  </a>
+                </div>
+                
+                <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <p style="margin: 0; color: #92400e;">
+                    <strong>⚠️ Important:</strong> This verification link will expire in 24 hours.
+                  </p>
+                </div>
+                
+                <p style="color: #6b7280; font-size: 14px;">
+                  If you can't click the button, copy and paste this link into your browser:<br>
+                  <code style="background: #f3f4f6; padding: 5px; border-radius: 3px; word-break: break-all; display: block; margin-top: 10px;">${verificationLink}</code>
+                </p>
+              </div>
+            </div>
+          `;
+        }
+      }
+
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
-        subject: `${greeting} - Please Verify Your Email`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-              <h1 style="margin: 0; font-size: 28px;">Croydon Business Association</h1>
-              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Email Verification Required</p>
-            </div>
-            
-            <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
-              <h2 style="color: #1f2937; margin-top: 0;">${greeting}</h2>
-              <p style="color: #374151; font-size: 18px; margin: 10px 0;">Hello ${recipientName}!</p>
-              
-              <p style="color: #4b5563; line-height: 1.6;">
-                ${message}
-              </p>
-              
-              <div style="background: #eff6ff; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <h4 style="margin: 0 0 10px 0; color: #1e40af;">Your benefits include:</h4>
-                <ul style="margin: 0; padding-left: 20px; color: #1e40af; line-height: 1.8;">
-                  ${benefits.map(benefit => `<li>${benefit}</li>`).join('')}
-                </ul>
-              </div>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${verificationLink}" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
-                  Verify My Email Address
-                </a>
-              </div>
-              
-              <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 0; color: #92400e;">
-                  <strong>⚠️ Important:</strong> This verification link will expire in 24 hours. If the link expires, you'll need to request a new one.
-                </p>
-              </div>
-              
-              <p style="color: #6b7280; font-size: 14px;">
-                If you can't click the button above, copy and paste this link into your browser:<br>
-                <code style="background: #f3f4f6; padding: 5px; border-radius: 3px; word-break: break-all; display: block; margin-top: 10px;">${verificationLink}</code>
-              </p>
-              
-              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-              
-              <p style="color: #6b7280; font-size: 14px; text-align: center;">
-                If you didn't create an account with us, please ignore this email.
-              </p>
-            </div>
-          </div>
-        `,
-        text: `
-          ${greeting}
-          
-          Hello ${recipientName}!
-          
-          ${message}
-          
-          Please verify your email address by clicking the following link:
-          ${verificationLink}
-          
-          This verification link will expire in 24 hours.
-          
-          If you didn't create an account with us, please ignore this email.
-        `
+        subject: subject,
+        html: htmlContent,
       };
 
       await this.transporter!.sendMail(mailOptions);
