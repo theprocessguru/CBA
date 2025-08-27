@@ -256,46 +256,6 @@ export default function DataImport() {
       importMutation.mutate({ file: selectedFile, mappings: fieldMappings });
     }
   };
-    },
-    onError: (error) => {
-      toast({
-        title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Failed to process file",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Import data with field mappings
-  const importMutation = useMutation({
-    mutationFn: async (data: { file: File; mappings: FieldMapping }) => {
-      const formData = new FormData();
-      formData.append('file', data.file);
-      formData.append('mappings', JSON.stringify(data.mappings));
-      const response = await fetch('/api/data-import/import', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error('Failed to import data');
-      }
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: "Import Successful",
-        description: `Successfully imported ${data.imported} businesses. ${data.skipped} duplicates skipped.`,
-      });
-      setImportStep('complete');
-    },
-    onError: (error) => {
-      toast({
-        title: "Import Failed",
-        description: error instanceof Error ? error.message : "Failed to import data",
-        variant: "destructive",
-      });
-    },
-  });
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -320,12 +280,6 @@ export default function DataImport() {
   const handlePreview = () => {
     if (selectedFile) {
       previewMutation.mutate(selectedFile);
-    }
-  };
-
-  const handleImport = () => {
-    if (selectedFile) {
-      importMutation.mutate({ file: selectedFile, mappings: fieldMappings });
     }
   };
 

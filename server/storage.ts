@@ -503,6 +503,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByQRHandle(qrHandle: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.qrHandle, qrHandle));
+    return user;
+  }
+
   async isUserAdmin(id: string): Promise<boolean> {
     const [user] = await db.select({ isAdmin: users.isAdmin }).from(users).where(eq(users.id, id));
     return !!user?.isAdmin;
@@ -1353,6 +1358,14 @@ export class DatabaseStorage implements IStorage {
     return registration;
   }
 
+  async getAISummitRegistrationById(id: number): Promise<AISummitRegistration | undefined> {
+    const [registration] = await db
+      .select()
+      .from(aiSummitRegistrations)
+      .where(eq(aiSummitRegistrations.id, id));
+    return registration;
+  }
+
   async createAISummitExhibitorRegistration(registrationData: InsertAISummitExhibitorRegistration): Promise<AISummitExhibitorRegistration> {
     const [registration] = await db
       .insert(aiSummitExhibitorRegistrations)
@@ -1413,6 +1426,14 @@ export class DatabaseStorage implements IStorage {
       .from(aiSummitBadges)
       .where(eq(aiSummitBadges.email, email))
       .orderBy(desc(aiSummitBadges.createdAt));
+  }
+
+  async getAISummitBadgeByRegistrationId(registrationId: string): Promise<AISummitBadge | undefined> {
+    const [badge] = await db
+      .select()
+      .from(aiSummitBadges)
+      .where(eq(aiSummitBadges.participantId, registrationId));
+    return badge;
   }
 
   // Check-in operations

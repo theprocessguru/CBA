@@ -5,8 +5,8 @@ import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { db } from "./db";
 import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
-// Papa Parse will be imported dynamically
 import * as XLSX from "xlsx";
+import Papa from "papaparse";
 import crypto from "crypto";
 import { 
   insertBusinessSchema, 
