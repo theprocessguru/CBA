@@ -5,7 +5,7 @@ import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { db } from "./db";
 import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
-import Papa from "papaparse";
+const Papa = require("papaparse");
 import * as XLSX from "xlsx";
 import crypto from "crypto";
 import { 
