@@ -4193,7 +4193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Performance Metrics
         monthlyEconomicGrowth: businessCount * 8500, // £8.5k monthly growth per business
-        quarterlyGrowthTarget: 2500000, // Q1 2025 target
+        quarterlyGrowthTarget: 2500000, // Q3 2025 target
         mytAutomationSyncStatus: 'active' as const,
         lastSyncTimestamp: new Date().toISOString()
       };

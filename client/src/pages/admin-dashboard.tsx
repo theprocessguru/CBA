@@ -822,7 +822,7 @@ function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupan
                   <div className="text-2xl font-bold text-orange-600">
                     £{metrics.economicGrowth.quarterlyGrowthTarget?.toLocaleString() || 0}
                   </div>
-                  <div className="text-sm text-gray-600">Q1 Target</div>
+                  <div className="text-sm text-gray-600">Q3 Target</div>
                 </div>
               </div>
               <div className="mt-4 pt-4 border-t">

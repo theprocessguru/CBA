@@ -84,7 +84,7 @@ const ComingSoonPage = () => {
     {
       phase: 1,
       title: "Foundation Phase",
-      timeline: "Q1 2025",
+      timeline: "Q3 2025",
       status: "In Progress",
       progress: 75,
       description: "Core infrastructure and immediate impact features",
@@ -98,7 +98,7 @@ const ComingSoonPage = () => {
     {
       phase: 2,
       title: "Marketplace Phase", 
-      timeline: "Q2 2025",
+      timeline: "Q1 2026",
       status: "Planned",
       progress: 0,
       description: "Local procurement and business intelligence features",
@@ -112,7 +112,7 @@ const ComingSoonPage = () => {
     {
       phase: 3,
       title: "Innovation Phase",
-      timeline: "Q3 2025", 
+      timeline: "Q3 2026", 
       status: "Concept",
       progress: 0,
       description: "Advanced features and economic multipliers",
