@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePersonTypes } from "@/hooks/usePersonTypes";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, ArrowLeft, Home, ChevronDown } from "lucide-react";
+import { Search, ArrowLeft, Home, ChevronDown, Users } from "lucide-react";
 import cbaLogo from "@assets/CBA LOGO.png";
 
 const Navbar = () => {
@@ -171,6 +171,12 @@ const Navbar = () => {
                 <Link href="/mobile-badge">
                   <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
                     Mobile Badge
+                  </Button>
+                </Link>
+                <Link href="/connections">
+                  <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
+                    <Users className="h-4 w-4 mr-1" />
+                    Connections
                   </Button>
                 </Link>
                 {(user as any)?.isAdmin && (

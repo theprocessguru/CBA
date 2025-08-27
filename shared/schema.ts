@@ -1905,6 +1905,39 @@ export const insertUserPersonTypeSchema = createInsertSchema(userPersonTypes, {
 export type InsertUserPersonType = z.infer<typeof insertUserPersonTypeSchema>;
 export type UserPersonType = typeof userPersonTypes.$inferSelect;
 
+// User Connections/Partnerships table - for networking
+export const userConnections = pgTable("user_connections", {
+  id: serial("id").primaryKey(),
+  requesterId: varchar("requester_id").notNull().references(() => users.id),
+  receiverId: varchar("receiver_id").notNull().references(() => users.id),
+  status: varchar("status").notNull().default("pending"), // pending, accepted, declined, blocked
+  connectionType: varchar("connection_type").default("network"), // network, partner, collaborator, mentor, mentee
+  requestMessage: text("request_message"),
+  responseMessage: text("response_message"),
+  requestedAt: timestamp("requested_at").defaultNow(),
+  respondedAt: timestamp("responded_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_connection").on(table.requesterId, table.receiverId),
+  index("user_connections_requester_idx").on(table.requesterId),
+  index("user_connections_receiver_idx").on(table.receiverId),
+  index("user_connections_status_idx").on(table.status),
+]);
+
+// User Connection Schema and Types
+export const insertUserConnectionSchema = createInsertSchema(userConnections, {
+  requesterId: z.string().min(1, "Requester ID is required"),
+  receiverId: z.string().min(1, "Receiver ID is required"),
+  status: z.enum(["pending", "accepted", "declined", "blocked"]).default("pending"),
+  connectionType: z.enum(["network", "partner", "collaborator", "mentor", "mentee"]).default("network"),
+  requestMessage: z.string().optional(),
+  responseMessage: z.string().optional(),
+}).omit({ id: true, requestedAt: true, respondedAt: true, createdAt: true, updatedAt: true });
+
+export type InsertUserConnection = z.infer<typeof insertUserConnectionSchema>;
+export type UserConnection = typeof userConnections.$inferSelect;
+
 // Jobs Board Schemas and Types
 export const insertJobPostingSchema = createInsertSchema(jobPostings, {
   userId: z.string().min(1, "User ID is required"),

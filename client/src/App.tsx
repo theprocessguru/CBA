@@ -94,6 +94,7 @@ import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
 import PersonTypeImport from "@/pages/admin/PersonTypeImport";
+import Connections from "@/pages/Connections";
 import Profile from "@/pages/Profile";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
@@ -760,6 +761,13 @@ function Router() {
             <PersonTypeImport />
           </MainLayout>
         </AdminRoute>
+      </Route>
+      <Route path="/connections">
+        <ProtectedRoute>
+          <MainLayout>
+            <Connections />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       
       {/* Admin Routes */}

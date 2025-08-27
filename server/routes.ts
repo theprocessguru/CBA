@@ -4098,6 +4098,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin impact metrics for funding and reporting
+  // Helper function to get active partnerships count
+  async function getActivePartnershipsCount() {
+    const result = await db.execute(sql`
+      SELECT COUNT(*) as count FROM user_connections WHERE status = 'accepted'
+    `);
+    return parseInt(result.rows[0]?.count || '0');
+  }
+
   app.get('/api/admin/impact-metrics', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       // Fetch member metrics
@@ -4295,7 +4303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Impact metrics
         businessesSupported,
         economicImpact: 2500000, // Placeholder
-        partnershipsFormed: 47, // Placeholder
+        partnershipsFormed: await getActivePartnershipsCount(),
         fundingSecured: 850000 // Placeholder
       });
     } catch (error) {
@@ -12380,6 +12388,198 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating business event approval:", error);
       res.status(500).json({ message: "Failed to update event approval" });
+    }
+  });
+
+  // ===== USER CONNECTIONS/PARTNERSHIPS API =====
+
+  // Get user connections (accepted partnerships)
+  app.get("/api/connections", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      
+      const connections = await db.execute(sql`
+        SELECT 
+          uc.*,
+          CASE 
+            WHEN uc.requester_id = ${userId} THEN u2.first_name || ' ' || u2.last_name
+            ELSE u1.first_name || ' ' || u1.last_name
+          END as partner_name,
+          CASE 
+            WHEN uc.requester_id = ${userId} THEN u2.email
+            ELSE u1.email
+          END as partner_email,
+          CASE 
+            WHEN uc.requester_id = ${userId} THEN u2.company
+            ELSE u1.company
+          END as partner_company,
+          CASE 
+            WHEN uc.requester_id = ${userId} THEN u2.job_title
+            ELSE u1.job_title
+          END as partner_job_title,
+          CASE 
+            WHEN uc.requester_id = ${userId} THEN u2.id
+            ELSE u1.id
+          END as partner_id
+        FROM user_connections uc
+        JOIN users u1 ON uc.requester_id = u1.id
+        JOIN users u2 ON uc.receiver_id = u2.id
+        WHERE (uc.requester_id = ${userId} OR uc.receiver_id = ${userId})
+          AND uc.status = 'accepted'
+        ORDER BY uc.created_at DESC
+      `);
+
+      res.json(connections.rows);
+    } catch (error) {
+      console.error("Error fetching connections:", error);
+      res.status(500).json({ message: "Failed to fetch connections" });
+    }
+  });
+
+  // Get pending connection requests (incoming)
+  app.get("/api/connections/requests", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      
+      const requests = await db.execute(sql`
+        SELECT 
+          uc.*,
+          u.first_name || ' ' || u.last_name as requester_name,
+          u.email as requester_email,
+          u.company as requester_company,
+          u.job_title as requester_job_title
+        FROM user_connections uc
+        JOIN users u ON uc.requester_id = u.id
+        WHERE uc.receiver_id = ${userId} AND uc.status = 'pending'
+        ORDER BY uc.requested_at DESC
+      `);
+
+      res.json(requests.rows);
+    } catch (error) {
+      console.error("Error fetching connection requests:", error);
+      res.status(500).json({ message: "Failed to fetch connection requests" });
+    }
+  });
+
+  // Send connection request
+  app.post("/api/connections/request", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      const { receiverId, connectionType = 'network', requestMessage } = req.body;
+
+      if (!receiverId) {
+        return res.status(400).json({ message: "Receiver ID is required" });
+      }
+
+      if (receiverId === userId) {
+        return res.status(400).json({ message: "Cannot send connection request to yourself" });
+      }
+
+      // Check if connection already exists
+      const existingConnection = await db.execute(sql`
+        SELECT id FROM user_connections 
+        WHERE (requester_id = ${userId} AND receiver_id = ${receiverId})
+           OR (requester_id = ${receiverId} AND receiver_id = ${userId})
+      `);
+
+      if (existingConnection.rows.length > 0) {
+        return res.status(400).json({ message: "Connection already exists or pending" });
+      }
+
+      // Create connection request
+      const result = await db.execute(sql`
+        INSERT INTO user_connections (requester_id, receiver_id, connection_type, request_message, status)
+        VALUES (${userId}, ${receiverId}, ${connectionType}, ${requestMessage || null}, 'pending')
+        RETURNING *
+      `);
+
+      res.status(201).json(result.rows[0]);
+    } catch (error) {
+      console.error("Error sending connection request:", error);
+      res.status(500).json({ message: "Failed to send connection request" });
+    }
+  });
+
+  // Respond to connection request (accept/decline)
+  app.patch("/api/connections/:id/respond", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      const connectionId = req.params.id;
+      const { status, responseMessage } = req.body;
+
+      if (!['accepted', 'declined'].includes(status)) {
+        return res.status(400).json({ message: "Status must be 'accepted' or 'declined'" });
+      }
+
+      // Update connection status
+      const result = await db.execute(sql`
+        UPDATE user_connections 
+        SET status = ${status}, 
+            response_message = ${responseMessage || null},
+            responded_at = NOW(),
+            updated_at = NOW()
+        WHERE id = ${connectionId} AND receiver_id = ${userId} AND status = 'pending'
+        RETURNING *
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Connection request not found or already responded" });
+      }
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      console.error("Error responding to connection request:", error);
+      res.status(500).json({ message: "Failed to respond to connection request" });
+    }
+  });
+
+  // Get users available for connection (directory)
+  app.get("/api/connections/directory", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = req.user.id;
+      const { search, personType } = req.query;
+
+      let searchClause = '';
+      let typeJoin = '';
+      let whereClause = `WHERE u.id != '${userId}' AND u.account_status = 'active' AND u.is_profile_hidden = false`;
+
+      if (search) {
+        searchClause = `AND (u.first_name ILIKE '%${search}%' OR u.last_name ILIKE '%${search}%' OR u.company ILIKE '%${search}%' OR u.job_title ILIKE '%${search}%')`;
+      }
+
+      if (personType) {
+        typeJoin = 'JOIN user_person_types upt ON u.id = upt.user_id JOIN person_types pt ON upt.person_type_id = pt.id';
+        searchClause += ` AND pt.name = '${personType}'`;
+      }
+
+      const users = await db.execute(sql`
+        SELECT DISTINCT
+          u.id,
+          u.first_name || ' ' || u.last_name as name,
+          u.email,
+          u.company,
+          u.job_title,
+          u.bio,
+          CASE 
+            WHEN EXISTS (
+              SELECT 1 FROM user_connections uc 
+              WHERE (uc.requester_id = ${userId} AND uc.receiver_id = u.id)
+                 OR (uc.requester_id = u.id AND uc.receiver_id = ${userId})
+            ) THEN true
+            ELSE false
+          END as connection_exists
+        FROM users u
+        ${typeJoin}
+        ${whereClause}
+        ${searchClause}
+        ORDER BY u.first_name, u.last_name
+        LIMIT 50
+      `);
+
+      res.json(users.rows);
+    } catch (error) {
+      console.error("Error fetching directory:", error);
+      res.status(500).json({ message: "Failed to fetch directory" });
     }
   });
 
