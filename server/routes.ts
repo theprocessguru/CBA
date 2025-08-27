@@ -1343,6 +1343,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return business;
   };
 
+  // New function to map CSV row to user data for people imports
+  const mapRowToUser = (row: any[], headers: string[], mappings: any, personTypeIds: number[] = []) => {
+    const userData: any = {
+      id: `import_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      membershipTier: 'Starter Tier',
+      membershipStatus: 'active',
+      emailVerified: true,
+      accountStatus: 'active'
+    };
+
+    headers.forEach((header, index) => {
+      const mappedField = mappings[header];
+      if (mappedField && mappedField !== '' && row[index] !== undefined && row[index] !== '') {
+        const value = row[index];
+        userData[mappedField] = value;
+      }
+    });
+
+    // Store person type IDs to assign after user creation
+    userData._personTypeIds = personTypeIds;
+
+    // Only return data if we have required fields (email or firstName/lastName)
+    return (userData.email || (userData.firstName && userData.lastName)) ? userData : null;
+  };
+
   // Preview uploaded file
   app.post('/api/data-import/preview', isAuthenticated, isAdmin, dataUpload.single('file'), async (req, res) => {
     try {
@@ -1493,6 +1518,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error importing data:', error);
       res.status(500).json({ 
         message: error instanceof Error ? error.message : 'Failed to import data' 
+      });
+    }
+  });
+
+  // Import people/users from uploaded file
+  app.post('/api/data-import/import-people', isAuthenticated, isAdmin, dataUpload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file uploaded' });
+      }
+
+      const mappings = JSON.parse(req.body.mappings || '{}');
+      const personTypeIds = JSON.parse(req.body.personTypeIds || '[]');
+      const importerId = (req as any).user.id;
+      
+      const fileData = await parseFileData(req.file.buffer, req.file.originalname);
+      
+      let imported = 0;
+      let skipped = 0;
+      const errors: string[] = [];
+
+      // Process each row
+      for (let i = 0; i < fileData.rows.length; i++) {
+        try {
+          const userData = mapRowToUser(fileData.rows[i], fileData.headers, mappings, personTypeIds);
+          
+          if (!userData) {
+            skipped++;
+            continue;
+          }
+
+          // Check for duplicate email
+          if (userData.email) {
+            const existingUser = await storage.getUserByEmail(userData.email);
+            if (existingUser) {
+              // Update existing user with new person types
+              const _personTypeIds = userData._personTypeIds;
+              delete userData._personTypeIds;
+              
+              // Assign new person types to existing user
+              if (_personTypeIds && _personTypeIds.length > 0) {
+                for (const personTypeId of _personTypeIds) {
+                  try {
+                    await storage.assignPersonTypeToUser(existingUser.id, personTypeId, importerId);
+                  } catch (error) {
+                    // Ignore if already assigned
+                  }
+                }
+              }
+              
+              skipped++;
+              continue;
+            }
+          }
+
+          // Create new user
+          const _personTypeIds = userData._personTypeIds;
+          delete userData._personTypeIds;
+          
+          const newUser = await storage.upsertUser(userData);
+          
+          // Assign person types to new user
+          if (_personTypeIds && _personTypeIds.length > 0) {
+            for (const personTypeId of _personTypeIds) {
+              try {
+                await storage.assignPersonTypeToUser(newUser.id, personTypeId, importerId);
+              } catch (error) {
+                console.warn(`Failed to assign person type ${personTypeId} to user ${newUser.id}:`, error);
+              }
+            }
+          }
+          
+          imported++;
+
+          // Sync with MyT Automation
+          const mytAutomationService = getMyTAutomationService();
+          if (mytAutomationService) {
+            try {
+              await mytAutomationService.syncBusinessMember({
+                email: newUser.email || '',
+                firstName: newUser.firstName || '',
+                lastName: newUser.lastName || '',
+                phone: newUser.phone || '',
+                company: newUser.company || '',
+                jobTitle: newUser.jobTitle || '',
+                membershipTier: newUser.membershipTier || 'Starter Tier'
+              });
+            } catch (ghlError) {
+              console.warn(`Failed to sync user ${newUser.id} to MyT Automation:`, ghlError);
+            }
+          }
+
+        } catch (error) {
+          console.error(`Error processing row ${i + 1}:`, error);
+          errors.push(`Row ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          skipped++;
+        }
+      }
+
+      res.json({
+        imported,
+        skipped,
+        errors: errors.slice(0, 10), // Limit errors shown
+        totalProcessed: fileData.totalRows
+      });
+    } catch (error) {
+      console.error('Error importing people:', error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : 'Failed to import people data' 
       });
     }
   });

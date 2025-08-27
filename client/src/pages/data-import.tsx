@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Users, Download } from "lucide-react";
+import { Upload, FileSpreadsheet, CheckCircle, AlertCircle, Users, Download, UserPlus, Building2 } from "lucide-react";
 import { Helmet } from "react-helmet";
 
 interface ImportPreview {
@@ -21,15 +22,32 @@ interface FieldMapping {
   [key: string]: string;
 }
 
+interface PersonType {
+  id: number;
+  name: string;
+  displayName: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+}
+
 export default function DataImport() {
   const { toast } = useToast();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importPreview, setImportPreview] = useState<ImportPreview | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping>({});
   const [importStep, setImportStep] = useState<'upload' | 'mapping' | 'complete'>('upload');
+  const [importType, setImportType] = useState<'business' | 'people'>('people'); // Default to people for AI Summit
+  const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
+
+  // Fetch person types for people imports
+  const { data: personTypes = [] } = useQuery<PersonType[]>({
+    queryKey: ["/api/person-types"],
+    enabled: importType === 'people'
+  });
 
   // Available database fields for mapping
-  const dbFields = [
+  const businessFields = [
     { value: 'skip', label: 'Skip this column' },
     // Contact Information
     { value: 'name', label: 'Business Name' },
@@ -89,6 +107,41 @@ export default function DataImport() {
     { value: 'source', label: 'Data Source' },
   ];
 
+  const peopleFields = [
+    { value: 'skip', label: 'Skip this column' },
+    // Personal Information
+    { value: 'firstName', label: 'First Name' },
+    { value: 'lastName', label: 'Last Name' },
+    { value: 'email', label: 'Email Address' },
+    { value: 'phone', label: 'Phone Number' },
+    
+    // Professional Information
+    { value: 'title', label: 'Title (Mr, Mrs, Dr, Mayor, etc)' },
+    { value: 'company', label: 'Company/Organization' },
+    { value: 'jobTitle', label: 'Job Title' },
+    { value: 'bio', label: 'Biography/Description' },
+    
+    // Contact & QR System
+    { value: 'qrHandle', label: 'QR Handle (unique identifier)' },
+    
+    // Membership Information
+    { value: 'membershipTier', label: 'Membership Tier' },
+    { value: 'membershipStatus', label: 'Membership Status' },
+    
+    // Volunteer/Student Fields
+    { value: 'university', label: 'University' },
+    { value: 'studentId', label: 'Student ID' },
+    { value: 'course', label: 'Course/Program' },
+    { value: 'yearOfStudy', label: 'Year of Study' },
+    { value: 'communityRole', label: 'Community Role' },
+    { value: 'volunteerExperience', label: 'Volunteer Experience' },
+    
+    // Additional Fields
+    { value: 'participantType', label: 'Primary Participant Type' },
+  ];
+
+  const dbFields = importType === 'business' ? businessFields : peopleFields;
+
   // Upload and preview CSV/Excel file
   const previewMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -110,27 +163,99 @@ export default function DataImport() {
       const mappings: FieldMapping = {};
       data.headers.forEach(header => {
         const lowerHeader = header.toLowerCase();
-        if (lowerHeader.includes('business') || lowerHeader.includes('company') || lowerHeader.includes('name')) {
-          mappings[header] = 'name';
-        } else if (lowerHeader.includes('email')) {
-          mappings[header] = 'email';
-        } else if (lowerHeader.includes('phone')) {
-          mappings[header] = 'phone';
-        } else if (lowerHeader.includes('website')) {
-          mappings[header] = 'website';
-        } else if (lowerHeader.includes('address')) {
-          mappings[header] = 'address';
-        } else if (lowerHeader.includes('city')) {
-          mappings[header] = 'city';
-        } else if (lowerHeader.includes('postcode') || lowerHeader.includes('zip')) {
-          mappings[header] = 'postcode';
-        } else if (lowerHeader.includes('industry') || lowerHeader.includes('sector')) {
-          mappings[header] = 'industry';
+        
+        // Smart mapping for business imports
+        if (importType === 'business') {
+          if (lowerHeader.includes('business') || lowerHeader.includes('company') || lowerHeader.includes('name')) {
+            mappings[header] = 'name';
+          } else if (lowerHeader.includes('email')) {
+            mappings[header] = 'email';
+          } else if (lowerHeader.includes('phone')) {
+            mappings[header] = 'phone';
+          } else if (lowerHeader.includes('website')) {
+            mappings[header] = 'website';
+          } else if (lowerHeader.includes('address')) {
+            mappings[header] = 'address';
+          } else if (lowerHeader.includes('city')) {
+            mappings[header] = 'city';
+          } else if (lowerHeader.includes('postcode') || lowerHeader.includes('zip')) {
+            mappings[header] = 'postcode';
+          }
         } else {
-          mappings[header] = '';
+          // Smart mapping for people imports
+          if (lowerHeader.includes('first') && lowerHeader.includes('name')) {
+            mappings[header] = 'firstName';
+          } else if (lowerHeader.includes('last') && lowerHeader.includes('name')) {
+            mappings[header] = 'lastName';
+          } else if (lowerHeader.includes('email')) {
+            mappings[header] = 'email';
+          } else if (lowerHeader.includes('phone')) {
+            mappings[header] = 'phone';
+          } else if (lowerHeader.includes('company') || lowerHeader.includes('organisation')) {
+            mappings[header] = 'company';
+          } else if (lowerHeader.includes('title') && !lowerHeader.includes('job')) {
+            mappings[header] = 'title';
+          } else if (lowerHeader.includes('job') || lowerHeader.includes('position')) {
+            mappings[header] = 'jobTitle';
+          }
         }
       });
       setFieldMappings(mappings);
+    },
+  });
+
+  // Import mutation - updated to support both business and people imports
+  const importMutation = useMutation({
+    mutationFn: async ({ file, mappings }: { file: File, mappings: FieldMapping }) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('mappings', JSON.stringify(mappings));
+      
+      // Add person type IDs for people imports
+      if (importType === 'people') {
+        formData.append('personTypeIds', JSON.stringify(selectedPersonTypes));
+      }
+      
+      const endpoint = importType === 'business' ? '/api/data-import/import' : '/api/data-import/import-people';
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error('Failed to import data');
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setImportStep('complete');
+      toast({
+        title: "Import Successful",
+        description: `Imported ${data.imported} records. ${data.skipped} records were skipped.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Import Failed",
+        description: "There was an error importing your data. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleImport = () => {
+    if (selectedFile) {
+      // Validate person types for people imports
+      if (importType === 'people' && selectedPersonTypes.length === 0) {
+        toast({
+          title: "Person Types Required",
+          description: "Please select at least one person type for people imports.",
+          variant: "destructive",
+        });
+        return;
+      }
+      importMutation.mutate({ file: selectedFile, mappings: fieldMappings });
+    }
+  };
     },
     onError: (error) => {
       toast({
