@@ -5,7 +5,7 @@ import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { db } from "./db";
 import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
-import * as Papa from "papaparse";
+// Papa Parse will be imported dynamically
 import * as XLSX from "xlsx";
 import crypto from "crypto";
 import { 
@@ -1247,13 +1247,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Data Import routes (admin only)
   
   // Parse CSV or Excel file and return preview
-  const parseFileData = (buffer: Buffer, filename: string) => {
+  const parseFileData = async (buffer: Buffer, filename: string) => {
     const extension = filename.split('.').pop()?.toLowerCase();
     
     if (extension === 'csv') {
-      // Parse CSV
+      // Parse CSV using dynamic import
+      const Papa = await import('papaparse');
       const csvString = buffer.toString('utf-8');
-      const result = (Papa as any).parse(csvString, {
+      const result = Papa.default.parse(csvString, {
         header: false,
         skipEmptyLines: true,
       });
@@ -1329,7 +1330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'No file uploaded' });
       }
 
-      const fileData = parseFileData(req.file.buffer, req.file.originalname);
+      const fileData = await parseFileData(req.file.buffer, req.file.originalname);
       
       // Return preview with limited rows (first 5 for display)
       res.json({
@@ -1355,7 +1356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const mappings = JSON.parse(req.body.mappings || '{}');
       const userId = (req as any).user.id;
       
-      const fileData = parseFileData(req.file.buffer, req.file.originalname);
+      const fileData = await parseFileData(req.file.buffer, req.file.originalname);
       
       let imported = 0;
       let skipped = 0;
