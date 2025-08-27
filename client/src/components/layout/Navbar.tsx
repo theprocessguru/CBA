@@ -379,88 +379,88 @@ const Navbar = () => {
           {isAuthenticated ? (
             <>
               {/* Scanner - Available to all authenticated users */}
-              <Link href="/organizer-scanner">
-                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                  isActive('/organizer-scanner') 
-                    ? 'border-primary text-primary bg-neutral-100' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+              <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                isActive('/organizer-scanner') 
+                  ? 'border-primary text-primary bg-neutral-100' 
+                  : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                } font-medium text-sm`}>
+                <Link href="/organizer-scanner">
                   📱 Scanner
-                </a>
-              </Link>
+                </Link>
+              </div>
               
               {/* Mobile Badge - Available to all authenticated users */}
-              <Link href="/mobile-badge">
-                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                  isActive('/mobile-badge') 
-                    ? 'border-primary text-primary bg-neutral-100' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+              <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                isActive('/mobile-badge') 
+                  ? 'border-primary text-primary bg-neutral-100' 
+                  : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                } font-medium text-sm`}>
+                <Link href="/mobile-badge">
                   Mobile Badge
-                </a>
-              </Link>
+                </Link>
+              </div>
               
               {/* Profile - Available to all authenticated users */}
-              <Link href="/my-profile">
-                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                  isActive('/my-profile') 
-                    ? 'border-primary text-primary bg-neutral-100' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+              <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                isActive('/my-profile') 
+                  ? 'border-primary text-primary bg-neutral-100' 
+                  : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                } font-medium text-sm`}>
+                <Link href="/my-profile">
                   👤 My Profile
-                </a>
-              </Link>
+                </Link>
+              </div>
               
               {/* Business Dashboard - Only for business types */}
               {hasBusinessType && (
-                <Link href="/dashboard">
-                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                    isActive('/dashboard') 
-                      ? 'border-primary text-primary bg-neutral-100' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                    } font-medium text-sm`}>
+                <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/dashboard') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  <Link href="/dashboard">
                     🏢 Business Dashboard
-                  </a>
-                </Link>
+                  </Link>
+                </div>
               )}
               
               {/* Volunteer Features */}
               {hasVolunteerType && (
-                <Link href="/event-scanner">
-                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                    isActive('/event-scanner') 
-                      ? 'border-primary text-primary bg-neutral-100' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                    } font-medium text-sm`}>
+                <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/event-scanner') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  <Link href="/event-scanner">
                     🤝 Volunteer Scanner
-                  </a>
-                </Link>
+                  </Link>
+                </div>
               )}
               
               {/* Student Features */}
               {hasStudentType && (
-                <Link href="/jobs">
-                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                    isActive('/jobs') 
-                      ? 'border-primary text-primary bg-neutral-100' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                    } font-medium text-sm`}>
+                <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/jobs') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  <Link href="/jobs">
                     🎓 Jobs Board
-                  </a>
-                </Link>
+                  </Link>
+                </div>
               )}
               
               {/* Admin Panel */}
               {(user as any)?.isAdmin && (
-                <Link href="/admin/dashboard">
-                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                    isActive('/admin/dashboard') 
-                      ? 'border-primary text-primary bg-neutral-100' 
-                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                    } font-medium text-sm`}>
+                <div className={`block pl-3 pr-4 py-2 border-l-4 ${
+                  isActive('/admin/dashboard') 
+                    ? 'border-primary text-primary bg-neutral-100' 
+                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                  } font-medium text-sm`}>
+                  <Link href="/admin/dashboard">
                     ⚙️ Admin
-                  </a>
-                </Link>
+                  </Link>
+                </div>
               )}
             </>
           ) : (
