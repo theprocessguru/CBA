@@ -1,20 +1,72 @@
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Home, Users, Store, Tag, User, Building, Crown, QrCode, Smartphone } from "lucide-react";
+import { Home, Users, Store, Tag, User, Building, Crown, QrCode, Smartphone, HandHeart, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { usePersonTypes } from "@/hooks/usePersonTypes";
 
 const BottomNavigation = () => {
   const [location] = useLocation();
   const { isAuthenticated } = useAuth();
+  const { hasBusinessType, hasVolunteerType, hasStudentType, isLoading } = usePersonTypes();
 
-  const navItems = [
+  // Base navigation items for all users
+  const baseItems = [
     { href: "/", icon: Home, label: "Home" },
-    { href: "/organizer-scanner", icon: QrCode, label: "QR Scanner" },
-    { href: "/directory", icon: Users, label: "Directory" },
-    { href: "/marketplace", icon: Store, label: "Shop" },
-    { href: "/membership", icon: Crown, label: "Join" },
+    { href: "/organizer-scanner", icon: QrCode, label: "Scanner" },
   ];
 
+  // Conditional navigation items based on person types
+  const getNavigationItems = () => {
+    const items = [...baseItems];
+
+    if (!isAuthenticated) {
+      // Non-authenticated users see basic navigation
+      items.push(
+        { href: "/directory", icon: Users, label: "Directory" },
+        { href: "/marketplace", icon: Store, label: "Shop" },
+        { href: "/membership", icon: Crown, label: "Join" }
+      );
+    } else {
+      // Authenticated users see conditional navigation based on person types
+      
+      // Business members see full business features
+      if (hasBusinessType) {
+        items.push(
+          { href: "/directory", icon: Users, label: "Directory" },
+          { href: "/marketplace", icon: Store, label: "Shop" },
+          { href: "/dashboard", icon: Building, label: "Business" }
+        );
+      }
+      
+      // Volunteers see volunteer-specific features
+      if (hasVolunteerType) {
+        items.push(
+          { href: "/directory", icon: Users, label: "Directory" },
+          { href: "/event-scanner", icon: HandHeart, label: "Volunteer" }
+        );
+      }
+      
+      // Students see educational features
+      if (hasStudentType) {
+        items.push(
+          { href: "/directory", icon: Users, label: "Directory" },
+          { href: "/jobs", icon: GraduationCap, label: "Jobs" }
+        );
+      }
+      
+      // If no specific person types, show basic authenticated navigation
+      if (!hasBusinessType && !hasVolunteerType && !hasStudentType) {
+        items.push(
+          { href: "/directory", icon: Users, label: "Directory" },
+          { href: "/membership", icon: Crown, label: "Join" }
+        );
+      }
+    }
+
+    return items;
+  };
+
+  const navItems = getNavigationItems();
   const dashboardItem = { href: "/dashboard", icon: Building, label: "Dashboard" };
 
   const isActive = (path: string) => {

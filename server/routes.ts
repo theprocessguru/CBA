@@ -9129,6 +9129,109 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import users with person types (admin only)
+  app.post('/api/admin/import-users-with-types', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { users } = req.body;
+      
+      if (!Array.isArray(users) || users.length === 0) {
+        return res.status(400).json({ message: 'No users provided for import' });
+      }
+
+      let successCount = 0;
+      let errorCount = 0;
+      let newUsers = 0;
+      let updatedUsers = 0;
+      const errors: string[] = [];
+
+      for (const userData of users) {
+        try {
+          if (!userData.email) {
+            errors.push(`Missing email for user`);
+            errorCount++;
+            continue;
+          }
+
+          // Check if user already exists
+          const existingUser = await storage.getUserByEmail(userData.email);
+          let userId: string;
+
+          if (existingUser) {
+            // Update existing user
+            await storage.updateUser(existingUser.id, {
+              firstName: userData.firstName || existingUser.firstName,
+              lastName: userData.lastName || existingUser.lastName,
+              phone: userData.phone || existingUser.phone,
+              company: userData.company || existingUser.company,
+            });
+            userId = existingUser.id;
+            updatedUsers++;
+          } else {
+            // Create new user
+            const newUser = await storage.createUser({
+              id: crypto.randomUUID(),
+              email: userData.email,
+              firstName: userData.firstName || '',
+              lastName: userData.lastName || '',
+              phone: userData.phone,
+              company: userData.company,
+              membershipTier: 'Starter Tier',
+              membershipStatus: 'trial',
+              isTrialMember: true,
+              accountStatus: 'active',
+              emailVerified: false,
+            });
+            userId = newUser.id;
+            newUsers++;
+          }
+
+          // Assign person types
+          if (userData.personTypes && Array.isArray(userData.personTypes)) {
+            // Remove existing person types for this user
+            const existingTypes = await storage.getUserPersonTypes(userId);
+            for (const existingType of existingTypes) {
+              await storage.removePersonTypeFromUser(userId, existingType.personTypeId);
+            }
+
+            // Assign new person types
+            for (let i = 0; i < userData.personTypes.length; i++) {
+              const personTypeId = userData.personTypes[i];
+              const isPrimary = userData.isPrimaryType === personTypeId || 
+                              (i === 0 && !userData.isPrimaryType); // First type is primary if not specified
+
+              await storage.assignPersonTypeToUser({
+                userId,
+                personTypeId,
+                isPrimary,
+                assignedBy: req.user.id,
+                notes: `Imported via CSV on ${new Date().toISOString()}`
+              });
+            }
+          }
+
+          successCount++;
+        } catch (userError) {
+          errors.push(`Error for ${userData.email}: ${userError.message}`);
+          errorCount++;
+        }
+      }
+
+      const result = {
+        successCount,
+        errorCount,
+        newUsers,
+        updatedUsers,
+        errors: errors.slice(0, 10), // Limit to first 10 errors
+        totalProcessed: users.length
+      };
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error importing users with person types:', error);
+      res.status(500).json({ message: 'Failed to import users' });
+    }
+  });
+
   // QR Code Scanning Interface Route
   app.get('/api/user-by-qr/:qrHandle', async (req: any, res) => {
     try {

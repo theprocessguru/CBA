@@ -93,6 +93,8 @@ import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import AffiliateManagement from "@/pages/admin/AffiliateManagement";
 import PersonTypes from "@/pages/admin/person-types";
+import PersonTypeImport from "@/pages/admin/PersonTypeImport";
+import Profile from "@/pages/Profile";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
@@ -477,7 +479,7 @@ function Router() {
       </Route>
       <Route path="/my-profile">
         <MainLayout>
-          <MyProfile />
+          <Profile />
         </MainLayout>
       </Route>
       <Route path="/admin/ghl">
@@ -749,6 +751,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <PersonTypes />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/person-type-import">
+        <AdminRoute>
+          <MainLayout>
+            <PersonTypeImport />
           </MainLayout>
         </AdminRoute>
       </Route>

@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { usePersonTypes } from "@/hooks/usePersonTypes";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, ArrowLeft, Home, ChevronDown } from "lucide-react";
@@ -11,6 +12,7 @@ const Navbar = () => {
   const [isHomeMenuOpen, setIsHomeMenuOpen] = useState(false);
   const [isMembershipMenuOpen, setIsMembershipMenuOpen] = useState(false);
   const { user, isAuthenticated } = useAuth();
+  const { hasBusinessType, hasVolunteerType, hasStudentType } = usePersonTypes();
   const [location] = useLocation();
 
   const isActive = (path: string) => location === path;
@@ -373,18 +375,10 @@ const Navbar = () => {
       {/* Mobile menu */}
       <div className={`sm:hidden ${isMenuOpen ? 'block' : 'hidden'}`} id="mobile-menu">
         <div className="pt-2 pb-3 space-y-1">
-          {/* For logged-in users, show only essential actions */}
+          {/* For logged-in users, show conditional actions based on person types */}
           {isAuthenticated ? (
             <>
-              <Link href="/dashboard">
-                <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                  isActive('/dashboard') 
-                    ? 'border-primary text-primary bg-neutral-100' 
-                    : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
-                  Dashboard
-                </a>
-              </Link>
+              {/* Scanner - Available to all authenticated users */}
               <Link href="/organizer-scanner">
                 <a className={`block pl-3 pr-4 py-2 border-l-4 ${
                   isActive('/organizer-scanner') 
@@ -394,6 +388,8 @@ const Navbar = () => {
                   📱 Scanner
                 </a>
               </Link>
+              
+              {/* Mobile Badge - Available to all authenticated users */}
               <Link href="/mobile-badge">
                 <a className={`block pl-3 pr-4 py-2 border-l-4 ${
                   isActive('/mobile-badge') 
@@ -403,15 +399,58 @@ const Navbar = () => {
                   Mobile Badge
                 </a>
               </Link>
-              <Link href="/my-qr-code">
+              
+              {/* Profile - Available to all authenticated users */}
+              <Link href="/my-profile">
                 <a className={`block pl-3 pr-4 py-2 border-l-4 ${
-                  isActive('/my-qr-code') 
+                  isActive('/my-profile') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
                   } font-medium text-sm`}>
-                  My QR Code
+                  👤 My Profile
                 </a>
               </Link>
+              
+              {/* Business Dashboard - Only for business types */}
+              {hasBusinessType && (
+                <Link href="/dashboard">
+                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                    isActive('/dashboard') 
+                      ? 'border-primary text-primary bg-neutral-100' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                    } font-medium text-sm`}>
+                    🏢 Business Dashboard
+                  </a>
+                </Link>
+              )}
+              
+              {/* Volunteer Features */}
+              {hasVolunteerType && (
+                <Link href="/event-scanner">
+                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                    isActive('/event-scanner') 
+                      ? 'border-primary text-primary bg-neutral-100' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                    } font-medium text-sm`}>
+                    🤝 Volunteer Scanner
+                  </a>
+                </Link>
+              )}
+              
+              {/* Student Features */}
+              {hasStudentType && (
+                <Link href="/jobs">
+                  <a className={`block pl-3 pr-4 py-2 border-l-4 ${
+                    isActive('/jobs') 
+                      ? 'border-primary text-primary bg-neutral-100' 
+                      : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                    } font-medium text-sm`}>
+                    🎓 Jobs Board
+                  </a>
+                </Link>
+              )}
+              
+              {/* Admin Panel */}
               {(user as any)?.isAdmin && (
                 <Link href="/admin/dashboard">
                   <a className={`block pl-3 pr-4 py-2 border-l-4 ${
@@ -419,7 +458,7 @@ const Navbar = () => {
                       ? 'border-primary text-primary bg-neutral-100' 
                       : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
                     } font-medium text-sm`}>
-                    Admin
+                    ⚙️ Admin
                   </a>
                 </Link>
               )}
