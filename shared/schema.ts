@@ -291,6 +291,7 @@ export const events = pgTable("events", {
   location: varchar("location").notNull(),
   maxCapacity: integer("max_capacity"),
   registrationFee: decimal("registration_fee", { precision: 10, scale: 2 }),
+  economicImpactValue: decimal("economic_impact_value", { precision: 10, scale: 2 }).default("0.00"), // Economic impact value per attendee
   status: varchar("status").default("draft"), // draft, published, ongoing, completed, cancelled
   tags: text("tags"), // JSON array of tags
   createdAt: timestamp("created_at").defaultNow(),
@@ -782,6 +783,7 @@ export const cbaEvents = pgTable("cba_events", {
   imageUrl: text("image_url"),
   ghlWorkflowId: varchar("ghl_workflow_id"), // MyT Automation workflow ID for automation
   ghlTagName: varchar("ghl_tag_name"), // MyT Automation tag for attendees
+  economicImpactValue: decimal("economic_impact_value", { precision: 10, scale: 2 }).default("0.00"), // Economic impact value per attendee for calculating total impact
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
