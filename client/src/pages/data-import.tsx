@@ -30,7 +30,7 @@ export default function DataImport() {
 
   // Available database fields for mapping
   const dbFields = [
-    { value: '', label: 'Skip this column' },
+    { value: 'skip', label: 'Skip this column' },
     // Contact Information
     { value: 'name', label: 'Business Name' },
     { value: 'email', label: 'Email Address' },
@@ -497,8 +497,8 @@ export default function DataImport() {
                         </div>
                         <div>
                           <Select 
-                            value={fieldMappings[header] || ''} 
-                            onValueChange={(value) => handleMappingChange(header, value)}
+                            value={fieldMappings[header] || 'skip'} 
+                            onValueChange={(value) => handleMappingChange(header, value === 'skip' ? '' : value)}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select database field" />
