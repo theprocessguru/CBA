@@ -4223,7 +4223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           UNION ALL
           
           -- Scan history for events
-          SELECT COUNT(DISTINCT scanned_by) as attendee_count
+          SELECT COUNT(DISTINCT scanner_id) as attendee_count
           FROM scan_history 
           WHERE scan_type = 'check_in'
           

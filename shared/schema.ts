@@ -101,6 +101,42 @@ export const businesses = pgTable("businesses", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Procurement Marketplace - Business Requests
+export const procurementRequests = pgTable("procurement_requests", {
+  id: serial("id").primaryKey(),
+  businessId: integer("business_id").notNull().references(() => businesses.id),
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  category: varchar("category").notNull(), // Service or Product category
+  budget: decimal("budget", { precision: 10, scale: 2 }),
+  budgetType: varchar("budget_type").default("fixed"), // fixed, hourly, negotiable
+  urgency: varchar("urgency").default("normal"), // urgent, normal, flexible
+  preferredLocation: varchar("preferred_location").default("Croydon"), // local preference
+  requirementType: varchar("requirement_type").notNull(), // one-time, ongoing, contract
+  deadline: timestamp("deadline"),
+  status: varchar("status").default("open"), // open, in_progress, completed, cancelled
+  proposalCount: integer("proposal_count").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Procurement Proposals - Supplier Responses
+export const procurementProposals = pgTable("procurement_proposals", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").notNull().references(() => procurementRequests.id),
+  supplierBusinessId: integer("supplier_business_id").notNull().references(() => businesses.id),
+  proposedPrice: decimal("proposed_price", { precision: 10, scale: 2 }),
+  timeline: varchar("timeline"), // delivery/completion time
+  message: text("message").notNull(), // proposal details
+  status: varchar("status").default("pending"), // pending, accepted, rejected, withdrawn
+  isCounterOffer: boolean("is_counter_offer").default(false),
+  originalProposalId: integer("original_proposal_id"), // for counter-offers
+  attachments: text("attachments").array(), // file URLs or documents
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Business categories
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
@@ -191,6 +227,25 @@ export const barterListings = pgTable("barter_listings", {
   updatedAt: timestamp("updated_at").defaultNow(),
   expiresAt: timestamp("expires_at"),
 });
+
+// Zod schemas for procurement
+export const insertProcurementRequestSchema = createInsertSchema(procurementRequests).omit({
+  id: true,
+  proposalCount: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertProcurementProposalSchema = createInsertSchema(procurementProposals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProcurementRequest = z.infer<typeof insertProcurementRequestSchema>;
+export type ProcurementRequest = typeof procurementRequests.$inferSelect;
+export type InsertProcurementProposal = z.infer<typeof insertProcurementProposalSchema>;
+export type ProcurementProposal = typeof procurementProposals.$inferSelect;
 
 // Transaction records between members
 export const transactions = pgTable("transactions", {
