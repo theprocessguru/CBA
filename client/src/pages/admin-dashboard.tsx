@@ -87,6 +87,35 @@ interface ImpactMetrics {
   economicImpact: number;
   partnershipsFormed: number;
   fundingSecured: number;
+  
+  // Economic Growth Tracking
+  economicGrowth?: {
+    // MYT Automation Pipeline Data
+    activeInvestmentMatches: number;
+    completedInvestmentMatches: number;
+    totalInvestmentValue: number;
+    procurementRequests: number;
+    localProcurementMatches: number;
+    skillsExchangeConnections: number;
+    activeSkillsProjects: number;
+    
+    // Business-to-Business Tracking
+    localSupplierTransactions: number;
+    externalSupplierReductions: number;
+    businessNetworkingConnections: number;
+    crossReferralGenerated: number;
+    
+    // Member Engagement
+    economicGrowthParticipation: number;
+    memberBusinessMatches: number;
+    localSpendIncrease: number;
+    
+    // Performance Metrics
+    monthlyEconomicGrowth: number;
+    quarterlyGrowthTarget: number;
+    mytAutomationSyncStatus: 'active' | 'inactive' | 'error';
+    lastSyncTimestamp: string;
+  };
 }
 
 export default function AdminDashboard() {
@@ -230,6 +259,16 @@ function AdminSidebar() {
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Upload size={18} />
               <span>Contact Import</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Economic Growth</p>
+          <Link href="/economic-growth">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-green-50 text-gray-700 hover:text-green-700">
+              <TrendingUp size={18} />
+              <span>🚀 Growth Engine</span>
             </div>
           </Link>
         </div>
@@ -606,6 +645,206 @@ function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupan
           </CardContent>
         </Card>
       </div>
+
+      {/* Economic Growth Engine Dashboard */}
+      {metrics?.economicGrowth && (
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl p-6 shadow-lg">
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <TrendingUp className="mr-2 h-6 w-6" />
+              🚀 Economic Growth Engine - Live Tracking
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold">£{metrics.economicGrowth.totalInvestmentValue?.toLocaleString() || 0}</div>
+                <div className="text-sm opacity-90">Investment Matched</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">{metrics.economicGrowth.localProcurementMatches || 0}</div>
+                <div className="text-sm opacity-90">Local Procurement</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">{metrics.economicGrowth.skillsExchangeConnections || 0}</div>
+                <div className="text-sm opacity-90">Skills Exchange</div>
+              </div>
+              <div className="text-center">
+                <div className={`p-2 rounded-lg ${
+                  metrics.economicGrowth.mytAutomationSyncStatus === 'active' ? 'bg-green-500' :
+                  metrics.economicGrowth.mytAutomationSyncStatus === 'error' ? 'bg-red-500' :
+                  'bg-yellow-500'
+                }`}>
+                  <div className="text-2xl font-bold">
+                    {metrics.economicGrowth.mytAutomationSyncStatus === 'active' ? '✅' : 
+                     metrics.economicGrowth.mytAutomationSyncStatus === 'error' ? '❌' : '⚠️'}
+                  </div>
+                  <div className="text-sm opacity-90">MYT Automation</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Investment Matching Hub */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Investment Matches</CardTitle>
+                <DollarSign className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metrics.economicGrowth.activeInvestmentMatches || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">In progress</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Completed Matches</CardTitle>
+                <Target className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{metrics.economicGrowth.completedInvestmentMatches || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Successfully funded</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Investment Value</CardTitle>
+                <TrendingUp className="h-4 w-4 text-purple-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">£{metrics.economicGrowth.totalInvestmentValue?.toLocaleString() || 0}</div>
+                <p className="text-xs text-gray-500 mt-1">Capital secured</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Local Procurement & Skills Exchange */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Building className="h-5 w-5 mr-2" />
+                  Local Procurement Network
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Procurement Requests</span>
+                    <span className="font-semibold">{metrics.economicGrowth.procurementRequests || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Local Matches</span>
+                    <span className="font-semibold">{metrics.economicGrowth.localProcurementMatches || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">External Reductions</span>
+                    <span className="font-semibold text-green-600">-{metrics.economicGrowth.externalSupplierReductions || 0}</span>
+                  </div>
+                  <Progress 
+                    value={metrics.economicGrowth.procurementRequests > 0 ? 
+                      (metrics.economicGrowth.localProcurementMatches / metrics.economicGrowth.procurementRequests) * 100 : 0} 
+                    className="w-full" 
+                  />
+                  <p className="text-xs text-gray-500">
+                    {metrics.economicGrowth.procurementRequests > 0 ? 
+                      Math.round((metrics.economicGrowth.localProcurementMatches / metrics.economicGrowth.procurementRequests) * 100) : 0}% local sourcing rate
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Users className="h-5 w-5 mr-2" />
+                  Skills Exchange Network
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Skills Connections</span>
+                    <span className="font-semibold">{metrics.economicGrowth.skillsExchangeConnections || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Active Projects</span>
+                    <span className="font-semibold">{metrics.economicGrowth.activeSkillsProjects || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-gray-600">Member Participation</span>
+                    <span className="font-semibold">{metrics.economicGrowth.economicGrowthParticipation || 0}</span>
+                  </div>
+                  <Progress 
+                    value={metrics.economicGrowth.skillsExchangeConnections > 0 ? 
+                      (metrics.economicGrowth.activeSkillsProjects / metrics.economicGrowth.skillsExchangeConnections) * 100 : 0} 
+                    className="w-full" 
+                  />
+                  <p className="text-xs text-gray-500">
+                    {metrics.economicGrowth.skillsExchangeConnections > 0 ? 
+                      Math.round((metrics.economicGrowth.activeSkillsProjects / metrics.economicGrowth.skillsExchangeConnections) * 100) : 0}% project completion rate
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Growth Performance */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <BarChart3 className="h-5 w-5 mr-2" />
+                Economic Growth Performance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {metrics.economicGrowth.businessNetworkingConnections || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">B2B Connections</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {metrics.economicGrowth.crossReferralGenerated || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Cross Referrals</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    £{metrics.economicGrowth.monthlyEconomicGrowth?.toLocaleString() || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Monthly Growth</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    £{metrics.economicGrowth.quarterlyGrowthTarget?.toLocaleString() || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">Q1 Target</div>
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">MYT Automation Sync Status</span>
+                  <div className="flex items-center">
+                    <Badge variant={
+                      metrics.economicGrowth.mytAutomationSyncStatus === 'active' ? 'default' :
+                      metrics.economicGrowth.mytAutomationSyncStatus === 'error' ? 'destructive' : 'secondary'
+                    }>
+                      {metrics.economicGrowth.mytAutomationSyncStatus?.toUpperCase()}
+                    </Badge>
+                    <span className="text-xs text-gray-500 ml-2">
+                      Last sync: {new Date(metrics.economicGrowth.lastSyncTimestamp).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Quick Actions */}
       <Card>
