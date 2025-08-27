@@ -125,7 +125,7 @@ const Navbar = () => {
                 <div className="relative">
                   <button 
                     className={`border-b-2 ${
-                      isActive('/membership-benefits') || isActive('/directory') || isActive('/events') || isActive('/marketplace')
+                      isActive('/membership-benefits') || isActive('/directory') || isActive('/events') || isActive('/marketplace') || isActive('/economic-growth')
                         ? 'border-primary text-primary' 
                         : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:border-neutral-300'
                       } font-medium text-sm leading-5 px-1 py-4 transition-colors duration-200 flex items-center space-x-1`}
@@ -291,6 +291,16 @@ const Navbar = () => {
                   } transition-colors duration-200`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   Marketplace
+                </a>
+              </Link>
+              <Link href="/economic-growth">
+                <a className={`text-sm font-medium ${
+                  isActive('/economic-growth') 
+                    ? 'text-primary' 
+                    : 'text-red-600 hover:text-red-700 font-semibold'
+                  } transition-colors duration-200`}
+                  onClick={() => setIsMembershipMenuOpen(false)}>
+                  🚀 Economic Growth (Coming Soon)
                 </a>
               </Link>
               <Link href="/events">

@@ -110,6 +110,7 @@ import MyApplications from "@/pages/my-applications";
 import { EventMoodDemo } from "@/pages/EventMoodDemo";
 import BusinessEventManagement from "@/pages/BusinessEventManagement";
 import BusinessEvents from "@/pages/BusinessEvents";
+import EconomicGrowth from "@/pages/EconomicGrowth";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -256,6 +257,11 @@ function Router() {
       <Route path="/offers">
         <MainLayout>
           <OffersPage />
+        </MainLayout>
+      </Route>
+      <Route path="/economic-growth">
+        <MainLayout>
+          <EconomicGrowth />
         </MainLayout>
       </Route>
       <Route path="/events">
