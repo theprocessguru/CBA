@@ -42,5 +42,5 @@ Navigation: Logged-in users only see logo and action buttons (Scanner, Mobile Ba
 - **Database**: Neon PostgreSQL serverless database.
 - **Email Service**: NodeMailer and SendGrid.
 - **Payment Processing**: Stripe.
-- **AI Chatbot**: MyT Automation.
+- **AI Chatbot & Automation**: MYT Automation (never refer to GoHighLevel or GHL).
 - **Third-party APIs**: General integration capabilities for external business tools, including Companies House for business data synchronization.

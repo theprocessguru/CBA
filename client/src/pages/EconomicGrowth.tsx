@@ -22,7 +22,7 @@ const ComingSoonPage = () => {
   const [selectedPhase, setSelectedPhase] = useState("phase1");
 
   const features = {
-    ghl: [
+    myt: [
       {
         title: "Investment Matching Hub",
         description: "Connect local businesses with investors, angels, and grants through automated workflows",
@@ -90,7 +90,7 @@ const ComingSoonPage = () => {
       description: "Core infrastructure and immediate impact features",
       deliverables: [
         "Real-time economic impact dashboard (75% complete)",
-        "GoHighLevel integration setup",
+        "MYT Automation integration setup",
         "Investment matching workflows",
         "Skills exchange platform launch"
       ]
@@ -187,21 +187,21 @@ const ComingSoonPage = () => {
       </div>
 
       {/* Feature Breakdown */}
-      <Tabs defaultValue="ghl" className="w-full">
+      <Tabs defaultValue="myt" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="ghl">GoHighLevel Features</TabsTrigger>
+          <TabsTrigger value="myt">MYT Automation Features</TabsTrigger>
           <TabsTrigger value="app">Custom App Features</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="ghl" className="space-y-6">
+        <TabsContent value="myt" className="space-y-6">
           <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold mb-2">Powered by GoHighLevel/MYT Automation</h3>
+            <h3 className="text-2xl font-bold mb-2">Powered by MYT Automation</h3>
             <p className="text-gray-600 dark:text-gray-300">
               Automated workflows and relationship management for scalable economic growth
             </p>
           </div>
           <div className="grid md:grid-cols-2 gap-6">
-            {features.ghl.map((feature, idx) => (
+            {features.myt.map((feature, idx) => (
               <Card key={idx} className="h-full">
                 <CardHeader>
                   <div className="flex items-center mb-2">
