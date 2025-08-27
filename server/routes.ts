@@ -5,7 +5,7 @@ import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { db } from "./db";
 import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
-const Papa = require("papaparse");
+import * as Papa from "papaparse";
 import * as XLSX from "xlsx";
 import crypto from "crypto";
 import { 
@@ -1253,7 +1253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (extension === 'csv') {
       // Parse CSV
       const csvString = buffer.toString('utf-8');
-      const result = Papa.parse(csvString, {
+      const result = (Papa as any).parse(csvString, {
         header: false,
         skipEmptyLines: true,
       });
