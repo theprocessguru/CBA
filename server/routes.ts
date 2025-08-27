@@ -4130,7 +4130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           SUM(
             COALESCE(e.economic_impact_value, 0) * 
             COALESCE(
-              (SELECT COUNT(DISTINCT user_id) FROM event_registrations er WHERE er.event_id = e.id AND er.checked_in = true),
+              (SELECT COUNT(DISTINCT user_id) FROM event_registrations er WHERE er.event_id = e.id AND er.check_in_status = true),
               0
             )
           ) as total_impact
@@ -4218,7 +4218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           -- Event registrations with check-ins
           SELECT COUNT(DISTINCT user_id) as attendee_count 
           FROM event_registrations 
-          WHERE checked_in = true
+          WHERE check_in_status = true
           
           UNION ALL
           
