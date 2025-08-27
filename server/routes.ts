@@ -222,7 +222,8 @@ const hasRestrictedAccess = async (req: Request, res: Response, next: Function) 
     if (!user) return res.status(401).json({ message: "User not found" });
     
     // Restricted participant types that have limited access
-    const restrictedTypes = ['resident', 'volunteer', 'exhibitor', 'speaker', 'vip_guest'];
+    // Note: residents and students are treated as full members for training purposes
+    const restrictedTypes = ['volunteer', 'exhibitor', 'speaker', 'vip_guest'];
     
     if (restrictedTypes.includes(user.participantType || '')) {
       return res.status(403).json({ 

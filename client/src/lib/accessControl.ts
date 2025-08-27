@@ -6,8 +6,8 @@ export interface AccessControlConfig {
 }
 
 // Default restricted participant types
+// Note: residents and students are treated as full members for training purposes
 export const RESTRICTED_PARTICIPANT_TYPES = [
-  'resident',
   'volunteer', 
   'exhibitor',
   'speaker',
@@ -25,7 +25,6 @@ export function getRestrictedAccessMessage(participantType?: string | null): str
   if (!participantType) return "";
   
   const messages: Record<string, string> = {
-    'resident': 'As a resident participant, you have access to event information and basic features.',
     'volunteer': 'As a volunteer, your access is limited to event-related features and volunteer coordination tools.',
     'exhibitor': 'As an exhibitor, you have access to event features and exhibitor-specific tools.',
     'speaker': 'As a speaker, you have access to event schedules and speaker resources.',
@@ -50,7 +49,6 @@ export function getRestrictedFeatures(participantType?: string | null): string[]
   
   // Type-specific additional restrictions
   const typeSpecificRestrictions: Record<string, string[]> = {
-    'resident': [...commonRestrictions, 'Admin Features', 'Business Analytics'],
     'volunteer': [...commonRestrictions, 'Admin Features', 'Payment Processing'],
     'exhibitor': [...commonRestrictions, 'Admin Features'],
     'speaker': [...commonRestrictions, 'Admin Features', 'Exhibitor Management'],
