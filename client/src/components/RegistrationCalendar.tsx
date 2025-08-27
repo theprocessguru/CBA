@@ -27,6 +27,9 @@ const RegistrationCalendar = ({
   onCancel 
 }: RegistrationCalendarProps) => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  
+  // Ensure userRegistrations is always an array to prevent runtime errors
+  const safeUserRegistrations = Array.isArray(userRegistrations) ? userRegistrations : [];
 
   // AI Summit schedule with all available sessions
   const allSessions: Registration[] = [
@@ -148,12 +151,12 @@ const RegistrationCalendar = ({
   };
 
   const isRegistered = (sessionId: string) => {
-    return userRegistrations.some(reg => reg.id === sessionId);
+    return safeUserRegistrations.some(reg => reg.id === sessionId);
   };
 
   const hasTimeConflict = (sessionTime: string) => {
     const [startTime] = sessionTime.split(' - ');
-    return userRegistrations.some(reg => {
+    return safeUserRegistrations.some(reg => {
       const [regStartTime] = reg.time.split(' - ');
       return regStartTime === startTime && reg.id !== selectedTimeSlot;
     });
@@ -184,11 +187,11 @@ const RegistrationCalendar = ({
           <div className="mb-6 p-4 border rounded-lg bg-blue-50">
             <h3 className="font-medium mb-2 flex items-center gap-2">
               <CheckCircle className="h-4 w-4 text-blue-600" />
-              Your Registrations ({userRegistrations.length})
+              Your Registrations ({safeUserRegistrations.length})
             </h3>
-            {userRegistrations.length > 0 ? (
+            {safeUserRegistrations.length > 0 ? (
               <div className="space-y-2">
-                {userRegistrations.map((reg) => (
+                {safeUserRegistrations.map((reg) => (
                   <div key={reg.id} className="flex items-center justify-between text-sm">
                     <span className="font-medium">{reg.time}</span>
                     <span>{reg.title}</span>

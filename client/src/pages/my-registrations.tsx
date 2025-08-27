@@ -31,10 +31,13 @@ const MyRegistrations = () => {
   const queryClient = useQueryClient();
 
   // Fetch user's current registrations
-  const { data: userRegistrations = [], isLoading } = useQuery<Registration[]>({
+  const { data: userRegistrations = [], isLoading, error } = useQuery<Registration[]>({
     queryKey: ['/api/my-registrations'],
     retry: false,
   });
+
+  // Ensure userRegistrations is always an array to prevent runtime errors
+  const safeUserRegistrations = Array.isArray(userRegistrations) ? userRegistrations : [];
 
   // Register for a session
   const registerMutation = useMutation({
@@ -146,7 +149,7 @@ const MyRegistrations = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Registrations</p>
-                    <p className="text-2xl font-bold text-blue-600">{userRegistrations.length}</p>
+                    <p className="text-2xl font-bold text-blue-600">{safeUserRegistrations.length}</p>
                   </div>
                   <Calendar className="h-8 w-8 text-blue-500" />
                 </div>
@@ -159,7 +162,7 @@ const MyRegistrations = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Workshops</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {userRegistrations.filter((r: Registration) => r.type === 'workshop').length}
+                      {safeUserRegistrations.filter((r: Registration) => r.type === 'workshop').length}
                     </p>
                   </div>
                   <Building className="h-8 w-8 text-green-500" />
@@ -173,7 +176,7 @@ const MyRegistrations = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600">Talks</p>
                     <p className="text-2xl font-bold text-purple-600">
-                      {userRegistrations.filter((r: Registration) => r.type === 'talk').length}
+                      {safeUserRegistrations.filter((r: Registration) => r.type === 'talk').length}
                     </p>
                   </div>
                   <User className="h-8 w-8 text-purple-500" />
@@ -183,14 +186,14 @@ const MyRegistrations = () => {
           </div>
 
           {/* My Current Registrations */}
-          {userRegistrations.length > 0 && (
+          {safeUserRegistrations.length > 0 && (
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle>Your Current Registrations</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {userRegistrations.map((registration: Registration) => (
+                  {safeUserRegistrations.map((registration: Registration) => (
                     <div key={registration.id} className="border rounded-lg p-4 bg-white">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -257,7 +260,7 @@ const MyRegistrations = () => {
 
           {/* Registration Calendar */}
           <RegistrationCalendar
-            userRegistrations={userRegistrations}
+            userRegistrations={safeUserRegistrations}
             onRegister={handleRegister}
             onCancel={handleCancel}
           />
