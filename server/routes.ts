@@ -1251,19 +1251,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const extension = filename.split('.').pop()?.toLowerCase();
     
     if (extension === 'csv') {
-      // Parse CSV using dynamic import
-      const Papa = await import('papaparse');
+      // Parse CSV using simple parser (avoiding Papa Parse issues)
       const csvString = buffer.toString('utf-8');
-      const result = Papa.default.parse(csvString, {
-        header: false,
-        skipEmptyLines: true,
-      });
+      const lines = csvString.split('\n').filter(line => line.trim() !== '');
       
-      if (result.errors.length > 0) {
-        throw new Error(`CSV parsing error: ${result.errors[0].message}`);
+      if (lines.length === 0) {
+        throw new Error('CSV file is empty');
       }
       
-      const [headers, ...rows] = result.data as string[][];
+      // Simple CSV parsing - handles basic cases with commas and quotes
+      const parseCSVLine = (line: string): string[] => {
+        const result: string[] = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line[i];
+          
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+          } else {
+            current += char;
+          }
+        }
+        result.push(current.trim());
+        return result;
+      };
+      
+      const headers = parseCSVLine(lines[0]);
+      const rows = lines.slice(1).map(line => parseCSVLine(line));
+      
       return { headers, rows, totalRows: rows.length };
     } else if (extension === 'xlsx' || extension === 'xls') {
       // Parse Excel
