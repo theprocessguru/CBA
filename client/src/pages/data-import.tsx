@@ -130,8 +130,7 @@ export default function DataImport() {
     { value: 'membershipStatus', label: 'Membership Status' },
     
     // Person Type & Classification
-    { value: 'participantType', label: 'Primary Participant Type' },
-    { value: 'personType', label: 'Person Type (resident, student, volunteer, etc)' },
+    { value: 'participantType', label: 'Primary Participant Type (attendee, volunteer, speaker, exhibitor, etc)' },
     
     // Interest Areas (from CSV: AI Basics, Education & Learning, AI in Healthcare, Career Opportunities, AI for Seniors, Family Activities)
     { value: 'interestAreas', label: 'Interest Areas (AI Basics, Education & Learning, AI in Healthcare, Career Opportunities, AI for Seniors, Family Activities)' },
@@ -203,7 +202,7 @@ export default function DataImport() {
           } else if (lowerHeader.includes('notes') || lowerHeader.includes('note')) {
             mappings[header] = 'notes';
           } else if (lowerHeader.includes('person') && lowerHeader.includes('type')) {
-            mappings[header] = 'personType';
+            mappings[header] = 'participantType';
           } else if (lowerHeader.includes('interest') && lowerHeader.includes('area')) {
             mappings[header] = 'interestAreas';
           } else if (lowerHeader.includes('accessibility') && lowerHeader.includes('need')) {
