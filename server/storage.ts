@@ -2807,54 +2807,6 @@ export class DatabaseStorage implements IStorage {
   async updateScanSession(id: number, session: any): Promise<ScanSession> { throw new Error('Not implemented'); }
   async getScanAnalyticsByEvent(eventId: number): Promise<any> { return {}; }
   async getScanAnalyticsByScanner(scannerId: string): Promise<any> { return {}; }
-  async getTopScanners(eventId?: number, limit?: number): Promise<any[]> { return []; }
-  async getMostScannedAttendees(eventId: number, limit?: number): Promise<any[]> { return []; }
-  async listPersonTypes(): Promise<PersonType[]> { return []; }
-  async getPersonTypeById(id: number): Promise<PersonType | undefined> { return undefined; }
-  async createPersonType(personType: any): Promise<PersonType> { throw new Error('Not implemented'); }
-  async updatePersonType(id: number, personType: any): Promise<PersonType> { throw new Error('Not implemented'); }
-  async deletePersonType(id: number): Promise<boolean> { return false; }
-  async getUserPersonTypes(userId: string): Promise<UserPersonType[]> { return []; }
-  async assignPersonTypeToUser(assignment: any): Promise<UserPersonType> { throw new Error('Not implemented'); }
-  async removePersonTypeFromUser(userId: string, personTypeId: number): Promise<boolean> { return false; }
-  async setPrimaryPersonType(userId: string, personTypeId: number): Promise<boolean> { return false; }
-  async getUsersByPersonType(personTypeId: number): Promise<User[]> { return []; }
-
-  // Workshop related
-  async createAISummitWorkshop(workshop: any): Promise<AISummitWorkshop> { throw new Error('Not implemented'); }
-  async getAISummitWorkshopById(id: number): Promise<AISummitWorkshop | undefined> { return undefined; }
-  async getAllAISummitWorkshops(): Promise<AISummitWorkshop[]> { return []; }
-  async updateAISummitWorkshop(id: number, workshop: any): Promise<AISummitWorkshop> { throw new Error('Not implemented'); }
-  async deleteAISummitWorkshop(id: number): Promise<boolean> { return false; }
-  async getActiveAISummitWorkshops(): Promise<AISummitWorkshop[]> { return []; }
-  async createAISummitWorkshopRegistration(registration: any): Promise<AISummitWorkshopRegistration> { throw new Error('Not implemented'); }
-  async getAISummitWorkshopRegistrationById(id: number): Promise<AISummitWorkshopRegistration | undefined> { return undefined; }
-  async getWorkshopRegistrationsByWorkshopId(workshopId: number): Promise<AISummitWorkshopRegistration[]> { return []; }
-  async getWorkshopRegistrationsByBadgeId(badgeId: string): Promise<AISummitWorkshopRegistration[]> { return []; }
-  async updateWorkshopRegistrationCheckIn(registrationId: number, checkedIn: boolean, checkedInAt?: Date): Promise<AISummitWorkshopRegistration> { throw new Error('Not implemented'); }
-  async checkWorkshopCapacity(workshopId: number): Promise<{ current: number; max: number; available: number }> { return { current: 0, max: 0, available: 0 }; }
-  async deleteAISummitWorkshopRegistration(id: number): Promise<boolean> { return false; }
-
-  // Speaking sessions
-  async createAISummitSpeakingSession(session: any): Promise<AISummitSpeakingSession> { throw new Error('Not implemented'); }
-  async getAISummitSpeakingSessionById(id: number): Promise<AISummitSpeakingSession | undefined> { return undefined; }
-  async getAllAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]> { return []; }
-  async updateAISummitSpeakingSession(id: number, session: any): Promise<AISummitSpeakingSession> { throw new Error('Not implemented'); }
-  async deleteAISummitSpeakingSession(id: number): Promise<boolean> { return false; }
-  async getActiveAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]> { return []; }
-  async createAISummitSpeakingSessionRegistration(registration: any): Promise<AISummitSpeakingSessionRegistration> { throw new Error('Not implemented'); }
-  async getAISummitSpeakingSessionRegistrationById(id: number): Promise<AISummitSpeakingSessionRegistration | undefined> { return undefined; }
-  async getSessionRegistrationsBySessionId(sessionId: number): Promise<AISummitSpeakingSessionRegistration[]> { return []; }
-  async getSessionRegistrationsByBadgeId(badgeId: string): Promise<AISummitSpeakingSessionRegistration[]> { return []; }
-  async checkSessionCapacity(sessionId: number): Promise<{ current: number; max: number; available: number }> { return { current: 0, max: 0, available: 0 }; }
-
-  // Team and volunteer stubs
-  async createAISummitVolunteer(volunteer: any): Promise<AISummitVolunteer> { throw new Error('Not implemented'); }
-  async getAISummitVolunteerById(id: number): Promise<AISummitVolunteer | undefined> { return undefined; }
-  async getAllAISummitVolunteers(): Promise<AISummitVolunteer[]> { return []; }
-  async createAISummitTeamMember(teamMember: any): Promise<AISummitTeamMember> { throw new Error('Not implemented'); }
-  async getAISummitTeamMemberById(id: number): Promise<AISummitTeamMember | undefined> { return undefined; }
-  async getAllAISummitTeamMembers(): Promise<AISummitTeamMember[]> { return []; }
 }
 
 export const storage = new DatabaseStorage();
