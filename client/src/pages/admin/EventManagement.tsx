@@ -105,7 +105,7 @@ export default function EventManagement() {
   // Create event mutation
   const createEventMutation = useMutation({
     mutationFn: async (eventData: any) => {
-      const response = await apiRequest("POST", "/api/events", eventData);
+      const response = await apiRequest("POST", "/api/admin/events", eventData);
       return response.json();
     },
     onSuccess: () => {
@@ -213,6 +213,7 @@ export default function EventManagement() {
 
     const eventData = {
       eventName: formData.get("title"),
+      eventSlug: (formData.get("title") as string)?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || '',
       description: formData.get("description"),
       eventDate: formData.get("eventDate"),
       startTime: formData.get("startTime"),
@@ -222,6 +223,9 @@ export default function EventManagement() {
       registrationFee: parseFloat(formData.get("registrationFee") as string) || 0,
       eventType: formData.get("eventType") || "workshop",
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
+      isActive: formData.get("isActive") === "on",
+      isFeatured: formData.get("isFeatured") === "on",
+      requiresApproval: formData.get("requiresApproval") === "on",
       imageUrl: imageUrl,
     };
 
@@ -302,6 +306,16 @@ export default function EventManagement() {
         const finalEventType = eventType === "other" ? customEventType : eventType;
         formData.set("eventType", finalEventType);
         formData.set("status", status);
+        
+        // Generate eventSlug from title
+        const title = formData.get("title") as string;
+        const eventSlug = title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || '';
+        formData.set("eventSlug", eventSlug);
+        
+        // Map form field names to backend schema names
+        formData.set("eventName", title);
+        formData.set("venue", formData.get("location") as string);
+        
         onSubmit(formData);
       }} className="space-y-4">
         <div>
@@ -416,6 +430,37 @@ export default function EventManagement() {
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            name="isActive" 
+            id="isActive" 
+            defaultChecked={event?.status === 'published' || !event}
+            className="rounded border-gray-300"
+          />
+          <Label htmlFor="isActive">Active</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            name="isFeatured" 
+            id="isFeatured" 
+            className="rounded border-gray-300"
+          />
+          <Label htmlFor="isFeatured">Featured</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <input 
+            type="checkbox" 
+            name="requiresApproval" 
+            id="requiresApproval" 
+            className="rounded border-gray-300"
+          />
+          <Label htmlFor="requiresApproval">Requires Approval</Label>
         </div>
       </div>
 
