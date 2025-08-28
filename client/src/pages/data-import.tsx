@@ -40,10 +40,9 @@ export default function DataImport() {
   const [importType, setImportType] = useState<'business' | 'people'>('people'); // Default to people for AI Summit
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
 
-  // Fetch person types for people imports
+  // Fetch person types for both people and business imports
   const { data: personTypes = [] } = useQuery<PersonType[]>({
-    queryKey: ["/api/person-types"],
-    enabled: importType === 'people'
+    queryKey: ["/api/person-types"]
   });
 
   // Available database fields for mapping
@@ -240,10 +239,8 @@ export default function DataImport() {
       formData.append('file', file);
       formData.append('mappings', JSON.stringify(mappings));
       
-      // Add person type IDs for people imports
-      if (importType === 'people') {
-        formData.append('personTypeIds', JSON.stringify(selectedPersonTypes));
-      }
+      // Add person type IDs for both business and people imports
+      formData.append('personTypeIds', JSON.stringify(selectedPersonTypes));
       
       const endpoint = importType === 'business' ? '/api/data-import/import' : '/api/data-import/import-people';
       const response = await apiRequest('POST', endpoint, formData);
@@ -608,51 +605,52 @@ export default function DataImport() {
 
           {importStep === 'mapping' && importPreview && (
             <div className="space-y-6">
-              {importType === 'people' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Select Person Types
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                      <p className="text-sm text-amber-800">
-                        Select which person types to assign to the imported people. You can assign multiple types.
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {personTypes.map((type) => (
-                        <div key={type.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`type-${type.id}`}
-                            checked={selectedPersonTypes.includes(type.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedPersonTypes([...selectedPersonTypes, type.id]);
-                              } else {
-                                setSelectedPersonTypes(selectedPersonTypes.filter(id => id !== type.id));
-                              }
-                            }}
-                          />
-                          <label
-                            htmlFor={`type-${type.id}`}
-                            className="text-sm font-medium cursor-pointer flex items-center gap-1"
-                          >
-                            {type.displayName}
-                          </label>
-                        </div>
-                      ))}
-                    </div>
-                    {selectedPersonTypes.length > 0 && (
-                      <div className="text-sm text-green-600 mt-2">
-                        ✓ Selected {selectedPersonTypes.length} person type{selectedPersonTypes.length !== 1 ? 's' : ''}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Select Person Types
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                    <p className="text-sm text-amber-800">
+                      {importType === 'people' 
+                        ? 'Select which person types to assign to the imported people. You can assign multiple types.'
+                        : 'Select which person types to assign to the business contacts/owners. You can assign multiple types.'
+                      }
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {personTypes.map((type) => (
+                      <div key={type.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`type-${type.id}`}
+                          checked={selectedPersonTypes.includes(type.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedPersonTypes([...selectedPersonTypes, type.id]);
+                            } else {
+                              setSelectedPersonTypes(selectedPersonTypes.filter(id => id !== type.id));
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`type-${type.id}`}
+                          className="text-sm font-medium cursor-pointer flex items-center gap-1"
+                        >
+                          {type.displayName}
+                        </label>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                    ))}
+                  </div>
+                  {selectedPersonTypes.length > 0 && (
+                    <div className="text-sm text-green-600 mt-2">
+                      ✓ Selected {selectedPersonTypes.length} person type{selectedPersonTypes.length !== 1 ? 's' : ''}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
               
               <Card>
                 <CardHeader>

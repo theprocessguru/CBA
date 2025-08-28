@@ -1402,6 +1402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const mappings = JSON.parse(req.body.mappings || '{}');
+      const personTypeIds = JSON.parse(req.body.personTypeIds || '[]');
       const userId = (req as any).user.id;
       
       const fileData = await parseFileData(req.file.buffer, req.file.originalname);
@@ -1435,6 +1436,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Create business
           const newBusiness = await storage.createBusiness(validatedData);
           imported++;
+
+          // Handle person type assignments for business contact
+          if (personTypeIds.length > 0 && businessData.email) {
+            try {
+              // Check if user exists with this email
+              let contactUser = await storage.getUserByEmail(businessData.email);
+              
+              if (!contactUser) {
+                // Create a new user for the business contact
+                const contactUserData = {
+                  id: `import_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                  email: businessData.email,
+                  firstName: businessData.contactFirstName || '',
+                  lastName: businessData.contactLastName || '',
+                  membershipTier: 'Starter Tier',
+                  membershipStatus: 'active',
+                  emailVerified: true,
+                  accountStatus: 'active'
+                };
+                contactUser = await storage.upsertUser(contactUserData);
+              }
+              
+              // Assign person types to the contact user
+              for (const personTypeId of personTypeIds) {
+                try {
+                  await storage.assignPersonTypeToUser({ 
+                    userId: contactUser.id, 
+                    personTypeId: personTypeId, 
+                    isPrimary: false 
+                  });
+                } catch (error) {
+                  // Ignore if already assigned
+                  console.warn(`Failed to assign person type ${personTypeId} to user ${contactUser.id}:`, error);
+                }
+              }
+            } catch (error) {
+              console.error(`Failed to handle person types for business contact:`, error);
+              // Don't fail the import if person type assignment fails
+            }
+          }
 
           // Enhanced sync to MyT Automation - Creates both Company and Contact
           const mytAutomationService = getMyTAutomationService();
