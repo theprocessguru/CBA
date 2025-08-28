@@ -54,12 +54,18 @@ export class MyTAutomationService {
   private apiV2: AxiosInstance;
   private apiKey: string;
   private oauthToken: string;
+  private syncEnabled: boolean;
 
   constructor() {
     this.apiKey = process.env.GHL_API_KEY || '';
     this.oauthToken = process.env.GHL_OAUTH_TOKEN || '';
+    this.syncEnabled = process.env.MYT_AUTOMATION_SYNC_ENABLED !== 'false';
     
-    if (!this.apiKey) {
+    if (!this.syncEnabled) {
+      console.log('🔄 MYT Automation syncing is DISABLED - Users will be stored in CBA app only');
+    }
+    
+    if (!this.apiKey && this.syncEnabled) {
       throw new Error('GHL_API_KEY is required for MyT Automation');
     }
 
@@ -118,6 +124,25 @@ export class MyTAutomationService {
     }
   }
 
+  // Add contact (alias for upsertContact to maintain compatibility)
+  async addContact(contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping contact: ${contactData.email}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: contactData.email || '',
+        firstName: contactData.firstName,
+        lastName: contactData.lastName,
+        phone: contactData.phone,
+        companyName: contactData.companyName,
+        tags: contactData.tags || [],
+        customFields: contactData.customFields || {}
+      };
+    }
+    
+    return await this.upsertContact(contactData);
+  }
+
   // Update existing contact
   async updateContact(contactId: string, contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
     try {
@@ -159,6 +184,20 @@ export class MyTAutomationService {
 
   // Create or update contact
   async upsertContact(contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping contact: ${contactData.email}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: contactData.email || '',
+        firstName: contactData.firstName,
+        lastName: contactData.lastName,
+        phone: contactData.phone,
+        companyName: contactData.companyName,
+        tags: contactData.tags || [],
+        customFields: contactData.customFields || {}
+      };
+    }
+    
     try {
       // Check if contact exists
       if (contactData.email) {
@@ -365,6 +404,20 @@ export class MyTAutomationService {
 
   // Sync business member to MyT Automation with ALL custom fields
   async syncBusinessMember(member: any): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping member: ${member.email}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: member.email || '',
+        firstName: member.firstName,
+        lastName: member.lastName,
+        phone: member.phone,
+        companyName: member.company || member.businessName,
+        tags: ['CBA_Member'],
+        customFields: {}
+      };
+    }
+    
     const tags: string[] = ['CBA_Member'];
     
     // Add tier-specific tags
@@ -494,6 +547,20 @@ export class MyTAutomationService {
   
   // Sync AI Summit attendee registration
   async syncAISummitAttendee(attendee: any): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping AI Summit attendee: ${attendee.email}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: attendee.email || '',
+        firstName: attendee.firstName,
+        lastName: attendee.lastName,
+        phone: attendee.phone,
+        companyName: attendee.company,
+        tags: ['AI_Summit_Registered', 'AI_Summit_Attendee'],
+        customFields: {}
+      };
+    }
+    
     const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Attendee'];
     
     // Add role-specific tags
@@ -551,6 +618,20 @@ export class MyTAutomationService {
   
   // Sync exhibitor registration
   async syncExhibitor(exhibitor: any): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping exhibitor: ${exhibitor.contactEmail}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: exhibitor.contactEmail || '',
+        firstName: exhibitor.contactName?.split(' ')[0],
+        lastName: exhibitor.contactName?.split(' ').slice(1).join(' '),
+        phone: exhibitor.phone,
+        companyName: exhibitor.exhibitorCompanyName,
+        tags: ['AI_Summit_Registered', 'AI_Summit_Exhibitor'],
+        customFields: {}
+      };
+    }
+    
     const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Exhibitor'];
     if (exhibitor.previousExhibitor) tags.push('Previous_Exhibitor');
 
@@ -589,6 +670,20 @@ export class MyTAutomationService {
   
   // Sync speaker registration
   async syncSpeaker(speaker: any): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping speaker: ${speaker.contactEmail}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: speaker.contactEmail || '',
+        firstName: speaker.contactName?.split(' ')[0],
+        lastName: speaker.contactName?.split(' ').slice(1).join(' '),
+        phone: speaker.phone,
+        companyName: speaker.company,
+        tags: ['AI_Summit_Registered', 'AI_Summit_Speaker'],
+        customFields: {}
+      };
+    }
+    
     const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Speaker'];
     if (speaker.previousSpeaking) tags.push('Previous_Speaker');
 
@@ -629,6 +724,20 @@ export class MyTAutomationService {
   
   // Sync volunteer registration
   async syncVolunteer(volunteer: any): Promise<MyTAutomationContact> {
+    if (!this.syncEnabled) {
+      console.log(`⏸️  MYT Automation sync disabled - skipping volunteer: ${volunteer.email}`);
+      return {
+        id: `mock_${Date.now()}`,
+        email: volunteer.email || '',
+        firstName: volunteer.firstName,
+        lastName: volunteer.lastName,
+        phone: volunteer.phone,
+        companyName: volunteer.company,
+        tags: ['AI_Summit_Registered', 'AI_Summit_Volunteer'],
+        customFields: {}
+      };
+    }
+    
     const tags: string[] = ['AI_Summit_Registered', 'AI_Summit_Volunteer'];
 
     const contactData: Partial<MyTAutomationContact> = {
