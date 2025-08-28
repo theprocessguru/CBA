@@ -415,9 +415,16 @@ export default function DataImport() {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="space-y-6">
           <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Business Data Import</h1>
-            <p className="text-lg text-gray-600">Import business data with Companies House information</p>
-            <p className="text-sm text-blue-600 mt-2">All imported data automatically syncs to MyT Automation with 150+ custom fields</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {importType === 'business' ? 'Business Data Import' : 'People Data Import'}
+            </h1>
+            <p className="text-lg text-gray-600">
+              {importType === 'business' 
+                ? 'Import business data with Companies House information' 
+                : 'Import contact lists, volunteers, students, and member profiles'
+              }
+            </p>
+            <p className="text-sm text-blue-600 mt-2">All imported data automatically syncs to MYT Automation with 150+ custom fields</p>
           </div>
 
           {/* Progress Steps */}
@@ -461,10 +468,37 @@ export default function DataImport() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Upload className="h-5 w-5" />
-                  Upload Business List
+                  {importType === 'business' ? 'Upload Business List' : 'Upload People List'}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Import Type Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <Card className={`cursor-pointer border-2 transition-colors ${
+                    importType === 'business' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                  }`} onClick={() => setImportType('business')}>
+                    <CardContent className="p-4 text-center">
+                      <Building2 className="mx-auto h-8 w-8 text-blue-600 mb-2" />
+                      <h3 className="font-semibold text-gray-900">Business Import</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Import business directories with Companies House data, notes, and 30+ fields
+                      </p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={`cursor-pointer border-2 transition-colors ${
+                    importType === 'people' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                  }`} onClick={() => setImportType('people')}>
+                    <CardContent className="p-4 text-center">
+                      <Users className="mx-auto h-8 w-8 text-green-600 mb-2" />
+                      <h3 className="font-semibold text-gray-900">People Import</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Import contact lists, volunteers, students, and member profiles
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <div className="space-y-2">
