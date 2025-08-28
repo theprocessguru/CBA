@@ -375,6 +375,19 @@ export class MyTAutomationService {
     if (member.isTrialMember) tags.push('CBA_Trial_Member');
     if (member.emailVerified) tags.push('Email_Verified');
     if (member.isAdmin) tags.push('CBA_Admin');
+    
+    // Add person type specific tags for workflow automation
+    const personType = member.personType || member.participantType || 'business';
+    tags.push(`CBA_${personType.charAt(0).toUpperCase() + personType.slice(1)}`);
+    
+    // Add special workflow trigger tags for priority person types
+    if (personType === 'administrator') tags.push('Admin_Onboarding');
+    if (personType === 'media') tags.push('Media_Kit_Required');
+    if (personType === 'sponsor') tags.push('Sponsor_Welcome');
+    if (personType === 'vip') tags.push('VIP_Experience');
+    if (personType === 'speaker') tags.push('Speaker_Resources');
+    if (personType === 'exhibitor') tags.push('Exhibitor_Setup');
+    if (personType === 'volunteer') tags.push('Volunteer_Training');
 
     const contactData: Partial<MyTAutomationContact> = {
       email: member.email,
