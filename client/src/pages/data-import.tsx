@@ -114,6 +114,7 @@ export default function DataImport() {
     { value: 'lastName', label: 'Last Name' },
     { value: 'email', label: 'Email Address' },
     { value: 'phone', label: 'Phone Number' },
+    { value: 'postcode', label: 'Postcode' },
     
     // Professional Information
     { value: 'title', label: 'Title (Mr, Mrs, Dr, Mayor, etc)' },
@@ -128,6 +129,13 @@ export default function DataImport() {
     { value: 'membershipTier', label: 'Membership Tier' },
     { value: 'membershipStatus', label: 'Membership Status' },
     
+    // Person Type & Classification
+    { value: 'participantType', label: 'Primary Participant Type' },
+    { value: 'personType', label: 'Person Type (resident, student, volunteer, etc)' },
+    
+    // Interest Areas (from CSV: AI Basics, Education & Learning, AI in Healthcare, Career Opportunities, AI for Seniors, Family Activities)
+    { value: 'interestAreas', label: 'Interest Areas (AI Basics, Education & Learning, AI in Healthcare, Career Opportunities, AI for Seniors, Family Activities)' },
+    
     // Volunteer/Student Fields
     { value: 'university', label: 'University' },
     { value: 'studentId', label: 'Student ID' },
@@ -135,9 +143,13 @@ export default function DataImport() {
     { value: 'yearOfStudy', label: 'Year of Study' },
     { value: 'communityRole', label: 'Community Role' },
     { value: 'volunteerExperience', label: 'Volunteer Experience' },
+    { value: 'isVolunteer', label: 'Is Volunteer (TRUE/FALSE)' },
+    
+    // Accessibility & Special Needs
+    { value: 'accessibilityNeeds', label: 'Accessibility Needs' },
     
     // Additional Fields
-    { value: 'participantType', label: 'Primary Participant Type' },
+    { value: 'notes', label: 'Notes' },
   ];
 
   const dbFields = importType === 'business' ? businessFields : peopleFields;
@@ -186,12 +198,34 @@ export default function DataImport() {
             mappings[header] = 'email';
           } else if (lowerHeader.includes('phone')) {
             mappings[header] = 'phone';
+          } else if (lowerHeader.includes('postcode') || lowerHeader.includes('zip')) {
+            mappings[header] = 'postcode';
+          } else if (lowerHeader.includes('notes') || lowerHeader.includes('note')) {
+            mappings[header] = 'notes';
+          } else if (lowerHeader.includes('person') && lowerHeader.includes('type')) {
+            mappings[header] = 'personType';
+          } else if (lowerHeader.includes('interest') && lowerHeader.includes('area')) {
+            mappings[header] = 'interestAreas';
+          } else if (lowerHeader.includes('accessibility') && lowerHeader.includes('need')) {
+            mappings[header] = 'accessibilityNeeds';
+          } else if (lowerHeader.includes('is') && lowerHeader.includes('volunteer')) {
+            mappings[header] = 'isVolunteer';
           } else if (lowerHeader.includes('company') || lowerHeader.includes('organisation')) {
             mappings[header] = 'company';
           } else if (lowerHeader.includes('title') && !lowerHeader.includes('job')) {
             mappings[header] = 'title';
           } else if (lowerHeader.includes('job') || lowerHeader.includes('position')) {
             mappings[header] = 'jobTitle';
+          } else if (lowerHeader.includes('university')) {
+            mappings[header] = 'university';
+          } else if (lowerHeader.includes('student') && lowerHeader.includes('id')) {
+            mappings[header] = 'studentId';
+          } else if (lowerHeader.includes('course')) {
+            mappings[header] = 'course';
+          } else if (lowerHeader.includes('year')) {
+            mappings[header] = 'yearOfStudy';
+          } else if (lowerHeader.includes('participant') && lowerHeader.includes('type')) {
+            mappings[header] = 'participantType';
           }
         }
         });
