@@ -147,14 +147,7 @@ export default function DataImport() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await fetch('/api/data-import/preview', {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error('Failed to preview file');
-      }
-      return response.json();
+      return apiRequest('POST', '/api/data-import/preview', formData);
     },
     onSuccess: (data: ImportPreview) => {
       setImportPreview(data);
@@ -217,14 +210,7 @@ export default function DataImport() {
       }
       
       const endpoint = importType === 'business' ? '/api/data-import/import' : '/api/data-import/import-people';
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error('Failed to import data');
-      }
-      return response.json();
+      return apiRequest('POST', endpoint, formData);
     },
     onSuccess: (data) => {
       setImportStep('complete');
