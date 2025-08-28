@@ -608,6 +608,52 @@ export default function DataImport() {
 
           {importStep === 'mapping' && importPreview && (
             <div className="space-y-6">
+              {importType === 'people' && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Select Person Types
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <p className="text-sm text-amber-800">
+                        Select which person types to assign to the imported people. You can assign multiple types.
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {personTypes.map((type) => (
+                        <div key={type.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`type-${type.id}`}
+                            checked={selectedPersonTypes.includes(type.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedPersonTypes([...selectedPersonTypes, type.id]);
+                              } else {
+                                setSelectedPersonTypes(selectedPersonTypes.filter(id => id !== type.id));
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`type-${type.id}`}
+                            className="text-sm font-medium cursor-pointer flex items-center gap-1"
+                          >
+                            {type.displayName}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedPersonTypes.length > 0 && (
+                      <div className="text-sm text-green-600 mt-2">
+                        ✓ Selected {selectedPersonTypes.length} person type{selectedPersonTypes.length !== 1 ? 's' : ''}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+              
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
