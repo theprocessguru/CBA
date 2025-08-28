@@ -147,14 +147,16 @@ export default function DataImport() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      return apiRequest('POST', '/api/data-import/preview', formData);
+      const response = await apiRequest('POST', '/api/data-import/preview', formData);
+      return response.json();
     },
     onSuccess: (data: ImportPreview) => {
       setImportPreview(data);
       setImportStep('mapping');
       // Initialize field mappings with smart defaults
       const mappings: FieldMapping = {};
-      data.headers.forEach(header => {
+      if (Array.isArray(data.headers)) {
+        data.headers.forEach(header => {
         const lowerHeader = header.toLowerCase();
         
         // Smart mapping for business imports
@@ -192,7 +194,8 @@ export default function DataImport() {
             mappings[header] = 'jobTitle';
           }
         }
-      });
+        });
+      }
       setFieldMappings(mappings);
     },
   });
@@ -210,7 +213,8 @@ export default function DataImport() {
       }
       
       const endpoint = importType === 'business' ? '/api/data-import/import' : '/api/data-import/import-people';
-      return apiRequest('POST', endpoint, formData);
+      const response = await apiRequest('POST', endpoint, formData);
+      return response.json();
     },
     onSuccess: (data) => {
       setImportStep('complete');
@@ -552,7 +556,7 @@ export default function DataImport() {
                   </div>
 
                   <div className="space-y-4">
-                    {importPreview.headers.map((header, index) => (
+                    {Array.isArray(importPreview.headers) ? importPreview.headers.map((header, index) => (
                       <div key={header} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center p-4 border border-gray-200 rounded-lg">
                         <div>
                           <Label className="font-medium">{header}</Label>
@@ -589,7 +593,11 @@ export default function DataImport() {
                           )}
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-4 text-gray-500">
+                        No headers found in the uploaded file.
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-between pt-4">
