@@ -80,7 +80,8 @@ import {
   insertBusinessEventSchema,
   insertBusinessEventRegistrationSchema,
   type BusinessEvent,
-  type BusinessEventRegistration
+  type BusinessEventRegistration,
+  personTypes
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -9475,7 +9476,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all person types
   app.get('/api/person-types', async (req, res) => {
     try {
-      const types = await storage.listPersonTypes();
+      // Direct database query to bypass storage issues
+      const types = await db
+        .select()
+        .from(personTypes)
+        .where(eq(personTypes.isActive, true))
+        .orderBy(asc(personTypes.priority), asc(personTypes.name));
       res.json(types);
     } catch (error) {
       console.error('Error fetching person types:', error);
