@@ -1693,6 +1693,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to sync member to MyT Automation" });
     }
   });
+
+  // Test API v2 connection for custom fields
+  app.get('/api/ghl/test-v2', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const isConnected = await mytAutomationService.testApiV2Connection();
+      res.json({ 
+        connected: isConnected,
+        message: isConnected ? "MyT Automation API v2 connection successful" : "MyT Automation API v2 connection failed - check OAuth token"
+      });
+    } catch (error) {
+      console.error("Error testing MyT Automation API v2 connection:", error);
+      res.status(500).json({ message: "Failed to test MyT Automation API v2 connection" });
+    }
+  });
+
+  // Get all custom fields
+  app.get('/api/ghl/custom-fields', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const objectType = (req.query.object as 'contact' | 'opportunity') || 'contact';
+      const customFields = await mytAutomationService.getCustomFields(objectType);
+      res.json({ 
+        customFields,
+        count: customFields.length,
+        objectType
+      });
+    } catch (error: any) {
+      console.error("Error fetching custom fields:", error);
+      res.status(500).json({ message: error.message || "Failed to fetch custom fields" });
+    }
+  });
+
+  // Create custom field
+  app.post('/api/ghl/custom-fields', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const { name, type, object, group, options, required } = req.body;
+      
+      if (!name || !type || !object) {
+        return res.status(400).json({ message: "Name, type, and object are required" });
+      }
+      
+      const customField = await mytAutomationService.createCustomField({
+        name,
+        type,
+        object,
+        group,
+        options,
+        required
+      });
+      
+      res.json({ 
+        customField,
+        message: "Custom field created successfully"
+      });
+    } catch (error: any) {
+      console.error("Error creating custom field:", error);
+      res.status(500).json({ message: error.message || "Failed to create custom field" });
+    }
+  });
+
+  // Update custom field
+  app.put('/api/ghl/custom-fields/:fieldId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const { fieldId } = req.params;
+      const updates = req.body;
+      
+      const customField = await mytAutomationService.updateCustomField(fieldId, updates);
+      res.json({ 
+        customField,
+        message: "Custom field updated successfully"
+      });
+    } catch (error: any) {
+      console.error("Error updating custom field:", error);
+      res.status(500).json({ message: error.message || "Failed to update custom field" });
+    }
+  });
+
+  // Delete custom field
+  app.delete('/api/ghl/custom-fields/:fieldId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const { fieldId } = req.params;
+      const success = await mytAutomationService.deleteCustomField(fieldId);
+      
+      if (success) {
+        res.json({ message: "Custom field deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Custom field not found or failed to delete" });
+      }
+    } catch (error: any) {
+      console.error("Error deleting custom field:", error);
+      res.status(500).json({ message: error.message || "Failed to delete custom field" });
+    }
+  });
+
+  // Ensure participantType field is set up with 14 person types
+  app.post('/api/ghl/ensure-participant-type-field', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      if (!mytAutomationService) {
+        return res.status(503).json({ message: "Go High Level integration not configured" });
+      }
+      
+      const customField = await mytAutomationService.ensureParticipantTypeField();
+      res.json({ 
+        customField,
+        message: "ParticipantType field ensured successfully with 14 person types"
+      });
+    } catch (error: any) {
+      console.error("Error ensuring participant type field:", error);
+      res.status(500).json({ message: error.message || "Failed to ensure participant type field" });
+    }
+  });
   
   // Content reporting endpoints
   app.post('/api/content-reports', isAuthenticated, async (req: any, res) => {

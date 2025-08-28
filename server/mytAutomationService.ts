@@ -30,21 +30,53 @@ export interface MyTAutomationCompany {
   customFields?: Record<string, any>;
 }
 
+export interface MyTAutomationCustomField {
+  id: string;
+  name: string;
+  type: 'text' | 'dropdown' | 'checkbox' | 'date' | 'number' | 'email' | 'phone' | 'url' | 'textarea';
+  object: 'contact' | 'opportunity';
+  group?: string;
+  options?: Array<{ name: string; value: string }>;
+  required?: boolean;
+}
+
+export interface CreateCustomFieldData {
+  name: string;
+  type: 'text' | 'dropdown' | 'checkbox' | 'date' | 'number' | 'email' | 'phone' | 'url' | 'textarea';
+  object: 'contact' | 'opportunity';
+  group?: string;
+  options?: Array<{ name: string; value: string }>;
+  required?: boolean;
+}
+
 export class MyTAutomationService {
   private api: AxiosInstance;
+  private apiV2: AxiosInstance;
   private apiKey: string;
+  private oauthToken: string;
 
   constructor() {
     this.apiKey = process.env.GHL_API_KEY || '';
+    this.oauthToken = process.env.GHL_OAUTH_TOKEN || '';
     
     if (!this.apiKey) {
       throw new Error('GHL_API_KEY is required for MyT Automation');
     }
 
+    // API v1 for existing functionality (contacts, companies, workflows)
     this.api = axios.create({
       baseURL: 'https://rest.gohighlevel.com/v1',
       headers: {
         'Authorization': `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // API v2 for custom fields management (requires OAuth)
+    this.apiV2 = axios.create({
+      baseURL: 'https://rest.gohighlevel.com/v2',
+      headers: {
+        'Authorization': `Bearer ${this.oauthToken || this.apiKey}`,
         'Content-Type': 'application/json',
       },
     });
@@ -383,6 +415,9 @@ export class MyTAutomationService {
         yearOfStudy: member.yearOfStudy,
         communityRole: member.communityRole,
         volunteerExperience: member.volunteerExperience,
+        
+        // Person Type Classification
+        participantType: member.personType || member.participantType || 'business',
         
         // Business Profile Fields
         businessName: member.businessName,
@@ -831,6 +866,158 @@ export class MyTAutomationService {
     
     // Default response
     return "Thank you for your message! I'm here to help with information about CBA membership, events, business support, and services. For detailed assistance, I can connect you with our team at hello@croydonbusiness.org. What specific information can I help you find?";
+  }
+
+  // ===== CUSTOM FIELDS MANAGEMENT (API v2) =====
+
+  // Check if API v2 is available
+  private isApiV2Available(): boolean {
+    return !!this.oauthToken || !!this.apiKey;
+  }
+
+  // Create custom field
+  async createCustomField(fieldData: CreateCustomFieldData): Promise<MyTAutomationCustomField> {
+    if (!this.isApiV2Available()) {
+      throw new Error('OAuth token required for custom fields management. Set GHL_OAUTH_TOKEN environment variable.');
+    }
+
+    try {
+      const response = await this.apiV2.post('/custom-fields', fieldData);
+      return response.data.customField || response.data;
+    } catch (error: any) {
+      console.error('Error creating custom field:', error?.response?.data || error);
+      throw new Error(`Failed to create custom field: ${error?.response?.data?.message || error.message}`);
+    }
+  }
+
+  // Get all custom fields
+  async getCustomFields(objectType: 'contact' | 'opportunity' = 'contact'): Promise<MyTAutomationCustomField[]> {
+    if (!this.isApiV2Available()) {
+      throw new Error('OAuth token required for custom fields management.');
+    }
+
+    try {
+      const response = await this.apiV2.get('/custom-fields', {
+        params: { object: objectType }
+      });
+      return response.data.customFields || response.data || [];
+    } catch (error: any) {
+      console.error('Error fetching custom fields:', error?.response?.data || error);
+      return [];
+    }
+  }
+
+  // Get specific custom field by ID
+  async getCustomField(fieldId: string): Promise<MyTAutomationCustomField | null> {
+    if (!this.isApiV2Available()) {
+      throw new Error('OAuth token required for custom fields management.');
+    }
+
+    try {
+      const response = await this.apiV2.get(`/custom-fields/${fieldId}`);
+      return response.data.customField || response.data;
+    } catch (error: any) {
+      console.error('Error fetching custom field:', error?.response?.data || error);
+      return null;
+    }
+  }
+
+  // Update custom field
+  async updateCustomField(fieldId: string, updates: Partial<CreateCustomFieldData>): Promise<MyTAutomationCustomField> {
+    if (!this.isApiV2Available()) {
+      throw new Error('OAuth token required for custom fields management.');
+    }
+
+    try {
+      const response = await this.apiV2.put(`/custom-fields/${fieldId}`, updates);
+      return response.data.customField || response.data;
+    } catch (error: any) {
+      console.error('Error updating custom field:', error?.response?.data || error);
+      throw new Error(`Failed to update custom field: ${error?.response?.data?.message || error.message}`);
+    }
+  }
+
+  // Delete custom field
+  async deleteCustomField(fieldId: string): Promise<boolean> {
+    if (!this.isApiV2Available()) {
+      throw new Error('OAuth token required for custom fields management.');
+    }
+
+    try {
+      await this.apiV2.delete(`/custom-fields/${fieldId}`);
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting custom field:', error?.response?.data || error);
+      return false;
+    }
+  }
+
+  // Create or update the participantType field with your 14 person types
+  async ensureParticipantTypeField(): Promise<MyTAutomationCustomField> {
+    const fieldName = 'participantType';
+    const personTypeOptions = [
+      { name: 'Business Member', value: 'business' },
+      { name: 'Administrator', value: 'administrator' },
+      { name: 'Media', value: 'media' },
+      { name: 'Staff', value: 'staff' },
+      { name: 'Sponsor', value: 'sponsor' },
+      { name: 'VIP Guest', value: 'vip' },
+      { name: 'Councillor', value: 'councillor' },
+      { name: 'Exhibitor', value: 'exhibitor' },
+      { name: 'Speaker', value: 'speaker' },
+      { name: 'Business Owner', value: 'business_owner' },
+      { name: 'Volunteer', value: 'volunteer' },
+      { name: 'Resident', value: 'resident' },
+      { name: 'Attendee', value: 'attendee' },
+      { name: 'Student', value: 'student' }
+    ];
+
+    try {
+      // First, try to find existing participantType field
+      const existingFields = await this.getCustomFields('contact');
+      const existingField = existingFields.find(field => 
+        field.name.toLowerCase() === fieldName.toLowerCase()
+      );
+
+      if (existingField) {
+        console.log('ParticipantType field exists, updating with new options...');
+        return await this.updateCustomField(existingField.id, {
+          name: fieldName,
+          type: 'dropdown',
+          object: 'contact',
+          options: personTypeOptions,
+          group: 'Person Classification'
+        });
+      } else {
+        console.log('Creating new participantType field...');
+        return await this.createCustomField({
+          name: fieldName,
+          type: 'dropdown',
+          object: 'contact',
+          options: personTypeOptions,
+          group: 'Person Classification',
+          required: false
+        });
+      }
+    } catch (error: any) {
+      console.error('Error ensuring participantType field:', error);
+      throw error;
+    }
+  }
+
+  // Test API v2 connection
+  async testApiV2Connection(): Promise<boolean> {
+    if (!this.isApiV2Available()) {
+      return false;
+    }
+
+    try {
+      await this.getCustomFields('contact');
+      return true;
+    } catch (error) {
+      console.error('API v2 connection test failed:', error);
+      return false;
+    }
   }
 
   // Track chatbot analytics
