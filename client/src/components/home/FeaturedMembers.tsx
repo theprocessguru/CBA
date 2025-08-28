@@ -67,10 +67,10 @@ const FeaturedMembers = () => {
                       {business.city || 'Croydon'}
                     </span>
                     <Link href={`/business/${business.id}`}>
-                      <a className="text-secondary hover:text-secondary-dark transition font-medium flex items-center">
+                      <span className="text-secondary hover:text-secondary-dark transition font-medium flex items-center cursor-pointer">
                         View Profile
                         <ChevronRight className="ml-2 w-4 h-4" />
-                      </a>
+                      </span>
                     </Link>
                   </div>
                 </CardContent>

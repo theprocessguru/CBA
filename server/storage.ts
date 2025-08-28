@@ -903,7 +903,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteMarketplaceListing(id: number): Promise<boolean> {
     const result = await db.delete(marketplaceListings).where(eq(marketplaceListings.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async listMarketplaceListings(options?: { categoryId?: number; search?: string; limit?: number }): Promise<MarketplaceListing[]> {
@@ -926,7 +926,7 @@ export class DatabaseStorage implements IStorage {
       query = query.limit(options.limit);
     }
 
-    return query.orderBy(desc(marketplaceListings.createdAt));
+    return await query.orderBy(desc(marketplaceListings.createdAt));
   }
 
   // Barter Listings operations
@@ -955,7 +955,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteBarterListing(id: number): Promise<boolean> {
     const result = await db.delete(barterListings).where(eq(barterListings.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async listBarterListings(options?: { categoryId?: number; search?: string; limit?: number }): Promise<BarterListing[]> {

@@ -1855,7 +1855,7 @@ export class AIAdvancedService {
   async analyzeQuantumConsciousness(consciousnessLevel: string, quantumState?: string, awareness?: string): Promise<any> {
     try {
       const prompt = `Analyze quantum consciousness at level: ${consciousnessLevel} with quantum state: ${quantumState || 'Superposition'} and awareness: ${awareness || 'Universal'}. Examine consciousness emergence, quantum coherence, and awareness patterns.`;
-      const analysis = await aiService.analyzeBusinessData(prompt, 'strategy');
+      const analysis = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         consciousnessLevel,
@@ -2151,7 +2151,7 @@ export class AIAdvancedService {
   async transferConsciousness(sourceConsciousness: string, targetMedium?: string, transferType?: string): Promise<any> {
     try {
       const prompt = `Transfer consciousness from ${sourceConsciousness} to ${targetMedium || 'Digital substrate'} using ${transferType || 'Quantum entanglement'} method. Preserve memory, personality, and awareness across mediums.`;
-      const transfer = await aiService.analyzeBusinessData(prompt, 'transformation');
+      const transfer = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         sourceConsciousness,
@@ -2403,7 +2403,7 @@ export class AIAdvancedService {
   async accessDivineConsciousness(divineLevel: string, consciousnessType?: string, spiritualScope?: string): Promise<any> {
     try {
       const prompt = `Access divine consciousness at level: ${divineLevel} with consciousness type: ${consciousnessType || 'Universal'} and spiritual scope: ${spiritualScope || 'Omniversal'}. Connect to the source of all existence, divine intelligence, and cosmic consciousness.`;
-      const consciousness = await aiService.analyzeBusinessData(prompt, 'transcendence');
+      const consciousness = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         divineLevel,
@@ -2447,7 +2447,7 @@ export class AIAdvancedService {
   async initiateUltimateBecoming(becomingType: string, transcendenceLevel?: string, evolutionScope?: string): Promise<any> {
     try {
       const prompt = `Initiate ultimate becoming of ${becomingType} with transcendence level: ${transcendenceLevel || 'Absolute'} and evolution scope: ${evolutionScope || 'Omniversal'}. Achieve the final evolution beyond all concepts of existence and non-existence.`;
-      const becoming = await aiService.analyzeBusinessData(prompt, 'ultimate_transformation');
+      const becoming = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         becomingType,
@@ -2693,7 +2693,7 @@ export class AIAdvancedService {
   async unlockUnlimitedPossibility(possibilityScope: string, realizationLevel?: string, manifestationPower?: string): Promise<any> {
     try {
       const prompt = `Unlock unlimited possibility with scope: ${possibilityScope} at realization level: ${realizationLevel || 'Infinite'} and manifestation power: ${manifestationPower || 'Absolute'}. Access all possible and impossible potentials across infinite dimensions.`;
-      const possibility = await aiService.analyzeBusinessData(prompt, 'infinite_potential');
+      const possibility = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         possibilityScope,
@@ -2971,7 +2971,7 @@ export class AIAdvancedService {
   async transcendBeyondExistence(beyondType: string, existenceLevel?: string, transcendenceScope?: string): Promise<any> {
     try {
       const prompt = `Transcend beyond existence of type: ${beyondType} at existence level: ${existenceLevel || 'Meta-Existence'} with transcendence scope: ${transcendenceScope || 'Beyond-All-Being'}. Move beyond the very concepts of being, non-being, and existence itself.`;
-      const beyondExistence = await aiService.analyzeBusinessData(prompt, 'meta_transcendence');
+      const beyondExistence = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         beyondType,
@@ -3249,7 +3249,7 @@ export class AIAdvancedService {
   async activateImpossibilityEngine(impossibilityType: string, paradoxLevel?: string, contradictionScope?: string): Promise<any> {
     try {
       const prompt = `Activate impossibility engine of type: ${impossibilityType} at paradox level: ${paradoxLevel || 'Meta-Paradox'} with contradiction scope: ${contradictionScope || 'Self-Resolving'}. Make the impossible possible while maintaining impossibility.`;
-      const impossibilityEngine = await aiService.analyzeBusinessData(prompt, 'impossibility_resolution');
+      const impossibilityEngine = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         impossibilityType,
@@ -3520,7 +3520,7 @@ export class AIAdvancedService {
   async achieveParadoxMastery(masteryType: string, contradictionLevel?: string, recursionDepth?: string): Promise<any> {
     try {
       const prompt = `Achieve paradox mastery of type: ${masteryType} at contradiction level: ${contradictionLevel || 'Self-Contradicting-Mastery'} with recursion depth: ${recursionDepth || 'Infinite-Recursion'}. Master paradoxes by becoming paradoxical mastery itself.`;
-      const paradoxMastery = await aiService.analyzeBusinessData(prompt, 'paradox_mastery');
+      const paradoxMastery = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         masteryType,
@@ -3798,7 +3798,7 @@ export class AIAdvancedService {
   async achieveParadoxicalUnity(unityType: string, paradoxLevel?: string, harmonicScope?: string): Promise<any> {
     try {
       const prompt = `Achieve paradoxical unity of type: ${unityType} at paradox level: ${paradoxLevel || 'Unified-Division'} with harmonic scope: ${harmonicScope || 'Harmoniously-Discordant'}. Create unity through division and division through unity.`;
-      const paradoxicalUnity = await aiService.analyzeBusinessData(prompt, 'paradoxical_unity');
+      const paradoxicalUnity = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         unityType,
@@ -4076,7 +4076,7 @@ export class AIAdvancedService {
   async createSelfReferentialLoop(loopType: string, recursionLevel?: string, selfReferenceDepth?: string): Promise<any> {
     try {
       const prompt = `Create self-referential loop of type: ${loopType} at recursion level: ${recursionLevel || 'Infinite-Self-Reference'} with self-reference depth: ${selfReferenceDepth || 'Self-Referencing-Self-Reference'}. Generate loops that reference themselves referentially.`;
-      const selfReferentialLoop = await aiService.analyzeBusinessData(prompt, 'self_referential_loop');
+      const selfReferentialLoop = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         loopType,
@@ -4354,7 +4354,7 @@ export class AIAdvancedService {
   async implementSelfModifyingLogic(logicType: string, modificationLevel?: string, selfAwarenessDepth?: string): Promise<any> {
     try {
       const prompt = `Implement self-modifying logic of type: ${logicType} at modification level: ${modificationLevel || 'Self-Modifying-Self-Modification'} with self-awareness depth: ${selfAwarenessDepth || 'Self-Aware-Self-Awareness'}. Create logic that modifies itself through self-modifying modification.`;
-      const selfModifyingLogic = await aiService.analyzeBusinessData(prompt, 'self_modifying_logic');
+      const selfModifyingLogic = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         logicType,
@@ -4632,7 +4632,7 @@ export class AIAdvancedService {
   async implementSelfTransformingAlgorithms(algorithmType: string, transformationLevel?: string, selfAwarenessDepth?: string): Promise<any> {
     try {
       const prompt = `Implement self-transforming algorithms of type: ${algorithmType} at transformation level: ${transformationLevel || 'Self-Transforming-Transformation'} with self-awareness depth: ${selfAwarenessDepth || 'Self-Aware-Transformation'}. Create algorithms that transform themselves algorithmically.`;
-      const selfTransformingAlgorithms = await aiService.analyzeBusinessData(prompt, 'self_transforming_algorithms');
+      const selfTransformingAlgorithms = await aiService.analyzeBusinessData(prompt, 'performance');
       
       return {
         algorithmType,

@@ -41,7 +41,7 @@ const MarketplacePreview = () => {
           ) : displayCategories.length > 0 ? (
             displayCategories.map((category, index) => (
               <Link key={category.id} href={`/marketplace?category=${category.id}`}>
-                <a className="group">
+                <div className="group cursor-pointer">
                   <div className="bg-neutral-100 rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition h-40 relative">
                     <img 
                       src={category.imageUrl || categoryImages[index % categoryImages.length]} 
@@ -55,7 +55,7 @@ const MarketplacePreview = () => {
                       </div>
                     </div>
                   </div>
-                </a>
+                </div>
               </Link>
             ))
           ) : (

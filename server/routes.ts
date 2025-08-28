@@ -1564,7 +1564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (_personTypeIds && _personTypeIds.length > 0) {
                 for (const personTypeId of _personTypeIds) {
                   try {
-                    await storage.assignPersonTypeToUser(existingUser.id, personTypeId, importerId);
+                    await storage.assignPersonTypeToUser({ userId: existingUser.id, personTypeId: personTypeId, isPrimary: false });
                   } catch (error) {
                     // Ignore if already assigned
                   }
@@ -1586,7 +1586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (_personTypeIds && _personTypeIds.length > 0) {
             for (const personTypeId of _personTypeIds) {
               try {
-                await storage.assignPersonTypeToUser(newUser.id, personTypeId, importerId);
+                await storage.assignPersonTypeToUser({ userId: newUser.id, personTypeId: personTypeId, isPrimary: false });
               } catch (error) {
                 console.warn(`Failed to assign person type ${personTypeId} to user ${newUser.id}:`, error);
               }
@@ -2009,14 +2009,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send onboarding message for team members
       try {
         const { onboardingService } = await import("./onboardingService");
-        await onboardingService.sendWelcomeMessage({
-          userId: newAdmin.id,
-          email: newAdmin.email,
-          firstName: newAdmin.firstName,
-          lastName: newAdmin.lastName,
-          personType: 'team',
-          company: 'Croydon Business Association'
-        });
+        await onboardingService.sendOnboarding(newAdmin.id);
       } catch (onboardingError) {
         console.error("Failed to send onboarding message:", onboardingError);
       }
@@ -3871,7 +3864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (aiSummitBadge) {
         // Get registration to find user
         try {
-          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.registrationId);
+          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.participantId);
           if (registration) {
             scannedUserId = registration.userId;
           }
@@ -3881,9 +3874,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         attendeeData = {
           badgeId: aiSummitBadge.badgeId,
-          name: aiSummitBadge.participantName || aiSummitBadge.name,
+          name: aiSummitBadge.name,
           email: aiSummitBadge.email,
-          participantType: aiSummitBadge.participantType,
+          participantType: aiSummitBadge.primaryRole,
           company: aiSummitBadge.company,
           jobTitle: aiSummitBadge.jobTitle,
           customRole: aiSummitBadge.customRole,
@@ -3987,7 +3980,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
         if (aiSummitBadge) {
-          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.registrationId);
+          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.participantId);
           if (registration) {
             scannedUser = await storage.getUserById(registration.userId);
           }
