@@ -234,24 +234,24 @@ const Navbar = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
               <Link href="/">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsHomeMenuOpen(false)}>
                   Home
-                </a>
+                </span>
               </Link>
               <Link href="/about">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/about') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsHomeMenuOpen(false)}>
                   About CBA
-                </a>
+                </span>
               </Link>
             </div>
           </div>
@@ -264,64 +264,64 @@ const Navbar = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
               <Link href="/membership-benefits">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/membership-benefits') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   Benefits
-                </a>
+                </span>
               </Link>
               <Link href="/directory">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/directory') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   Directory
-                </a>
+                </span>
               </Link>
               <Link href="/marketplace">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/marketplace') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   Marketplace
-                </a>
+                </span>
               </Link>
               <Link href="/economic-growth">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/economic-growth') 
                     ? 'text-primary' 
                     : 'text-red-600 hover:text-red-700 font-semibold'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   🚀 Economic Growth (Coming Soon)
-                </a>
+                </span>
               </Link>
               <Link href="/events">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/events') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   Events
-                </a>
+                </span>
               </Link>
               <Link href="/jobs">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/jobs') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsMembershipMenuOpen(false)}>
                   Jobs Board
-                </a>
+                </span>
               </Link>
             </div>
           </div>
@@ -334,54 +334,54 @@ const Navbar = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-wrap space-x-4 lg:space-x-8 py-3">
               <Link href="/ai-summit">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/ai-summit') 
                     ? 'text-primary' 
                     : 'text-red-600 hover:text-red-700 font-semibold'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsAiMenuOpen(false)}>
                   🚀 AI Summit Oct 1st
-                </a>
+                </span>
               </Link>
               <Link href="/ai-services">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/ai-services') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsAiMenuOpen(false)}>
                   AI Services
-                </a>
+                </span>
               </Link>
               <Link href="/ai-tools">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/ai-tools') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsAiMenuOpen(false)}>
                   AI Tools
-                </a>
+                </span>
               </Link>
               <Link href="/ai-automation">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/ai-automation') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsAiMenuOpen(false)}>
                   AI Automation
-                </a>
+                </span>
               </Link>
               <Link href="/ai-analytics">
-                <a className={`text-sm font-medium ${
+                <span className={`text-sm font-medium ${
                   isActive('/ai-analytics') 
                     ? 'text-primary' 
                     : 'text-neutral-600 hover:text-primary'
-                  } transition-colors duration-200`}
+                  } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsAiMenuOpen(false)}>
                   AI Analytics
-                </a>
+                </span>
               </Link>
             </div>
           </div>
@@ -483,9 +483,9 @@ const Navbar = () => {
             <>
               {/* For non-logged-in users, show full navigation */}
               <Link href="/ai-summit">
-                <a className="block pl-3 pr-4 py-2 border-l-4 border-red-500 text-red-600 bg-red-50 font-bold text-sm">
+                <span className="block pl-3 pr-4 py-2 border-l-4 border-red-500 text-red-600 bg-red-50 font-bold text-sm cursor-pointer">
                   🚀 First AI Summit - Oct 1st FREE
-                </a>
+                </span>
               </Link>
               
               {/* Home Section */}
@@ -493,22 +493,22 @@ const Navbar = () => {
                 Home
               </div>
               <Link href="/">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   Home
-                </a>
+                </span>
               </Link>
               <Link href="/about">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/about') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   About CBA
-                </a>
+                </span>
               </Link>
               
               {/* Membership Section */}
@@ -516,60 +516,60 @@ const Navbar = () => {
                 Membership
               </div>
               <Link href="/membership-benefits">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/membership-benefits') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   Benefits
-                </a>
+                </span>
               </Link>
               <Link href="/directory">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/directory') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   Directory
-                </a>
+                </span>
               </Link>
               <Link href="/marketplace">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/marketplace') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   Marketplace
-                </a>
+                </span>
               </Link>
               <Link href="/events">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/events') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   Events
-                </a>
+                </span>
               </Link>
               <Link href="/jobs">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/jobs') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   Jobs Board
-                </a>
+                </span>
               </Link>
               
               {/* QR Scanner - Prominent for all users */}
               <Link href="/organizer-scanner">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/organizer-scanner') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   📱 QR Code Scanner
-                </a>
+                </span>
               </Link>
               
               {/* AI Section Header */}
@@ -577,51 +577,51 @@ const Navbar = () => {
                 AI Services
               </div>
               <Link href="/ai-summit">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/ai-summit') 
                     ? 'border-red-500 text-red-600 bg-red-100' 
                     : 'border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50 hover:border-red-500'
-                  } font-bold text-sm`}>
+                  } font-bold text-sm cursor-pointer`}>
                   🚀 AI Summit Oct 1st
-                </a>
+                </span>
               </Link>
               <Link href="/ai-services">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/ai-services') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   AI Services
-                </a>
+                </span>
               </Link>
             </>
           )}
           <Link href="/ai-tools">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+            <span className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/ai-tools') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
+              } font-medium text-sm cursor-pointer`}>
               AI Tools
-            </a>
+            </span>
           </Link>
           <Link href="/ai-automation">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+            <span className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/ai-automation') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
+              } font-medium text-sm cursor-pointer`}>
               AI Automation
-            </a>
+            </span>
           </Link>
           <Link href="/ai-analytics">
-            <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+            <span className={`block pl-6 pr-4 py-2 border-l-4 ${
               isActive('/ai-analytics') 
                 ? 'border-primary text-primary bg-neutral-100' 
                 : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-              } font-medium text-sm`}>
+              } font-medium text-sm cursor-pointer`}>
               AI Analytics
-            </a>
+            </span>
           </Link>
           
           {/* Admin Section */}
@@ -631,31 +631,31 @@ const Navbar = () => {
                 Admin Tools
               </div>
               <Link href="/admin/import">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/admin/import') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   📁 Data Import
-                </a>
+                </span>
               </Link>
               <Link href="/admin/ghl">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/admin/ghl') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   ⚙️ MyT Automation Admin
-                </a>
+                </span>
               </Link>
               <Link href="/dashboard/ai-summit-schedule">
-                <a className={`block pl-6 pr-4 py-2 border-l-4 ${
+                <span className={`block pl-6 pr-4 py-2 border-l-4 ${
                   isActive('/dashboard/ai-summit-schedule') 
                     ? 'border-primary text-primary bg-neutral-100' 
                     : 'border-transparent text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
-                  } font-medium text-sm`}>
+                  } font-medium text-sm cursor-pointer`}>
                   📅 AI Summit Schedule
-                </a>
+                </span>
               </Link>
               <Link href="/admin/badge-scanner">
                 <a className={`block pl-6 pr-4 py-2 border-l-4 ${

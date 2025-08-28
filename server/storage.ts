@@ -2665,31 +2665,6 @@ export class DatabaseStorage implements IStorage {
   // Placeholder implementations for remaining missing methods
   // TODO: Implement these based on actual requirements
 
-  async getMarketplaceListingById(id: number): Promise<MarketplaceListing | undefined> { return undefined; }
-  async getMarketplaceListingsByBusinessId(businessId: number): Promise<MarketplaceListing[]> { return []; }
-  async updateMarketplaceListing(id: number, listing: any): Promise<MarketplaceListing> { throw new Error('Not implemented'); }
-  async deleteMarketplaceListing(id: number): Promise<boolean> { return false; }
-  async getBarterListingById(id: number): Promise<BarterListing | undefined> { return undefined; }
-  async getBarterListingsByBusinessId(businessId: number): Promise<BarterListing[]> { return []; }
-  async updateBarterListing(id: number, listing: any): Promise<BarterListing> { throw new Error('Not implemented'); }
-  async deleteBarterListing(id: number): Promise<boolean> { return false; }
-  async getTransactionById(id: string): Promise<Transaction | undefined> { return undefined; }
-  async getTransactionsByBusinessId(businessId: number, role?: any): Promise<Transaction[]> { return []; }
-  async updateTransaction(id: string, transaction: any): Promise<Transaction> { throw new Error('Not implemented'); }
-  async getBarterExchangeById(id: string): Promise<BarterExchange | undefined> { return undefined; }
-  async getBarterExchangesByBusinessId(businessId: number, role?: any): Promise<BarterExchange[]> { return []; }
-  async updateBarterExchange(id: string, exchange: any): Promise<BarterExchange> { throw new Error('Not implemented'); }
-  async getContentReportById(id: number): Promise<ContentReport | undefined> { return undefined; }
-  async getContentReportsByStatus(status?: string): Promise<ContentReport[]> { return []; }
-  async updateContentReport(id: number, report: any): Promise<ContentReport> { throw new Error('Not implemented'); }
-  async getContentReportsForContent(contentType: string, contentId: number): Promise<ContentReport[]> { return []; }
-  async getInteractionStats(contentType?: string, timeframe?: string): Promise<any> { return {}; }
-  async getOfferEngagementStats(): Promise<any> { return {}; }
-  async getBusinessProfileViews(businessId: number): Promise<number> { return 0; }
-  async getTopViewedContent(contentType: string, limit?: number): Promise<any[]> { return []; }
-  async markPasswordResetTokenAsUsed(tokenId: number): Promise<void> { }
-  async deleteExpiredPasswordResetTokens(): Promise<void> { }
-
   // AI Summit specific stubs
   async createAISummitRegistration(registration: any): Promise<AISummitRegistration> { throw new Error('Not implemented'); }
   async createAISummitExhibitorRegistration(registration: any): Promise<AISummitExhibitorRegistration> { throw new Error('Not implemented'); }
