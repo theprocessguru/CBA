@@ -6,12 +6,13 @@ export interface AccessControlConfig {
 }
 
 // Default restricted participant types
-// Note: residents and students are treated as full members for training purposes
+// Note: residents and students are treated as full members for training purposes  
+// Updated to match database person types - using 'vip' instead of 'vip_guest'
 export const RESTRICTED_PARTICIPANT_TYPES = [
   'volunteer', 
   'exhibitor',
   'speaker',
-  'vip_guest'
+  'vip'
 ];
 
 // Check if a user has restricted access based on participant type
@@ -28,7 +29,7 @@ export function getRestrictedAccessMessage(participantType?: string | null): str
     'volunteer': 'As a volunteer, your access is limited to event-related features and volunteer coordination tools.',
     'exhibitor': 'As an exhibitor, you have access to event features and exhibitor-specific tools.',
     'speaker': 'As a speaker, you have access to event schedules and speaker resources.',
-    'vip_guest': 'As a VIP guest, you have special event access privileges.'
+    'vip': 'As a VIP guest, you have special event access privileges.'
   };
   
   return messages[participantType] || 'Your account type has limited access to certain features.';
@@ -52,7 +53,7 @@ export function getRestrictedFeatures(participantType?: string | null): string[]
     'volunteer': [...commonRestrictions, 'Admin Features', 'Payment Processing'],
     'exhibitor': [...commonRestrictions, 'Admin Features'],
     'speaker': [...commonRestrictions, 'Admin Features', 'Exhibitor Management'],
-    'vip_guest': [...commonRestrictions, 'Admin Features', 'Content Management']
+    'vip': [...commonRestrictions, 'Admin Features', 'Content Management']
   };
   
   return typeSpecificRestrictions[participantType] || commonRestrictions;

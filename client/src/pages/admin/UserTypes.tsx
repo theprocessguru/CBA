@@ -17,72 +17,37 @@ import {
   Filter
 } from "lucide-react";
 
-// Define participant types with their characteristics
-const PARTICIPANT_TYPES = {
-  attendee: {
-    label: "Regular Attendee",
-    icon: Users,
-    color: "bg-blue-500",
-    badgeColor: "bg-blue-100 text-blue-800",
-    description: "Standard event attendees and members",
-    features: ["Full event access", "Can register for workshops", "Business features enabled"]
-  },
-  volunteer: {
-    label: "Volunteer",
-    icon: UserCheck,
-    color: "bg-green-500",
-    badgeColor: "bg-green-100 text-green-800",
-    description: "Event volunteers helping with organization",
-    features: ["Special volunteer badge", "Limited business features", "Access to volunteer areas"]
-  },
-  speaker: {
-    label: "Speaker",
-    icon: Mic,
-    color: "bg-purple-500",
-    badgeColor: "bg-purple-100 text-purple-800",
-    description: "Event speakers and presenters",
-    features: ["Speaker badge", "Green room access", "Limited business features"]
-  },
-  exhibitor: {
-    label: "Exhibitor",
-    icon: Store,
-    color: "bg-orange-500",
-    badgeColor: "bg-orange-100 text-orange-800",
-    description: "Companies and organizations with exhibition booths",
-    features: ["Exhibitor badge", "Booth access", "Limited business features"]
-  },
-  vip_guest: {
-    label: "VIP Guest",
-    icon: Star,
-    color: "bg-yellow-500",
-    badgeColor: "bg-yellow-100 text-yellow-800",
-    description: "Special guests and VIP attendees",
-    features: ["VIP badge", "Priority access", "VIP lounge access"]
-  },
-  resident: {
-    label: "Local Resident",
-    icon: Home,
-    color: "bg-teal-500",
-    badgeColor: "bg-teal-100 text-teal-800",
-    description: "Local community members",
-    features: ["Community access", "Limited business features", "Resident discounts"]
-  },
-  team: {
-    label: "Team Member",
-    icon: UsersRound,
-    color: "bg-indigo-500",
-    badgeColor: "bg-indigo-100 text-indigo-800",
-    description: "CBA team members and staff",
-    features: ["Full access", "Admin capabilities", "Team coordination tools"]
-  }
+// Icon mapping for person types
+const getIconComponent = (iconName: string) => {
+  const iconMap: Record<string, any> = {
+    Shield: Shield,
+    Building2: Store,
+    Camera: Mic,
+    Briefcase: UserCheck,
+    Trophy: Star,
+    Star: Star,
+    Building: Home,
+    ShoppingBag: Store,
+    Mic: Mic,
+    Heart: UserCheck,
+    Home: Home,
+    User: Users,
+    GraduationCap: Users
+  };
+  return iconMap[iconName] || Users;
 };
 
 export default function UserTypes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
 
+  // Fetch person types from database
+  const { data: personTypes = [], isLoading: typesLoading } = useQuery({
+    queryKey: ['/api/person-types'],
+  }) as { data: any[]; isLoading: boolean };
+
   // Fetch users with their types
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading: usersLoading } = useQuery({
     queryKey: ['/api/admin/users'],
     queryFn: async () => {
       const response = await fetch('/api/admin/users');
@@ -90,6 +55,21 @@ export default function UserTypes() {
       return response.json();
     }
   });
+
+  // Create participant types map from database (kept for compatibility)
+  const participantTypesMap = (personTypes as any[]).reduce((acc: any, personType: any) => {
+    const IconComponent = getIconComponent(personType.icon);
+    acc[personType.name] = {
+      id: personType.id,
+      label: personType.displayName,
+      icon: IconComponent,
+      color: `bg-${personType.color?.replace('#', '')}-500` || 'bg-gray-500',
+      badgeColor: `bg-${personType.color?.replace('#', '')}-100 text-${personType.color?.replace('#', '')}-800` || 'bg-gray-100 text-gray-800',
+      description: personType.description,
+      features: [] // Features can be defined per type if needed
+    };
+    return acc;
+  }, {});
 
   // Group users by participant type
   const usersByType = users?.reduce((acc: any, user: any) => {
@@ -111,6 +91,8 @@ export default function UserTypes() {
     return matchesSearch && matchesType;
   }) || [];
 
+  const isLoading = usersLoading || typesLoading;
+
   return (
     <div className="p-8 max-w-7xl mx-auto">
       <div className="mb-8">
@@ -122,20 +104,21 @@ export default function UserTypes() {
 
       {/* Type Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        {Object.entries(PARTICIPANT_TYPES).map(([key, type]) => {
-          const Icon = type.icon;
-          const count = usersByType[key]?.length || 0;
+        {personTypes.map((personType: any) => {
+          const Icon = getIconComponent(personType.icon);
+          const count = usersByType[personType.name]?.length || 0;
           
           return (
-            <Card key={key} className="hover:shadow-lg transition-shadow">
+            <Card key={personType.id} className="hover:shadow-lg transition-shadow">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 ${type.color} rounded-full flex items-center justify-center text-white`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white`} 
+                         style={{backgroundColor: personType.color}}>
                       <Icon className="h-5 w-5" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">{type.label}</CardTitle>
+                      <CardTitle className="text-base">{personType.displayName}</CardTitle>
                       <Badge variant="secondary" className="mt-1">
                         {count} users
                       </Badge>
@@ -145,15 +128,8 @@ export default function UserTypes() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-3">
-                  {type.description}
+                  {personType.description}
                 </p>
-                <div className="space-y-1">
-                  {type.features.map((feature, idx) => (
-                    <div key={idx} className="text-xs text-gray-600 flex items-center gap-1">
-                      <span className="text-green-500">✓</span> {feature}
-                    </div>
-                  ))}
-                </div>
               </CardContent>
             </Card>
           );
@@ -182,9 +158,9 @@ export default function UserTypes() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  {Object.entries(PARTICIPANT_TYPES).map(([key, type]) => (
-                    <SelectItem key={key} value={key}>
-                      {type.label}
+                  {personTypes.map((personType: any) => (
+                    <SelectItem key={personType.id} value={personType.name}>
+                      {personType.displayName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -199,8 +175,9 @@ export default function UserTypes() {
             <div className="space-y-2">
               {filteredUsers.length > 0 ? (
                 filteredUsers.map((user: any) => {
-                  const type = PARTICIPANT_TYPES[user.participantType as keyof typeof PARTICIPANT_TYPES] || PARTICIPANT_TYPES.attendee;
-                  const Icon = type.icon;
+                  const personType = personTypes.find((pt: any) => pt.name === user.participantType) || 
+                                   personTypes.find((pt: any) => pt.name === 'attendee');
+                  const Icon = getIconComponent(personType?.icon || 'User');
                   
                   return (
                     <div
@@ -208,7 +185,8 @@ export default function UserTypes() {
                       className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 ${type.color} rounded-full flex items-center justify-center text-white`}>
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white`}
+                             style={{backgroundColor: personType?.color || '#6B7280'}}>
                           <Icon className="h-4 w-4" />
                         </div>
                         <div>
@@ -227,8 +205,12 @@ export default function UserTypes() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge className={type.badgeColor}>
-                          {type.label}
+                        <Badge style={{
+                          backgroundColor: `${personType?.color}20`,
+                          color: personType?.color || '#6B7280',
+                          border: `1px solid ${personType?.color}30`
+                        }}>
+                          {personType?.displayName || 'Attendee'}
                         </Badge>
                         {user.membershipTier && user.membershipTier !== "Starter Tier" && (
                           <Badge variant="outline">
@@ -252,11 +234,12 @@ export default function UserTypes() {
             <h3 className="text-sm font-medium mb-4">User Distribution</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries(usersByType).map(([type, typeUsers]: [string, any]) => {
-                const typeConfig = PARTICIPANT_TYPES[type as keyof typeof PARTICIPANT_TYPES] || PARTICIPANT_TYPES.attendee;
+                const personType = (personTypes as any[]).find((pt: any) => pt.name === type) || 
+                                 (personTypes as any[]).find((pt: any) => pt.name === 'attendee');
                 return (
                   <div key={type} className="text-center">
                     <div className="text-2xl font-bold">{typeUsers.length}</div>
-                    <div className="text-xs text-muted-foreground">{typeConfig.label}</div>
+                    <div className="text-xs text-muted-foreground">{personType?.displayName || type}</div>
                   </div>
                 );
               })}

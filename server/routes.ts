@@ -223,7 +223,8 @@ const hasRestrictedAccess = async (req: Request, res: Response, next: Function) 
     
     // Restricted participant types that have limited access
     // Note: residents and students are treated as full members for training purposes
-    const restrictedTypes = ['volunteer', 'exhibitor', 'speaker', 'vip_guest'];
+    // Updated to match database person types - using 'vip' instead of 'vip_guest'
+    const restrictedTypes = ['volunteer', 'exhibitor', 'speaker', 'vip'];
     
     if (restrictedTypes.includes(user.participantType || '')) {
       return res.status(403).json({ 

@@ -130,7 +130,7 @@ export default function DataImport() {
     { value: 'membershipStatus', label: 'Membership Status' },
     
     // Person Type & Classification
-    { value: 'participantType', label: 'Primary Participant Type (attendee, volunteer, speaker, exhibitor, etc)' },
+    { value: 'participantType', label: 'Primary Participant Type (uses database person types)' },
     
     // Interest Areas (from CSV: AI Basics, Education & Learning, AI in Healthcare, Career Opportunities, AI for Seniors, Family Activities)
     { value: 'interestAreas', label: 'Interest Areas (AI Basics, Education & Learning, AI in Healthcare, Career Opportunities, AI for Seniors, Family Activities)' },
