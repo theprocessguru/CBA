@@ -2044,11 +2044,6 @@ export class DatabaseStorage implements IStorage {
     return updatedRegistration;
   }
 
-  async getUserEventRegistrations(userId: string): Promise<EventRegistration[]> {
-    return await db.select().from(eventRegistrations)
-      .where(eq(eventRegistrations.userId, userId))
-      .orderBy(desc(eventRegistrations.registrationDate));
-  }
 
 
 
@@ -2669,47 +2664,7 @@ export class DatabaseStorage implements IStorage {
 
   // Placeholder implementations for remaining missing methods
   // TODO: Implement these based on actual requirements
-  async getUserEventRegistrations(userId: string): Promise<any[]> {
-    return db.select().from(cbaEventRegistrations).where(eq(cbaEventRegistrations.userId, userId));
-  }
 
-  async suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User> {
-    const [user] = await db.update(users)
-      .set({
-        accountStatus: 'suspended',
-        suspensionReason: reason,
-        suspendedBy,
-        suspendedAt: new Date()
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
-  }
-
-  async reactivateUser(userId: string): Promise<User> {
-    const [user] = await db.update(users)
-      .set({
-        accountStatus: 'active',
-        suspensionReason: null,
-        suspendedBy: null,
-        suspendedAt: null
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    return user;
-  }
-
-  async deleteUser(userId: string): Promise<boolean> {
-    const result = await db.delete(users).where(eq(users.id, userId));
-    return (result.rowCount ?? 0) > 0;
-  }
-
-  // Add stub implementations for all remaining missing methods
-  async getBusinessByEmail(email: string): Promise<Business | undefined> { return undefined; }
-  async getProductsByBusinessId(businessId: number): Promise<Product[]> { return []; }
-  async deleteProduct(id: number): Promise<boolean> { return false; }
-  async getOffersByBusinessId(businessId: number): Promise<Offer[]> { return []; }
-  async deleteOffer(id: number): Promise<boolean> { return false; }
   async getMarketplaceListingById(id: number): Promise<MarketplaceListing | undefined> { return undefined; }
   async getMarketplaceListingsByBusinessId(businessId: number): Promise<MarketplaceListing[]> { return []; }
   async updateMarketplaceListing(id: number, listing: any): Promise<MarketplaceListing> { throw new Error('Not implemented'); }

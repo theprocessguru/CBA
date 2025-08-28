@@ -3203,7 +3203,7 @@ export class AIAdvancedService {
     };
   }
 
-  private getInfinityMetrics(): any {
+  private getMetaInfinityMetrics(): any {
     return {
       "Meta-Infinity Level": "Beyond infinity concepts",
       "Mathematical Transcendence": "Complete beyond mathematics",

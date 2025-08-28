@@ -1,0 +1,16 @@
+modules = ["nodejs-20", "web"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+publicDir = "dist/public"
+build = ["npm", "run", "build"]
+run = ["npm", "start"]
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[env]
+NODE_ENV = "production"

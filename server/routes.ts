@@ -9058,8 +9058,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           membershipTier: userData.membershipTier,
           company: userData.company,
           type: 'personal_badge'
-        },
-        qrHandle: badgeData.qrHandle // Store qrHandle separately for easy access
+        }
       });
 
       res.setHeader('Content-Type', 'text/html');
