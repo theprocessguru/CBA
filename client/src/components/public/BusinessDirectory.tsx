@@ -17,7 +17,17 @@ const BusinessDirectory = () => {
   const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([]);
   
   const { data: businesses, isLoading: isLoadingBusinesses } = useQuery<Business[]>({
-    queryKey: [`/api/businesses${categoryFilter && categoryFilter !== 'all' ? `?categoryId=${categoryFilter}` : ''}`],
+    queryKey: ['/api/businesses', { categoryId: categoryFilter === 'all' ? undefined : categoryFilter }],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (categoryFilter && categoryFilter !== 'all') {
+        params.append('categoryId', categoryFilter);
+      }
+      const url = `/api/businesses${params.toString() ? '?' + params.toString() : ''}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Failed to fetch businesses');
+      return response.json();
+    },
   });
   
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
