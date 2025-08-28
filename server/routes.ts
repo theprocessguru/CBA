@@ -1589,6 +1589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const userData = mapRowToUser(fileData.rows[i], fileData.headers, mappings, personTypeIds);
           
           if (!userData) {
+            errors.push(`Row ${i + 1}: Missing required fields - need either email OR (first name AND last name)`);
             skipped++;
             continue;
           }
