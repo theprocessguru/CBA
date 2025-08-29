@@ -4531,41 +4531,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
       const averageSalary = Number(avgSalaryResult.rows[0]?.avg || 35000);
 
-      // Stakeholder percentages
+      // Stakeholder percentages from person type assignments
       const stakeholderResult = await db.execute(sql`
-        SELECT participant_type, COUNT(*) as count
-        FROM users
-        GROUP BY participant_type
+        SELECT pt.name, pt.display_name, COUNT(DISTINCT upt.user_id) as count
+        FROM person_types pt
+        LEFT JOIN user_person_types upt ON upt.person_type_id = pt.id
+        GROUP BY pt.id, pt.name, pt.display_name
+        ORDER BY count DESC
       `);
 
       let stakeholderTotals = {
+        attendees: 0,
         businesses: 0,
         students: 0,
         volunteers: 0,
-        jobSeekers: 0,
+        residents: 0,
         speakers: 0,
         exhibitors: 0,
-        sponsors: 0
+        sponsors: 0,
+        vips: 0,
+        councillors: 0
       };
 
       stakeholderResult.rows.forEach(row => {
-        const type = row.participant_type as string;
+        const type = row.name as string;
         const count = Number(row.count);
         
-        if (type === 'member' || type === 'business') {
+        if (type === 'attendee') {
+          stakeholderTotals.attendees = count;
+        } else if (type === 'business_owner' || type === 'business') {
           stakeholderTotals.businesses += count;
         } else if (type === 'student') {
-          stakeholderTotals.students += count;
+          stakeholderTotals.students = count;
         } else if (type === 'volunteer') {
-          stakeholderTotals.volunteers += count;
-        } else if (type === 'job_seeker') {
-          stakeholderTotals.jobSeekers += count;
+          stakeholderTotals.volunteers = count;
+        } else if (type === 'resident') {
+          stakeholderTotals.residents = count;
         } else if (type === 'speaker') {
-          stakeholderTotals.speakers += count;
+          stakeholderTotals.speakers = count;
         } else if (type === 'exhibitor') {
-          stakeholderTotals.exhibitors += count;
+          stakeholderTotals.exhibitors = count;
         } else if (type === 'sponsor') {
-          stakeholderTotals.sponsors += count;
+          stakeholderTotals.sponsors = count;
+        } else if (type === 'vip') {
+          stakeholderTotals.vips = count;
+        } else if (type === 'councillor') {
+          stakeholderTotals.councillors = count;
         }
       });
 
