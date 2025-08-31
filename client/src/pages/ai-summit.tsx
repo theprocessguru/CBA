@@ -69,10 +69,18 @@ const AISummit = () => {
     cacheTime: 0,
   });
 
-  // Filter person types to exclude admin-only types
-  const selfRegisterPersonTypes = allPersonTypes.filter((type: any) => 
-    !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor'].includes(type.name.toLowerCase())
-  );
+  // Filter person types to exclude admin-only types and sort with attendee first
+  const selfRegisterPersonTypes = allPersonTypes
+    .filter((type: any) => 
+      !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor'].includes(type.name.toLowerCase())
+    )
+    .sort((a: any, b: any) => {
+      // Put attendee first
+      if (a.name.toLowerCase() === 'attendee') return -1;
+      if (b.name.toLowerCase() === 'attendee') return 1;
+      // Sort others alphabetically
+      return a.displayName.localeCompare(b.displayName);
+    });
 
 
   const { data: categories = [] } = useQuery<any[]>({
