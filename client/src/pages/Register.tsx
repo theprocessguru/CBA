@@ -40,6 +40,12 @@ export default function Register() {
     educatorRole: "",
     subjectTaught: "",
     schoolType: "",
+    // Trainer details
+    trainingSpecialty: "",
+    targetAudience: "",
+    trainingMethods: "",
+    trainingVenue: "",
+    certifications: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
@@ -47,6 +53,7 @@ export default function Register() {
   const [showBusinessDetails, setShowBusinessDetails] = useState(false);
   const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
   const [showEducatorDetails, setShowEducatorDetails] = useState(false);
+  const [showTrainerDetails, setShowTrainerDetails] = useState(false);
   const [organizationMemberships, setOrganizationMemberships] = useState([{
     organizationName: '',
     organizationType: '',
@@ -236,6 +243,13 @@ export default function Register() {
       const hasEducatorType = newTypes.some(id => educatorTypes.includes(id));
       setShowEducatorDetails(hasEducatorType);
       
+      // Check if trainer type is selected
+      const trainerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'trainer'
+      ).map((type: any) => type.id);
+      const hasTrainerType = newTypes.some(id => trainerTypes.includes(id));
+      setShowTrainerDetails(hasTrainerType);
+      
       return newTypes;
     });
   };
@@ -255,6 +269,7 @@ export default function Register() {
       'councillor': Users,
       'media': Mic,
       'educator': GraduationCap,
+      'trainer': Users,
     };
     return iconMap[typeName] || User;
   };
@@ -814,6 +829,113 @@ export default function Register() {
                       placeholder="e.g., Mathematics, English, Science"
                     />
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Trainer Details Section - Conditional */}
+            {showTrainerDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Training Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected trainer, please provide details about your training activities</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="trainingSpecialty">Training Specialty <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="trainingSpecialty"
+                      name="trainingSpecialty"
+                      value={formData.trainingSpecialty}
+                      onChange={handleChange}
+                      required={showTrainerDetails}
+                      placeholder="e.g., Digital Marketing, Leadership"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="targetAudience">Who Do You Train? <span className="text-red-500">*</span></Label>
+                    <select
+                      id="targetAudience"
+                      name="targetAudience"
+                      value={formData.targetAudience}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showTrainerDetails}
+                    >
+                      <option value="">Select audience...</option>
+                      <option value="professionals">Working Professionals</option>
+                      <option value="executives">Executives & Managers</option>
+                      <option value="entrepreneurs">Entrepreneurs</option>
+                      <option value="job_seekers">Job Seekers</option>
+                      <option value="students">Students</option>
+                      <option value="seniors">Senior Citizens</option>
+                      <option value="youth">Young People</option>
+                      <option value="women">Women</option>
+                      <option value="minorities">Underrepresented Groups</option>
+                      <option value="general_public">General Public</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="trainingMethods">How Do You Train?</Label>
+                    <select
+                      id="trainingMethods"
+                      name="trainingMethods"
+                      value={formData.trainingMethods}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select method...</option>
+                      <option value="in_person_workshops">In-Person Workshops</option>
+                      <option value="online_courses">Online Courses</option>
+                      <option value="one_on_one">One-on-One Coaching</option>
+                      <option value="group_sessions">Group Sessions</option>
+                      <option value="webinars">Webinars</option>
+                      <option value="corporate_training">Corporate Training</option>
+                      <option value="bootcamps">Intensive Bootcamps</option>
+                      <option value="mentoring">Mentoring Programs</option>
+                      <option value="hybrid">Hybrid (Online + In-Person)</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="trainingVenue">Where Do You Train?</Label>
+                    <select
+                      id="trainingVenue"
+                      name="trainingVenue"
+                      value={formData.trainingVenue}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select venue...</option>
+                      <option value="own_premises">Own Training Center</option>
+                      <option value="client_premises">Client Offices</option>
+                      <option value="community_centers">Community Centers</option>
+                      <option value="libraries">Libraries</option>
+                      <option value="universities">Universities/Colleges</option>
+                      <option value="online_only">Online Only</option>
+                      <option value="co_working_spaces">Co-working Spaces</option>
+                      <option value="conference_centers">Conference Centers</option>
+                      <option value="various_locations">Various Locations</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="certifications">Professional Certifications</Label>
+                  <Input
+                    id="certifications"
+                    name="certifications"
+                    value={formData.certifications}
+                    onChange={handleChange}
+                    placeholder="e.g., CIPD, PMP, Google Certified Trainer"
+                  />
                 </div>
               </div>
             )}
