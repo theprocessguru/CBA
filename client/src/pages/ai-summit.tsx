@@ -1139,6 +1139,78 @@ const AISummit = () => {
     }));
   };
 
+  // Admin test data fill function
+  const fillTestData = () => {
+    if (selfRegisterPersonTypes.length > 0) {
+      // Select all available person types
+      const allPersonTypeIds = selfRegisterPersonTypes.map((type: any) => type.id);
+      
+      setRegistrationData({
+        firstName: "John",
+        lastName: "Smith",
+        email: "john.smith@test.com",
+        phone: "+44 7700 900123",
+        postcode: "SW1A 1AA",
+        dateOfBirth: "1985-06-15",
+        selectedPersonTypes: allPersonTypeIds,
+        businessName: "Test Business Ltd",
+        businessCategory: "Technology",
+        businessDescription: "Software development and consulting",
+        password: "TestPassword123",
+        confirmPassword: "TestPassword123",
+        interestAreas: ["AI & Machine Learning", "Digital Marketing", "Business Strategy"],
+        tshirtSize: "M",
+        gender: "prefer-not-to-say",
+        studentInstitution: "University of London",
+        studyLevel: "undergraduate",
+        fieldOfStudy: "Computer Science",
+        graduationYear: "2025",
+        careerInterests: "Technology",
+        workExperience: "internships",
+        learningGoals: "Gain practical AI skills for future career",
+        educatorInstitution: "London Business School",
+        teachingLevel: "higher_education",
+        subjectsAreas: "Business Technology",
+        yearsTeaching: "5",
+        educationInterests: "AI in Education",
+        currentChallenges: "Integrating AI tools into curriculum",
+        trainerOrganization: "Professional Training Solutions",
+        trainerExpertise: "Digital Skills Training",
+        clientTypes: "corporate",
+        yearsTraining: "8",
+        trainingInterests: "AI Training Programs",
+        trainerChallenges: "Keeping up with AI developments",
+        established: "2020",
+        volunteerSkills: "Event management, Customer service",
+        volunteerAreas: "Registration, Technical support",
+        volunteerAvailability: "Weekends and evenings",
+        volunteerFrequency: "weekly",
+        volunteerExperience: "2 years volunteer experience",
+        volunteerTimeSlots: "Morning and afternoon shifts",
+        mediaOutlet: "Tech Today Magazine",
+        mediaType: "print",
+        coverageArea: "Technology and Business",
+        socialMediaHandle: "@techtodaymagazine",
+        audienceReach: "50000",
+        specialtyBeats: "AI, Machine Learning, Startup News"
+      });
+
+      // Set organization memberships for community group
+      setOrganizationMemberships([
+        {
+          name: "Local Business Association",
+          role: "Member",
+          yearsActive: "3"
+        },
+        {
+          name: "Tech Entrepreneurs Network",
+          role: "Committee Member", 
+          yearsActive: "2"
+        }
+      ]);
+    }
+  };
+
   // Organization membership helpers
   const handleOrganizationChange = (index: number, field: string, value: string) => {
     setOrganizationMemberships(prev => prev.map((org, i) => 
@@ -2415,6 +2487,19 @@ const AISummit = () => {
                 </div>
 
                 <form onSubmit={handleRegistration} className="space-y-4">
+                  {/* Admin Test Data Button */}
+                  {import.meta.env.DEV && (
+                    <div className="flex justify-center mb-4">
+                      <Button
+                        type="button"
+                        onClick={fillTestData}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        🧪 Fill Test Data (Admin)
+                      </Button>
+                    </div>
+                  )}
+
                   {/* Basic Information */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
