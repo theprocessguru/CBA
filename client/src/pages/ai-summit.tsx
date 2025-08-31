@@ -254,6 +254,20 @@ const AISummit = () => {
       ).map((type: any) => type.id);
       const hasCommunityGroupType = selectedTypes.some(id => communityGroupTypes.includes(id));
       setShowOrganizationMemberships(hasCommunityGroupType);
+
+      // Check for councillor type
+      const councillorTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'councillor'
+      ).map((type: any) => type.id);
+      const hasCouncillorType = selectedTypes.some(id => councillorTypes.includes(id));
+      setShowCouncillorDetails(hasCouncillorType);
+
+      // Check for speaker type
+      const speakerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'speaker'
+      ).map((type: any) => type.id);
+      const hasSpeakerType = selectedTypes.some(id => speakerTypes.includes(id));
+      // Add speaker details state if needed - for now we can use existing speaker form modal
     }
   }, [registrationData.selectedPersonTypes, selfRegisterPersonTypes]);
 
