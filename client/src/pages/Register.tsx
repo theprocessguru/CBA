@@ -67,6 +67,10 @@ export default function Register() {
     volunteerFrequency: "",
     volunteerExperience: "",
     volunteerTimeSlots: "",
+    // Dietary information
+    dietaryRestrictions: "",
+    allergies: "",
+    dietaryNotes: "",
     // T-shirt and sizing info
     tshirtSize: "",
     gender: "",
@@ -1420,6 +1424,59 @@ export default function Register() {
                       <option value="leadership">Volunteer leadership experience</option>
                       <option value="professional">Professional volunteer coordinator</option>
                     </select>
+                  </div>
+                </div>
+                
+                {/* Dietary Information for Volunteers */}
+                <div className="space-y-4 border-t pt-4">
+                  <Label className="text-sm font-medium">Dietary Information</Label>
+                  <p className="text-xs text-gray-500">This helps us plan meals and catering for volunteer events</p>
+                  
+                  <div>
+                    <Label htmlFor="dietaryRestrictions">Dietary Restrictions</Label>
+                    <select
+                      id="dietaryRestrictions"
+                      name="dietaryRestrictions"
+                      value={formData.dietaryRestrictions}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">No restrictions</option>
+                      <option value="vegetarian">Vegetarian</option>
+                      <option value="vegan">Vegan</option>
+                      <option value="pescatarian">Pescatarian</option>
+                      <option value="halal">Halal</option>
+                      <option value="kosher">Kosher</option>
+                      <option value="gluten-free">Gluten-Free</option>
+                      <option value="dairy-free">Dairy-Free</option>
+                      <option value="nut-free">Nut-Free</option>
+                      <option value="other">Other (specify below)</option>
+                    </select>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label htmlFor="allergies">Food Allergies</Label>
+                      <Input
+                        id="allergies"
+                        name="allergies"
+                        value={formData.allergies}
+                        onChange={handleChange}
+                        placeholder="List any food allergies (e.g., nuts, shellfish, eggs)"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="dietaryNotes">Additional Dietary Notes</Label>
+                      <Textarea
+                        id="dietaryNotes"
+                        name="dietaryNotes"
+                        value={formData.dietaryNotes}
+                        onChange={handleChange}
+                        rows={2}
+                        placeholder="Any other dietary preferences or medical dietary requirements..."
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

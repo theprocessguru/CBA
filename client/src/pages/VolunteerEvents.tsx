@@ -118,6 +118,9 @@ export default function VolunteerEventsPage() {
       availability: formData.get("availability"),
       tShirtSize: formData.get("tShirtSize"),
       emergencyContact: formData.get("emergencyContact"),
+      dietaryRestrictions: formData.get("dietaryRestrictions"),
+      allergies: formData.get("allergies"),
+      dietaryNotes: formData.get("dietaryNotes"),
     };
 
     volunteerMutation.mutate(signupData);
@@ -442,6 +445,42 @@ export default function VolunteerEventsPage() {
                 placeholder="Name and phone number of emergency contact"
                 required
               />
+            </div>
+
+            <div className="space-y-4 border-t pt-4">
+              <Label className="text-sm font-medium">Dietary Information</Label>
+              <div>
+                <Label htmlFor="dietaryRestrictions">Dietary Restrictions</Label>
+                <select name="dietaryRestrictions" className="w-full p-2 border border-gray-300 rounded-md">
+                  <option value="">No restrictions</option>
+                  <option value="vegetarian">Vegetarian</option>
+                  <option value="vegan">Vegan</option>
+                  <option value="pescatarian">Pescatarian</option>
+                  <option value="halal">Halal</option>
+                  <option value="kosher">Kosher</option>
+                  <option value="gluten-free">Gluten-Free</option>
+                  <option value="dairy-free">Dairy-Free</option>
+                  <option value="nut-free">Nut-Free</option>
+                  <option value="other">Other (specify below)</option>
+                </select>
+              </div>
+              
+              <div>
+                <Label htmlFor="allergies">Food Allergies</Label>
+                <Input 
+                  name="allergies" 
+                  placeholder="List any food allergies (e.g., nuts, shellfish, eggs)"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="dietaryNotes">Additional Dietary Notes</Label>
+                <Textarea 
+                  name="dietaryNotes" 
+                  rows={2}
+                  placeholder="Any other dietary preferences or medical dietary requirements..."
+                />
+              </div>
             </div>
 
             {selectedRole && (

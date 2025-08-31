@@ -90,6 +90,7 @@ import { ExhibitorVisitors } from "@/pages/ExhibitorVisitors";
 import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 import EventTimeSlots from "@/pages/admin/EventTimeSlots";
 import TimeSlotManager from "@/pages/admin/TimeSlotManager";
+import EventDataExports from "@/pages/admin/EventDataExports";
 import AttendeeBooking from "@/pages/AttendeeBooking";
 import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
@@ -724,6 +725,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <EventTimeSlots />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/event-data-exports">
+        <AdminRoute>
+          <MainLayout>
+            <EventDataExports />
           </MainLayout>
         </AdminRoute>
       </Route>

@@ -5910,6 +5910,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin endpoints for event data exports
+  
+  // Export volunteer list for an event with dietary information
+  app.get('/api/admin/events/:eventId/volunteers/export', isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { eventId } = req.params;
+      const volunteers = await storage.getEventVolunteersWithDietaryInfo(parseInt(eventId));
+      
+      // Set headers for CSV download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="event-${eventId}-volunteers.csv"`);
+      
+      // Create CSV content
+      const csvHeader = 'Name,Email,Phone,Role,T-Shirt Size,Emergency Contact,Dietary Restrictions,Allergies,Dietary Notes,Experience,Availability,Signed Up Date\n';
+      const csvRows = volunteers.map(volunteer => {
+        return [
+          `"${volunteer.name || ''}"`,
+          `"${volunteer.email || ''}"`,
+          `"${volunteer.phone || ''}"`,
+          `"${volunteer.role || ''}"`,
+          `"${volunteer.tShirtSize || ''}"`,
+          `"${volunteer.emergencyContact || ''}"`,
+          `"${volunteer.dietaryRestrictions || ''}"`,
+          `"${volunteer.allergies || ''}"`,
+          `"${volunteer.dietaryNotes || ''}"`,
+          `"${volunteer.experience || ''}"`,
+          `"${volunteer.availability || ''}"`,
+          `"${volunteer.signedUpAt || ''}"`
+        ].join(',');
+      }).join('\n');
+      
+      res.send(csvHeader + csvRows);
+    } catch (error) {
+      console.error("Error exporting volunteers:", error);
+      res.status(500).json({ message: "Failed to export volunteers" });
+    }
+  });
+
+  // Export attendee list for an event
+  app.get('/api/admin/events/:eventId/attendees/export', isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { eventId } = req.params;
+      const attendees = await storage.getEventAttendeesWithDetails(parseInt(eventId));
+      
+      // Set headers for CSV download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="event-${eventId}-attendees.csv"`);
+      
+      // Create CSV content
+      const csvHeader = 'Name,Email,Phone,Registration Type,Ticket ID,Status,Registered Date,Dietary Restrictions,Allergies,T-Shirt Size\n';
+      const csvRows = attendees.map(attendee => {
+        return [
+          `"${attendee.participantName || ''}"`,
+          `"${attendee.participantEmail || ''}"`,
+          `"${attendee.phone || ''}"`,
+          `"${attendee.registrationType || ''}"`,
+          `"${attendee.ticketId || ''}"`,
+          `"${attendee.status || ''}"`,
+          `"${attendee.registeredAt || ''}"`,
+          `"${attendee.dietaryRestrictions || ''}"`,
+          `"${attendee.allergies || ''}"`,
+          `"${attendee.tShirtSize || ''}"`
+        ].join(',');
+      }).join('\n');
+      
+      res.send(csvHeader + csvRows);
+    } catch (error) {
+      console.error("Error exporting attendees:", error);
+      res.status(500).json({ message: "Failed to export attendees" });
+    }
+  });
+
+  // Get volunteer summary with dietary counts for an event
+  app.get('/api/admin/events/:eventId/volunteers/summary', isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if user is admin
+      if (!req.user || req.user.role !== 'admin') {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { eventId } = req.params;
+      const volunteers = await storage.getEventVolunteersWithDietaryInfo(parseInt(eventId));
+      
+      // Count dietary restrictions
+      const dietaryCounts = volunteers.reduce((counts: any, volunteer: any) => {
+        const restriction = volunteer.dietaryRestrictions || 'none';
+        counts[restriction] = (counts[restriction] || 0) + 1;
+        return counts;
+      }, {});
+
+      // Count t-shirt sizes
+      const tshirtCounts = volunteers.reduce((counts: any, volunteer: any) => {
+        const size = volunteer.tShirtSize || 'not_specified';
+        counts[size] = (counts[size] || 0) + 1;
+        return counts;
+      }, {});
+
+      // Count volunteers with allergies
+      const allergyCount = volunteers.filter((v: any) => v.allergies && v.allergies.trim()).length;
+
+      const summary = {
+        totalVolunteers: volunteers.length,
+        dietaryRestrictions: dietaryCounts,
+        tshirtSizes: tshirtCounts,
+        volunteersWithAllergies: allergyCount,
+        volunteersWithDietaryNotes: volunteers.filter((v: any) => v.dietaryNotes && v.dietaryNotes.trim()).length
+      };
+
+      res.json(summary);
+    } catch (error) {
+      console.error("Error getting volunteer summary:", error);
+      res.status(500).json({ message: "Failed to get volunteer summary" });
+    }
+  });
+
   // Register for an event
   app.post('/api/events/:eventId/register', isAuthenticated, async (req: any, res) => {
     try {

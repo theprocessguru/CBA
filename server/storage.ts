@@ -260,6 +260,8 @@ export interface IStorage {
   createVolunteerSignup(signupData: any): Promise<any>;
   incrementVolunteerRoleCount(roleId: number): Promise<void>;
   getEventVolunteerRoles(eventId: number): Promise<any[]>;
+  getEventVolunteersWithDietaryInfo(eventId: number): Promise<any[]>;
+  getEventAttendeesWithDetails(eventId: number): Promise<any[]>;
   
   // Team member operations
   createAISummitTeamMember(teamMember: InsertAISummitTeamMember): Promise<AISummitTeamMember>;
@@ -1526,6 +1528,18 @@ export class DatabaseStorage implements IStorage {
 
   async getEventVolunteerRoles(eventId: number): Promise<any[]> {
     // Return empty array for now since eventVolunteerRoles table doesn't exist yet
+    return [];
+  }
+
+  async getEventVolunteersWithDietaryInfo(eventId: number): Promise<any[]> {
+    // For now, return placeholder data since the tables don't exist yet
+    // In the future, this would join eventVolunteers with user data and dietary info
+    return [];
+  }
+
+  async getEventAttendeesWithDetails(eventId: number): Promise<any[]> {
+    // For now, return placeholder data since the full registration system isn't implemented
+    // This would typically pull from event registrations with user details
     return [];
   }
 
