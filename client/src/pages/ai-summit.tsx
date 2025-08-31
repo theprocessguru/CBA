@@ -189,9 +189,15 @@ const AISummit = () => {
 
   // Auto-select attendee person type when filtered person types are available
   useEffect(() => {
-    if (selfRegisterPersonTypes.length > 0 && registrationData.selectedPersonTypes.length === 0) {
+    if (selfRegisterPersonTypes.length > 0) {
       const attendeeType = selfRegisterPersonTypes.find((type: any) => type.name === 'attendee');
-      if (attendeeType) {
+      if (attendeeType && registrationData.selectedPersonTypes.length === 0) {
+        setRegistrationData(prev => ({
+          ...prev,
+          selectedPersonTypes: [attendeeType.id]
+        }));
+      } else if (attendeeType && registrationData.selectedPersonTypes.length !== 1) {
+        // If somehow multiple types got selected, reset to just attendee
         setRegistrationData(prev => ({
           ...prev,
           selectedPersonTypes: [attendeeType.id]
