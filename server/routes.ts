@@ -81,7 +81,11 @@ import {
   insertBusinessEventRegistrationSchema,
   type BusinessEvent,
   type BusinessEventRegistration,
-  personTypes
+  personTypes,
+  organizationMemberships,
+  insertOrganizationMembershipSchema,
+  type OrganizationMembership,
+  type InsertOrganizationMembership
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";

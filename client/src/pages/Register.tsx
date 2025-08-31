@@ -40,6 +40,17 @@ export default function Register() {
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
   const [showBusinessAddress, setShowBusinessAddress] = useState(false);
   const [showBusinessDetails, setShowBusinessDetails] = useState(false);
+  const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
+  const [organizationMemberships, setOrganizationMemberships] = useState([{
+    organizationName: '',
+    organizationType: '',
+    role: '',
+    isActive: true,
+    description: '',
+    contactEmail: '',
+    contactPhone: '',
+    websiteUrl: ''
+  }]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
@@ -89,6 +100,7 @@ export default function Register() {
       businessCategory?: string;
       employeeCount?: string;
       established?: string;
+      organizationMemberships?: any[];
       personTypeIds: number[]; 
     }) => {
       const response = await apiRequest("POST", "/api/auth/register", data);
@@ -152,6 +164,7 @@ export default function Register() {
       businessCategory: showBusinessDetails ? formData.businessCategory : undefined,
       employeeCount: showBusinessDetails ? formData.employeeCount : undefined,
       established: showBusinessDetails ? formData.established : undefined,
+      organizationMemberships: showOrganizationMemberships ? organizationMemberships.filter(org => org.organizationName) : undefined,
       personTypeIds: selectedPersonTypes,
     });
   };
@@ -161,6 +174,31 @@ export default function Register() {
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  const handleOrganizationChange = (index: number, field: string, value: string) => {
+    setOrganizationMemberships(prev => prev.map((org, i) => 
+      i === index ? { ...org, [field]: value } : org
+    ));
+  };
+
+  const addOrganization = () => {
+    setOrganizationMemberships(prev => [...prev, {
+      organizationName: '',
+      organizationType: '',
+      role: '',
+      isActive: true,
+      description: '',
+      contactEmail: '',
+      contactPhone: '',
+      websiteUrl: ''
+    }]);
+  };
+
+  const removeOrganization = (index: number) => {
+    if (organizationMemberships.length > 1) {
+      setOrganizationMemberships(prev => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handlePersonTypeChange = (personTypeId: number, checked: boolean) => {
@@ -177,6 +215,13 @@ export default function Register() {
       const hasBusinessType = newTypes.some(id => businessTypes.includes(id));
       setShowBusinessAddress(hasBusinessType);
       setShowBusinessDetails(hasBusinessType);
+      
+      // Check if community group type is selected
+      const communityGroupTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'community_group'
+      ).map((type: any) => type.id);
+      const hasCommunityGroupType = newTypes.some(id => communityGroupTypes.includes(id));
+      setShowOrganizationMemberships(hasCommunityGroupType);
       
       return newTypes;
     });
@@ -435,6 +480,153 @@ export default function Register() {
                 </div>
               </div>
             )}
+
+            {/* Organization Memberships Section - Conditional */}
+            {showOrganizationMemberships && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    <Label className="text-lg font-medium">Community Group Memberships</Label>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addOrganization}
+                  >
+                    Add Organization
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-500">Tell us about the community groups, associations, or organizations you belong to</p>
+                
+                {organizationMemberships.map((org, index) => (
+                  <div key={index} className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium text-sm">Organization {index + 1}</h4>
+                      {organizationMemberships.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeOrganization(index)}
+                          className="text-red-600"
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`orgName-${index}`}>Organization Name <span className="text-red-500">*</span></Label>
+                        <Input
+                          id={`orgName-${index}`}
+                          value={org.organizationName}
+                          onChange={(e) => handleOrganizationChange(index, 'organizationName', e.target.value)}
+                          required
+                          placeholder="e.g., Croydon Residents Association"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`orgType-${index}`}>Organization Type <span className="text-red-500">*</span></Label>
+                        <select
+                          id={`orgType-${index}`}
+                          value={org.organizationType}
+                          onChange={(e) => handleOrganizationChange(index, 'organizationType', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        >
+                          <option value="">Select type...</option>
+                          <option value="community_group">Community Group</option>
+                          <option value="residents_association">Residents Association</option>
+                          <option value="charity">Charity</option>
+                          <option value="ngo">NGO</option>
+                          <option value="professional_body">Professional Body</option>
+                          <option value="trade_union">Trade Union</option>
+                          <option value="sports_club">Sports Club</option>
+                          <option value="cultural_group">Cultural Group</option>
+                          <option value="religious_organization">Religious Organization</option>
+                          <option value="volunteer_group">Volunteer Group</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`role-${index}`}>Your Role <span className="text-red-500">*</span></Label>
+                        <select
+                          id={`role-${index}`}
+                          value={org.role}
+                          onChange={(e) => handleOrganizationChange(index, 'role', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                          required
+                        >
+                          <option value="">Select role...</option>
+                          <option value="member">Member</option>
+                          <option value="committee_member">Committee Member</option>
+                          <option value="chair">Chair/President</option>
+                          <option value="vice_chair">Vice Chair</option>
+                          <option value="secretary">Secretary</option>
+                          <option value="treasurer">Treasurer</option>
+                          <option value="volunteer">Volunteer</option>
+                          <option value="coordinator">Coordinator</option>
+                          <option value="director">Director</option>
+                          <option value="trustee">Trustee</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor={`contactEmail-${index}`}>Organization Contact Email</Label>
+                        <Input
+                          id={`contactEmail-${index}`}
+                          type="email"
+                          value={org.contactEmail}
+                          onChange={(e) => handleOrganizationChange(index, 'contactEmail', e.target.value)}
+                          placeholder="contact@organization.org"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor={`contactPhone-${index}`}>Organization Contact Phone</Label>
+                        <Input
+                          id={`contactPhone-${index}`}
+                          type="tel"
+                          value={org.contactPhone}
+                          onChange={(e) => handleOrganizationChange(index, 'contactPhone', e.target.value)}
+                          placeholder="+44 20 xxxx xxxx"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor={`website-${index}`}>Organization Website</Label>
+                        <Input
+                          id={`website-${index}`}
+                          type="url"
+                          value={org.websiteUrl}
+                          onChange={(e) => handleOrganizationChange(index, 'websiteUrl', e.target.value)}
+                          placeholder="https://www.organization.org"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor={`description-${index}`}>Role Description</Label>
+                      <Textarea
+                        id={`description-${index}`}
+                        value={org.description}
+                        onChange={(e) => handleOrganizationChange(index, 'description', e.target.value)}
+                        placeholder="Describe your role and activities in this organization..."
+                        className="min-h-[60px]"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div>
               <Label htmlFor="password">Password</Label>
               <div className="relative">

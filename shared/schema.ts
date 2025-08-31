@@ -2091,3 +2091,43 @@ export const insertEmailCommunicationSchema = createInsertSchema(emailCommunicat
 
 export type InsertEmailCommunication = z.infer<typeof insertEmailCommunicationSchema>;
 export type EmailCommunication = typeof emailCommunications.$inferSelect;
+
+// Organization Memberships table for tracking community group affiliations
+export const organizationMemberships = pgTable("organization_memberships", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  organizationName: varchar("organization_name").notNull(),
+  organizationType: varchar("organization_type").notNull(), // community_group, charity, ngo, professional_body, trade_union, etc.
+  role: varchar("role").notNull(), // member, committee_member, chair, secretary, treasurer, volunteer, etc.
+  startDate: date("start_date"),
+  endDate: date("end_date"), // null if still active
+  isActive: boolean("is_active").default(true),
+  description: text("description"), // Details about their role or involvement
+  contactEmail: varchar("contact_email"), // Organization contact for mobilization
+  contactPhone: varchar("contact_phone"), // Organization contact for mobilization
+  websiteUrl: varchar("website_url"),
+  // MYT Automation integration
+  mytWorkflowId: varchar("myt_workflow_id"), // For mobilizing specific organizations
+  mytTagName: varchar("myt_tag_name"), // For tagging members of this organization
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOrganizationMembershipSchema = createInsertSchema(organizationMemberships, {
+  userId: z.string().min(1, "User ID is required"),
+  organizationName: z.string().min(1, "Organization name is required"),
+  organizationType: z.string().min(1, "Organization type is required"),
+  role: z.string().min(1, "Role is required"),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
+  isActive: z.boolean().default(true),
+  description: z.string().optional(),
+  contactEmail: z.string().email().optional(),
+  contactPhone: z.string().optional(),
+  websiteUrl: z.string().url().optional(),
+  mytWorkflowId: z.string().optional(),
+  mytTagName: z.string().optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertOrganizationMembership = z.infer<typeof insertOrganizationMembershipSchema>;
+export type OrganizationMembership = typeof organizationMemberships.$inferSelect;

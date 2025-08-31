@@ -5,6 +5,8 @@ import { emailService } from "./emailService";
 import type { Express, Request, Response, RequestHandler } from "express";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
+import { organizationMemberships, insertOrganizationMembershipSchema } from "@shared/schema";
+import { db } from "./db";
 
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
@@ -85,6 +87,15 @@ export async function setupLocalAuth(app: Express) {
         businessAddress,
         businessCity,
         businessPostcode,
+        businessName,
+        businessDescription,
+        businessWebsite,
+        businessPhone,
+        businessEmail,
+        businessCategory,
+        employeeCount,
+        established,
+        organizationMemberships: orgMemberships = [],
         personTypeIds = [] 
       } = req.body;
 
@@ -154,6 +165,29 @@ export async function setupLocalAuth(app: Express) {
           });
         } catch (error) {
           console.warn(`Failed to assign default attendee type to user ${user.id}:`, error);
+        }
+      }
+
+      // Save organization memberships if provided
+      if (orgMemberships && orgMemberships.length > 0) {
+        for (const orgMembership of orgMemberships) {
+          if (orgMembership.organizationName && orgMembership.organizationType && orgMembership.role) {
+            try {
+              await db.insert(organizationMemberships).values({
+                userId: user.id,
+                organizationName: orgMembership.organizationName,
+                organizationType: orgMembership.organizationType,
+                role: orgMembership.role,
+                isActive: orgMembership.isActive !== false,
+                description: orgMembership.description || null,
+                contactEmail: orgMembership.contactEmail || null,
+                contactPhone: orgMembership.contactPhone || null,
+                websiteUrl: orgMembership.websiteUrl || null,
+              });
+            } catch (error) {
+              console.warn(`Failed to save organization membership for user ${user.id}:`, error);
+            }
+          }
         }
       }
 
