@@ -69,10 +69,10 @@ const AISummit = () => {
     cacheTime: 0,
   });
 
-  // Filter person types to exclude admin-only types and sort with attendee first
+  // Filter person types to exclude admin-only types and business members (they register from inside the app)
   const selfRegisterPersonTypes = allPersonTypes
     .filter((type: any) => 
-      !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor'].includes(type.name.toLowerCase())
+      !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor', 'business'].includes(type.name.toLowerCase())
     )
     .sort((a: any, b: any) => {
       // Put attendee first
