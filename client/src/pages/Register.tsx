@@ -45,7 +45,7 @@ export default function Register() {
 
   // Filter person types for self-registration (exclude admin-only ones)
   const selfRegisterPersonTypes = personTypes.filter((type: any) => 
-    !['administrator', 'staff', 'sponsor', 'vip', 'media', 'councillor'].includes(type.name)
+    !['administrator', 'staff', 'sponsor', 'vip', 'councillor', 'speaker'].includes(type.name)
   );
 
   const registerMutation = useMutation({
