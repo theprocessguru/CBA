@@ -3474,22 +3474,33 @@ const AISummit = () => {
                     </p>
                   </div>
 
-                  {/* Submit Button - Inside Form */}
-                  <div className="flex gap-4 pt-4 border-t bg-white sticky bottom-0">
+                  {/* SUBMIT BUTTONS - VERY IMPORTANT */}
+                  <div className="flex gap-4 pt-6 mt-6 border-t-2 border-blue-200 bg-white p-4 rounded-lg shadow-lg">
                     <Button 
                       type="button"
                       variant="outline" 
                       onClick={() => setShowRegistrationForm(false)}
-                      className="flex-1"
+                      className="flex-1 h-12 text-lg"
                     >
                       Cancel
                     </Button>
                     <Button 
                       type="submit"
-                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      className="flex-1 h-12 text-lg bg-blue-600 hover:bg-blue-700 text-white font-bold"
                       disabled={registerMutation.isPending}
                     >
-                      {registerMutation.isPending ? "Reserving Your Spot..." : "Reserve My Spot"}
+                      {registerMutation.isPending ? "Reserving Your Spot..." : "🎯 Reserve My Spot"}
+                    </Button>
+                  </div>
+
+                  {/* BACKUP SUBMIT BUTTON IN CASE ABOVE IS HIDDEN */}
+                  <div className="text-center mt-4 p-4 bg-red-100 border-2 border-red-500">
+                    <Button 
+                      type="submit"
+                      className="w-full h-16 text-xl bg-red-600 hover:bg-red-700 text-white font-bold"
+                      disabled={registerMutation.isPending}
+                    >
+                      {registerMutation.isPending ? "SUBMITTING..." : "🚀 SUBMIT REGISTRATION NOW"}
                     </Button>
                   </div>
 
