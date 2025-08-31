@@ -3493,16 +3493,6 @@ const AISummit = () => {
                     </Button>
                   </div>
 
-                  {/* BACKUP SUBMIT BUTTON IN CASE ABOVE IS HIDDEN */}
-                  <div className="text-center mt-4 p-4 bg-red-100 border-2 border-red-500">
-                    <Button 
-                      type="submit"
-                      className="w-full h-16 text-xl bg-red-600 hover:bg-red-700 text-white font-bold"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending ? "SUBMITTING..." : "🚀 SUBMIT REGISTRATION NOW"}
-                    </Button>
-                  </div>
 
                 </form>
               </div>
