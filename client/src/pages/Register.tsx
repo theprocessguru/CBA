@@ -60,6 +60,13 @@ export default function Register() {
     yearOfStudy: "",
     expectedGraduation: "",
     studyMode: "",
+    // Volunteer details
+    volunteerSkills: "",
+    volunteerAreas: "",
+    volunteerAvailability: "",
+    volunteerFrequency: "",
+    volunteerExperience: "",
+    volunteerTimeSlots: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
@@ -70,6 +77,7 @@ export default function Register() {
   const [showTrainerDetails, setShowTrainerDetails] = useState(false);
   const [showMediaDetails, setShowMediaDetails] = useState(false);
   const [showStudentDetails, setShowStudentDetails] = useState(false);
+  const [showVolunteerDetails, setShowVolunteerDetails] = useState(false);
   const [organizationMemberships, setOrganizationMemberships] = useState([{
     organizationName: '',
     organizationType: '',
@@ -279,6 +287,13 @@ export default function Register() {
       ).map((type: any) => type.id);
       const hasStudentType = newTypes.some(id => studentTypes.includes(id));
       setShowStudentDetails(hasStudentType);
+      
+      // Check if volunteer type is selected
+      const volunteerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'volunteer'
+      ).map((type: any) => type.id);
+      const hasVolunteerType = newTypes.some(id => volunteerTypes.includes(id));
+      setShowVolunteerDetails(hasVolunteerType);
       
       return newTypes;
     });
@@ -1208,6 +1223,161 @@ export default function Register() {
                       onChange={handleChange}
                       placeholder="YYYY-MM"
                     />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Volunteer Details Section - Conditional */}
+            {showVolunteerDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <Heart className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Volunteer Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected volunteer, please tell us about your availability and skills</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="volunteerSkills">What Are Your Capabilities? <span className="text-red-500">*</span></Label>
+                    <select
+                      id="volunteerSkills"
+                      name="volunteerSkills"
+                      value={formData.volunteerSkills}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showVolunteerDetails}
+                    >
+                      <option value="">Select skills...</option>
+                      <option value="admin_office">Admin & Office Work</option>
+                      <option value="event_support">Event Support & Setup</option>
+                      <option value="registration_desk">Registration & Check-in</option>
+                      <option value="tech_support">Tech Support & IT</option>
+                      <option value="photography">Photography & Media</option>
+                      <option value="social_media">Social Media & Marketing</option>
+                      <option value="customer_service">Customer Service</option>
+                      <option value="fundraising">Fundraising & Sales</option>
+                      <option value="teaching_mentoring">Teaching & Mentoring</option>
+                      <option value="driving_transport">Driving & Transport</option>
+                      <option value="manual_labor">Manual Work & Setup</option>
+                      <option value="design_creative">Design & Creative</option>
+                      <option value="translation">Translation & Languages</option>
+                      <option value="catering_hospitality">Catering & Hospitality</option>
+                      <option value="other">Other Skills</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="volunteerAreas">Volunteer Areas <span className="text-red-500">*</span></Label>
+                    <select
+                      id="volunteerAreas"
+                      name="volunteerAreas"
+                      value={formData.volunteerAreas}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showVolunteerDetails}
+                    >
+                      <option value="">Select areas...</option>
+                      <option value="events_conferences">Events & Conferences</option>
+                      <option value="workshops_training">Workshops & Training</option>
+                      <option value="community_outreach">Community Outreach</option>
+                      <option value="business_support">Business Support</option>
+                      <option value="education_programs">Education Programs</option>
+                      <option value="networking_events">Networking Events</option>
+                      <option value="charity_fundraising">Charity & Fundraising</option>
+                      <option value="youth_programs">Youth Programs</option>
+                      <option value="senior_programs">Senior Programs</option>
+                      <option value="environmental">Environmental Projects</option>
+                      <option value="digital_inclusion">Digital Inclusion</option>
+                      <option value="emergency_response">Emergency Response</option>
+                      <option value="other">Other Areas</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="volunteerAvailability">When Can You Volunteer? <span className="text-red-500">*</span></Label>
+                    <select
+                      id="volunteerAvailability"
+                      name="volunteerAvailability"
+                      value={formData.volunteerAvailability}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showVolunteerDetails}
+                    >
+                      <option value="">Select availability...</option>
+                      <option value="weekday_mornings">Weekday Mornings (9am-12pm)</option>
+                      <option value="weekday_afternoons">Weekday Afternoons (12pm-5pm)</option>
+                      <option value="weekday_evenings">Weekday Evenings (5pm-9pm)</option>
+                      <option value="weekend_mornings">Weekend Mornings</option>
+                      <option value="weekend_afternoons">Weekend Afternoons</option>
+                      <option value="weekend_evenings">Weekend Evenings</option>
+                      <option value="school_holidays">School Holidays</option>
+                      <option value="flexible">Flexible Schedule</option>
+                      <option value="emergency_only">Emergency/Urgent Only</option>
+                      <option value="any_time">Any Time Available</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="volunteerFrequency">How Often Can You Volunteer? <span className="text-red-500">*</span></Label>
+                    <select
+                      id="volunteerFrequency"
+                      name="volunteerFrequency"
+                      value={formData.volunteerFrequency}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showVolunteerDetails}
+                    >
+                      <option value="">Select frequency...</option>
+                      <option value="daily">Daily</option>
+                      <option value="several_times_week">Several times per week</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="bi_weekly">Every 2 weeks</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="quarterly">Every 3 months</option>
+                      <option value="few_times_year">Few times per year</option>
+                      <option value="special_events">Special events only</option>
+                      <option value="as_needed">As needed basis</option>
+                      <option value="one_off">One-off opportunities</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="volunteerTimeSlots">Preferred Time Commitment</Label>
+                    <select
+                      id="volunteerTimeSlots"
+                      name="volunteerTimeSlots"
+                      value={formData.volunteerTimeSlots}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select time slots...</option>
+                      <option value="1_2_hours">1-2 hours</option>
+                      <option value="2_4_hours">2-4 hours</option>
+                      <option value="half_day">Half day (4-6 hours)</option>
+                      <option value="full_day">Full day (6-8 hours)</option>
+                      <option value="weekend">Whole weekend</option>
+                      <option value="flexible">Flexible</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="volunteerExperience">Previous Volunteer Experience</Label>
+                    <select
+                      id="volunteerExperience"
+                      name="volunteerExperience"
+                      value={formData.volunteerExperience}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select experience...</option>
+                      <option value="none">No previous experience</option>
+                      <option value="some">Some experience</option>
+                      <option value="experienced">Experienced volunteer</option>
+                      <option value="leadership">Volunteer leadership experience</option>
+                      <option value="professional">Professional volunteer coordinator</option>
+                    </select>
                   </div>
                 </div>
               </div>
