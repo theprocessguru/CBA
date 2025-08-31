@@ -1,4 +1,6 @@
 import nodemailer from 'nodemailer';
+import { db } from './db';
+import { emailCommunications, type InsertEmailCommunication } from '@shared/schema';
 
 export interface EmailConfig {
   host: string;
@@ -81,25 +83,83 @@ export class EmailService {
   }
 
   /**
+   * Log email to the database for tracking
+   */
+  private async logEmail(
+    userId: string | null,
+    recipientEmail: string,
+    subject: string,
+    content: string,
+    emailType: string,
+    status: 'sent' | 'failed' = 'sent',
+    metadata?: any
+  ): Promise<void> {
+    try {
+      // If no userId provided, try to find user by email
+      if (!userId) {
+        const { users } = await import('@shared/schema');
+        const { eq } = await import('drizzle-orm');
+        
+        const [user] = await db
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.email, recipientEmail))
+          .limit(1);
+        
+        if (user) {
+          userId = user.id;
+        }
+      }
+
+      // Only log if we have a userId
+      if (userId) {
+        const emailLog: InsertEmailCommunication = {
+          userId,
+          subject,
+          content,
+          emailType,
+          status,
+          metadata: metadata || {}
+        };
+
+        await db.insert(emailCommunications).values(emailLog);
+        console.log(`Email logged: ${emailType} to ${recipientEmail}`);
+      }
+    } catch (error) {
+      console.error('Error logging email:', error);
+      // Don't throw - we don't want email logging failures to prevent email sending
+    }
+  }
+
+  /**
    * Send a general email
    */
   async sendEmail(
     recipientEmail: string,
     subject: string,
-    htmlContent: string
+    htmlContent: string,
+    emailType: string = 'general',
+    userId?: string
   ): Promise<void> {
     if (!this.isConfigured()) {
+      await this.logEmail(userId || null, recipientEmail, subject, htmlContent, emailType, 'failed', { error: 'Email service not configured' });
       throw new Error('Email service not configured');
     }
 
-    const mailOptions = {
-      from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
-      to: recipientEmail,
-      subject: subject,
-      html: htmlContent,
-    };
+    try {
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: recipientEmail,
+        subject: subject,
+        html: htmlContent,
+      };
 
-    await this.transporter!.sendMail(mailOptions);
+      await this.transporter!.sendMail(mailOptions);
+      await this.logEmail(userId || null, recipientEmail, subject, htmlContent, emailType, 'sent');
+    } catch (error) {
+      await this.logEmail(userId || null, recipientEmail, subject, htmlContent, emailType, 'failed', { error: error instanceof Error ? error.message : 'Unknown error' });
+      throw error;
+    }
   }
 
   /**
@@ -251,15 +311,187 @@ export class EmailService {
 
       await this.transporter!.sendMail(mailOptions);
       
+      // Log the email to database
+      await this.logEmail(null, recipientEmail, subject, htmlContent, 'verification', 'sent', {
+        participantType,
+        verificationToken,
+        template: template ? template.templateName : 'default'
+      });
+      
       return {
         success: true,
         message: 'Verification email sent successfully'
       };
     } catch (error: any) {
       console.error('Error sending verification email:', error);
+      
+      // Log the failed email
+      await this.logEmail(null, recipientEmail, 'Email Verification', '', 'verification', 'failed', {
+        participantType,
+        error: error.message || 'Failed to send verification email'
+      });
+      
       return {
         success: false,
         message: error.message || 'Failed to send verification email'
+      };
+    }
+  }
+
+  /**
+   * Send verification emails to all unverified users (mass send)
+   */
+  async sendMassVerificationEmails(): Promise<{ 
+    success: boolean; 
+    totalSent: number; 
+    totalFailed: number; 
+    results: Array<{ email: string; success: boolean; message: string }> 
+  }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ email: 'system', success: false, message: 'Email service not configured' }]
+      };
+    }
+
+    try {
+      // Import required modules
+      const { users } = await import('@shared/schema');
+      const { eq, and, isNull, or } = await import('drizzle-orm');
+      const crypto = await import('crypto');
+
+      // Get all unverified users
+      const unverifiedUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          participantType: users.participantType
+        })
+        .from(users)
+        .where(
+          and(
+            or(eq(users.emailVerified, false), isNull(users.emailVerified)),
+            // Only include users with valid emails
+            eq(users.accountStatus, 'active')
+          )
+        );
+
+      const results: Array<{ email: string; success: boolean; message: string }> = [];
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      console.log(`Starting mass verification email send to ${unverifiedUsers.length} users`);
+
+      // Send emails in batches to avoid overwhelming the email service
+      const batchSize = 10;
+      for (let i = 0; i < unverifiedUsers.length; i += batchSize) {
+        const batch = unverifiedUsers.slice(i, i + batchSize);
+        
+        // Process batch in parallel
+        const batchPromises = batch.map(async (user) => {
+          try {
+            if (!user.email) {
+              throw new Error('No email address');
+            }
+
+            // Generate verification token
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const verificationTokenExpiry = new Date();
+            verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24); // 24-hour expiry
+
+            // Update user with verification token
+            await db
+              .update(users)
+              .set({
+                verificationToken,
+                verificationTokenExpiry,
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, user.id));
+
+            // Send verification email
+            const emailResult = await this.sendVerificationEmail(
+              user.email,
+              user.firstName || 'Member',
+              verificationToken,
+              user.participantType || 'attendee'
+            );
+
+            if (emailResult.success) {
+              totalSent++;
+              return { 
+                email: user.email, 
+                success: true, 
+                message: 'Verification email sent successfully' 
+              };
+            } else {
+              totalFailed++;
+              return { 
+                email: user.email, 
+                success: false, 
+                message: emailResult.message 
+              };
+            }
+
+          } catch (error) {
+            totalFailed++;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Failed to send verification email to ${user.email}:`, errorMessage);
+            return { 
+              email: user.email || 'unknown', 
+              success: false, 
+              message: errorMessage 
+            };
+          }
+        });
+
+        // Wait for batch to complete
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Process results
+        batchResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            results.push(result.value);
+          } else {
+            totalFailed++;
+            results.push({ 
+              email: 'unknown', 
+              success: false, 
+              message: result.reason?.message || 'Promise rejected' 
+            });
+          }
+        });
+
+        // Add delay between batches to avoid rate limiting
+        if (i + batchSize < unverifiedUsers.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        }
+      }
+
+      console.log(`Mass verification email complete: ${totalSent} sent, ${totalFailed} failed`);
+
+      return {
+        success: true,
+        totalSent,
+        totalFailed,
+        results
+      };
+
+    } catch (error) {
+      console.error('Error in mass verification email send:', error);
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ 
+          email: 'system', 
+          success: false, 
+          message: error instanceof Error ? error.message : 'Unknown error' 
+        }]
       };
     }
   }

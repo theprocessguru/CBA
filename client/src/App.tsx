@@ -30,6 +30,7 @@ import ContentReports from "@/pages/admin/ContentReports";
 import UserManagement from "@/pages/admin/UserManagement";
 import Analytics from "@/pages/admin/Analytics";
 import EmailSettings from "@/pages/admin/EmailSettings";
+import EmailLogs from "@/pages/admin/EmailLogs";
 import UploadMembers from "@/pages/admin/upload-members";
 import MembershipManagement from "@/pages/admin/MembershipManagement";
 import MembershipBenefits from "@/pages/membership-benefits";
@@ -633,6 +634,11 @@ function Router() {
       <Route path="/dashboard/email-settings">
         <AdminRoute>
           <EmailSettings />
+        </AdminRoute>
+      </Route>
+      <Route path="/dashboard/email-logs">
+        <AdminRoute>
+          <EmailLogs />
         </AdminRoute>
       </Route>
       <Route path="/dashboard/event-management">

@@ -2485,6 +2485,163 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mass verification email endpoint (admin only)
+  app.post('/api/admin/email/send-mass-verification', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated mass verification email send`);
+      
+      // Send verification emails to all unverified users
+      const result = await emailService.sendMassVerificationEmails();
+      
+      if (result.success) {
+        res.json({
+          message: `Mass verification email completed: ${result.totalSent} sent, ${result.totalFailed} failed`,
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      } else {
+        res.status(500).json({
+          message: "Mass verification email failed",
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      }
+    } catch (error) {
+      console.error("Error in mass verification email:", error);
+      res.status(500).json({ message: "Failed to send mass verification emails" });
+    }
+  });
+
+  // Get email logs and statistics (admin only)
+  app.get('/api/admin/email/logs', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { page = 1, limit = 50, emailType, status, userId } = req.query;
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+
+      // Build where conditions
+      const whereConditions = [];
+      if (emailType) {
+        const { eq } = await import('drizzle-orm');
+        const { emailCommunications } = await import('@shared/schema');
+        whereConditions.push(eq(emailCommunications.emailType, emailType));
+      }
+      if (status) {
+        const { eq } = await import('drizzle-orm');
+        const { emailCommunications } = await import('@shared/schema');
+        whereConditions.push(eq(emailCommunications.status, status));
+      }
+      if (userId) {
+        const { eq } = await import('drizzle-orm');
+        const { emailCommunications } = await import('@shared/schema');
+        whereConditions.push(eq(emailCommunications.userId, userId));
+      }
+
+      // Import required modules
+      const { emailCommunications, users } = await import('@shared/schema');
+      const { desc, and, count } = await import('drizzle-orm');
+      const { db } = await import('./db');
+
+      // Get total count
+      const [totalResult] = await db
+        .select({ count: count() })
+        .from(emailCommunications)
+        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+      // Get email logs with user details
+      const emailLogs = await db
+        .select({
+          id: emailCommunications.id,
+          userId: emailCommunications.userId,
+          userEmail: users.email,
+          userFirstName: users.firstName,
+          userLastName: users.lastName,
+          subject: emailCommunications.subject,
+          emailType: emailCommunications.emailType,
+          status: emailCommunications.status,
+          sentAt: emailCommunications.sentAt,
+          openedAt: emailCommunications.openedAt,
+          clickedAt: emailCommunications.clickedAt,
+          metadata: emailCommunications.metadata
+        })
+        .from(emailCommunications)
+        .leftJoin(users, eq(emailCommunications.userId, users.id))
+        .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+        .orderBy(desc(emailCommunications.sentAt))
+        .limit(parseInt(limit))
+        .offset(offset);
+
+      res.json({
+        logs: emailLogs,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: totalResult.count,
+          pages: Math.ceil(totalResult.count / parseInt(limit))
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching email logs:", error);
+      res.status(500).json({ message: "Failed to fetch email logs" });
+    }
+  });
+
+  // Get email statistics (admin only)
+  app.get('/api/admin/email/statistics', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { emailCommunications } = await import('@shared/schema');
+      const { sql, count } = await import('drizzle-orm');
+      const { db } = await import('./db');
+
+      // Get overall statistics
+      const [overallStats] = await db
+        .select({
+          totalEmails: count(),
+          sentEmails: count(sql`CASE WHEN status = 'sent' THEN 1 END`),
+          failedEmails: count(sql`CASE WHEN status = 'failed' THEN 1 END`),
+          openedEmails: count(sql`CASE WHEN opened_at IS NOT NULL THEN 1 END`),
+          clickedEmails: count(sql`CASE WHEN clicked_at IS NOT NULL THEN 1 END`)
+        })
+        .from(emailCommunications);
+
+      // Get statistics by email type
+      const statsByType = await db
+        .select({
+          emailType: emailCommunications.emailType,
+          totalEmails: count(),
+          sentEmails: count(sql`CASE WHEN status = 'sent' THEN 1 END`),
+          failedEmails: count(sql`CASE WHEN status = 'failed' THEN 1 END`)
+        })
+        .from(emailCommunications)
+        .groupBy(emailCommunications.emailType);
+
+      // Get recent email activity (last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const [recentActivity] = await db
+        .select({
+          recentEmails: count()
+        })
+        .from(emailCommunications)
+        .where(sql`sent_at >= ${sevenDaysAgo}`);
+
+      res.json({
+        overall: overallStats,
+        byType: statsByType,
+        recentActivity: recentActivity.recentEmails
+      });
+    } catch (error) {
+      console.error("Error fetching email statistics:", error);
+      res.status(500).json({ message: "Failed to fetch email statistics" });
+    }
+  });
+
   // Simple test email endpoint (no auth required for testing)
   app.post('/api/test-email', async (req: any, res) => {
     try {
