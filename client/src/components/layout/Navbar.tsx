@@ -204,11 +204,18 @@ const Navbar = () => {
                 </Button>
               </div>
             ) : (
-              <Link href="/login">
-                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap ml-2">
-                  Login
-                </Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link href="/register">
+                  <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
+                    Join CBA
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                    Login
+                  </Button>
+                </Link>
+              </div>
             )}
           </div>
           <div className="-mr-2 flex items-center sm:hidden">
@@ -707,11 +714,18 @@ const Navbar = () => {
                   </Button>
                 </Link>
               ) : (
-                <Link href="/login">
-                  <Button className="w-full flex justify-center">
-                    Member Login
-                  </Button>
-                </Link>
+                <div className="space-y-2">
+                  <Link href="/register">
+                    <Button variant="outline" className="w-full flex justify-center">
+                      Join CBA
+                    </Button>
+                  </Link>
+                  <Link href="/login">
+                    <Button className="w-full flex justify-center">
+                      Member Login
+                    </Button>
+                  </Link>
+                </div>
               )}
             </div>
           </div>
