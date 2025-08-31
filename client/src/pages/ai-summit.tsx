@@ -38,7 +38,8 @@ import {
   Home,
   Heart,
   Crown,
-  User
+  User,
+  Plus
 } from "lucide-react";
 import { Link } from "wouter";
 import { ParticipantTypeSelector } from "@/components/forms/ParticipantTypeSelector";
@@ -96,6 +97,18 @@ const AISummit = () => {
   const [showEducatorDetails, setShowEducatorDetails] = useState(false);
   const [showTrainerDetails, setShowTrainerDetails] = useState(false);
   const [showVolunteerDetails, setShowVolunteerDetails] = useState(false);
+  const [showMediaDetails, setShowMediaDetails] = useState(false);
+  const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
+  const [organizationMemberships, setOrganizationMemberships] = useState([{
+    organizationName: '',
+    organizationType: '',
+    role: '',
+    isActive: true,
+    description: '',
+    contactEmail: '',
+    contactPhone: '',
+    websiteUrl: ''
+  }]);
   
   // Password visibility states
   const [showPassword, setShowPassword] = useState(false);
@@ -149,6 +162,20 @@ const AISummit = () => {
     businessWebsite: "",
     employeeCount: "",
     established: "",
+    // Volunteer fields
+    volunteerSkills: "",
+    volunteerAreas: "",
+    volunteerAvailability: "",
+    volunteerFrequency: "",
+    volunteerExperience: "",
+    volunteerTimeSlots: "",
+    // Media fields
+    mediaOutlet: "",
+    mediaType: "",
+    coverageArea: "",
+    socialMediaHandle: "",
+    audienceReach: "",
+    specialtyBeats: "",
     password: "",
     confirmPassword: "",
     interestAreas: [] as string[],
@@ -212,6 +239,20 @@ const AISummit = () => {
       ).map((type: any) => type.id);
       const hasVolunteerType = selectedTypes.some(id => volunteerTypes.includes(id));
       setShowVolunteerDetails(hasVolunteerType);
+
+      // Check for media type
+      const mediaTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'media'
+      ).map((type: any) => type.id);
+      const hasMediaType = selectedTypes.some(id => mediaTypes.includes(id));
+      setShowMediaDetails(hasMediaType);
+
+      // Check for community group type
+      const communityGroupTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'community_group'
+      ).map((type: any) => type.id);
+      const hasCommunityGroupType = selectedTypes.some(id => communityGroupTypes.includes(id));
+      setShowOrganizationMemberships(hasCommunityGroupType);
     }
   }, [registrationData.selectedPersonTypes, selfRegisterPersonTypes]);
 
@@ -576,7 +617,11 @@ const AISummit = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: typeof registrationData) => {
-      const response = await apiRequest("POST", "/api/ai-summit-registration", data);
+      const submissionData = {
+        ...data,
+        organizationMemberships: showOrganizationMemberships ? organizationMemberships.filter(org => org.organizationName) : undefined,
+      };
+      const response = await apiRequest("POST", "/api/ai-summit-registration", submissionData);
       return response.json();
     },
     onSuccess: (data) => {
@@ -1086,6 +1131,32 @@ const AISummit = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  // Organization membership helpers
+  const handleOrganizationChange = (index: number, field: string, value: string) => {
+    setOrganizationMemberships(prev => prev.map((org, i) => 
+      i === index ? { ...org, [field]: value } : org
+    ));
+  };
+
+  const addOrganization = () => {
+    setOrganizationMemberships(prev => [...prev, {
+      organizationName: '',
+      organizationType: '',
+      role: '',
+      isActive: true,
+      description: '',
+      contactEmail: '',
+      contactPhone: '',
+      websiteUrl: ''
+    }]);
+  };
+
+  const removeOrganization = (index: number) => {
+    if (organizationMemberships.length > 1) {
+      setOrganizationMemberships(prev => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handleExhibitorInputChange = (field: string, value: string | number | boolean) => {
@@ -2726,44 +2797,315 @@ const AISummit = () => {
                     </div>
                   )}
 
-                  {/* T-shirt and Gender - Only show if volunteer is selected */}
+                  {/* Volunteer Details Section - Comprehensive */}
                   {showVolunteerDetails && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="tshirtSize">T-shirt Size</Label>
-                        <select
-                          id="tshirtSize"
-                          name="tshirtSize"
-                          value={registrationData.tshirtSize || ''}
-                          onChange={(e) => handleInputChange('tshirtSize', e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select size...</option>
-                          <option value="XS">XS (Extra Small)</option>
-                          <option value="S">S (Small)</option>
-                          <option value="M">M (Medium)</option>
-                          <option value="L">L (Large)</option>
-                          <option value="XL">XL (Extra Large)</option>
-                          <option value="XXL">XXL (2X Large)</option>
-                          <option value="XXXL">XXXL (3X Large)</option>
-                        </select>
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Heart className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Volunteer Information</Label>
                       </div>
-                      <div>
-                        <Label htmlFor="gender">Gender (for t-shirt fit)</Label>
-                        <select
-                          id="gender"
-                          name="gender"
-                          value={registrationData.gender || ''}
-                          onChange={(e) => handleInputChange('gender', e.target.value)}
-                          className="w-full p-2 border border-gray-300 rounded-md"
-                        >
-                          <option value="">Select fit...</option>
-                          <option value="male">Male fit</option>
-                          <option value="female">Female fit</option>
-                          <option value="unisex">Unisex fit</option>
-                          <option value="prefer_not_to_say">Prefer not to say</option>
-                        </select>
+                      <p className="text-xs text-gray-500">Since you selected volunteer, please provide your volunteer details</p>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="volunteerSkills">Skills & Expertise</Label>
+                          <Input
+                            id="volunteerSkills"
+                            name="volunteerSkills"
+                            value={registrationData.volunteerSkills || ''}
+                            onChange={(e) => handleInputChange('volunteerSkills', e.target.value)}
+                            placeholder="e.g., IT support, event management, marketing"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="volunteerAreas">Preferred Areas</Label>
+                          <Input
+                            id="volunteerAreas"
+                            name="volunteerAreas"
+                            value={registrationData.volunteerAreas || ''}
+                            onChange={(e) => handleInputChange('volunteerAreas', e.target.value)}
+                            placeholder="e.g., registration, hospitality, tech support"
+                          />
+                        </div>
                       </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="volunteerAvailability">Availability</Label>
+                          <Input
+                            id="volunteerAvailability"
+                            name="volunteerAvailability"
+                            value={registrationData.volunteerAvailability || ''}
+                            onChange={(e) => handleInputChange('volunteerAvailability', e.target.value)}
+                            placeholder="e.g., weekends, evenings, full-time"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="volunteerFrequency">How Often</Label>
+                          <Input
+                            id="volunteerFrequency"
+                            name="volunteerFrequency"
+                            value={registrationData.volunteerFrequency || ''}
+                            onChange={(e) => handleInputChange('volunteerFrequency', e.target.value)}
+                            placeholder="e.g., weekly, monthly, event-based"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="volunteerExperience">Previous Experience</Label>
+                          <Input
+                            id="volunteerExperience"
+                            name="volunteerExperience"
+                            value={registrationData.volunteerExperience || ''}
+                            onChange={(e) => handleInputChange('volunteerExperience', e.target.value)}
+                            placeholder="Previous volunteer experience"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="volunteerTimeSlots">Preferred Time Slots</Label>
+                          <Input
+                            id="volunteerTimeSlots"
+                            name="volunteerTimeSlots"
+                            value={registrationData.volunteerTimeSlots || ''}
+                            onChange={(e) => handleInputChange('volunteerTimeSlots', e.target.value)}
+                            placeholder="e.g., morning, afternoon, evening"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="tshirtSize">T-shirt Size</Label>
+                          <select
+                            id="tshirtSize"
+                            name="tshirtSize"
+                            value={registrationData.tshirtSize || ''}
+                            onChange={(e) => handleInputChange('tshirtSize', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select size...</option>
+                            <option value="XS">XS (Extra Small)</option>
+                            <option value="S">S (Small)</option>
+                            <option value="M">M (Medium)</option>
+                            <option value="L">L (Large)</option>
+                            <option value="XL">XL (Extra Large)</option>
+                            <option value="XXL">XXL (2X Large)</option>
+                            <option value="XXXL">XXXL (3X Large)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label htmlFor="gender">Gender (for t-shirt fit)</Label>
+                          <select
+                            id="gender"
+                            name="gender"
+                            value={registrationData.gender || ''}
+                            onChange={(e) => handleInputChange('gender', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select fit...</option>
+                            <option value="male">Male fit</option>
+                            <option value="female">Female fit</option>
+                            <option value="unisex">Unisex fit</option>
+                            <option value="prefer_not_to_say">Prefer not to say</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Media Details Section - Comprehensive */}
+                  {showMediaDetails && (
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Mic className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Media Information</Label>
+                      </div>
+                      <p className="text-xs text-gray-500">Since you selected media, please provide your media outlet details</p>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="mediaOutlet">Media Outlet</Label>
+                          <Input
+                            id="mediaOutlet"
+                            name="mediaOutlet"
+                            value={registrationData.mediaOutlet || ''}
+                            onChange={(e) => handleInputChange('mediaOutlet', e.target.value)}
+                            placeholder="Name of your media organization"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="mediaType">Media Type</Label>
+                          <Input
+                            id="mediaType"
+                            name="mediaType"
+                            value={registrationData.mediaType || ''}
+                            onChange={(e) => handleInputChange('mediaType', e.target.value)}
+                            placeholder="e.g., newspaper, TV, radio, podcast, blog"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="coverageArea">Coverage Area</Label>
+                          <Input
+                            id="coverageArea"
+                            name="coverageArea"
+                            value={registrationData.coverageArea || ''}
+                            onChange={(e) => handleInputChange('coverageArea', e.target.value)}
+                            placeholder="Geographic area you cover"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="socialMediaHandle">Social Media Handle</Label>
+                          <Input
+                            id="socialMediaHandle"
+                            name="socialMediaHandle"
+                            value={registrationData.socialMediaHandle || ''}
+                            onChange={(e) => handleInputChange('socialMediaHandle', e.target.value)}
+                            placeholder="@YourHandle"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="audienceReach">Audience Reach</Label>
+                          <Input
+                            id="audienceReach"
+                            name="audienceReach"
+                            value={registrationData.audienceReach || ''}
+                            onChange={(e) => handleInputChange('audienceReach', e.target.value)}
+                            placeholder="Estimated audience size"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="specialtyBeats">Specialty/Beats</Label>
+                          <Input
+                            id="specialtyBeats"
+                            name="specialtyBeats"
+                            value={registrationData.specialtyBeats || ''}
+                            onChange={(e) => handleInputChange('specialtyBeats', e.target.value)}
+                            placeholder="Topics you specialize in"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Community Group Organization Memberships Section */}
+                  {showOrganizationMemberships && (
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Organization Memberships</Label>
+                      </div>
+                      <p className="text-xs text-gray-500">Since you selected community group member, please provide details about your organization memberships</p>
+                      
+                      {organizationMemberships.map((org, index) => (
+                        <div key={index} className="space-y-4 p-4 border rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <Label className="font-medium">Organization {index + 1}</Label>
+                            {organizationMemberships.length > 1 && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeOrganization(index)}
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`orgName-${index}`}>Organization Name</Label>
+                              <Input
+                                id={`orgName-${index}`}
+                                value={org.organizationName}
+                                onChange={(e) => handleOrganizationChange(index, 'organizationName', e.target.value)}
+                                placeholder="Organization name"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`orgType-${index}`}>Organization Type</Label>
+                              <Input
+                                id={`orgType-${index}`}
+                                value={org.organizationType}
+                                onChange={(e) => handleOrganizationChange(index, 'organizationType', e.target.value)}
+                                placeholder="e.g., charity, club, association"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`orgRole-${index}`}>Your Role</Label>
+                              <Input
+                                id={`orgRole-${index}`}
+                                value={org.role}
+                                onChange={(e) => handleOrganizationChange(index, 'role', e.target.value)}
+                                placeholder="e.g., member, volunteer, board member"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`orgEmail-${index}`}>Contact Email</Label>
+                              <Input
+                                id={`orgEmail-${index}`}
+                                type="email"
+                                value={org.contactEmail}
+                                onChange={(e) => handleOrganizationChange(index, 'contactEmail', e.target.value)}
+                                placeholder="organization@example.com"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor={`orgPhone-${index}`}>Contact Phone</Label>
+                              <Input
+                                id={`orgPhone-${index}`}
+                                value={org.contactPhone}
+                                onChange={(e) => handleOrganizationChange(index, 'contactPhone', e.target.value)}
+                                placeholder="Phone number"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`orgWebsite-${index}`}>Website</Label>
+                              <Input
+                                id={`orgWebsite-${index}`}
+                                value={org.websiteUrl}
+                                onChange={(e) => handleOrganizationChange(index, 'websiteUrl', e.target.value)}
+                                placeholder="https://example.com"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <Label htmlFor={`orgDesc-${index}`}>Description</Label>
+                            <Textarea
+                              id={`orgDesc-${index}`}
+                              value={org.description}
+                              onChange={(e) => handleOrganizationChange(index, 'description', e.target.value)}
+                              placeholder="Brief description of the organization and your involvement..."
+                              rows={3}
+                            />
+                          </div>
+                        </div>
+                      ))}
+
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={addOrganization}
+                        className="w-full"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Another Organization
+                      </Button>
                     </div>
                   )}
 
