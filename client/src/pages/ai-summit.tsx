@@ -2467,8 +2467,8 @@ const AISummit = () => {
         {/* Registration Form Modal */}
         {showRegistrationForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
+              <div className="flex-1 overflow-y-auto p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-neutral-900">Attend the AI Summit by registering</h2>
                   <Button 
@@ -2480,7 +2480,7 @@ const AISummit = () => {
                   </Button>
                 </div>
 
-                <form onSubmit={handleRegistration} className="space-y-4">
+                <form onSubmit={handleRegistration} id="registration-form" className="space-y-4">
                   {/* Admin Test Data Button */}
                   {import.meta.env.DEV && (
                     <div className="flex justify-center mb-4">
@@ -3474,8 +3474,8 @@ const AISummit = () => {
                     </p>
                   </div>
 
-                  {/* Submit Button */}
-                  <div className="flex gap-4">
+                  {/* Submit Button - Inside Form */}
+                  <div className="flex gap-4 pt-4 border-t bg-white sticky bottom-0">
                     <Button 
                       type="button"
                       variant="outline" 
@@ -3485,7 +3485,7 @@ const AISummit = () => {
                       Cancel
                     </Button>
                     <Button 
-                      type="submit" 
+                      type="submit"
                       className="flex-1 bg-blue-600 hover:bg-blue-700"
                       disabled={registerMutation.isPending}
                     >
