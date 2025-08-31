@@ -71,7 +71,7 @@ const AISummit = () => {
 
   // Filter person types to exclude admin-only types
   const selfRegisterPersonTypes = allPersonTypes.filter((type: any) => 
-    !['administrator', 'staff', 'sponsor'].includes(type.name.toLowerCase())
+    !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor'].includes(type.name.toLowerCase())
   );
 
 
