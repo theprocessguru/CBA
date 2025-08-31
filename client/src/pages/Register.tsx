@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, User, Building, GraduationCap, Home, Users, Mic, Heart, Crown } from "lucide-react";
 
 export default function Register() {
   const [, setLocation] = useLocation();
@@ -18,13 +19,28 @@ export default function Register() {
     firstName: "",
     lastName: "",
   });
+  const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch available person types
+  const { data: personTypes = [] } = useQuery({
+    queryKey: ['/api/person-types'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/person-types');
+      return response.json();
+    }
+  });
+
+  // Filter person types for self-registration (exclude admin-only ones)
+  const selfRegisterPersonTypes = personTypes.filter((type: any) => 
+    !['administrator', 'staff', 'sponsor'].includes(type.name)
+  );
+
   const registerMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string; firstName: string; lastName: string }) => {
+    mutationFn: async (data: { email: string; password: string; firstName: string; lastName: string; personTypeIds: number[] }) => {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
@@ -71,6 +87,7 @@ export default function Register() {
       password: formData.password,
       firstName: formData.firstName,
       lastName: formData.lastName,
+      personTypeIds: selectedPersonTypes,
     });
   };
 
@@ -79,6 +96,32 @@ export default function Register() {
       ...prev,
       [e.target.name]: e.target.value
     }));
+  };
+
+  const handlePersonTypeChange = (personTypeId: number, checked: boolean) => {
+    setSelectedPersonTypes(prev => 
+      checked 
+        ? [...prev, personTypeId]
+        : prev.filter(id => id !== personTypeId)
+    );
+  };
+
+  // Person type icons mapping
+  const getPersonTypeIcon = (typeName: string) => {
+    const iconMap: Record<string, any> = {
+      'attendee': User,
+      'business': Building,
+      'business_owner': Building,
+      'student': GraduationCap,
+      'resident': Home,
+      'exhibitor': Users,
+      'speaker': Mic,
+      'volunteer': Heart,
+      'vip': Crown,
+      'councillor': Users,
+      'media': Mic,
+    };
+    return iconMap[typeName] || User;
   };
 
   return (
@@ -183,10 +226,50 @@ export default function Register() {
                 </button>
               </div>
             </div>
+            
+            {/* Person Type Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">I am a: <span className="text-red-500">*</span></Label>
+              <p className="text-xs text-gray-500">Select all that apply to you</p>
+              
+              <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
+                {selfRegisterPersonTypes.map((type: any) => {
+                  const Icon = getPersonTypeIcon(type.name);
+                  return (
+                    <div key={type.id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                      <Checkbox
+                        id={`person-type-${type.id}`}
+                        checked={selectedPersonTypes.includes(type.id)}
+                        onCheckedChange={(checked) => handlePersonTypeChange(type.id, checked as boolean)}
+                      />
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Icon className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <Label 
+                            htmlFor={`person-type-${type.id}`} 
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            {type.displayName}
+                          </Label>
+                          {type.description && (
+                            <p className="text-xs text-gray-500">{type.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {selectedPersonTypes.length === 0 && (
+                <p className="text-xs text-red-500">Please select at least one option</p>
+              )}
+            </div>
+            
             <Button 
               type="submit" 
               className="w-full"
-              disabled={registerMutation.isPending}
+              disabled={registerMutation.isPending || selectedPersonTypes.length === 0}
             >
               {registerMutation.isPending ? "Creating account..." : "Create Account"}
             </Button>

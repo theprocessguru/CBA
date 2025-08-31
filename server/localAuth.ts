@@ -73,7 +73,7 @@ export async function setupLocalAuth(app: Express) {
   // Register endpoint
   app.post('/api/auth/register', async (req: Request, res: Response) => {
     try {
-      const { email, password, firstName, lastName } = req.body;
+      const { email, password, firstName, lastName, personTypeIds = [] } = req.body;
 
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
@@ -108,6 +108,32 @@ export async function setupLocalAuth(app: Express) {
         profileImageUrl: null,
         passwordHash: hashedPassword,
       });
+
+      // Assign person types to new user
+      if (personTypeIds && personTypeIds.length > 0) {
+        for (const personTypeId of personTypeIds) {
+          try {
+            await storage.assignPersonTypeToUser({ 
+              userId: user.id, 
+              personTypeId: personTypeId, 
+              isPrimary: false 
+            });
+          } catch (error) {
+            console.warn(`Failed to assign person type ${personTypeId} to user ${user.id}:`, error);
+          }
+        }
+      } else {
+        // Default to attendee if no person types selected (person type ID 1 is attendee)
+        try {
+          await storage.assignPersonTypeToUser({ 
+            userId: user.id, 
+            personTypeId: 1, // Attendee person type ID
+            isPrimary: true 
+          });
+        } catch (error) {
+          console.warn(`Failed to assign default attendee type to user ${user.id}:`, error);
+        }
+      }
 
       // Set session
       (req.session as any).userId = user.id;
