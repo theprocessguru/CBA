@@ -6,68 +6,148 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
-import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { Eye, EyeOff, User, Building, GraduationCap, Home, Users, Mic, Heart, Crown } from "lucide-react";
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
-    phone: "",
-    company: "",
-    jobTitle: "",
-    interestAreas: [] as string[],
-    accessibilityNeeds: "",
     password: "",
     confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    homeAddress: "",
+    homeCity: "",
+    homePostcode: "",
+    businessAddress: "",
+    businessCity: "",
+    businessPostcode: "",
+    // Business details
+    businessName: "",
+    businessDescription: "",
+    businessWebsite: "",
+    businessPhone: "",
+    businessEmail: "",
+    businessCategory: "",
+    employeeCount: "",
+    established: "",
+    // Educator details
+    schoolName: "",
+    educatorRole: "",
+    subjectTaught: "",
+    schoolType: "",
+    // Trainer details
+    trainingSpecialty: "",
+    targetAudience: "",
+    trainingMethods: "",
+    trainingVenue: "",
+    certifications: "",
+    // Media details
+    mediaOutlet: "",
+    mediaType: "",
+    coverageArea: "",
+    socialMediaHandle: "",
+    audienceReach: "",
+    specialtyBeats: "",
+    // Student details
+    studyInstitution: "",
+    courseOfStudy: "",
+    studyLevel: "",
+    yearOfStudy: "",
+    expectedGraduation: "",
+    studyMode: "",
+    // Volunteer details
+    volunteerSkills: "",
+    volunteerAreas: "",
+    volunteerAvailability: "",
+    volunteerFrequency: "",
+    volunteerExperience: "",
+    volunteerTimeSlots: "",
+    // Dietary information
+    dietaryRestrictions: "",
+    allergies: "",
+    dietaryNotes: "",
+    // T-shirt and sizing info
+    tshirtSize: "",
+    gender: "",
   });
-
+  const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
+  const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
+  const [showBusinessAddress, setShowBusinessAddress] = useState(false);
+  const [showBusinessDetails, setShowBusinessDetails] = useState(false);
+  const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
+  const [showEducatorDetails, setShowEducatorDetails] = useState(false);
+  const [showTrainerDetails, setShowTrainerDetails] = useState(false);
+  const [showMediaDetails, setShowMediaDetails] = useState(false);
+  const [showStudentDetails, setShowStudentDetails] = useState(false);
+  const [showVolunteerDetails, setShowVolunteerDetails] = useState(false);
+  const [organizationMemberships, setOrganizationMemberships] = useState([{
+    organizationName: '',
+    organizationType: '',
+    role: '',
+    isActive: true,
+    description: '',
+    contactEmail: '',
+    contactPhone: '',
+    websiteUrl: ''
+  }]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const availableInterests = [
-    "AI Basics",
-    "Education & Learning", 
-    "AI in Healthcare",
-    "Career Opportunities",
-    "AI for Seniors",
-    "Family Activities"
-  ];
+  // Fetch available person types
+  const { data: personTypes = [] } = useQuery({
+    queryKey: ['/api/person-types'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/person-types');
+      return response.json();
+    }
+  });
+
+  // Filter person types for self-registration (exclude admin-only ones)
+  const selfRegisterPersonTypes = personTypes.filter((type: any) => 
+    !['administrator', 'staff', 'sponsor', 'vip', 'councillor', 'speaker'].includes(type.name)
+  );
+
+  // Fetch business categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    }
+  });
 
   const registerMutation = useMutation({
-    mutationFn: async (data: {
-      name: string;
-      email: string;
+    mutationFn: async (data: { 
+      email: string; 
+      password: string; 
+      firstName: string; 
+      lastName: string; 
       phone: string;
-      company?: string;
-      jobTitle?: string;
-      interestAreas: string[];
-      accessibilityNeeds?: string;
-      password: string;
+      homeAddress: string;
+      homeCity: string;
+      homePostcode: string;
+      businessAddress?: string;
+      businessCity?: string;
+      businessPostcode?: string;
+      businessName?: string;
+      businessDescription?: string;
+      businessWebsite?: string;
+      businessPhone?: string;
+      businessEmail?: string;
+      businessCategory?: string;
+      employeeCount?: string;
+      established?: string;
+      organizationMemberships?: any[];
+      personTypeIds: number[]; 
     }) => {
-      // Split name into firstName and lastName
-      const nameParts = data.name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-
-      const response = await apiRequest("POST", "/api/auth/register", {
-        email: data.email,
-        password: data.password,
-        firstName,
-        lastName,
-        phone: data.phone,
-        homeAddress: "UK", // Default for now
-        homeCity: "Croydon", // Default for now
-        homePostcode: "CR0", // Default for now
-        businessName: data.company,
-        businessDescription: `Interested in: ${data.interestAreas.join(', ')}`,
-        personTypeIds: [1], // Default to attendee
-      });
+      const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
     onSuccess: () => {
@@ -76,7 +156,7 @@ export default function Register() {
         description: "Welcome to Croydon Business Association.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      setLocation("/dashboard");
+      setLocation("/trial-membership");
     },
     onError: (error) => {
       toast({
@@ -90,33 +170,6 @@ export default function Register() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim()) {
-      toast({
-        title: "Name required",
-        description: "Please enter your full name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.email.trim()) {
-      toast({
-        title: "Email required",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.phone.trim()) {
-      toast({
-        title: "Phone required",
-        description: "Please enter your phone number.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -126,173 +179,482 @@ export default function Register() {
       return;
     }
 
-    if (formData.password.length < 8) {
+    if (formData.password.length < 6) {
       toast({
         title: "Password too short",
-        description: "Password must be at least 8 characters long.",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
     }
 
     registerMutation.mutate({
-      name: formData.name,
       email: formData.email,
-      phone: formData.phone,
-      company: formData.company || undefined,
-      jobTitle: formData.jobTitle || undefined,
-      interestAreas: formData.interestAreas,
-      accessibilityNeeds: formData.accessibilityNeeds || undefined,
       password: formData.password,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phone: formData.phone,
+      homeAddress: formData.homeAddress,
+      homeCity: formData.homeCity,
+      homePostcode: formData.homePostcode,
+      businessAddress: showBusinessAddress ? formData.businessAddress : undefined,
+      businessCity: showBusinessAddress ? formData.businessCity : undefined,
+      businessPostcode: showBusinessAddress ? formData.businessPostcode : undefined,
+      businessName: showBusinessDetails ? formData.businessName : undefined,
+      businessDescription: showBusinessDetails ? formData.businessDescription : undefined,
+      businessWebsite: showBusinessDetails ? formData.businessWebsite : undefined,
+      businessPhone: showBusinessDetails ? formData.businessPhone : undefined,
+      businessEmail: showBusinessDetails ? formData.businessEmail : undefined,
+      businessCategory: showBusinessDetails ? formData.businessCategory : undefined,
+      employeeCount: showBusinessDetails ? formData.employeeCount : undefined,
+      established: showBusinessDetails ? formData.established : undefined,
+      organizationMemberships: showOrganizationMemberships ? organizationMemberships.filter(org => org.organizationName) : undefined,
+      personTypeIds: selectedPersonTypes,
     });
   };
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [e.target.name]: e.target.value
     }));
   };
 
-  const handleInterestChange = (interest: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      interestAreas: checked 
-        ? [...prev.interestAreas, interest]
-        : prev.interestAreas.filter(item => item !== interest)
-    }));
+  const handleOrganizationChange = (index: number, field: string, value: string) => {
+    setOrganizationMemberships(prev => prev.map((org, i) => 
+      i === index ? { ...org, [field]: value } : org
+    ));
+  };
+
+  const addOrganization = () => {
+    setOrganizationMemberships(prev => [...prev, {
+      organizationName: '',
+      organizationType: '',
+      role: '',
+      isActive: true,
+      description: '',
+      contactEmail: '',
+      contactPhone: '',
+      websiteUrl: ''
+    }]);
+  };
+
+  const removeOrganization = (index: number) => {
+    if (organizationMemberships.length > 1) {
+      setOrganizationMemberships(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handlePersonTypeChange = (personTypeId: number, checked: boolean) => {
+    setSelectedPersonTypes(prev => {
+      const newTypes = checked 
+        ? [...prev, personTypeId]
+        : prev.filter(id => id !== personTypeId);
+      
+      // Check if business-related types are selected
+      const businessTypes = selfRegisterPersonTypes.filter((type: any) => 
+        ['business', 'business_owner'].includes(type.name)
+      ).map((type: any) => type.id);
+      
+      const hasBusinessType = newTypes.some(id => businessTypes.includes(id));
+      setShowBusinessAddress(hasBusinessType);
+      setShowBusinessDetails(hasBusinessType);
+      
+      // Check if community group type is selected
+      const communityGroupTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'community_group'
+      ).map((type: any) => type.id);
+      const hasCommunityGroupType = newTypes.some(id => communityGroupTypes.includes(id));
+      setShowOrganizationMemberships(hasCommunityGroupType);
+      
+      // Check if educator type is selected
+      const educatorTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'educator'
+      ).map((type: any) => type.id);
+      const hasEducatorType = newTypes.some(id => educatorTypes.includes(id));
+      setShowEducatorDetails(hasEducatorType);
+      
+      // Check if trainer type is selected
+      const trainerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'trainer'
+      ).map((type: any) => type.id);
+      const hasTrainerType = newTypes.some(id => trainerTypes.includes(id));
+      setShowTrainerDetails(hasTrainerType);
+      
+      // Check if media type is selected
+      const mediaTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'media'
+      ).map((type: any) => type.id);
+      const hasMediaType = newTypes.some(id => mediaTypes.includes(id));
+      setShowMediaDetails(hasMediaType);
+      
+      // Check if student type is selected
+      const studentTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'student'
+      ).map((type: any) => type.id);
+      const hasStudentType = newTypes.some(id => studentTypes.includes(id));
+      setShowStudentDetails(hasStudentType);
+      
+      // Check if volunteer type is selected
+      const volunteerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'volunteer'
+      ).map((type: any) => type.id);
+      const hasVolunteerType = newTypes.some(id => volunteerTypes.includes(id));
+      setShowVolunteerDetails(hasVolunteerType);
+      
+      return newTypes;
+    });
+  };
+
+  // Person type icons mapping
+  const getPersonTypeIcon = (typeName: string) => {
+    const iconMap: Record<string, any> = {
+      'attendee': User,
+      'business': Building,
+      'business_owner': Building,
+      'student': GraduationCap,
+      'resident': Home,
+      'exhibitor': Users,
+      'speaker': Mic,
+      'volunteer': Heart,
+      'vip': Crown,
+      'councillor': Users,
+      'media': Mic,
+      'educator': GraduationCap,
+      'trainer': Users,
+    };
+    return iconMap[typeName] || User;
   };
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-2xl">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <UserPlus className="h-12 w-12 text-blue-600" />
-          </div>
-          <CardTitle className="text-2xl font-bold text-neutral-900">
-            Join Croydon Business Association
-          </CardTitle>
-          <CardDescription>
-            Create your account to access exclusive benefits and connect with the business community
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold text-neutral-900">Join CBA</CardTitle>
+          <CardDescription>Create your account to get started</CardDescription>
+          <p className="text-center text-sm text-gray-600 mt-2">
+            Already have an account? <Link href="/login" className="text-blue-600 hover:text-blue-800">Sign in</Link>
+          </p>
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Personal Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Basic Information */}
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="name">Full Name *</Label>
+                <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
                 <Input
-                  id="name"
-                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
                   required
-                  value={formData.name}
-                  onChange={(e) => handleChange('name', e.target.value)}
-                  placeholder="Enter your full name"
+                  placeholder="John"
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email Address *</Label>
+                <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
                 <Input
-                  id="email"
-                  type="email"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
                   required
-                  value={formData.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
-                  placeholder="your.email@example.com"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="phone">Phone Number *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                  placeholder="Your contact number"
-                />
-              </div>
-              <div>
-                <Label htmlFor="company">Company/Organization</Label>
-                <Input
-                  id="company"
-                  type="text"
-                  value={formData.company}
-                  onChange={(e) => handleChange('company', e.target.value)}
-                  placeholder="Your company name"
+                  placeholder="Smith"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="jobTitle">Job Title</Label>
+              <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
               <Input
-                id="jobTitle"
-                type="text"
-                value={formData.jobTitle}
-                onChange={(e) => handleChange('jobTitle', e.target.value)}
-                placeholder="Your role/position"
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="john@example.com"
               />
             </div>
 
-            {/* Interest Areas Section */}
+            <div>
+              <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                placeholder="+44 20 xxxx xxxx"
+              />
+            </div>
+
+            {/* Home Address */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">What aspect of AI interests you most?</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {availableInterests.map((interest) => (
-                  <div key={interest} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`interest-${interest.replace(/\s+/g, '-').toLowerCase()}`}
-                      checked={formData.interestAreas.includes(interest)}
-                      onCheckedChange={(checked) => handleInterestChange(interest, checked as boolean)}
-                    />
-                    <Label 
-                      htmlFor={`interest-${interest.replace(/\s+/g, '-').toLowerCase()}`}
-                      className="text-sm cursor-pointer"
-                    >
-                      {interest}
-                    </Label>
-                  </div>
-                ))}
+              <div className="flex items-center space-x-2">
+                <Home className="h-4 w-4 text-primary" />
+                <Label className="text-sm font-medium">Home Address</Label>
               </div>
-            </div>
-
-            {/* Accessibility Requirements */}
-            <div className="space-y-2">
-              <Label htmlFor="accessibilityNeeds">Accessibility Requirements</Label>
-              <Textarea
-                id="accessibilityNeeds"
-                value={formData.accessibilityNeeds}
-                onChange={(e) => handleChange('accessibilityNeeds', e.target.value)}
-                placeholder="Any accessibility support needed"
-                className="min-h-[80px]"
-              />
-            </div>
-
-            {/* Create Your Account */}
-            <div className="space-y-4 border-t pt-6">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold text-neutral-900">Create Your Account</h3>
-                <p className="text-sm text-neutral-600">You'll need this to access your QR code and event badges</p>
+              
+              <div>
+                <Label htmlFor="homeAddress">Street Address <span className="text-red-500">*</span></Label>
+                <Input
+                  id="homeAddress"
+                  name="homeAddress"
+                  value={formData.homeAddress}
+                  onChange={handleChange}
+                  required
+                  placeholder="123 High Street"
+                />
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="password">Password *</Label>
+                  <Label htmlFor="homeCity">City <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="homeCity"
+                    name="homeCity"
+                    value={formData.homeCity}
+                    onChange={handleChange}
+                    required
+                    placeholder="Croydon"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="homePostcode">Postcode <span className="text-red-500">*</span></Label>
+                  <Input
+                    id="homePostcode"
+                    name="homePostcode"
+                    value={formData.homePostcode}
+                    onChange={handleChange}
+                    required
+                    placeholder="CR0 1XX"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* T-shirt and Gender - Only show if volunteer is selected */}
+            {showVolunteerDetails && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="tshirtSize">T-shirt Size</Label>
+                  <select
+                    id="tshirtSize"
+                    name="tshirtSize"
+                    value={formData.tshirtSize}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Select size...</option>
+                    <option value="XS">XS (Extra Small)</option>
+                    <option value="S">S (Small)</option>
+                    <option value="M">M (Medium)</option>
+                    <option value="L">L (Large)</option>
+                    <option value="XL">XL (Extra Large)</option>
+                    <option value="XXL">XXL (2X Large)</option>
+                    <option value="XXXL">XXXL (3X Large)</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="gender">Gender (for t-shirt fit)</Label>
+                  <select
+                    id="gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">Select fit...</option>
+                    <option value="male">Male fit</option>
+                    <option value="female">Female fit</option>
+                    <option value="unisex">Unisex fit</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            
+            {/* Person Type Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">I am a: <span className="text-red-500">*</span></Label>
+              <p className="text-xs text-gray-500">Select all that apply to you</p>
+              
+              <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
+                {selfRegisterPersonTypes.map((type: any) => {
+                  const Icon = getPersonTypeIcon(type.name);
+                  return (
+                    <div key={type.id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                      <Checkbox
+                        id={`person-type-${type.id}`}
+                        checked={selectedPersonTypes.includes(type.id)}
+                        onCheckedChange={(checked) => handlePersonTypeChange(type.id, checked as boolean)}
+                      />
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Icon className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <Label 
+                            htmlFor={`person-type-${type.id}`} 
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            {type.displayName}
+                          </Label>
+                          {type.description && (
+                            <p className="text-xs text-gray-500">{type.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {selectedPersonTypes.length === 0 && (
+                <p className="text-xs text-red-500">Please select at least one option</p>
+              )}
+            </div>
+
+            {/* Business Details Section - Conditional */}
+            {showBusinessDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <Building className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Business Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected business owner/member, please provide your business details for our directory</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessName">Business Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="businessName"
+                      name="businessName"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      required={showBusinessDetails}
+                      placeholder="Your Business Ltd"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessCategory">Category</Label>
+                    <select
+                      id="businessCategory"
+                      name="businessCategory"
+                      value={formData.businessCategory}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select category...</option>
+                      {categories.map((category: any) => (
+                        <option key={category.id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="businessDescription">Business Description</Label>
+                  <Textarea
+                    id="businessDescription"
+                    name="businessDescription"
+                    value={formData.businessDescription}
+                    onChange={handleChange}
+                    placeholder="Brief description of your business and services..."
+                    className="min-h-[80px]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessPhone">Business Phone</Label>
+                    <Input
+                      id="businessPhone"
+                      name="businessPhone"
+                      type="tel"
+                      value={formData.businessPhone}
+                      onChange={handleChange}
+                      placeholder="+44 20 xxxx xxxx"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessEmail">Business Email</Label>
+                    <Input
+                      id="businessEmail"
+                      name="businessEmail"
+                      type="email"
+                      value={formData.businessEmail}
+                      onChange={handleChange}
+                      placeholder="info@yourbusiness.com"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessWebsite">Website</Label>
+                    <Input
+                      id="businessWebsite"
+                      name="businessWebsite"
+                      type="url"
+                      value={formData.businessWebsite}
+                      onChange={handleChange}
+                      placeholder="https://www.yourbusiness.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="employeeCount">Number of Employees</Label>
+                    <select
+                      id="employeeCount"
+                      name="employeeCount"
+                      value={formData.employeeCount}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select size...</option>
+                      <option value="1">Just me (1)</option>
+                      <option value="2-5">Small (2-5)</option>
+                      <option value="6-10">Medium (6-10)</option>
+                      <option value="11-50">Growing (11-50)</option>
+                      <option value="51-250">Large (51-250)</option>
+                      <option value="250+">Enterprise (250+)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="established">Year Established</Label>
+                  <Input
+                    id="established"
+                    name="established"
+                    type="number"
+                    min="1800"
+                    max={new Date().getFullYear()}
+                    value={formData.established}
+                    onChange={handleChange}
+                    placeholder="2020"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Password Section */}
+            <div className="space-y-4 border-t pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
                   <div className="relative">
                     <Input
                       id="password"
+                      name="password"
                       type={showPassword ? "text" : "password"}
-                      required
                       value={formData.password}
-                      onChange={(e) => handleChange('password', e.target.value)}
-                      placeholder="At least 8 characters"
+                      onChange={handleChange}
+                      required
+                      placeholder="Choose a strong password"
                       className="pr-10"
                     />
                     <button
@@ -309,15 +671,16 @@ export default function Register() {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                  <Label htmlFor="confirmPassword">Confirm Password <span className="text-red-500">*</span></Label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
+                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
-                      required
                       value={formData.confirmPassword}
-                      onChange={(e) => handleChange('confirmPassword', e.target.value)}
-                      placeholder="Re-enter your password"
+                      onChange={handleChange}
+                      required
+                      placeholder="Confirm your password"
                       className="pr-10"
                     />
                     <button
@@ -339,18 +702,10 @@ export default function Register() {
             <Button 
               type="submit" 
               className="w-full" 
-              size="lg"
-              disabled={registerMutation.isPending}
+              disabled={registerMutation.isPending || selectedPersonTypes.length === 0}
             >
               {registerMutation.isPending ? "Creating Account..." : "Create Account"}
             </Button>
-
-            <div className="text-center text-sm">
-              <span className="text-neutral-600">Already have an account? </span>
-              <Link href="/login" className="text-blue-600 hover:text-blue-800 font-medium">
-                Sign in here
-              </Link>
-            </div>
           </form>
         </CardContent>
       </Card>
