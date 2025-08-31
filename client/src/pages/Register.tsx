@@ -67,6 +67,9 @@ export default function Register() {
     volunteerFrequency: "",
     volunteerExperience: "",
     volunteerTimeSlots: "",
+    // T-shirt and sizing info
+    tshirtSize: "",
+    gender: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
@@ -461,6 +464,45 @@ export default function Register() {
                     <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
                   )}
                 </button>
+              </div>
+            </div>
+            
+            {/* T-shirt Information */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="tshirtSize">T-shirt Size</Label>
+                <select
+                  id="tshirtSize"
+                  name="tshirtSize"
+                  value={formData.tshirtSize}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">Select size...</option>
+                  <option value="XS">XS (Extra Small)</option>
+                  <option value="S">S (Small)</option>
+                  <option value="M">M (Medium)</option>
+                  <option value="L">L (Large)</option>
+                  <option value="XL">XL (Extra Large)</option>
+                  <option value="XXL">XXL (2X Large)</option>
+                  <option value="XXXL">XXXL (3X Large)</option>
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="gender">Gender (for t-shirt fit)</Label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="">Select fit...</option>
+                  <option value="male">Male fit</option>
+                  <option value="female">Female fit</option>
+                  <option value="unisex">Unisex fit</option>
+                  <option value="prefer_not_to_say">Prefer not to say</option>
+                </select>
               </div>
             </div>
             
