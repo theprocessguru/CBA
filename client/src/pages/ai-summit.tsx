@@ -66,7 +66,6 @@ const AISummit = () => {
   const { data: allPersonTypes = [] } = useQuery<any[]>({
     queryKey: ['/api/person-types'],
     staleTime: 0,
-    cacheTime: 0,
   });
 
   // Filter person types to exclude admin-only types and business members (they register from inside the app)
@@ -127,6 +126,29 @@ const AISummit = () => {
     aiInterest: "",
     accessibilityNeeds: "",
     comments: "",
+    // Student fields
+    studyInstitution: "",
+    courseOfStudy: "",
+    studyLevel: "",
+    yearOfStudy: "",
+    expectedGraduation: "",
+    studyMode: "",
+    // Educator fields
+    schoolName: "",
+    educatorRole: "",
+    subjectTaught: "",
+    schoolType: "",
+    // Trainer fields
+    trainingSpecialty: "",
+    targetAudience: "",
+    trainingMethods: "",
+    trainingVenue: "",
+    // Business fields
+    businessPhone: "",
+    businessEmail: "",
+    businessWebsite: "",
+    employeeCount: "",
+    established: "",
     password: "",
     confirmPassword: "",
     interestAreas: [] as string[],
@@ -592,25 +614,6 @@ const AISummit = () => {
         businessName: "",
         businessCategory: "",
         businessDescription: "",
-        studyInstitution: "",
-        courseOfStudy: "",
-        studyLevel: "",
-        yearOfStudy: "",
-        expectedGraduation: "",
-        studyMode: "",
-        schoolName: "",
-        subjectTaught: "",
-        educatorRole: "",
-        schoolType: "",
-        trainingSpecialty: "",
-        targetAudience: "",
-        trainingMethods: "",
-        trainingVenue: "",
-        businessPhone: "",
-        businessEmail: "",
-        businessWebsite: "",
-        employeeCount: "",
-        established: ""
       });
       // Refresh registration status
       refetchStatus();
@@ -2522,6 +2525,73 @@ const AISummit = () => {
                           />
                         </div>
                       </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="studyLevel">Study Level</Label>
+                          <select
+                            id="studyLevel"
+                            name="studyLevel"
+                            value={registrationData.studyLevel || ''}
+                            onChange={(e) => handleInputChange('studyLevel', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select level...</option>
+                            <option value="secondary">Secondary/A-Levels</option>
+                            <option value="undergraduate">Undergraduate</option>
+                            <option value="postgraduate">Postgraduate</option>
+                            <option value="doctorate">Doctorate/PhD</option>
+                            <option value="professional">Professional Course</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label htmlFor="yearOfStudy">Year of Study</Label>
+                          <select
+                            id="yearOfStudy"
+                            name="yearOfStudy"
+                            value={registrationData.yearOfStudy || ''}
+                            onChange={(e) => handleInputChange('yearOfStudy', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select year...</option>
+                            <option value="1">Year 1</option>
+                            <option value="2">Year 2</option>
+                            <option value="3">Year 3</option>
+                            <option value="4">Year 4</option>
+                            <option value="5">Year 5+</option>
+                            <option value="final">Final Year</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="expectedGraduation">Expected Graduation</Label>
+                          <Input
+                            id="expectedGraduation"
+                            name="expectedGraduation"
+                            type="month"
+                            value={registrationData.expectedGraduation || ''}
+                            onChange={(e) => handleInputChange('expectedGraduation', e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="studyMode">Study Mode</Label>
+                          <select
+                            id="studyMode"
+                            name="studyMode"
+                            value={registrationData.studyMode || ''}
+                            onChange={(e) => handleInputChange('studyMode', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select mode...</option>
+                            <option value="full-time">Full-time</option>
+                            <option value="part-time">Part-time</option>
+                            <option value="distance">Distance Learning</option>
+                            <option value="evening">Evening Classes</option>
+                            <option value="weekend">Weekend Classes</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -2544,7 +2614,30 @@ const AISummit = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="subjectTaught">Subject Taught</Label>
+                          <Label htmlFor="educatorRole">Role/Position</Label>
+                          <select
+                            id="educatorRole"
+                            name="educatorRole"
+                            value={registrationData.educatorRole || ''}
+                            onChange={(e) => handleInputChange('educatorRole', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select role...</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="lecturer">Lecturer</option>
+                            <option value="professor">Professor</option>
+                            <option value="head_teacher">Head Teacher</option>
+                            <option value="assistant_head">Assistant Head</option>
+                            <option value="department_head">Department Head</option>
+                            <option value="teaching_assistant">Teaching Assistant</option>
+                            <option value="tutor">Tutor</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="subjectTaught">Subject(s) Taught</Label>
                           <Input
                             id="subjectTaught"
                             name="subjectTaught"
@@ -2552,6 +2645,28 @@ const AISummit = () => {
                             onChange={(e) => handleInputChange('subjectTaught', e.target.value)}
                             placeholder="What subject(s) do you teach"
                           />
+                        </div>
+                        <div>
+                          <Label htmlFor="schoolType">School Type</Label>
+                          <select
+                            id="schoolType"
+                            name="schoolType"
+                            value={registrationData.schoolType || ''}
+                            onChange={(e) => handleInputChange('schoolType', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select type...</option>
+                            <option value="primary">Primary School</option>
+                            <option value="secondary">Secondary School</option>
+                            <option value="college">College</option>
+                            <option value="university">University</option>
+                            <option value="private">Private School</option>
+                            <option value="academy">Academy</option>
+                            <option value="grammar">Grammar School</option>
+                            <option value="special">Special Needs</option>
+                            <option value="adult_education">Adult Education</option>
+                            <option value="other">Other</option>
+                          </select>
                         </div>
                       </div>
                     </div>
@@ -2576,13 +2691,35 @@ const AISummit = () => {
                           />
                         </div>
                         <div>
-                          <Label htmlFor="certifications">Certifications</Label>
+                          <Label htmlFor="targetAudience">Target Audience</Label>
                           <Input
-                            id="certifications"
-                            name="certifications"
-                            value={registrationData.certifications || ''}
-                            onChange={(e) => handleInputChange('certifications', e.target.value)}
-                            placeholder="Professional certifications"
+                            id="targetAudience"
+                            name="targetAudience"
+                            value={registrationData.targetAudience || ''}
+                            onChange={(e) => handleInputChange('targetAudience', e.target.value)}
+                            placeholder="Who do you typically train?"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="trainingMethods">Training Methods</Label>
+                          <Input
+                            id="trainingMethods"
+                            name="trainingMethods"
+                            value={registrationData.trainingMethods || ''}
+                            onChange={(e) => handleInputChange('trainingMethods', e.target.value)}
+                            placeholder="Online, in-person, workshops, etc."
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="trainingVenue">Training Venue</Label>
+                          <Input
+                            id="trainingVenue"
+                            name="trainingVenue"
+                            value={registrationData.trainingVenue || ''}
+                            onChange={(e) => handleInputChange('trainingVenue', e.target.value)}
+                            placeholder="Where do you conduct training?"
                           />
                         </div>
                       </div>
@@ -2631,10 +2768,7 @@ const AISummit = () => {
                   )}
 
                   {/* Business Details Section - Conditional */}
-                  {(registrationData.selectedPersonTypes || []).some((typeId: number) => {
-                    const type = selfRegisterPersonTypes.find((t: any) => t.id === typeId);
-                    return type?.name === 'business';
-                  }) && (
+                  {showBusinessDetails && (
                     <div className="space-y-4 border-t pt-4">
                       <div className="flex items-center space-x-2">
                         <Building className="h-5 w-5 text-primary" />
@@ -2683,6 +2817,80 @@ const AISummit = () => {
                           placeholder="Tell us about your business..."
                           rows={3}
                         />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="businessPhone">Business Phone</Label>
+                          <Input
+                            id="businessPhone"
+                            name="businessPhone"
+                            value={registrationData.businessPhone || ''}
+                            onChange={(e) => handleInputChange('businessPhone', e.target.value)}
+                            placeholder="+44 20 1234 5678"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="businessEmail">Business Email</Label>
+                          <Input
+                            id="businessEmail"
+                            name="businessEmail"
+                            type="email"
+                            value={registrationData.businessEmail || ''}
+                            onChange={(e) => handleInputChange('businessEmail', e.target.value)}
+                            placeholder="info@yourbusiness.com"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="businessWebsite">Website</Label>
+                          <Input
+                            id="businessWebsite"
+                            name="businessWebsite"
+                            type="url"
+                            value={registrationData.businessWebsite || ''}
+                            onChange={(e) => handleInputChange('businessWebsite', e.target.value)}
+                            placeholder="https://www.yourbusiness.com"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="employeeCount">Number of Employees</Label>
+                          <select
+                            id="employeeCount"
+                            name="employeeCount"
+                            value={registrationData.employeeCount || ''}
+                            onChange={(e) => handleInputChange('employeeCount', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select size...</option>
+                            <option value="1">Just me</option>
+                            <option value="2-5">2-5 employees</option>
+                            <option value="6-10">6-10 employees</option>
+                            <option value="11-25">11-25 employees</option>
+                            <option value="26-50">26-50 employees</option>
+                            <option value="51-100">51-100 employees</option>
+                            <option value="101-500">101-500 employees</option>
+                            <option value="500+">500+ employees</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="established">Year Established</Label>
+                          <Input
+                            id="established"
+                            name="established"
+                            type="number"
+                            min="1800"
+                            max={new Date().getFullYear()}
+                            value={registrationData.established || ''}
+                            onChange={(e) => handleInputChange('established', e.target.value)}
+                            placeholder="2020"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}
