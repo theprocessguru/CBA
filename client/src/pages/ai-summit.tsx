@@ -65,6 +65,8 @@ const AISummit = () => {
   // Fetch person types and categories for the form
   const { data: selfRegisterPersonTypes = [] } = useQuery<any[]>({
     queryKey: ['/api/person-types'],
+    staleTime: 0,
+    cacheTime: 0,
   });
 
 
@@ -2386,8 +2388,8 @@ const AISummit = () => {
                           </div>
                         );
                       }) : (
-                        <div className="col-span-2 p-4 text-center text-red-500">
-                          No person types found. Data: {JSON.stringify(selfRegisterPersonTypes)}
+                        <div className="col-span-2 p-4 text-center text-gray-500">
+                          Loading person types...
                         </div>
                       )}
                     </div>
