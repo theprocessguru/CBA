@@ -10,6 +10,8 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
+import CouncillorRegister from "@/pages/CouncillorRegister";
+import SpeakerRegister from "@/pages/SpeakerRegister";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import AuthTest from "@/pages/auth-test";
@@ -206,6 +208,12 @@ function Router() {
       </Route>
       <Route path="/register">
         <Register />
+      </Route>
+      <Route path="/councillor-register">
+        <CouncillorRegister />
+      </Route>
+      <Route path="/speaker-register">
+        <SpeakerRegister />
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />

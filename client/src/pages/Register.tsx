@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -25,10 +26,20 @@ export default function Register() {
     businessAddress: "",
     businessCity: "",
     businessPostcode: "",
+    // Business details
+    businessName: "",
+    businessDescription: "",
+    businessWebsite: "",
+    businessPhone: "",
+    businessEmail: "",
+    businessCategory: "",
+    employeeCount: "",
+    established: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
   const [showBusinessAddress, setShowBusinessAddress] = useState(false);
+  const [showBusinessDetails, setShowBusinessDetails] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
@@ -48,6 +59,15 @@ export default function Register() {
     !['administrator', 'staff', 'sponsor', 'vip', 'councillor', 'speaker'].includes(type.name)
   );
 
+  // Fetch business categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['/api/categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    }
+  });
+
   const registerMutation = useMutation({
     mutationFn: async (data: { 
       email: string; 
@@ -61,6 +81,14 @@ export default function Register() {
       businessAddress?: string;
       businessCity?: string;
       businessPostcode?: string;
+      businessName?: string;
+      businessDescription?: string;
+      businessWebsite?: string;
+      businessPhone?: string;
+      businessEmail?: string;
+      businessCategory?: string;
+      employeeCount?: string;
+      established?: string;
       personTypeIds: number[]; 
     }) => {
       const response = await apiRequest("POST", "/api/auth/register", data);
@@ -116,6 +144,14 @@ export default function Register() {
       businessAddress: showBusinessAddress ? formData.businessAddress : undefined,
       businessCity: showBusinessAddress ? formData.businessCity : undefined,
       businessPostcode: showBusinessAddress ? formData.businessPostcode : undefined,
+      businessName: showBusinessDetails ? formData.businessName : undefined,
+      businessDescription: showBusinessDetails ? formData.businessDescription : undefined,
+      businessWebsite: showBusinessDetails ? formData.businessWebsite : undefined,
+      businessPhone: showBusinessDetails ? formData.businessPhone : undefined,
+      businessEmail: showBusinessDetails ? formData.businessEmail : undefined,
+      businessCategory: showBusinessDetails ? formData.businessCategory : undefined,
+      employeeCount: showBusinessDetails ? formData.employeeCount : undefined,
+      established: showBusinessDetails ? formData.established : undefined,
       personTypeIds: selectedPersonTypes,
     });
   };
@@ -140,6 +176,7 @@ export default function Register() {
       
       const hasBusinessType = newTypes.some(id => businessTypes.includes(id));
       setShowBusinessAddress(hasBusinessType);
+      setShowBusinessDetails(hasBusinessType);
       
       return newTypes;
     });
@@ -252,30 +289,149 @@ export default function Register() {
               </div>
             </div>
             
-            {/* Business Address Section - Conditional */}
-            {showBusinessAddress && (
-              <div className="space-y-3 border-t pt-4">
-                <Label className="text-sm font-medium">Business Address</Label>
-                <p className="text-xs text-gray-500">Since you selected business owner/member, please provide your business address</p>
-                <Input
-                  name="businessAddress"
-                  value={formData.businessAddress}
-                  onChange={handleChange}
-                  placeholder="Business address (if different from home)"
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    name="businessCity"
-                    value={formData.businessCity}
+            {/* Business Details Section - Conditional */}
+            {showBusinessDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <Building className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Business Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected business owner/member, please provide your business details for our directory</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessName">Business Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="businessName"
+                      name="businessName"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      required={showBusinessDetails}
+                      placeholder="Your Business Ltd"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessCategory">Category</Label>
+                    <select
+                      id="businessCategory"
+                      name="businessCategory"
+                      value={formData.businessCategory}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select category...</option>
+                      {categories.map((category: any) => (
+                        <option key={category.id} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="businessDescription">Business Description</Label>
+                  <Textarea
+                    id="businessDescription"
+                    name="businessDescription"
+                    value={formData.businessDescription}
                     onChange={handleChange}
-                    placeholder="Croydon"
+                    placeholder="Brief description of your business and services..."
+                    className="min-h-[80px]"
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="businessPhone">Business Phone</Label>
+                    <Input
+                      id="businessPhone"
+                      name="businessPhone"
+                      type="tel"
+                      value={formData.businessPhone}
+                      onChange={handleChange}
+                      placeholder="+44 20 xxxx xxxx"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="businessEmail">Business Email</Label>
+                    <Input
+                      id="businessEmail"
+                      name="businessEmail"
+                      type="email"
+                      value={formData.businessEmail}
+                      onChange={handleChange}
+                      placeholder="info@yourbusiness.com"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="businessWebsite">Business Website</Label>
                   <Input
-                    name="businessPostcode"
-                    value={formData.businessPostcode}
+                    id="businessWebsite"
+                    name="businessWebsite"
+                    type="url"
+                    value={formData.businessWebsite}
                     onChange={handleChange}
-                    placeholder="CR0 1AB"
+                    placeholder="https://www.yourbusiness.com"
                   />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="established">Year Established</Label>
+                    <Input
+                      id="established"
+                      name="established"
+                      value={formData.established}
+                      onChange={handleChange}
+                      placeholder="2020"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="employeeCount">Number of Employees</Label>
+                    <select
+                      id="employeeCount"
+                      name="employeeCount"
+                      value={formData.employeeCount}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select size...</option>
+                      <option value="1">Just me (1)</option>
+                      <option value="2-5">Small (2-5)</option>
+                      <option value="6-10">Medium (6-10)</option>
+                      <option value="11-50">Growing (11-50)</option>
+                      <option value="51-200">Large (51-200)</option>
+                      <option value="200+">Enterprise (200+)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Business Address Section */}
+                <div className="space-y-3 border-t pt-4">
+                  <Label className="text-sm font-medium">Business Address</Label>
+                  <Input
+                    name="businessAddress"
+                    value={formData.businessAddress}
+                    onChange={handleChange}
+                    placeholder="Business address (if different from home)"
+                  />
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input
+                      name="businessCity"
+                      value={formData.businessCity}
+                      onChange={handleChange}
+                      placeholder="Croydon"
+                    />
+                    <Input
+                      name="businessPostcode"
+                      value={formData.businessPostcode}
+                      onChange={handleChange}
+                      placeholder="CR0 1AB"
+                    />
+                  </div>
                 </div>
               </div>
             )}

@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
-import { Eye, EyeOff, Mic, PresentationChart } from "lucide-react";
+import { Eye, EyeOff, Mic, Presentation } from "lucide-react";
 
 export default function SpeakerRegister() {
   const [, setLocation] = useLocation();
@@ -108,7 +108,7 @@ export default function SpeakerRegister() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <Mic className="h-8 w-8 text-primary" />
-            <PresentationChart className="h-8 w-8 text-primary" />
+            <Presentation className="h-8 w-8 text-primary" />
           </div>
           <CardTitle className="text-2xl font-bold">Speaker Registration</CardTitle>
           <CardDescription>
