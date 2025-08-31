@@ -5552,7 +5552,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse JSON fields for frontend consumption
       const eventsWithParsedFields = events.map(event => ({
         ...event,
-        topicsOfInterest: event.topicsOfInterest ? JSON.parse(event.topicsOfInterest) : [],
+
         tags: event.tags ? JSON.parse(event.tags) : []
       }));
       
@@ -5602,8 +5602,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle endTime field  
         endTime: req.body.endTime || extractTime(req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
-        // Handle topics of interest
-        topicsOfInterest: req.body.topicsOfInterest ? JSON.stringify(req.body.topicsOfInterest) : null,
+
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -5671,8 +5670,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle endTime field  
         endTime: req.body.endTime || extractTime(req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
-        // Handle topics of interest
-        topicsOfInterest: req.body.topicsOfInterest ? JSON.stringify(req.body.topicsOfInterest) : null,
+
         updatedAt: new Date()
       };
       
@@ -5970,7 +5968,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse JSON fields for frontend consumption
       const eventsWithParsedFields = publishedEvents.map(event => ({
         ...event,
-        topicsOfInterest: event.topicsOfInterest ? JSON.parse(event.topicsOfInterest) : [],
+
         tags: event.tags ? JSON.parse(event.tags) : []
       }));
       
@@ -5999,7 +5997,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse JSON fields for frontend consumption
       const eventWithParsedFields = {
         ...event,
-        topicsOfInterest: event.topicsOfInterest ? JSON.parse(event.topicsOfInterest) : [],
+
         tags: event.tags ? JSON.parse(event.tags) : []
       };
       
@@ -6025,14 +6023,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const [updatedEvent] = await db
           .update(cbaEvents)
           .set({
-            topicsOfInterest: JSON.stringify([
-              "AI Basics",
-              "Education & Learning",
-              "AI in Healthcare",
-              "Career Opportunities",
-              "AI for Seniors",
-              "Family Activities"
-            ]),
             updatedAt: new Date()
           })
           .where(eq(cbaEvents.id, existingEvent[0].id))
@@ -6063,14 +6053,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: true,
           isFeatured: true,
           requiresApproval: false,
-          topicsOfInterest: JSON.stringify([
-            "AI Basics",
-            "Education & Learning", 
-            "AI in Healthcare",
-            "Career Opportunities",
-            "AI for Seniors",
-            "Family Activities"
-          ]),
           tags: JSON.stringify(["AI", "Summit", "Education", "Free", "Croydon"]),
           economicImpactValue: 50.00,
           createdBy: req.user.id,
