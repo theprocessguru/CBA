@@ -18,6 +18,7 @@ export default function Register() {
     confirmPassword: "",
     firstName: "",
     lastName: "",
+    phone: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +41,7 @@ export default function Register() {
   );
 
   const registerMutation = useMutation({
-    mutationFn: async (data: { email: string; password: string; firstName: string; lastName: string; personTypeIds: number[] }) => {
+    mutationFn: async (data: { email: string; password: string; firstName: string; lastName: string; phone: string; personTypeIds: number[] }) => {
       const response = await apiRequest("POST", "/api/auth/register", data);
       return response.json();
     },
@@ -87,6 +88,7 @@ export default function Register() {
       password: formData.password,
       firstName: formData.firstName,
       lastName: formData.lastName,
+      phone: formData.phone,
       personTypeIds: selectedPersonTypes,
     });
   };
@@ -158,6 +160,19 @@ export default function Register() {
                   placeholder="Smith"
                 />
               </div>
+            </div>
+            <div>
+              <Label htmlFor="phone">Mobile Phone <span className="text-red-500">*</span></Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                placeholder="+44 7xxx xxx xxx"
+              />
+              <p className="text-xs text-gray-500 mt-1">Required for QR code access to events</p>
             </div>
             <div>
               <Label htmlFor="email">Email</Label>

@@ -73,10 +73,10 @@ export async function setupLocalAuth(app: Express) {
   // Register endpoint
   app.post('/api/auth/register', async (req: Request, res: Response) => {
     try {
-      const { email, password, firstName, lastName, personTypeIds = [] } = req.body;
+      const { email, password, firstName, lastName, phone, personTypeIds = [] } = req.body;
 
-      if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+      if (!email || !password || !phone) {
+        return res.status(400).json({ message: "Email, password, and phone number are required" });
       }
       
       // Basic email validation
@@ -105,6 +105,7 @@ export async function setupLocalAuth(app: Express) {
         email,
         firstName: firstName || null,
         lastName: lastName || null,
+        phone: phone || null,
         profileImageUrl: null,
         passwordHash: hashedPassword,
       });
