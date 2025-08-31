@@ -57,17 +57,17 @@ const AISummit = () => {
   });
 
   // Fetch AI Summit event details for dynamic topics
-  const { data: aiSummitEvent } = useQuery({
+  const { data: aiSummitEvent } = useQuery<any>({
     queryKey: ['/api/events/first-ai-summit-croydon-2025'],
     retry: false,
   });
 
   // Fetch person types and categories for the form
-  const { data: selfRegisterPersonTypes = [] } = useQuery({
+  const { data: selfRegisterPersonTypes = [] } = useQuery<any[]>({
     queryKey: ['/api/person-types/self-register'],
   });
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [] } = useQuery<any[]>({
     queryKey: ['/api/business-categories'],
   });
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
@@ -968,7 +968,7 @@ const AISummit = () => {
     volunteerMutation.mutate(volunteerData);
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number[] | string[]) => {
     setRegistrationData(prev => ({
       ...prev,
       [field]: value
@@ -2328,7 +2328,7 @@ const AISummit = () => {
                     <p className="text-xs text-gray-500">Select all that apply to you</p>
                     
                     <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
-                      {selfRegisterPersonTypes.map((type: any) => {
+                      {selfRegisterPersonTypes && selfRegisterPersonTypes.length > 0 ? selfRegisterPersonTypes.map((type: any) => {
                         const Icon = type.name === 'business' ? Building :
                                    type.name === 'student' ? GraduationCap :
                                    type.name === 'resident' ? Home :
@@ -2371,7 +2371,11 @@ const AISummit = () => {
                             </div>
                           </div>
                         );
-                      })}
+                      }) : (
+                        <div className="col-span-2 p-4 text-center text-gray-500">
+                          Loading person types... {selfRegisterPersonTypes ? `Found ${selfRegisterPersonTypes.length} types` : 'No data yet'}
+                        </div>
+                      )}
                     </div>
                     
                     {(!registrationData.selectedPersonTypes || registrationData.selectedPersonTypes.length === 0) && (
