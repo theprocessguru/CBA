@@ -489,7 +489,13 @@ const AISummit = () => {
       setShowRegistrationForm(false);
       setRegistrationData({
         name: "",
+        firstName: "",
+        lastName: "",
         email: "",
+        phone: "",
+        homeAddress: "",
+        homeCity: "",
+        homePostcode: "",
         participantType: "attendee",
         customRole: "",
         company: "",
@@ -500,7 +506,14 @@ const AISummit = () => {
         accessibilityNeeds: "",
         comments: "",
         password: "",
-        confirmPassword: ""
+        confirmPassword: "",
+        interestAreas: [] as string[],
+        selectedPersonTypes: [] as number[],
+        tshirtSize: "",
+        gender: "",
+        businessName: "",
+        businessCategory: "",
+        businessDescription: ""
       });
       // Refresh registration status
       refetchStatus();
@@ -2328,7 +2341,7 @@ const AISummit = () => {
                     <p className="text-xs text-gray-500">Select all that apply to you</p>
                     
                     <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
-                      {selfRegisterPersonTypes && selfRegisterPersonTypes.length > 0 ? selfRegisterPersonTypes.map((type: any) => {
+                      {Array.isArray(selfRegisterPersonTypes) && selfRegisterPersonTypes.length > 0 ? selfRegisterPersonTypes.map((type: any) => {
                         const Icon = type.name === 'business' ? Building :
                                    type.name === 'student' ? GraduationCap :
                                    type.name === 'resident' ? Home :
@@ -2372,8 +2385,8 @@ const AISummit = () => {
                           </div>
                         );
                       }) : (
-                        <div className="col-span-2 p-4 text-center text-gray-500">
-                          Loading person types... {selfRegisterPersonTypes ? `Found ${selfRegisterPersonTypes.length} types` : 'No data yet'}
+                        <div className="col-span-2 p-4 text-center text-red-500">
+                          No person types found. Data: {JSON.stringify(selfRegisterPersonTypes)}
                         </div>
                       )}
                     </div>
@@ -2488,7 +2501,7 @@ const AISummit = () => {
                   <div className="space-y-3">
                     <Label className="text-sm font-medium">What are you looking to get out of this event? (Select all that apply)</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {(aiSummitEvent?.topicsOfInterest?.length > 0 ? aiSummitEvent.topicsOfInterest : ["AI Basics", "Education & Learning", "AI in Healthcare", "Career Opportunities", "AI for Seniors", "Family Activities"]).map((area) => (
+                      {(aiSummitEvent?.topicsOfInterest?.length > 0 ? aiSummitEvent.topicsOfInterest : ["AI Basics", "Education & Learning", "AI in Healthcare", "Career Opportunities", "AI for Seniors", "Family Activities"]).map((area: string) => (
                         <div key={area} className="flex items-center space-x-2">
                           <Checkbox
                             id={`interest-${area.replace(/\s+/g, '-').toLowerCase()}`}
