@@ -12163,6 +12163,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Councillor import endpoint
+  app.post('/api/admin/import-councillors', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
+    try {
+      const { councillors } = req.body;
+      
+      if (!Array.isArray(councillors) || councillors.length === 0) {
+        return res.status(400).json({ message: "Invalid councillor data" });
+      }
+
+      let imported = 0;
+      let skipped = 0;
+      const errors = [];
+
+      for (const councillor of councillors) {
+        try {
+          // Check if councillor already exists by email
+          const existingUser = await storage.getUserByEmail(councillor.email);
+          
+          if (existingUser) {
+            skipped++;
+            continue;
+          }
+
+          // Create councillor user account
+          const hashedPassword = await bcrypt.hash('councillor123', 10); // Default password
+          
+          const userData = {
+            email: councillor.email,
+            firstName: councillor.firstName || null,
+            lastName: councillor.lastName || null,
+            phone: councillor.phone || null,
+            homeAddress: councillor.homeAddress || null,
+            homeCity: councillor.homeCity || councillor.council,
+            homePostcode: councillor.homePostcode || null,
+            homeCountry: 'UK',
+            businessAddress: councillor.officeAddress || null,
+            businessCity: councillor.officeCity || null,
+            businessPostcode: councillor.officePostcode || null,
+            businessCountry: councillor.officeAddress ? 'UK' : null,
+            profileImageUrl: null,
+            passwordHash: hashedPassword,
+            isAdmin: false,
+          };
+
+          const user = await storage.createUser(userData);
+
+          // Assign councillor person type (ID 14)
+          await storage.assignPersonTypeToUser({
+            userId: user.id,
+            personTypeId: 14, // councillor person type
+            isPrimary: true
+          });
+
+          // Generate QR handle for councillor
+          const qrHandle = `${councillor.firstName.toUpperCase()}-CBA-2025`;
+          await storage.updateUser(user.id, { qrHandle });
+          imported++;
+
+        } catch (error) {
+          console.error(`Error importing councillor ${councillor.email}:`, error);
+          errors.push(`Failed to import ${councillor.email}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      res.json({
+        imported,
+        skipped,
+        errors,
+        total: councillors.length
+      });
+
+    } catch (error) {
+      console.error('Councillor import error:', error);
+      res.status(500).json({ message: 'Failed to import councillors' });
+    }
+  });
+
   // Automatically enroll all users as affiliates (run once)
   app.post('/api/admin/affiliates/enroll-all', isAuthenticated, async (req: Request, res: Response) => {
     try {
