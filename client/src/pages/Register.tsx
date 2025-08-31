@@ -35,12 +35,18 @@ export default function Register() {
     businessCategory: "",
     employeeCount: "",
     established: "",
+    // Educator details
+    schoolName: "",
+    educatorRole: "",
+    subjectTaught: "",
+    schoolType: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
   const [showBusinessAddress, setShowBusinessAddress] = useState(false);
   const [showBusinessDetails, setShowBusinessDetails] = useState(false);
   const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
+  const [showEducatorDetails, setShowEducatorDetails] = useState(false);
   const [organizationMemberships, setOrganizationMemberships] = useState([{
     organizationName: '',
     organizationType: '',
@@ -223,6 +229,13 @@ export default function Register() {
       const hasCommunityGroupType = newTypes.some(id => communityGroupTypes.includes(id));
       setShowOrganizationMemberships(hasCommunityGroupType);
       
+      // Check if educator type is selected
+      const educatorTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'educator'
+      ).map((type: any) => type.id);
+      const hasEducatorType = newTypes.some(id => educatorTypes.includes(id));
+      setShowEducatorDetails(hasEducatorType);
+      
       return newTypes;
     });
   };
@@ -241,6 +254,7 @@ export default function Register() {
       'vip': Crown,
       'councillor': Users,
       'media': Mic,
+      'educator': GraduationCap,
     };
     return iconMap[typeName] || User;
   };
@@ -719,6 +733,88 @@ export default function Register() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Educator Details Section - Conditional */}
+            {showEducatorDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Education Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected educator, please provide your education details</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="schoolName">School/Institution Name <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="schoolName"
+                      name="schoolName"
+                      value={formData.schoolName}
+                      onChange={handleChange}
+                      required={showEducatorDetails}
+                      placeholder="e.g., Croydon High School"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="schoolType">Institution Type</Label>
+                    <select
+                      id="schoolType"
+                      name="schoolType"
+                      value={formData.schoolType}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select type...</option>
+                      <option value="primary">Primary School</option>
+                      <option value="secondary">Secondary School</option>
+                      <option value="college">College</option>
+                      <option value="university">University</option>
+                      <option value="vocational">Vocational Training</option>
+                      <option value="private">Private Institution</option>
+                      <option value="public">Public Institution</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="educatorRole">Your Role <span className="text-red-500">*</span></Label>
+                    <select
+                      id="educatorRole"
+                      name="educatorRole"
+                      value={formData.educatorRole}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showEducatorDetails}
+                    >
+                      <option value="">Select role...</option>
+                      <option value="teacher">Teacher</option>
+                      <option value="head_teacher">Head Teacher</option>
+                      <option value="deputy_head">Deputy Head</option>
+                      <option value="professor">Professor</option>
+                      <option value="lecturer">Lecturer</option>
+                      <option value="teaching_assistant">Teaching Assistant</option>
+                      <option value="tutor">Tutor</option>
+                      <option value="administrator">Administrator</option>
+                      <option value="support_staff">Support Staff</option>
+                      <option value="supply_teacher">Supply Teacher</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="subjectTaught">Subject/Area Taught</Label>
+                    <Input
+                      id="subjectTaught"
+                      name="subjectTaught"
+                      value={formData.subjectTaught}
+                      onChange={handleChange}
+                      placeholder="e.g., Mathematics, English, Science"
+                    />
+                  </div>
+                </div>
               </div>
             )}
             
