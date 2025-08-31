@@ -619,6 +619,8 @@ const AISummit = () => {
     mutationFn: async (data: typeof registrationData) => {
       const submissionData = {
         ...data,
+        name: `${data.firstName} ${data.lastName}`.trim(),
+        phoneNumber: data.phone,
         organizationMemberships: showOrganizationMemberships ? organizationMemberships.filter(org => org.organizationName) : undefined,
       };
       const response = await apiRequest("POST", "/api/ai-summit-registration", submissionData);
