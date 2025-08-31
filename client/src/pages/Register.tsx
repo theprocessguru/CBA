@@ -334,6 +334,101 @@ export default function Register() {
               </div>
             </div>
             
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                  minLength={6}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+            </div>
+            
+            {/* Person Type Selection */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">I am a: <span className="text-red-500">*</span></Label>
+              <p className="text-xs text-gray-500">Select all that apply to you</p>
+              
+              <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
+                {selfRegisterPersonTypes.map((type: any) => {
+                  const Icon = getPersonTypeIcon(type.name);
+                  return (
+                    <div key={type.id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                      <Checkbox
+                        id={`person-type-${type.id}`}
+                        checked={selectedPersonTypes.includes(type.id)}
+                        onCheckedChange={(checked) => handlePersonTypeChange(type.id, checked as boolean)}
+                      />
+                      <div className="flex items-center space-x-2 flex-1">
+                        <Icon className="h-4 w-4 text-gray-500" />
+                        <div>
+                          <Label 
+                            htmlFor={`person-type-${type.id}`} 
+                            className="text-sm font-medium cursor-pointer"
+                          >
+                            {type.displayName}
+                          </Label>
+                          {type.description && (
+                            <p className="text-xs text-gray-500">{type.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {selectedPersonTypes.length === 0 && (
+                <p className="text-xs text-red-500">Please select at least one option</p>
+              )}
+            </div>
+
             {/* Business Details Section - Conditional */}
             {showBusinessDetails && (
               <div className="space-y-4 border-t pt-4">
@@ -626,101 +721,6 @@ export default function Register() {
                 ))}
               </div>
             )}
-
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  minLength={6}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <Eye className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-            
-            {/* Person Type Selection */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">I am a: <span className="text-red-500">*</span></Label>
-              <p className="text-xs text-gray-500">Select all that apply to you</p>
-              
-              <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
-                {selfRegisterPersonTypes.map((type: any) => {
-                  const Icon = getPersonTypeIcon(type.name);
-                  return (
-                    <div key={type.id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
-                      <Checkbox
-                        id={`person-type-${type.id}`}
-                        checked={selectedPersonTypes.includes(type.id)}
-                        onCheckedChange={(checked) => handlePersonTypeChange(type.id, checked as boolean)}
-                      />
-                      <div className="flex items-center space-x-2 flex-1">
-                        <Icon className="h-4 w-4 text-gray-500" />
-                        <div>
-                          <Label 
-                            htmlFor={`person-type-${type.id}`} 
-                            className="text-sm font-medium cursor-pointer"
-                          >
-                            {type.displayName}
-                          </Label>
-                          {type.description && (
-                            <p className="text-xs text-gray-500">{type.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {selectedPersonTypes.length === 0 && (
-                <p className="text-xs text-red-500">Please select at least one option</p>
-              )}
-            </div>
             
             <Button 
               type="submit" 
