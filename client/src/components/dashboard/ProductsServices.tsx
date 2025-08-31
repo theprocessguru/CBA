@@ -459,7 +459,7 @@ const ProductsServices = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
                           {categories?.map((category) => (
                             <SelectItem key={category.id} value={String(category.id)}>
                               {category.name}

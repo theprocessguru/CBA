@@ -344,7 +344,7 @@ const DataImport = () => {
                                 <SelectValue placeholder="Select database field" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">-- Skip this field --</SelectItem>
+                                <SelectItem value="skip">-- Skip this field --</SelectItem>
                                 {availableFields.map((field) => (
                                   <SelectItem key={field.value} value={field.value}>
                                     {field.label}

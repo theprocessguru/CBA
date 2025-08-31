@@ -202,7 +202,7 @@ export default function MoodSubmission() {
                     <SelectValue placeholder="Select current session if applicable" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">General event</SelectItem>
+                    <SelectItem value="general">General event</SelectItem>
                     {(sessions as string[]).map((session: string) => (
                       <SelectItem key={session} value={session}>
                         {session}

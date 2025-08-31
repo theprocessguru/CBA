@@ -597,7 +597,7 @@ export default function EventTimeSlots() {
                   <SelectValue placeholder="Select primary speaker" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value="none">None</SelectItem>
                   {(speakers as Speaker[]).map((speaker: Speaker) => (
                     <SelectItem key={speaker.id} value={speaker.id}>
                       {speaker.firstName} {speaker.lastName} {speaker.company && `(${speaker.company})`}

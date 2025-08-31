@@ -69,7 +69,7 @@ export function EventMoodDemo() {
                 <SelectValue placeholder="Session (Optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Sessions</SelectItem>
+                <SelectItem value="all">All Sessions</SelectItem>
                 {demoSessions.map(session => (
                   <SelectItem key={session} value={session}>
                     {session}

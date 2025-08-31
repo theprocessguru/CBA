@@ -373,7 +373,7 @@ export default function ContactImport() {
                           <SelectValue placeholder="Select column" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No mapping</SelectItem>
+                          <SelectItem value="skip">No mapping</SelectItem>
                           {preview.headers.map(header => (
                             <SelectItem key={header} value={header}>
                               {header}

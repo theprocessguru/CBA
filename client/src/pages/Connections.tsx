@@ -70,7 +70,7 @@ export default function Connections() {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
-      if (selectedPersonType) params.append('personType', selectedPersonType);
+      if (selectedPersonType && selectedPersonType !== 'all') params.append('personType', selectedPersonType);
       
       const response = await fetch(`/api/connections/directory?${params}`);
       if (!response.ok) throw new Error('Failed to fetch directory');
@@ -282,7 +282,7 @@ export default function Connections() {
                     <SelectValue placeholder="Filter by type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="business">Business</SelectItem>
                     <SelectItem value="volunteer">Volunteer</SelectItem>
                     <SelectItem value="student">Student</SelectItem>
