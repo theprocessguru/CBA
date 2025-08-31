@@ -98,6 +98,7 @@ const AISummit = () => {
   const [showTrainerDetails, setShowTrainerDetails] = useState(false);
   const [showVolunteerDetails, setShowVolunteerDetails] = useState(false);
   const [showMediaDetails, setShowMediaDetails] = useState(false);
+  const [showCouncillorDetails, setShowCouncillorDetails] = useState(false);
   const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
   const [organizationMemberships, setOrganizationMemberships] = useState([{
     organizationName: '',
@@ -661,6 +662,15 @@ const AISummit = () => {
         businessName: "",
         businessCategory: "",
         businessDescription: "",
+        // Councillor-specific fields
+        title: "",
+        council: "",
+        ward: "",
+        constituency: "",
+        officeAddress: "",
+        officeCity: "",
+        officePostcode: "",
+        bio: "",
       });
       // Refresh registration status
       refetchStatus();
