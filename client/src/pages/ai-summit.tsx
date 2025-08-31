@@ -91,6 +91,13 @@ const AISummit = () => {
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
   const [showSponsorForm, setShowSponsorForm] = useState(false);
   
+  // Conditional form sections
+  const [showBusinessDetails, setShowBusinessDetails] = useState(false);
+  const [showStudentDetails, setShowStudentDetails] = useState(false);
+  const [showEducatorDetails, setShowEducatorDetails] = useState(false);
+  const [showTrainerDetails, setShowTrainerDetails] = useState(false);
+  const [showVolunteerDetails, setShowVolunteerDetails] = useState(false);
+  
   // Password visibility states
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -143,6 +150,48 @@ const AISummit = () => {
       }
     }
   }, [selfRegisterPersonTypes]);
+
+  // Handle conditional form sections based on selected person types
+  useEffect(() => {
+    if (selfRegisterPersonTypes.length > 0 && registrationData.selectedPersonTypes) {
+      const selectedTypes = registrationData.selectedPersonTypes || [];
+      
+      // Check for business types
+      const businessTypes = selfRegisterPersonTypes.filter((type: any) => 
+        ['business', 'business_owner'].includes(type.name)
+      ).map((type: any) => type.id);
+      const hasBusinessType = selectedTypes.some(id => businessTypes.includes(id));
+      setShowBusinessDetails(hasBusinessType);
+
+      // Check for student type
+      const studentTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'student'
+      ).map((type: any) => type.id);
+      const hasStudentType = selectedTypes.some(id => studentTypes.includes(id));
+      setShowStudentDetails(hasStudentType);
+
+      // Check for educator type
+      const educatorTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'educator'
+      ).map((type: any) => type.id);
+      const hasEducatorType = selectedTypes.some(id => educatorTypes.includes(id));
+      setShowEducatorDetails(hasEducatorType);
+
+      // Check for trainer type
+      const trainerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'trainer'
+      ).map((type: any) => type.id);
+      const hasTrainerType = selectedTypes.some(id => trainerTypes.includes(id));
+      setShowTrainerDetails(hasTrainerType);
+
+      // Check for volunteer type
+      const volunteerTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'volunteer'
+      ).map((type: any) => type.id);
+      const hasVolunteerType = selectedTypes.some(id => volunteerTypes.includes(id));
+      setShowVolunteerDetails(hasVolunteerType);
+    }
+  }, [registrationData.selectedPersonTypes, selfRegisterPersonTypes]);
 
   // Auto-populate form when user data is available
   useEffect(() => {
@@ -542,7 +591,13 @@ const AISummit = () => {
         gender: "",
         businessName: "",
         businessCategory: "",
-        businessDescription: ""
+        businessDescription: "",
+        studyInstitution: "",
+        courseOfStudy: "",
+        schoolName: "",
+        subjectTaught: "",
+        trainingSpecialty: "",
+        certifications: ""
       });
       // Refresh registration status
       refetchStatus();
@@ -2425,11 +2480,104 @@ const AISummit = () => {
                     )}
                   </div>
 
+                  {/* Student Details Section - Conditional */}
+                  {showStudentDetails && (
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <GraduationCap className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Student Information</Label>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="studyInstitution">School/University</Label>
+                          <Input
+                            id="studyInstitution"
+                            name="studyInstitution"
+                            value={registrationData.studyInstitution || ''}
+                            onChange={(e) => handleInputChange('studyInstitution', e.target.value)}
+                            placeholder="Name of your school or university"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="courseOfStudy">Course/Subject</Label>
+                          <Input
+                            id="courseOfStudy"
+                            name="courseOfStudy"
+                            value={registrationData.courseOfStudy || ''}
+                            onChange={(e) => handleInputChange('courseOfStudy', e.target.value)}
+                            placeholder="What you're studying"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Educator Details Section - Conditional */}
+                  {showEducatorDetails && (
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <GraduationCap className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Educator Information</Label>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="schoolName">School/Institution</Label>
+                          <Input
+                            id="schoolName"
+                            name="schoolName"
+                            value={registrationData.schoolName || ''}
+                            onChange={(e) => handleInputChange('schoolName', e.target.value)}
+                            placeholder="Name of your school or institution"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="subjectTaught">Subject Taught</Label>
+                          <Input
+                            id="subjectTaught"
+                            name="subjectTaught"
+                            value={registrationData.subjectTaught || ''}
+                            onChange={(e) => handleInputChange('subjectTaught', e.target.value)}
+                            placeholder="What subject(s) do you teach"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Trainer Details Section - Conditional */}
+                  {showTrainerDetails && (
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Trainer Information</Label>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="trainingSpecialty">Training Specialty</Label>
+                          <Input
+                            id="trainingSpecialty"
+                            name="trainingSpecialty"
+                            value={registrationData.trainingSpecialty || ''}
+                            onChange={(e) => handleInputChange('trainingSpecialty', e.target.value)}
+                            placeholder="Your area of training expertise"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="certifications">Certifications</Label>
+                          <Input
+                            id="certifications"
+                            name="certifications"
+                            value={registrationData.certifications || ''}
+                            onChange={(e) => handleInputChange('certifications', e.target.value)}
+                            placeholder="Professional certifications"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* T-shirt and Gender - Only show if volunteer is selected */}
-                  {(registrationData.selectedPersonTypes || []).some((typeId: number) => {
-                    const type = selfRegisterPersonTypes.find((t: any) => t.id === typeId);
-                    return type?.name === 'volunteer';
-                  }) && (
+                  {showVolunteerDetails && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="tshirtSize">T-shirt Size</Label>
