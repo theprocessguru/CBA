@@ -3474,40 +3474,10 @@ const AISummit = () => {
                     </p>
                   </div>
 
-                  {/* Test Data Button - Only show to authenticated admins */}
-                  {import.meta.env.DEV && isAuthenticated && user?.isAdmin && (
-                    <div className="flex justify-center">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          const testData = {
-                            name: 'John Smith',
-                            email: `test${Math.floor(Math.random() * 10000)}@example.com`,
-                            phoneNumber: '07700900123',
-                            company: 'Tech Solutions Ltd',
-                            jobTitle: 'Senior Developer',
-                            businessType: 'Technology',
-                            aiInterest: 'automation',
-                            accessibilityNeeds: '',
-                            password: 'TestPassword123!',
-                            confirmPassword: 'TestPassword123!',
-                            comments: 'Looking forward to the event'
-                          };
-                          Object.entries(testData).forEach(([key, value]) => {
-                            handleInputChange(key, value);
-                          });
-                        }}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white"
-                      >
-                        🧪 Fill with Test Data (Admin Only)
-                      </Button>
-                    </div>
-                  )}
-
-                  <div className="flex gap-4 pt-4">
+                  {/* Submit Button */}
+                  <div className="flex gap-4">
                     <Button 
-                      type="button" 
+                      type="button"
                       variant="outline" 
                       onClick={() => setShowRegistrationForm(false)}
                       className="flex-1"
@@ -3522,6 +3492,7 @@ const AISummit = () => {
                       {registerMutation.isPending ? "Reserving Your Spot..." : "Reserve My Spot"}
                     </Button>
                   </div>
+
                 </form>
               </div>
             </div>
