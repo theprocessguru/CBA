@@ -865,7 +865,6 @@ export const cbaEvents = pgTable("cba_events", {
   isRecurring: boolean("is_recurring").default(false),
   recurringPattern: varchar("recurring_pattern"), // weekly, monthly, etc.
   tags: text("tags"), // JSON array of event tags
-  topicsOfInterest: text("topics_of_interest"), // JSON array of topics for registration interest selection
   imageUrl: text("image_url"),
   ghlWorkflowId: varchar("ghl_workflow_id"), // MyT Automation workflow ID for automation
   ghlTagName: varchar("ghl_tag_name"), // MyT Automation tag for attendees

@@ -72,7 +72,7 @@ const AISummit = () => {
   // Filter person types to exclude admin-only types and business members (they register from inside the app)
   const selfRegisterPersonTypes = allPersonTypes
     .filter((type: any) => 
-      !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor', 'business'].includes(type.name.toLowerCase())
+      !['administrator', 'staff', 'sponsor', 'vip', 'exhibitor', 'business', 'councillor', 'speaker'].includes(type.name.toLowerCase())
     )
     .sort((a: any, b: any) => {
       // Put attendee first
@@ -255,19 +255,6 @@ const AISummit = () => {
       const hasCommunityGroupType = selectedTypes.some(id => communityGroupTypes.includes(id));
       setShowOrganizationMemberships(hasCommunityGroupType);
 
-      // Check for councillor type
-      const councillorTypes = selfRegisterPersonTypes.filter((type: any) => 
-        type.name === 'councillor'
-      ).map((type: any) => type.id);
-      const hasCouncillorType = selectedTypes.some(id => councillorTypes.includes(id));
-      setShowCouncillorDetails(hasCouncillorType);
-
-      // Check for speaker type
-      const speakerTypes = selfRegisterPersonTypes.filter((type: any) => 
-        type.name === 'speaker'
-      ).map((type: any) => type.id);
-      const hasSpeakerType = selectedTypes.some(id => speakerTypes.includes(id));
-      // Add speaker details state if needed - for now we can use existing speaker form modal
     }
   }, [registrationData.selectedPersonTypes, selfRegisterPersonTypes]);
 
