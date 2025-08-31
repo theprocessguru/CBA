@@ -27,7 +27,7 @@ export default function Login() {
       }
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       // Store auth token if provided (for Replit environment)
       if (data?.authToken) {
         localStorage.setItem('authToken', data.authToken);
@@ -40,16 +40,17 @@ export default function Login() {
       });
       
       // Invalidate and refetch auth queries to ensure state updates
-      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
-      // Small delay to let the token be stored, then redirect
-      setTimeout(() => {
-        if (data?.user?.isAdmin) {
-          setLocation("/admin");
-        } else {
-          setLocation("/dashboard");
-        }
-      }, 100);
+      // Wait for the auth state to settle before redirecting
+      await queryClient.refetchQueries({ queryKey: ['/api/auth/user'] });
+      
+      // Redirect based on user role
+      if (data?.user?.isAdmin) {
+        setLocation("/admin");
+      } else {
+        setLocation("/dashboard");
+      }
     },
     onError: (error) => {
       toast({
