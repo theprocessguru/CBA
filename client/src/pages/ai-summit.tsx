@@ -34,7 +34,11 @@ import {
   Trophy,
   BookOpen,
   Eye,
-  EyeOff
+  EyeOff,
+  Home,
+  Heart,
+  Crown,
+  User
 } from "lucide-react";
 import { Link } from "wouter";
 import { ParticipantTypeSelector } from "@/components/forms/ParticipantTypeSelector";
@@ -57,6 +61,15 @@ const AISummit = () => {
     queryKey: ['/api/events/first-ai-summit-croydon-2025'],
     retry: false,
   });
+
+  // Fetch person types and categories for the form
+  const { data: selfRegisterPersonTypes = [] } = useQuery({
+    queryKey: ['/api/person-types/self-register'],
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ['/api/business-categories'],
+  });
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
   const [showSpeakerForm, setShowSpeakerForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
@@ -75,7 +88,13 @@ const AISummit = () => {
   const [showSponsorConfirmPassword, setShowSponsorConfirmPassword] = useState(false);
   const [registrationData, setRegistrationData] = useState({
     name: "",
+    firstName: "",
+    lastName: "",
     email: "",
+    phone: "",
+    homeAddress: "",
+    homeCity: "",
+    homePostcode: "",
     participantType: "attendee",
     customRole: "",
     company: "",
@@ -87,7 +106,13 @@ const AISummit = () => {
     comments: "",
     password: "",
     confirmPassword: "",
-    interestAreas: [] as string[]
+    interestAreas: [] as string[],
+    selectedPersonTypes: [] as number[],
+    tshirtSize: "",
+    gender: "",
+    businessName: "",
+    businessCategory: "",
+    businessDescription: ""
   });
 
   // Auto-populate form when user data is available
@@ -2189,7 +2214,7 @@ const AISummit = () => {
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neutral-900">Register for AI Summit 2025</h2>
+                  <h2 className="text-2xl font-bold text-neutral-900">Attend the AI Summit by registering</h2>
                   <Button 
                     variant="ghost" 
                     size="sm"
@@ -2200,106 +2225,262 @@ const AISummit = () => {
                 </div>
 
                 <form onSubmit={handleRegistration} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="firstName">First Name <span className="text-red-500">*</span></Label>
                       <Input
-                        id="name"
-                        type="text"
+                        id="firstName"
+                        name="firstName"
+                        value={registrationData.firstName || ''}
+                        onChange={(e) => handleInputChange('firstName', e.target.value)}
                         required
-                        value={registrationData.name}
-                        onChange={(e) => handleInputChange('name', e.target.value)}
-                        placeholder="Enter your full name"
+                        placeholder="John"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email Address *</Label>
+                      <Label htmlFor="lastName">Last Name <span className="text-red-500">*</span></Label>
                       <Input
-                        id="email"
-                        type="email"
+                        id="lastName"
+                        name="lastName"
+                        value={registrationData.lastName || ''}
+                        onChange={(e) => handleInputChange('lastName', e.target.value)}
                         required
-                        value={registrationData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        placeholder="your.email@example.com"
+                        placeholder="Smith"
                       />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="company">Company/Organization</Label>
-                      <Input
-                        id="company"
-                        type="text"
-                        value={registrationData.company}
-                        onChange={(e) => handleInputChange('company', e.target.value)}
-                        placeholder="Your company name"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="jobTitle">Job Title</Label>
-                      <Input
-                        id="jobTitle"
-                        type="text"
-                        value={registrationData.jobTitle}
-                        onChange={(e) => handleInputChange('jobTitle', e.target.value)}
-                        placeholder="Your role/position"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="phoneNumber">Phone Number *</Label>
-                      <Input
-                        id="phoneNumber"
-                        type="tel"
-                        required
-                        value={registrationData.phoneNumber}
-                        onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-                        placeholder="Your contact number"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="businessType">Business Type</Label>
-                      <Select value={registrationData.businessType} onValueChange={(value) => handleInputChange('businessType', value)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select business type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="startup">Startup</SelectItem>
-                          <SelectItem value="small-business">Small Business</SelectItem>
-                          <SelectItem value="medium-enterprise">Medium Enterprise</SelectItem>
-                          <SelectItem value="large-corporation">Large Corporation</SelectItem>
-                          <SelectItem value="freelancer">Freelancer/Consultant</SelectItem>
-                          <SelectItem value="non-profit">Non-Profit</SelectItem>
-                          <SelectItem value="student">Student</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="aiInterest">AI Interest/Focus Area</Label>
-                    <Select value={registrationData.aiInterest} onValueChange={(value) => handleInputChange('aiInterest', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="What aspect of AI interests you most?" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="content-creation">Content Creation & Marketing</SelectItem>
-                        <SelectItem value="automation">Business Process Automation</SelectItem>
-                        <SelectItem value="customer-service">Customer Service AI</SelectItem>
-                        <SelectItem value="data-analytics">Data Analytics & Insights</SelectItem>
-                        <SelectItem value="chatbots">Chatbots & Virtual Assistants</SelectItem>
-                        <SelectItem value="productivity">Productivity Tools</SelectItem>
-                        <SelectItem value="general-learning">General AI Learning</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="email">Email <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={registrationData.email || ''}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      required
+                      placeholder="john@example.com"
+                    />
                   </div>
 
-                  {/* Interest Areas Section */}
+                  <div>
+                    <Label htmlFor="phone">Phone Number <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      value={registrationData.phone || ''}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      required
+                      placeholder="+44 20 xxxx xxxx"
+                    />
+                  </div>
+
+                  {/* Home Address */}
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Home className="h-4 w-4 text-primary" />
+                      <Label className="text-sm font-medium">Home Address</Label>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="homeAddress">Street Address <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="homeAddress"
+                        name="homeAddress"
+                        value={registrationData.homeAddress || ''}
+                        onChange={(e) => handleInputChange('homeAddress', e.target.value)}
+                        required
+                        placeholder="123 High Street"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="homeCity">City <span className="text-red-500">*</span></Label>
+                        <Input
+                          id="homeCity"
+                          name="homeCity"
+                          value={registrationData.homeCity || ''}
+                          onChange={(e) => handleInputChange('homeCity', e.target.value)}
+                          required
+                          placeholder="Croydon"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="homePostcode">Postcode <span className="text-red-500">*</span></Label>
+                        <Input
+                          id="homePostcode"
+                          name="homePostcode"
+                          value={registrationData.homePostcode || ''}
+                          onChange={(e) => handleInputChange('homePostcode', e.target.value)}
+                          required
+                          placeholder="CR0 1XX"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Person Type Selection */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">I am a: <span className="text-red-500">*</span></Label>
+                    <p className="text-xs text-gray-500">Select all that apply to you</p>
+                    
+                    <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
+                      {selfRegisterPersonTypes.map((type: any) => {
+                        const Icon = type.name === 'business' ? Building :
+                                   type.name === 'student' ? GraduationCap :
+                                   type.name === 'resident' ? Home :
+                                   type.name === 'exhibitor' ? Users :
+                                   type.name === 'speaker' ? Mic :
+                                   type.name === 'volunteer' ? Heart :
+                                   type.name === 'vip' ? Crown :
+                                   type.name === 'councillor' ? Users :
+                                   type.name === 'media' ? Mic :
+                                   type.name === 'educator' ? GraduationCap :
+                                   type.name === 'trainer' ? Users :
+                                   User;
+                        return (
+                          <div key={type.id} className="flex items-center space-x-2 p-2 border rounded-lg hover:bg-gray-50">
+                            <Checkbox
+                              id={`person-type-${type.id}`}
+                              checked={registrationData.selectedPersonTypes?.includes(type.id) || false}
+                              onCheckedChange={(checked) => {
+                                const currentTypes = registrationData.selectedPersonTypes || [];
+                                if (checked) {
+                                  handleInputChange('selectedPersonTypes', [...currentTypes, type.id]);
+                                } else {
+                                  handleInputChange('selectedPersonTypes', currentTypes.filter((id: number) => id !== type.id));
+                                }
+                              }}
+                            />
+                            <div className="flex items-center space-x-2 flex-1">
+                              <Icon className="h-4 w-4 text-gray-500" />
+                              <div>
+                                <Label 
+                                  htmlFor={`person-type-${type.id}`} 
+                                  className="text-sm font-medium cursor-pointer"
+                                >
+                                  {type.displayName}
+                                </Label>
+                                {type.description && (
+                                  <p className="text-xs text-gray-500">{type.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {(!registrationData.selectedPersonTypes || registrationData.selectedPersonTypes.length === 0) && (
+                      <p className="text-xs text-red-500">Please select at least one option</p>
+                    )}
+                  </div>
+
+                  {/* T-shirt and Gender - Only show if volunteer is selected */}
+                  {(registrationData.selectedPersonTypes || []).some((typeId: number) => {
+                    const type = selfRegisterPersonTypes.find((t: any) => t.id === typeId);
+                    return type?.name === 'volunteer';
+                  }) && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="tshirtSize">T-shirt Size</Label>
+                        <select
+                          id="tshirtSize"
+                          name="tshirtSize"
+                          value={registrationData.tshirtSize || ''}
+                          onChange={(e) => handleInputChange('tshirtSize', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select size...</option>
+                          <option value="XS">XS (Extra Small)</option>
+                          <option value="S">S (Small)</option>
+                          <option value="M">M (Medium)</option>
+                          <option value="L">L (Large)</option>
+                          <option value="XL">XL (Extra Large)</option>
+                          <option value="XXL">XXL (2X Large)</option>
+                          <option value="XXXL">XXXL (3X Large)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <Label htmlFor="gender">Gender (for t-shirt fit)</Label>
+                        <select
+                          id="gender"
+                          name="gender"
+                          value={registrationData.gender || ''}
+                          onChange={(e) => handleInputChange('gender', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md"
+                        >
+                          <option value="">Select fit...</option>
+                          <option value="male">Male fit</option>
+                          <option value="female">Female fit</option>
+                          <option value="unisex">Unisex fit</option>
+                          <option value="prefer_not_to_say">Prefer not to say</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Business Details Section - Conditional */}
+                  {(registrationData.selectedPersonTypes || []).some((typeId: number) => {
+                    const type = selfRegisterPersonTypes.find((t: any) => t.id === typeId);
+                    return type?.name === 'business';
+                  }) && (
+                    <div className="space-y-4 border-t pt-4">
+                      <div className="flex items-center space-x-2">
+                        <Building className="h-5 w-5 text-primary" />
+                        <Label className="text-lg font-medium">Business Information</Label>
+                      </div>
+                      <p className="text-xs text-gray-500">Since you selected business owner/member, please provide your business details for our directory</p>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="businessName">Business Name <span className="text-red-500">*</span></Label>
+                          <Input
+                            id="businessName"
+                            name="businessName"
+                            value={registrationData.businessName || ''}
+                            onChange={(e) => handleInputChange('businessName', e.target.value)}
+                            required
+                            placeholder="Your Business Ltd"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="businessCategory">Category</Label>
+                          <select
+                            id="businessCategory"
+                            name="businessCategory"
+                            value={registrationData.businessCategory || ''}
+                            onChange={(e) => handleInputChange('businessCategory', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md"
+                          >
+                            <option value="">Select category...</option>
+                            {categories.map((category: any) => (
+                              <option key={category.id} value={category.name}>
+                                {category.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <Label htmlFor="businessDescription">Business Description</Label>
+                        <Textarea
+                          id="businessDescription"
+                          name="businessDescription"
+                          value={registrationData.businessDescription || ''}
+                          onChange={(e) => handleInputChange('businessDescription', e.target.value)}
+                          placeholder="Tell us about your business..."
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* AI Interest Areas Section */}
                   <div className="space-y-3">
                     <Label className="text-sm font-medium">What are you looking to get out of this event? (Select all that apply)</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -2334,6 +2515,25 @@ const AISummit = () => {
                   </div>
 
                   <div>
+                    <Label htmlFor="aiInterest">AI Interest/Focus Area</Label>
+                    <Select value={registrationData.aiInterest} onValueChange={(value) => handleInputChange('aiInterest', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="What aspect of AI interests you most?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="content-creation">Content Creation & Marketing</SelectItem>
+                        <SelectItem value="automation">Business Process Automation</SelectItem>
+                        <SelectItem value="customer-service">Customer Service AI</SelectItem>
+                        <SelectItem value="data-analytics">Data Analytics & Insights</SelectItem>
+                        <SelectItem value="chatbots">Chatbots & Virtual Assistants</SelectItem>
+                        <SelectItem value="productivity">Productivity Tools</SelectItem>
+                        <SelectItem value="general-learning">General AI Learning</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
                     <Label htmlFor="accessibilityNeeds">Accessibility Requirements</Label>
                     <Input
                       id="accessibilityNeeds"
@@ -2341,6 +2541,17 @@ const AISummit = () => {
                       value={registrationData.accessibilityNeeds}
                       onChange={(e) => handleInputChange('accessibilityNeeds', e.target.value)}
                       placeholder="Any accessibility support needed"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="comments">Additional Comments/Questions</Label>
+                    <Textarea
+                      id="comments"
+                      value={registrationData.comments}
+                      onChange={(e) => handleInputChange('comments', e.target.value)}
+                      placeholder="Any questions or additional information..."
+                      rows={3}
                     />
                   </div>
 

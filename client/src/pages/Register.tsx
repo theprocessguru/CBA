@@ -330,7 +330,7 @@ export default function Register() {
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-neutral-900">Join CBA</CardTitle>
+          <CardTitle className="text-2xl font-bold text-neutral-900">Join the CBA</CardTitle>
           <CardDescription>Create your account to get started</CardDescription>
           <p className="text-center text-sm text-gray-600 mt-2">
             Already have an account? <Link href="/login" className="text-blue-600 hover:text-blue-800">Sign in</Link>
