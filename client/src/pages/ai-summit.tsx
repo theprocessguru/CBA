@@ -64,8 +64,9 @@ const AISummit = () => {
 
   // Fetch person types and categories for the form
   const { data: selfRegisterPersonTypes = [] } = useQuery<any[]>({
-    queryKey: ['/api/person-types/self-register'],
+    queryKey: ['/api/person-types'],
   });
+
 
   const { data: categories = [] } = useQuery<any[]>({
     queryKey: ['/api/business-categories'],
@@ -2341,7 +2342,7 @@ const AISummit = () => {
                     <p className="text-xs text-gray-500">Select all that apply to you</p>
                     
                     <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto">
-                      {Array.isArray(selfRegisterPersonTypes) && selfRegisterPersonTypes.length > 0 ? selfRegisterPersonTypes.map((type: any) => {
+                      {selfRegisterPersonTypes && selfRegisterPersonTypes.length > 0 ? selfRegisterPersonTypes.map((type: any) => {
                         const Icon = type.name === 'business' ? Building :
                                    type.name === 'student' ? GraduationCap :
                                    type.name === 'resident' ? Home :
