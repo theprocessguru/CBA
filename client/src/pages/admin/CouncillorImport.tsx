@@ -248,11 +248,11 @@ export default function CouncillorImport() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-blue-600 mb-2">Optional Columns:</h4>
+                  <h4 className="font-medium text-blue-600 mb-2">Important Optional Columns:</h4>
                   <ul className="list-disc list-inside text-sm space-y-1 text-gray-600">
+                    <li><code>party</code> - <strong>Political party</strong> (Labour, Conservative, Liberal Democrat, Green, Independent, etc.)</li>
                     <li><code>phone</code> - Contact phone number</li>
                     <li><code>constituency</code> - Parliamentary constituency</li>
-                    <li><code>party</code> - Political party</li>
                     <li><code>homeAddress, homeCity, homePostcode</code> - Home address</li>
                     <li><code>officeAddress, officeCity, officePostcode</code> - Office address</li>
                     <li><code>bio</code> - Biography and role description</li>
