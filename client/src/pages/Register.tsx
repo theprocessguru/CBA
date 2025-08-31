@@ -46,6 +46,13 @@ export default function Register() {
     trainingMethods: "",
     trainingVenue: "",
     certifications: "",
+    // Media details
+    mediaOutlet: "",
+    mediaType: "",
+    coverageArea: "",
+    socialMediaHandle: "",
+    audienceReach: "",
+    specialtyBeats: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
@@ -54,6 +61,7 @@ export default function Register() {
   const [showOrganizationMemberships, setShowOrganizationMemberships] = useState(false);
   const [showEducatorDetails, setShowEducatorDetails] = useState(false);
   const [showTrainerDetails, setShowTrainerDetails] = useState(false);
+  const [showMediaDetails, setShowMediaDetails] = useState(false);
   const [organizationMemberships, setOrganizationMemberships] = useState([{
     organizationName: '',
     organizationType: '',
@@ -249,6 +257,13 @@ export default function Register() {
       ).map((type: any) => type.id);
       const hasTrainerType = newTypes.some(id => trainerTypes.includes(id));
       setShowTrainerDetails(hasTrainerType);
+      
+      // Check if media type is selected
+      const mediaTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'media'
+      ).map((type: any) => type.id);
+      const hasMediaType = newTypes.some(id => mediaTypes.includes(id));
+      setShowMediaDetails(hasMediaType);
       
       return newTypes;
     });
@@ -936,6 +951,129 @@ export default function Register() {
                     onChange={handleChange}
                     placeholder="e.g., CIPD, PMP, Google Certified Trainer"
                   />
+                </div>
+              </div>
+            )}
+
+            {/* Media Details Section - Conditional */}
+            {showMediaDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <Mic className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Media Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected media, please provide details about your coverage and outlets</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="mediaOutlet">Media Outlet/Publication <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="mediaOutlet"
+                      name="mediaOutlet"
+                      value={formData.mediaOutlet}
+                      onChange={handleChange}
+                      required={showMediaDetails}
+                      placeholder="e.g., Croydon Advertiser, BBC London"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="mediaType">Media Type <span className="text-red-500">*</span></Label>
+                    <select
+                      id="mediaType"
+                      name="mediaType"
+                      value={formData.mediaType}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showMediaDetails}
+                    >
+                      <option value="">Select type...</option>
+                      <option value="newspaper">Newspaper</option>
+                      <option value="online_news">Online News</option>
+                      <option value="magazine">Magazine</option>
+                      <option value="television">Television</option>
+                      <option value="radio">Radio</option>
+                      <option value="podcast">Podcast</option>
+                      <option value="social_media">Social Media</option>
+                      <option value="blog">Blog</option>
+                      <option value="youtube">YouTube Channel</option>
+                      <option value="freelance">Freelance Journalist</option>
+                      <option value="photography">Photography</option>
+                      <option value="videography">Videography</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="coverageArea">What Do You Cover? <span className="text-red-500">*</span></Label>
+                    <select
+                      id="coverageArea"
+                      name="coverageArea"
+                      value={formData.coverageArea}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showMediaDetails}
+                    >
+                      <option value="">Select coverage...</option>
+                      <option value="local_news">Local News</option>
+                      <option value="business">Business & Finance</option>
+                      <option value="politics">Politics</option>
+                      <option value="community">Community Events</option>
+                      <option value="education">Education</option>
+                      <option value="healthcare">Healthcare</option>
+                      <option value="crime">Crime & Safety</option>
+                      <option value="sports">Sports</option>
+                      <option value="entertainment">Entertainment</option>
+                      <option value="lifestyle">Lifestyle</option>
+                      <option value="technology">Technology</option>
+                      <option value="environment">Environment</option>
+                      <option value="general">General Interest</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="audienceReach">Audience Reach</Label>
+                    <select
+                      id="audienceReach"
+                      name="audienceReach"
+                      value={formData.audienceReach}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select reach...</option>
+                      <option value="hyperlocal">Hyperlocal (Neighborhood)</option>
+                      <option value="local">Local (Borough/Town)</option>
+                      <option value="regional">Regional (South London)</option>
+                      <option value="london">London-wide</option>
+                      <option value="national">National</option>
+                      <option value="international">International</option>
+                      <option value="niche">Niche Audience</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="socialMediaHandle">Social Media Handle</Label>
+                    <Input
+                      id="socialMediaHandle"
+                      name="socialMediaHandle"
+                      value={formData.socialMediaHandle}
+                      onChange={handleChange}
+                      placeholder="@yourhandle or URL"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="specialtyBeats">Specialty Beats</Label>
+                    <Input
+                      id="specialtyBeats"
+                      name="specialtyBeats"
+                      value={formData.specialtyBeats}
+                      onChange={handleChange}
+                      placeholder="e.g., Council meetings, Property, Startups"
+                    />
+                  </div>
                 </div>
               </div>
             )}
