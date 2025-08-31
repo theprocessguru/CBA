@@ -53,6 +53,13 @@ export default function Register() {
     socialMediaHandle: "",
     audienceReach: "",
     specialtyBeats: "",
+    // Student details
+    studyInstitution: "",
+    courseOfStudy: "",
+    studyLevel: "",
+    yearOfStudy: "",
+    expectedGraduation: "",
+    studyMode: "",
   });
   const [selectedPersonTypes, setSelectedPersonTypes] = useState<number[]>([]);
   const [hasExistingBusiness, setHasExistingBusiness] = useState<boolean | null>(null);
@@ -62,6 +69,7 @@ export default function Register() {
   const [showEducatorDetails, setShowEducatorDetails] = useState(false);
   const [showTrainerDetails, setShowTrainerDetails] = useState(false);
   const [showMediaDetails, setShowMediaDetails] = useState(false);
+  const [showStudentDetails, setShowStudentDetails] = useState(false);
   const [organizationMemberships, setOrganizationMemberships] = useState([{
     organizationName: '',
     organizationType: '',
@@ -264,6 +272,13 @@ export default function Register() {
       ).map((type: any) => type.id);
       const hasMediaType = newTypes.some(id => mediaTypes.includes(id));
       setShowMediaDetails(hasMediaType);
+      
+      // Check if student type is selected
+      const studentTypes = selfRegisterPersonTypes.filter((type: any) => 
+        type.name === 'student'
+      ).map((type: any) => type.id);
+      const hasStudentType = newTypes.some(id => studentTypes.includes(id));
+      setShowStudentDetails(hasStudentType);
       
       return newTypes;
     });
@@ -1072,6 +1087,126 @@ export default function Register() {
                       value={formData.specialtyBeats}
                       onChange={handleChange}
                       placeholder="e.g., Council meetings, Property, Startups"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Student Details Section - Conditional */}
+            {showStudentDetails && (
+              <div className="space-y-4 border-t pt-4">
+                <div className="flex items-center space-x-2">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                  <Label className="text-lg font-medium">Study Information</Label>
+                </div>
+                <p className="text-xs text-gray-500">Since you selected student, please provide details about your studies</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="studyInstitution">Where Are You Studying? <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="studyInstitution"
+                      name="studyInstitution"
+                      value={formData.studyInstitution}
+                      onChange={handleChange}
+                      required={showStudentDetails}
+                      placeholder="e.g., Croydon College, King's College London"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="studyLevel">Study Level <span className="text-red-500">*</span></Label>
+                    <select
+                      id="studyLevel"
+                      name="studyLevel"
+                      value={formData.studyLevel}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      required={showStudentDetails}
+                    >
+                      <option value="">Select level...</option>
+                      <option value="gcse">GCSE</option>
+                      <option value="a_level">A-Level</option>
+                      <option value="btec">BTEC</option>
+                      <option value="nvq">NVQ</option>
+                      <option value="apprenticeship">Apprenticeship</option>
+                      <option value="foundation">Foundation Course</option>
+                      <option value="undergraduate">Undergraduate Degree</option>
+                      <option value="postgraduate">Postgraduate Degree</option>
+                      <option value="masters">Master's Degree</option>
+                      <option value="phd">PhD/Doctorate</option>
+                      <option value="professional">Professional Qualification</option>
+                      <option value="short_course">Short Course</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="courseOfStudy">What Are You Studying? <span className="text-red-500">*</span></Label>
+                    <Input
+                      id="courseOfStudy"
+                      name="courseOfStudy"
+                      value={formData.courseOfStudy}
+                      onChange={handleChange}
+                      required={showStudentDetails}
+                      placeholder="e.g., Business Management, Computer Science"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="yearOfStudy">Year of Study</Label>
+                    <select
+                      id="yearOfStudy"
+                      name="yearOfStudy"
+                      value={formData.yearOfStudy}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select year...</option>
+                      <option value="1">1st Year</option>
+                      <option value="2">2nd Year</option>
+                      <option value="3">3rd Year</option>
+                      <option value="4">4th Year</option>
+                      <option value="5">5th Year</option>
+                      <option value="6">6th Year</option>
+                      <option value="foundation">Foundation Year</option>
+                      <option value="final">Final Year</option>
+                      <option value="gap_year">Gap Year</option>
+                      <option value="completed">Recently Completed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="studyMode">Study Mode</Label>
+                    <select
+                      id="studyMode"
+                      name="studyMode"
+                      value={formData.studyMode}
+                      onChange={handleChange}
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Select mode...</option>
+                      <option value="full_time">Full-time</option>
+                      <option value="part_time">Part-time</option>
+                      <option value="distance_learning">Distance Learning</option>
+                      <option value="evening">Evening Classes</option>
+                      <option value="weekend">Weekend Classes</option>
+                      <option value="online">Online Only</option>
+                      <option value="hybrid">Hybrid (Online + In-person)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="expectedGraduation">Expected Graduation</Label>
+                    <Input
+                      id="expectedGraduation"
+                      name="expectedGraduation"
+                      type="month"
+                      value={formData.expectedGraduation}
+                      onChange={handleChange}
+                      placeholder="YYYY-MM"
                     />
                   </div>
                 </div>
