@@ -156,9 +156,9 @@ const AISummit = () => {
     if (selfRegisterPersonTypes.length > 0 && registrationData.selectedPersonTypes) {
       const selectedTypes = registrationData.selectedPersonTypes || [];
       
-      // Check for business types
+      // Check for business owner types (business is filtered out in selfRegisterPersonTypes)
       const businessTypes = selfRegisterPersonTypes.filter((type: any) => 
-        ['business', 'business_owner'].includes(type.name)
+        type.name === 'business_owner'
       ).map((type: any) => type.id);
       const hasBusinessType = selectedTypes.some(id => businessTypes.includes(id));
       setShowBusinessDetails(hasBusinessType);
@@ -594,10 +594,23 @@ const AISummit = () => {
         businessDescription: "",
         studyInstitution: "",
         courseOfStudy: "",
+        studyLevel: "",
+        yearOfStudy: "",
+        expectedGraduation: "",
+        studyMode: "",
         schoolName: "",
         subjectTaught: "",
+        educatorRole: "",
+        schoolType: "",
         trainingSpecialty: "",
-        certifications: ""
+        targetAudience: "",
+        trainingMethods: "",
+        trainingVenue: "",
+        businessPhone: "",
+        businessEmail: "",
+        businessWebsite: "",
+        employeeCount: "",
+        established: ""
       });
       // Refresh registration status
       refetchStatus();
