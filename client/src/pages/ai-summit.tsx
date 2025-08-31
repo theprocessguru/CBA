@@ -51,6 +51,12 @@ const AISummit = () => {
     enabled: isAuthenticated,
     retry: false,
   });
+
+  // Fetch AI Summit event details for dynamic topics
+  const { data: aiSummitEvent } = useQuery({
+    queryKey: ['/api/events/first-ai-summit-croydon-2025'],
+    retry: false,
+  });
   const [showExhibitorForm, setShowExhibitorForm] = useState(false);
   const [showSpeakerForm, setShowSpeakerForm] = useState(false);
   const [showVolunteerForm, setShowVolunteerForm] = useState(false);
@@ -2297,7 +2303,7 @@ const AISummit = () => {
                   <div className="space-y-3">
                     <Label className="text-sm font-medium">What are you looking to get out of this event? (Select all that apply)</Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {["AI Basics", "Education & Learning", "AI in Healthcare", "Career Opportunities", "AI for Seniors", "Family Activities"].map((area) => (
+                      {(aiSummitEvent?.topicsOfInterest?.length > 0 ? aiSummitEvent.topicsOfInterest : ["AI Basics", "Education & Learning", "AI in Healthcare", "Career Opportunities", "AI for Seniors", "Family Activities"]).map((area) => (
                         <div key={area} className="flex items-center space-x-2">
                           <Checkbox
                             id={`interest-${area.replace(/\s+/g, '-').toLowerCase()}`}

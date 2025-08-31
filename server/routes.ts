@@ -5391,7 +5391,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/events', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const events = await db.select().from(cbaEvents);
-      res.json(events);
+      
+      // Parse JSON fields for frontend consumption
+      const eventsWithParsedFields = events.map(event => ({
+        ...event,
+        topicsOfInterest: event.topicsOfInterest ? JSON.parse(event.topicsOfInterest) : [],
+        tags: event.tags ? JSON.parse(event.tags) : []
+      }));
+      
+      res.json(eventsWithParsedFields);
     } catch (error) {
       console.error('Error fetching events:', error);
       res.status(500).json({ message: 'Failed to fetch events' });
@@ -5437,6 +5445,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle endTime field  
         endTime: req.body.endTime || extractTime(req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
+        // Handle topics of interest
+        topicsOfInterest: req.body.topicsOfInterest ? JSON.stringify(req.body.topicsOfInterest) : null,
         createdAt: new Date(),
         updatedAt: new Date()
       };
@@ -5504,6 +5514,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle endTime field  
         endTime: req.body.endTime || extractTime(req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
+        // Handle topics of interest
+        topicsOfInterest: req.body.topicsOfInterest ? JSON.stringify(req.body.topicsOfInterest) : null,
         updatedAt: new Date()
       };
       
@@ -5797,10 +5809,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/events', async (req, res) => {
     try {
       const publishedEvents = await storage.getPublishedEvents();
-      res.json(publishedEvents);
+      
+      // Parse JSON fields for frontend consumption
+      const eventsWithParsedFields = publishedEvents.map(event => ({
+        ...event,
+        topicsOfInterest: event.topicsOfInterest ? JSON.parse(event.topicsOfInterest) : [],
+        tags: event.tags ? JSON.parse(event.tags) : []
+      }));
+      
+      res.json(eventsWithParsedFields);
     } catch (error) {
       console.error("Error fetching events:", error);
       res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  // Get specific event details (public endpoint for registration forms)
+  app.get('/api/events/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      
+      const [event] = await db
+        .select()
+        .from(cbaEvents)
+        .where(eq(cbaEvents.eventSlug, slug))
+        .limit(1);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      // Parse JSON fields for frontend consumption
+      const eventWithParsedFields = {
+        ...event,
+        topicsOfInterest: event.topicsOfInterest ? JSON.parse(event.topicsOfInterest) : [],
+        tags: event.tags ? JSON.parse(event.tags) : []
+      };
+      
+      res.json(eventWithParsedFields);
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+
+  // Initialize AI Summit event with topics (admin only - one-time setup)
+  app.post('/api/admin/setup-ai-summit', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Check if AI Summit already exists
+      const existingEvent = await db
+        .select()
+        .from(cbaEvents)
+        .where(eq(cbaEvents.eventSlug, 'first-ai-summit-croydon-2025'))
+        .limit(1);
+
+      if (existingEvent.length > 0) {
+        // Update existing event with topics
+        const [updatedEvent] = await db
+          .update(cbaEvents)
+          .set({
+            topicsOfInterest: JSON.stringify([
+              "AI Basics",
+              "Education & Learning",
+              "AI in Healthcare",
+              "Career Opportunities",
+              "AI for Seniors",
+              "Family Activities"
+            ]),
+            updatedAt: new Date()
+          })
+          .where(eq(cbaEvents.id, existingEvent[0].id))
+          .returning();
+        
+        return res.json({ 
+          message: "AI Summit topics updated successfully",
+          event: updatedEvent 
+        });
+      }
+
+      // Create new AI Summit event
+      const [newEvent] = await db
+        .insert(cbaEvents)
+        .values({
+          eventName: "First AI Summit Croydon 2025",
+          eventSlug: "first-ai-summit-croydon-2025",
+          description: "Educational AI event for entrepreneurs and residents. Talks, workshops, and networking at LSBU Croydon.",
+          eventType: "summit",
+          eventDate: "2025-10-01",
+          startTime: "09:00:00",
+          endTime: "17:00:00",
+          venue: "London South Bank University - Croydon Campus",
+          venueAddress: "1 Fairfield, Croydon CR0 9BW",
+          maxCapacity: 500,
+          registrationFee: 0,
+          memberPrice: 0,
+          isActive: true,
+          isFeatured: true,
+          requiresApproval: false,
+          topicsOfInterest: JSON.stringify([
+            "AI Basics",
+            "Education & Learning", 
+            "AI in Healthcare",
+            "Career Opportunities",
+            "AI for Seniors",
+            "Family Activities"
+          ]),
+          tags: JSON.stringify(["AI", "Summit", "Education", "Free", "Croydon"]),
+          economicImpactValue: 50.00,
+          createdBy: req.user.id,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      res.json({ 
+        message: "AI Summit created successfully with dynamic topics",
+        event: newEvent 
+      });
+    } catch (error) {
+      console.error("Error setting up AI Summit:", error);
+      res.status(500).json({ message: "Failed to setup AI Summit" });
     }
   });
 

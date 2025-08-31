@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -31,6 +31,7 @@ interface Event {
   status: string;
   eventType: string;
   tags: string[];
+  topicsOfInterest?: string[];
   imageUrl?: string;
   createdAt: string;
 }
@@ -223,6 +224,7 @@ export default function EventManagement() {
       registrationFee: parseFloat(formData.get("registrationFee") as string) || 0,
       eventType: formData.get("eventType") || "workshop",
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
+      topicsOfInterest: formData.get("topicsOfInterest") ? JSON.parse(formData.get("topicsOfInterest") as string) : [],
       isActive: formData.get("isActive") === "on",
       isFeatured: formData.get("isFeatured") === "on",
       requiresApproval: formData.get("requiresApproval") === "on",
@@ -258,6 +260,7 @@ export default function EventManagement() {
       venue: formData.get("location"),
       maxCapacity: parseInt(formData.get("maxCapacity") as string) || 100,
       registrationFee: parseFloat(formData.get("registrationFee") as string) || 0,
+      topicsOfInterest: formData.get("topicsOfInterest") ? JSON.parse(formData.get("topicsOfInterest") as string) : selectedEvent.topicsOfInterest || [],
       eventType: formData.get("eventType"),
       tags: (formData.get("tags") as string)?.split(",").map(tag => tag.trim()) || [],
       imageUrl: imageUrl,
@@ -283,6 +286,8 @@ export default function EventManagement() {
     const [eventType, setEventType] = useState(event?.eventType || "workshop");
     const [customEventType, setCustomEventType] = useState("");
     const [status, setStatus] = useState(event?.status || "draft");
+    const [topicsOfInterest, setTopicsOfInterest] = useState<string[]>(event?.topicsOfInterest || []);
+    const [newTopic, setNewTopic] = useState("");
     
     // Reset form state when event changes
     useEffect(() => {
@@ -296,6 +301,7 @@ export default function EventManagement() {
         setCustomEventType("");
       }
       setStatus(event?.status || "draft");
+      setTopicsOfInterest(event?.topicsOfInterest || []);
     }, [event]);
     
     return (
@@ -315,6 +321,9 @@ export default function EventManagement() {
         // Map form field names to backend schema names
         formData.set("eventName", title);
         formData.set("venue", formData.get("location") as string);
+        
+        // Add topics of interest to form data
+        formData.set("topicsOfInterest", JSON.stringify(topicsOfInterest));
         
         onSubmit(formData);
       }} className="space-y-4">
@@ -471,6 +480,67 @@ export default function EventManagement() {
           defaultValue={event?.tags?.join(", ")} 
           placeholder="e.g., business, networking, training"
         />
+      </div>
+
+      <div>
+        <Label>Topics of Interest</Label>
+        <p className="text-sm text-muted-foreground mb-2">
+          Define topics that attendees can select from when registering for this event
+        </p>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            <Input
+              value={newTopic}
+              onChange={(e) => setNewTopic(e.target.value)}
+              placeholder="e.g., AI Basics, Career Opportunities"
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (newTopic.trim() && !topicsOfInterest.includes(newTopic.trim())) {
+                    setTopicsOfInterest([...topicsOfInterest, newTopic.trim()]);
+                    setNewTopic("");
+                  }
+                }
+              }}
+            />
+            <Button
+              type="button"
+              onClick={() => {
+                if (newTopic.trim() && !topicsOfInterest.includes(newTopic.trim())) {
+                  setTopicsOfInterest([...topicsOfInterest, newTopic.trim()]);
+                  setNewTopic("");
+                }
+              }}
+              disabled={!newTopic.trim()}
+            >
+              Add Topic
+            </Button>
+          </div>
+          
+          {topicsOfInterest.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Current Topics:</p>
+              <div className="flex flex-wrap gap-2">
+                {topicsOfInterest.map((topic, index) => (
+                  <Badge key={index} variant="secondary" className="text-sm">
+                    {topic}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="ml-2 h-auto p-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        setTopicsOfInterest(topicsOfInterest.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div>
