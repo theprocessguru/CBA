@@ -205,7 +205,7 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link href="/register">
+                <Link href="/trial-membership">
                   <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
                     Join CBA
                   </Button>
@@ -715,7 +715,7 @@ const Navbar = () => {
                 </Link>
               ) : (
                 <div className="space-y-2">
-                  <Link href="/register">
+                  <Link href="/trial-membership">
                     <Button variant="outline" className="w-full flex justify-center">
                       Join CBA
                     </Button>
