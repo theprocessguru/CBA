@@ -187,9 +187,9 @@ const AISummit = () => {
     businessDescription: ""
   });
 
-  // Auto-select attendee person type when filtered person types are available
+  // Force reset to only attendee on load
   useEffect(() => {
-    if (selfRegisterPersonTypes.length > 0 && registrationData.selectedPersonTypes.length === 0) {
+    if (selfRegisterPersonTypes.length > 0) {
       const attendeeType = selfRegisterPersonTypes.find((type: any) => type.name === 'attendee');
       if (attendeeType) {
         setRegistrationData(prev => ({
