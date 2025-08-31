@@ -19,9 +19,10 @@ interface CouncillorRow {
   ward: string;
   constituency: string;
   party?: string;
-  homeAddress: string;
-  homeCity: string;
-  homePostcode: string;
+  homeAddress?: string;
+  homeCity?: string;
+  homePostcode?: string;
+  residentialWard?: string;
   officeAddress?: string;
   officeCity?: string;
   officePostcode?: string;
@@ -131,9 +132,10 @@ export default function CouncillorImport() {
         ward: "Broad Green",
         constituency: "Croydon Central",
         party: "Labour",
-        homeAddress: "123 Main Street",
-        homeCity: "Croydon",
-        homePostcode: "CR0 2RG",
+        homeAddress: "",
+        homeCity: "",
+        homePostcode: "",
+        residentialWard: "Central",
         officeAddress: "Bernard Weatherill House",
         officeCity: "Croydon",
         officePostcode: "CR0 2RG",
@@ -253,7 +255,8 @@ export default function CouncillorImport() {
                     <li><code>party</code> - <strong>Political party</strong> (Labour, Conservative, Liberal Democrat, Green, Independent, etc.)</li>
                     <li><code>phone</code> - Contact phone number</li>
                     <li><code>constituency</code> - Parliamentary constituency</li>
-                    <li><code>homeAddress, homeCity, homePostcode</code> - Home address</li>
+                    <li><code>residentialWard</code> - <strong>Ward where councillor lives</strong> (often different from electoral ward)</li>
+                    <li><code>homeAddress, homeCity, homePostcode</code> - Home address (optional for privacy)</li>
                     <li><code>officeAddress, officeCity, officePostcode</code> - Office address</li>
                     <li><code>bio</code> - Biography and role description</li>
                   </ul>
@@ -261,8 +264,9 @@ export default function CouncillorImport() {
 
                 <div className="p-3 bg-yellow-50 rounded-lg">
                   <p className="text-sm text-yellow-800">
-                    <strong>Note:</strong> Councillors will be automatically assigned QR codes for event access.
-                    Duplicate emails will be skipped during import.
+                    <strong>Privacy-Friendly:</strong> Home addresses are completely optional for councillor privacy.
+                    Use the residential ward field to track where they live without full addresses.
+                    Councillors get automatic QR codes for event access. Duplicate emails are skipped.
                   </p>
                 </div>
               </div>
