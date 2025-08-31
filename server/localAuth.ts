@@ -73,10 +73,23 @@ export async function setupLocalAuth(app: Express) {
   // Register endpoint
   app.post('/api/auth/register', async (req: Request, res: Response) => {
     try {
-      const { email, password, firstName, lastName, phone, personTypeIds = [] } = req.body;
+      const { 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        phone, 
+        homeAddress,
+        homeCity,
+        homePostcode,
+        businessAddress,
+        businessCity,
+        businessPostcode,
+        personTypeIds = [] 
+      } = req.body;
 
-      if (!email || !password || !phone) {
-        return res.status(400).json({ message: "Email, password, and phone number are required" });
+      if (!email || !password || !phone || !homeAddress || !homeCity || !homePostcode) {
+        return res.status(400).json({ message: "Email, password, phone number, and home address are required" });
       }
       
       // Basic email validation
@@ -106,6 +119,14 @@ export async function setupLocalAuth(app: Express) {
         firstName: firstName || null,
         lastName: lastName || null,
         phone: phone || null,
+        homeAddress: homeAddress || null,
+        homeCity: homeCity || null,
+        homePostcode: homePostcode || null,
+        homeCountry: "UK",
+        businessAddress: businessAddress || null,
+        businessCity: businessCity || null,
+        businessPostcode: businessPostcode || null,
+        businessCountry: businessAddress ? "UK" : null,
         profileImageUrl: null,
         passwordHash: hashedPassword,
       });

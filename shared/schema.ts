@@ -59,6 +59,15 @@ export const users = pgTable("users", {
   jobTitle: varchar("job_title"),
   phone: varchar("phone"),
   bio: text("bio"),
+  // Address fields
+  homeAddress: text("home_address"),
+  homeCity: varchar("home_city"),
+  homePostcode: varchar("home_postcode"),
+  homeCountry: varchar("home_country").default("UK"),
+  businessAddress: text("business_address"),
+  businessCity: varchar("business_city"),
+  businessPostcode: varchar("business_postcode"),
+  businessCountry: varchar("business_country").default("UK"),
   // Email verification fields
   emailVerified: boolean("email_verified").default(false),
   verificationToken: varchar("verification_token"),
