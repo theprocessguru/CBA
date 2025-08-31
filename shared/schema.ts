@@ -508,6 +508,7 @@ export const aiSummitRegistrations = pgTable("ai_summit_registrations", {
   phoneNumber: varchar("phone_number"),
   businessType: varchar("business_type"),
   aiInterest: varchar("ai_interest"),
+  interestAreas: text("interest_areas"), // JSON array of selected interest areas
   accessibilityNeeds: varchar("accessibility_needs"),
   comments: text("comments"),
   participantRoles: text("participant_roles").notNull().default('["attendee"]'), // JSON array of roles: attendee, exhibitor, speaker, organizer, volunteer, team

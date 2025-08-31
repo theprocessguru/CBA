@@ -80,7 +80,8 @@ const AISummit = () => {
     accessibilityNeeds: "",
     comments: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    interestAreas: [] as string[]
   });
 
   // Auto-populate form when user data is available
@@ -2290,6 +2291,40 @@ const AISummit = () => {
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* Interest Areas Section */}
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium">What are you looking to get out of this event? (Select all that apply)</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {["AI Basics", "Education & Learning", "AI in Healthcare", "Career Opportunities", "AI for Seniors", "Family Activities"].map((area) => (
+                        <div key={area} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`interest-${area.replace(/\s+/g, '-').toLowerCase()}`}
+                            checked={registrationData.interestAreas.includes(area)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setRegistrationData(prev => ({
+                                  ...prev,
+                                  interestAreas: [...prev.interestAreas, area]
+                                }));
+                              } else {
+                                setRegistrationData(prev => ({
+                                  ...prev,
+                                  interestAreas: prev.interestAreas.filter(item => item !== area)
+                                }));
+                              }
+                            }}
+                          />
+                          <Label 
+                            htmlFor={`interest-${area.replace(/\s+/g, '-').toLowerCase()}`}
+                            className="text-sm font-normal cursor-pointer"
+                          >
+                            {area}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div>

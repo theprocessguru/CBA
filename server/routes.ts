@@ -6642,6 +6642,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phoneNumber, 
         businessType, 
         aiInterest, 
+        interestAreas,
         accessibilityNeeds, 
         comments 
       } = req.body;
@@ -6714,6 +6715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           phoneNumber: phoneNumber || null,
           businessType: businessType || null,
           aiInterest: aiInterest || null,
+          interestAreas: interestAreas ? JSON.stringify(interestAreas) : null,
           accessibilityNeeds: accessibilityNeeds || null,
           comments: comments || null
           // Let all other fields use their defaults
