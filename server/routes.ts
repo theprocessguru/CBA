@@ -5816,6 +5816,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Volunteer-specific endpoints
+  
+  // Get events with volunteer opportunities
+  app.get('/api/volunteer/events', async (req, res) => {
+    try {
+      const events = await storage.getEventsWithVolunteerRoles();
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching volunteer events:", error);
+      res.status(500).json({ message: "Failed to fetch volunteer events" });
+    }
+  });
+
+  // Get user's volunteer signups
+  app.get('/api/volunteer/my-signups', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const signups = await storage.getUserVolunteerSignups(userId);
+      res.json(signups);
+    } catch (error) {
+      console.error("Error fetching volunteer signups:", error);
+      res.status(500).json({ message: "Failed to fetch volunteer signups" });
+    }
+  });
+
+  // Volunteer signup for an event
+  app.post('/api/volunteer/events/:eventId/signup', isAuthenticated, async (req: any, res) => {
+    try {
+      const { eventId } = req.params;
+      const userId = req.user.id;
+      const {
+        volunteerRoleId,
+        name,
+        email,
+        phone,
+        role,
+        experience,
+        availability,
+        tShirtSize,
+        emergencyContact
+      } = req.body;
+
+      // Check if user is already signed up for this event as a volunteer
+      const existingSignup = await storage.getUserVolunteerSignupForEvent(userId, parseInt(eventId));
+      if (existingSignup) {
+        return res.status(400).json({ message: "You are already signed up to volunteer for this event" });
+      }
+
+      // Check if the event exists and is published
+      const event = await storage.getEventById(parseInt(eventId));
+      if (!event || event.status !== 'published') {
+        return res.status(404).json({ message: "Event not found or not published" });
+      }
+
+      // Create volunteer signup
+      const volunteerSignup = await storage.createVolunteerSignup({
+        eventId: parseInt(eventId),
+        volunteerRoleId: volunteerRoleId ? parseInt(volunteerRoleId) : undefined,
+        userId,
+        name,
+        email,
+        phone,
+        role,
+        experience,
+        availability,
+        tShirtSize,
+        emergencyContact,
+        status: 'confirmed'
+      });
+
+      // If volunteering for a specific role, increment the current volunteers count
+      if (volunteerRoleId) {
+        await storage.incrementVolunteerRoleCount(parseInt(volunteerRoleId));
+      }
+
+      res.json(volunteerSignup);
+    } catch (error) {
+      console.error("Error creating volunteer signup:", error);
+      res.status(500).json({ message: "Failed to create volunteer signup" });
+    }
+  });
+
+  // Get volunteer roles for a specific event
+  app.get('/api/events/:eventId/volunteer-roles', async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const roles = await storage.getEventVolunteerRoles(parseInt(eventId));
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching volunteer roles:", error);
+      res.status(500).json({ message: "Failed to fetch volunteer roles" });
+    }
+  });
+
   // Register for an event
   app.post('/api/events/:eventId/register', isAuthenticated, async (req: any, res) => {
     try {

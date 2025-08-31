@@ -114,6 +114,7 @@ import { EventMoodDemo } from "@/pages/EventMoodDemo";
 import BusinessEventManagement from "@/pages/BusinessEventManagement";
 import BusinessEvents from "@/pages/BusinessEvents";
 import EconomicGrowth from "@/pages/EconomicGrowth";
+import VolunteerEvents from "@/pages/VolunteerEvents";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -276,6 +277,11 @@ function Router() {
       <Route path="/events">
         <MainLayout>
           <EventsPage />
+        </MainLayout>
+      </Route>
+      <Route path="/volunteer-events">
+        <MainLayout>
+          <VolunteerEvents />
         </MainLayout>
       </Route>
       <Route path="/attendee-booking">

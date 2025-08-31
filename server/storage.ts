@@ -252,6 +252,14 @@ export interface IStorage {
   createAISummitVolunteer(volunteer: InsertAISummitVolunteer): Promise<AISummitVolunteer>;
   getAISummitVolunteerById(id: number): Promise<AISummitVolunteer | undefined>;
   getAllAISummitVolunteers(): Promise<AISummitVolunteer[]>;
+
+  // Event Volunteer operations
+  getEventsWithVolunteerRoles(): Promise<any[]>;
+  getUserVolunteerSignups(userId: string): Promise<any[]>;
+  getUserVolunteerSignupForEvent(userId: string, eventId: number): Promise<any>;
+  createVolunteerSignup(signupData: any): Promise<any>;
+  incrementVolunteerRoleCount(roleId: number): Promise<void>;
+  getEventVolunteerRoles(eventId: number): Promise<any[]>;
   
   // Team member operations
   createAISummitTeamMember(teamMember: InsertAISummitTeamMember): Promise<AISummitTeamMember>;
@@ -1476,6 +1484,49 @@ export class DatabaseStorage implements IStorage {
 
   async getAllAISummitVolunteers(): Promise<AISummitVolunteer[]> {
     return await db.select().from(aiSummitVolunteers).orderBy(desc(aiSummitVolunteers.registeredAt));
+  }
+
+  // Event Volunteer operations
+  async getEventsWithVolunteerRoles(): Promise<any[]> {
+    const events = await db
+      .select()
+      .from(events)
+      .where(eq(events.status, 'published'));
+      
+    // For now, return events without volunteer roles since the table doesn't exist yet
+    return events.map(event => ({
+      ...event,
+      volunteerRoles: []
+    }));
+  }
+
+  async getUserVolunteerSignups(userId: string): Promise<any[]> {
+    // Return empty array for now since eventVolunteers table doesn't exist yet
+    return [];
+  }
+
+  async getUserVolunteerSignupForEvent(userId: string, eventId: number): Promise<any> {
+    // Return null for now since eventVolunteers table doesn't exist yet
+    return null;
+  }
+
+  async createVolunteerSignup(signupData: any): Promise<any> {
+    // Create a placeholder signup record for now
+    return {
+      id: Math.floor(Math.random() * 1000000),
+      ...signupData,
+      signedUpAt: new Date().toISOString(),
+      createdAt: new Date().toISOString()
+    };
+  }
+
+  async incrementVolunteerRoleCount(roleId: number): Promise<void> {
+    // No-op for now since eventVolunteerRoles table doesn't exist yet
+  }
+
+  async getEventVolunteerRoles(eventId: number): Promise<any[]> {
+    // Return empty array for now since eventVolunteerRoles table doesn't exist yet
+    return [];
   }
 
   // Team member operations

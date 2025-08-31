@@ -439,10 +439,29 @@ export const eventSpeakers = pgTable("event_speakers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Event Volunteer Roles - Defines what volunteer roles are needed for each event
+export const eventVolunteerRoles = pgTable("event_volunteer_roles", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => events.id),
+  roleName: varchar("role_name").notNull(), // e.g., "Registration Desk Helper", "Technical Support"
+  roleDescription: text("role_description").notNull(), // Detailed description of what the role involves
+  requirements: text("requirements"), // Any specific skills or requirements
+  timeCommitment: varchar("time_commitment"), // e.g., "2-3 hours", "Full day", "Morning shift"
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  location: varchar("location"), // Specific location within the event venue
+  maxVolunteers: integer("max_volunteers").default(1), // How many volunteers needed for this role
+  currentVolunteers: integer("current_volunteers").default(0), // How many signed up
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Event Volunteers - For events needing volunteers
 export const eventVolunteers = pgTable("event_volunteers", {
   id: serial("id").primaryKey(),
   eventId: integer("event_id").notNull().references(() => events.id),
+  volunteerRoleId: integer("volunteer_role_id").references(() => eventVolunteerRoles.id),
+  userId: varchar("user_id").references(() => users.id), // Link to registered user
   registrationId: integer("registration_id").references(() => eventRegistrations.id),
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
@@ -454,6 +473,7 @@ export const eventVolunteers = pgTable("event_volunteers", {
   tShirtSize: varchar("t_shirt_size"),
   emergencyContact: varchar("emergency_contact"),
   status: varchar("status").default("confirmed"), // pending, confirmed, cancelled
+  signedUpAt: timestamp("signed_up_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1580,6 +1600,16 @@ export type EventVolunteer = typeof eventVolunteers.$inferSelect;
 
 export type InsertEventSponsor = z.infer<typeof insertEventSponsorSchema>;
 export type EventSponsor = typeof eventSponsors.$inferSelect;
+
+// Zod schemas for volunteer roles
+export const insertEventVolunteerRoleSchema = createInsertSchema(eventVolunteerRoles).omit({
+  id: true,
+  currentVolunteers: true,
+  createdAt: true,
+});
+
+export type InsertEventVolunteerRole = z.infer<typeof insertEventVolunteerRoleSchema>;
+export type EventVolunteerRole = typeof eventVolunteerRoles.$inferSelect;
 
 // Additional Event System Types
 

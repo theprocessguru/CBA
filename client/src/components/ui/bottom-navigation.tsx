@@ -42,7 +42,7 @@ const BottomNavigation = () => {
       if (hasVolunteerType) {
         items.push(
           { href: "/directory", icon: Users, label: "Directory" },
-          { href: "/event-scanner", icon: HandHeart, label: "Volunteer" }
+          { href: "/volunteer-events", icon: HandHeart, label: "Volunteer" }
         );
       }
       
