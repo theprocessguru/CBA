@@ -63,11 +63,16 @@ const AISummit = () => {
   });
 
   // Fetch person types and categories for the form
-  const { data: selfRegisterPersonTypes = [] } = useQuery<any[]>({
+  const { data: allPersonTypes = [] } = useQuery<any[]>({
     queryKey: ['/api/person-types'],
     staleTime: 0,
     cacheTime: 0,
   });
+
+  // Filter person types to exclude admin-only types
+  const selfRegisterPersonTypes = allPersonTypes.filter((type: any) => 
+    !['administrator', 'staff', 'sponsor'].includes(type.name.toLowerCase())
+  );
 
 
   const { data: categories = [] } = useQuery<any[]>({
@@ -117,6 +122,19 @@ const AISummit = () => {
     businessCategory: "",
     businessDescription: ""
   });
+
+  // Auto-select attendee person type when filtered person types are available
+  useEffect(() => {
+    if (selfRegisterPersonTypes.length > 0 && registrationData.selectedPersonTypes.length === 0) {
+      const attendeeType = selfRegisterPersonTypes.find((type: any) => type.name === 'attendee');
+      if (attendeeType) {
+        setRegistrationData(prev => ({
+          ...prev,
+          selectedPersonTypes: [attendeeType.id]
+        }));
+      }
+    }
+  }, [selfRegisterPersonTypes]);
 
   // Auto-populate form when user data is available
   useEffect(() => {
