@@ -739,7 +739,18 @@ export class DatabaseStorage implements IStorage {
       query = query.limit(options.limit);
     }
     
-    query = query.orderBy(desc(businesses.createdAt));
+    // Sort by contact completeness first (businesses with contact info first), then by creation date
+    query = query.orderBy(
+      // Priority sorting: businesses with contact info (phone, email, or website) first
+      sql`CASE 
+        WHEN (${businesses.phone} IS NOT NULL AND ${businesses.phone} != '') 
+          OR (${businesses.email} IS NOT NULL AND ${businesses.email} != '') 
+          OR (${businesses.website} IS NOT NULL AND ${businesses.website} != '') 
+        THEN 0 
+        ELSE 1 
+      END`,
+      desc(businesses.createdAt)
+    );
     
     return await query;
   }
