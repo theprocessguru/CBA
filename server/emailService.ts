@@ -967,6 +967,131 @@ Croydon Business Association
     }
   }
 
+  // Bulk password reset email function for imported users without passwords
+  async sendMassPasswordResetEmails(): Promise<{ 
+    success: boolean; 
+    totalSent: number; 
+    totalFailed: number; 
+    results: Array<{ email: string; success: boolean; message: string }> 
+  }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ email: 'system', success: false, message: 'Email service not configured' }]
+      };
+    }
+
+    try {
+      // Import required modules
+      const { users, passwordResetTokens } = await import('@shared/schema');
+      const { eq, isNull, or, and } = await import('drizzle-orm');
+      const crypto = await import('crypto');
+
+      // Get all users without passwords (imported users)
+      const usersNeedingPasswords = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+        })
+        .from(users)
+        .where(and(
+          eq(users.accountStatus, 'active'),
+          or(
+            isNull(users.passwordHash),
+            eq(users.passwordHash, '')
+          )
+        ));
+
+      const results: Array<{ email: string; success: boolean; message: string }> = [];
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      console.log(`Starting mass password reset email send to ${usersNeedingPasswords.length} users without passwords`);
+
+      // Send emails in batches to avoid overwhelming the email service
+      const batchSize = 10;
+      for (let i = 0; i < usersNeedingPasswords.length; i += batchSize) {
+        const batch = usersNeedingPasswords.slice(i, i + batchSize);
+        
+        // Process batch in parallel
+        const batchPromises = batch.map(async (user) => {
+          try {
+            if (!user.email) {
+              throw new Error('No email address');
+            }
+
+            // Generate password reset token
+            const resetToken = crypto.randomBytes(32).toString('hex');
+            const resetTokenExpiry = new Date();
+            resetTokenExpiry.setHours(resetTokenExpiry.getHours() + 24); // 24-hour expiry
+
+            // Save password reset token to database
+            await db.insert(passwordResetTokens).values({
+              userId: user.id,
+              token: resetToken,
+              expiresAt: resetTokenExpiry,
+              createdAt: new Date()
+            });
+
+            // Send password reset email
+            const userName = user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Member';
+            const emailResult = await this.sendPasswordResetEmail(
+              user.email,
+              resetToken,
+              userName
+            );
+
+            if (emailResult) {
+              totalSent++;
+              results.push({ email: user.email, success: true, message: 'Password reset email sent successfully' });
+            } else {
+              throw new Error('Failed to send password reset email');
+            }
+          } catch (error: any) {
+            totalFailed++;
+            results.push({ 
+              email: user.email || 'unknown', 
+              success: false, 
+              message: error.message 
+            });
+            console.error(`Failed to send password reset email to ${user.email}:`, error.message);
+          }
+        });
+
+        // Wait for batch to complete
+        await Promise.all(batchPromises);
+
+        // Add delay between batches to avoid rate limits
+        if (i + batchSize < usersNeedingPasswords.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        }
+
+        console.log(`Batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(usersNeedingPasswords.length/batchSize)} completed: ${batch.length} emails processed`);
+      }
+
+      console.log(`Mass password reset email complete: ${totalSent} sent, ${totalFailed} failed`);
+
+      return {
+        success: totalSent > 0,
+        totalSent,
+        totalFailed,
+        results
+      };
+    } catch (error: any) {
+      console.error('Mass password reset email failed:', error);
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 1,
+        results: [{ email: 'system', success: false, message: error.message }]
+      };
+    }
+  }
+
   public async sendSimpleTestEmail(to: string, userName: string = 'Test User'): Promise<boolean> {
     if (!this.isConfigured()) {
       console.warn('Email service not configured. Test email not sent to:', to);

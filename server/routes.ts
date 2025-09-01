@@ -2551,6 +2551,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mass password reset email endpoint (admin only) - for users without passwords
+  app.post('/api/admin/email/send-mass-password-reset', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated mass password reset email send`);
+      
+      // Send password reset emails to all users without passwords
+      const result = await emailService.sendMassPasswordResetEmails();
+      
+      if (result.success) {
+        res.json({
+          message: `Mass password reset emails completed: ${result.totalSent} sent to users without passwords, ${result.totalFailed} failed`,
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      } else {
+        res.status(500).json({
+          message: "Mass password reset email failed",
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      }
+    } catch (error) {
+      console.error("Error in mass password reset email:", error);
+      res.status(500).json({ message: "Failed to send mass password reset emails" });
+    }
+  });
+
   // Get email logs and statistics (admin only)
   app.get('/api/admin/email/logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
