@@ -2518,6 +2518,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mass verification email to ALL users endpoint (admin only)
+  app.post('/api/admin/email/send-mass-verification-all', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated mass verification email send to ALL users`);
+      
+      // Send verification emails to ALL users in the database
+      const result = await emailService.sendMassVerificationEmailsToAll();
+      
+      if (result.success) {
+        res.json({
+          message: `Mass verification email to ALL users completed: ${result.totalSent} sent, ${result.totalFailed} failed`,
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      } else {
+        res.status(500).json({
+          message: "Mass verification email to ALL users failed",
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      }
+    } catch (error) {
+      console.error("Error in mass verification email to all users:", error);
+      res.status(500).json({ message: "Failed to send mass verification emails to all users" });
+    }
+  });
+
   // Get email logs and statistics (admin only)
   app.get('/api/admin/email/logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

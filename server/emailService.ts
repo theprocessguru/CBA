@@ -497,6 +497,159 @@ export class EmailService {
   }
 
   /**
+   * Send verification emails to ALL users in the database (mass send)
+   */
+  async sendMassVerificationEmailsToAll(): Promise<{ 
+    success: boolean; 
+    totalSent: number; 
+    totalFailed: number; 
+    results: Array<{ email: string; success: boolean; message: string }> 
+  }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ email: 'system', success: false, message: 'Email service not configured' }]
+      };
+    }
+
+    try {
+      // Import required modules
+      const { users } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+      const crypto = await import('crypto');
+
+      // Get ALL active users
+      const allUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          participantType: users.participantType,
+          emailVerified: users.emailVerified
+        })
+        .from(users)
+        .where(eq(users.accountStatus, 'active'));
+
+      const results: Array<{ email: string; success: boolean; message: string }> = [];
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      console.log(`Starting mass verification email send to ALL ${allUsers.length} users`);
+
+      // Send emails in batches to avoid overwhelming the email service
+      const batchSize = 10;
+      for (let i = 0; i < allUsers.length; i += batchSize) {
+        const batch = allUsers.slice(i, i + batchSize);
+        
+        // Process batch in parallel
+        const batchPromises = batch.map(async (user) => {
+          try {
+            if (!user.email) {
+              throw new Error('No email address');
+            }
+
+            // Generate verification token (even for already verified users)
+            const verificationToken = crypto.randomBytes(32).toString('hex');
+            const verificationTokenExpiry = new Date();
+            verificationTokenExpiry.setHours(verificationTokenExpiry.getHours() + 24); // 24-hour expiry
+
+            // Update user with verification token
+            await db
+              .update(users)
+              .set({
+                verificationToken,
+                verificationTokenExpiry,
+                updatedAt: new Date()
+              })
+              .where(eq(users.id, user.id));
+
+            // Send verification email
+            const emailResult = await this.sendVerificationEmail(
+              user.email,
+              user.firstName || 'Member',
+              verificationToken,
+              user.participantType || 'attendee'
+            );
+
+            if (emailResult.success) {
+              totalSent++;
+              return { 
+                email: user.email, 
+                success: true, 
+                message: `Verification email sent successfully (${user.emailVerified ? 'already verified' : 'unverified'})` 
+              };
+            } else {
+              totalFailed++;
+              return { 
+                email: user.email, 
+                success: false, 
+                message: emailResult.message 
+              };
+            }
+
+          } catch (error) {
+            totalFailed++;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Failed to send verification email to ${user.email}:`, errorMessage);
+            return { 
+              email: user.email || 'unknown', 
+              success: false, 
+              message: errorMessage 
+            };
+          }
+        });
+
+        // Wait for batch to complete
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Process results
+        batchResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            results.push(result.value);
+          } else {
+            totalFailed++;
+            results.push({ 
+              email: 'unknown', 
+              success: false, 
+              message: result.reason?.message || 'Promise rejected' 
+            });
+          }
+        });
+
+        // Add delay between batches to avoid rate limiting
+        if (i + batchSize < allUsers.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        }
+      }
+
+      console.log(`Mass verification email to ALL users complete: ${totalSent} sent, ${totalFailed} failed`);
+
+      return {
+        success: true,
+        totalSent,
+        totalFailed,
+        results
+      };
+
+    } catch (error) {
+      console.error('Error in mass verification email send to all users:', error);
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ 
+          email: 'system', 
+          success: false, 
+          message: 'System error in mass verification email send to all users' 
+        }]
+      };
+    }
+  }
+
+  /**
    * Send admin welcome email with temporary password
    */
   async sendAdminWelcomeEmail(

@@ -106,6 +106,29 @@ export default function EmailLogs() {
     },
   });
 
+  // Mass verification email to ALL users mutation
+  const massVerificationAllMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/email/send-mass-verification-all');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "🎯 Mass Verification Email Sent to ALL Users",
+        description: `Successfully sent verification emails to ALL 360 users: ${data.totalSent} sent, ${data.totalFailed} failed`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/email/logs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/email/statistics'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send mass verification emails to all users",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -220,25 +243,50 @@ export default function EmailLogs() {
       <Card>
         <CardHeader>
           <CardTitle>Mass Email Actions</CardTitle>
-          <CardDescription>Send verification emails to all unverified users</CardDescription>
+          <CardDescription>Send verification emails to unverified users or to ALL users in the database</CardDescription>
         </CardHeader>
         <CardContent>
-          <Alert className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              This will send verification emails to all users who haven't verified their email addresses. 
-              Users who were imported without going through the normal registration process will receive verification links.
-            </AlertDescription>
-          </Alert>
-          
-          <Button 
-            onClick={() => massVerificationMutation.mutate()}
-            disabled={massVerificationMutation.isPending}
-            className="w-full sm:w-auto"
-          >
-            <Send className="w-4 h-4 mr-2" />
-            {massVerificationMutation.isPending ? "Sending..." : "Send Mass Verification Emails"}
-          </Button>
+          <div className="space-y-6">
+            {/* Send to Unverified Users */}
+            <div>
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  This will send verification emails to all users who haven't verified their email addresses. 
+                  Users who were imported without going through the normal registration process will receive verification links.
+                </AlertDescription>
+              </Alert>
+              <Button 
+                onClick={() => massVerificationMutation.mutate()}
+                disabled={massVerificationMutation.isPending}
+                className="w-full sm:w-auto"
+                variant="outline"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {massVerificationMutation.isPending ? "Sending..." : "Send to Unverified Users Only"}
+              </Button>
+            </div>
+
+            {/* Send to ALL Users */}
+            <div className="border-t pt-6">
+              <Alert className="mb-4 border-orange-200 bg-orange-50">
+                <AlertCircle className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-orange-800">
+                  <strong>🎯 Send to ALL 360 users:</strong> This will send verification emails to EVERYONE in the database, 
+                  including both verified and unverified users. Use this for important announcements or when you need 
+                  to re-verify all accounts.
+                </AlertDescription>
+              </Alert>
+              <Button 
+                onClick={() => massVerificationAllMutation.mutate()}
+                disabled={massVerificationAllMutation.isPending}
+                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {massVerificationAllMutation.isPending ? 'Sending to All Users...' : '🎯 Send Verification Email to ALL 360 Users'}
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
