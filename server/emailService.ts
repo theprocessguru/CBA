@@ -859,9 +859,18 @@ Croydon Business Association
   }
 
   public async sendPasswordResetEmail(to: string, resetToken: string, userName?: string): Promise<boolean> {
+    const subject = 'Password Reset - Croydon Business Association';
+    
     if (!this.isConfigured()) {
       console.warn('Email service not configured. Password reset token:', resetToken);
       console.warn(`Reset URL: ${this.getBaseUrl()}/reset-password?token=${resetToken}`);
+      
+      // Log failed attempt to database
+      await this.logEmail(null, to, subject, 'Email service not configured', 'password_reset', 'failed', { 
+        error: 'Email service not configured',
+        resetToken 
+      });
+      
       return false;
     }
 
@@ -949,17 +958,33 @@ Croydon Business Association
       const result = await this.transporter!.sendMail({
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to,
-        subject: 'Password Reset - Croydon Business Association',
+        subject,
         text: textContent,
         html: htmlContent,
       });
 
       console.log(`Password reset email sent to ${to}. Message ID: ${result.messageId}`);
       console.log('SMTP Response:', result.response);
+      
+      // Log successful email to database
+      await this.logEmail(null, to, subject, htmlContent, 'password_reset', 'sent', { 
+        resetToken,
+        userName: userName || 'Member',
+        messageId: result.messageId 
+      });
+      
       return true;
     } catch (error) {
       console.error('Failed to send password reset email:', error);
       console.error('SMTP Error details:', error);
+      
+      // Log failed email to database
+      await this.logEmail(null, to, subject, htmlContent, 'password_reset', 'failed', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        resetToken,
+        userName: userName || 'Member'
+      });
+      
       // Fall back to console logging for development
       console.warn('Email failed, logging reset info:');
       console.warn(`Reset URL: ${resetUrl}`);

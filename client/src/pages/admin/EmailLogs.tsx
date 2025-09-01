@@ -129,6 +129,29 @@ export default function EmailLogs() {
     },
   });
 
+  // Mass password reset email mutation
+  const massPasswordResetMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/email/send-mass-password-reset');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "🔐 Mass Password Reset Complete",
+        description: `Successfully sent ${data.totalSent} password reset emails to users without passwords, ${data.totalFailed} failed`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/email/logs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/email/statistics'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send mass password reset emails",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -243,7 +266,7 @@ export default function EmailLogs() {
       <Card>
         <CardHeader>
           <CardTitle>Mass Email Actions</CardTitle>
-          <CardDescription>Send verification emails to unverified users or to ALL users in the database</CardDescription>
+          <CardDescription>Send verification emails to users or password reset emails to imported users without passwords</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -284,6 +307,25 @@ export default function EmailLogs() {
               >
                 <Send className="w-4 h-4 mr-2" />
                 {massVerificationAllMutation.isPending ? 'Sending to All Users...' : '🎯 Send Verification Email to ALL 360 Users'}
+              </Button>
+            </div>
+
+            {/* Send Password Reset Emails */}
+            <div className="border-t pt-6">
+              <Alert className="mb-4 border-yellow-200 bg-yellow-50">
+                <AlertCircle className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-800">
+                  <strong>🔐 Password Reset for Imported Users:</strong> This will send password reset emails to all 337 users 
+                  who were imported without passwords. They'll receive secure 24-hour reset links to create their own passwords.
+                </AlertDescription>
+              </Alert>
+              <Button 
+                onClick={() => massPasswordResetMutation.mutate()}
+                disabled={massPasswordResetMutation.isPending}
+                className="w-full sm:w-auto bg-yellow-600 hover:bg-yellow-700"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {massPasswordResetMutation.isPending ? "Sending Reset Links..." : "🔐 Send Password Reset Emails"}
               </Button>
             </div>
           </div>
