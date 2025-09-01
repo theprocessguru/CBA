@@ -5549,11 +5549,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const events = await db.select().from(cbaEvents);
       
-      // Parse JSON fields for frontend consumption
+      // Parse tags field for frontend consumption
       const eventsWithParsedFields = events.map(event => ({
         ...event,
-
-        tags: event.tags ? JSON.parse(event.tags) : []
+        tags: event.tags ? 
+          (event.tags.startsWith('[') ? JSON.parse(event.tags) : event.tags.split(',').map(tag => tag.trim())) 
+          : []
       }));
       
       res.json(eventsWithParsedFields);
