@@ -619,10 +619,24 @@ const AISummit = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: typeof registrationData) => {
+      // Validate required fields on client-side
+      if (!data.firstName?.trim() || !data.lastName?.trim()) {
+        throw new Error("First name and last name are required");
+      }
+      if (!data.email?.trim()) {
+        throw new Error("Email address is required");
+      }
+      
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(data.email.trim())) {
+        throw new Error("Please provide a valid email address");
+      }
+
       const submissionData = {
         ...data,
-        name: `${data.firstName} ${data.lastName}`.trim(),
-        phoneNumber: data.phone,
+        name: `${data.firstName.trim()} ${data.lastName.trim()}`,
+        phoneNumber: data.phone || "",
         organizationMemberships: showOrganizationMemberships ? organizationMemberships.filter(org => org.organizationName) : undefined,
       };
       const response = await apiRequest("POST", "/api/ai-summit-registration", submissionData);
@@ -677,6 +691,8 @@ const AISummit = () => {
       refetchStatus();
     },
     onError: (error: any) => {
+      console.error("Registration error:", error);
+      
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
@@ -688,7 +704,22 @@ const AISummit = () => {
         setTimeout(() => {
           window.location.href = "/login";
         }, 2000);
+      } else if (error?.response?.status === 400) {
+        // Handle validation errors
+        toast({
+          title: "Registration Error",
+          description: error?.response?.data?.message || error.message || "Please check your information and try again.",
+          variant: "destructive",
+        });
+      } else if (error?.response?.status === 500) {
+        // Handle server errors
+        toast({
+          title: "Server Error",
+          description: "There was a problem processing your registration. Please try again in a few moments or contact support if the issue persists.",
+          variant: "destructive",
+        });
       } else {
+        // Handle other errors including client-side validation
         toast({
           title: "Registration Failed",
           description: error instanceof Error ? error.message : "Failed to register. Please try again.",
