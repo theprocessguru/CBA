@@ -179,8 +179,8 @@ const BusinessOnboardingChecklist = () => {
       },
       {
         id: "qr-customization",
-        title: "Personalize Your QR Code",
-        description: "Professional networking identity for events",
+        title: "Set Your Universal Access Key", 
+        description: "QR handle for AI Summit, workshops & all events",
         completed: hasQrHandle,
         isNext: hasProducts && !hasQrHandle,
         actionText: "Customize QR Code",
@@ -188,9 +188,9 @@ const BusinessOnboardingChecklist = () => {
         icon: <QrCode className="h-5 w-5" />,
         estimatedTime: "2 minutes",
         benefits: [
-          "Professional networking appearance",
-          "Easy to remember identifier",
-          "Enhanced event experience"
+          "Universal access to AI Summit & workshops",
+          "Your master key for all future events", 
+          "Professional event check-in experience"
         ],
         tips: [
           "Use your business name or initials",

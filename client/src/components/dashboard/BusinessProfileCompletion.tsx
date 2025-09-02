@@ -139,17 +139,17 @@ const BusinessProfileCompletion = () => {
       },
       {
         id: "qr-customization",
-        title: "Custom QR Handle",
-        description: "Personalize your QR code for networking",
+        title: "Universal Access Key",
+        description: "Your QR handle for AI Summit, workshops & all events",
         completed: hasQrHandle,
         weight: 5,
         actionText: "Customize QR Code",
         actionLink: "/dashboard/qr-customization",
         icon: <QrCode className="h-4 w-4" />,
         benefits: [
-          "Professional networking appearance",
-          "Easy to remember QR identifier",
-          "Personal branding at events"
+          "Universal access to AI Summit & workshops",
+          "Your master key for all events",
+          "Professional event check-in experience"
         ]
       }
     ];
@@ -311,7 +311,7 @@ const BusinessProfileCompletion = () => {
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• 3x higher visibility in business directory</li>
             <li>• Eligible for featured listing opportunities</li>
-            <li>• Professional QR code for networking events</li>
+            <li>• Universal QR access key for AI Summit & workshops</li>
             <li>• Access to detailed analytics and insights</li>
           </ul>
         </div>

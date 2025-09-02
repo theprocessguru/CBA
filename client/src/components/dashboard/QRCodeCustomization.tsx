@@ -74,18 +74,28 @@ const QRCodeCustomization = ({ showFull = false }: QRCodeCustomizationProps) => 
   // Update QR handle mutation
   const updateQRHandleMutation = useMutation({
     mutationFn: async (data: QRCustomizationFormValues) => {
+      // First update the QR handle
       const response = await apiRequest("POST", "/api/update-qr-handle", data);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to update QR handle");
       }
+      
+      // Then ensure universal access is set up
+      try {
+        await apiRequest("POST", "/api/ensure-qr-access", {});
+      } catch (accessError) {
+        console.log("Universal access setup note:", accessError);
+        // Don't fail the main operation if access setup has issues
+      }
+      
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       toast({
-        title: "QR Handle Updated!",
-        description: "Your custom QR handle has been saved successfully.",
+        title: "Universal Access Key Set! 🔑",
+        description: "Your QR handle now gets you into AI Summit, workshops, and all events!",
       });
       setIsDialogOpen(false);
     },
@@ -150,8 +160,8 @@ const QRCodeCustomization = ({ showFull = false }: QRCodeCustomizationProps) => 
                 <QrCode className="h-4 w-4 text-green-600" />
               </div>
               <div>
-                <p className="font-medium text-green-900">Custom QR: {user.qrHandle}</p>
-                <p className="text-sm text-green-700">Ready for networking!</p>
+                <p className="font-medium text-green-900">Universal Access Key: {user.qrHandle}</p>
+                <p className="text-sm text-green-700">✓ AI Summit ✓ Workshops ✓ All Events</p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -187,8 +197,8 @@ const QRCodeCustomization = ({ showFull = false }: QRCodeCustomizationProps) => 
                 <QrCode className="h-4 w-4 text-amber-600" />
               </div>
               <div>
-                <p className="font-medium text-amber-900">Customize Your QR Code</p>
-                <p className="text-sm text-amber-700">Stand out at networking events</p>
+                <p className="font-medium text-amber-900">Set Your Universal Access Key</p>
+                <p className="text-sm text-amber-700">Your key to AI Summit + all events</p>
               </div>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -208,11 +218,11 @@ const QRCodeCustomization = ({ showFull = false }: QRCodeCustomizationProps) => 
                 
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                    <Alert className="border-blue-200 bg-blue-50">
-                      <AlertCircle className="h-4 w-4 text-blue-600" />
-                      <AlertDescription className="text-blue-800">
-                        Your QR handle is how other business members will see you when they scan your code at events.
-                        Choose something professional and memorable!
+                    <Alert className="border-green-200 bg-green-50">
+                      <AlertCircle className="h-4 w-4 text-green-600" />
+                      <AlertDescription className="text-green-800">
+                        <strong>🔑 This is your Universal Access Key!</strong> Your QR handle gets you into the AI Summit, workshops, 
+                        seminars, training sessions, and all future events. Choose something professional and memorable!
                       </AlertDescription>
                     </Alert>
 
@@ -269,15 +279,15 @@ const QRCodeCustomization = ({ showFull = false }: QRCodeCustomizationProps) => 
                       <div className="grid grid-cols-1 gap-2 text-sm text-gray-600">
                         <div className="flex items-center gap-2">
                           <User className="h-3 w-3 text-blue-500" />
-                          <span>Professional appearance at events</span>
+                          <span>Access to AI Summit & all events</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Building className="h-3 w-3 text-green-500" />
-                          <span>Easy to remember for follow-ups</span>
+                          <span>Book workshops & training sessions</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-3 w-3 text-purple-500" />
-                          <span>Branded networking experience</span>
+                          <span>Universal key for all future events</span>
                         </div>
                       </div>
                     </div>

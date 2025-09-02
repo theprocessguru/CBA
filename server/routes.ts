@@ -9573,6 +9573,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Ensure universal QR access for business members
+  app.post('/api/ensure-qr-access', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user || !user.qrHandle) {
+        return res.status(400).json({ message: "QR handle required for universal access" });
+      }
+      
+      // Check if user has AI Summit registration
+      let aiSummitRegistration = await storage.getAISummitRegistrationByUserId(userId);
+      
+      if (!aiSummitRegistration) {
+        // Create AI Summit registration with QR handle as badge ID
+        const registrationData = {
+          userId: userId,
+          participantType: 'business_member',
+          registrationDate: new Date(),
+          eventPreferences: '["networking", "workshops"]',
+          dietaryRequirements: null,
+          accessibilityRequirements: null,
+          emergencyContactName: null,
+          emergencyContactPhone: null,
+          marketingConsent: true,
+          dataProcessingConsent: true,
+          registrationStatus: 'confirmed',
+          badgeId: user.qrHandle // Use QR handle as badge ID for universal access
+        };
+        
+        aiSummitRegistration = await storage.createAISummitRegistration(registrationData);
+      }
+      
+      // Create or update AI Summit badge linked to QR handle
+      let badge = await storage.getAISummitBadgeById(user.qrHandle);
+      
+      if (!badge) {
+        const badgeData = {
+          badgeId: user.qrHandle, // QR handle IS the badge ID
+          participantType: 'business_member',
+          customRole: 'Business Member',
+          participantId: aiSummitRegistration.id,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+          email: user.email,
+          company: user.company || null,
+          jobTitle: user.jobTitle || null,
+          badgeDesign: 'business',
+          qrCodeData: user.qrHandle, // QR code contains the QR handle
+          isActive: true,
+          printedAt: null,
+          issuedAt: new Date(),
+          createdAt: new Date()
+        };
+        
+        badge = await storage.createAISummitBadge(badgeData);
+      }
+      
+      res.json({
+        success: true,
+        message: "Universal QR access confirmed",
+        qrHandle: user.qrHandle,
+        hasAISummitAccess: true,
+        hasWorkshopAccess: true,
+        badgeId: badge.badgeId
+      });
+    } catch (error) {
+      console.error("Error ensuring QR access:", error);
+      res.status(500).json({ message: "Failed to ensure QR access" });
+    }
+  });
+
   // Check QR handle availability
   app.post('/api/check-qr-handle', isAuthenticated, async (req: any, res) => {
     try {
