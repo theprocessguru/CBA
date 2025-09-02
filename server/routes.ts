@@ -2785,6 +2785,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test SMS endpoint
+  app.post('/api/test-sms', async (req: any, res) => {
+    try {
+      const { phone, message } = req.body;
+      
+      if (!phone) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      const testMessage = message || "Test SMS from CBA platform - your messaging system is working! 🎯";
+
+      // Get MyT Automation service
+      const mytService = getMyTAutomationService();
+      if (!mytService) {
+        return res.status(400).json({ 
+          message: "MyT Automation service not configured",
+          details: "SMS service requires MyT Automation integration"
+        });
+      }
+
+      console.log(`Sending test SMS to: ${phone}`);
+      
+      // Send test SMS
+      await mytService.sendSMSNotification(phone, testMessage);
+      
+      console.log(`Test SMS sent successfully to ${phone}`);
+      
+      res.json({ 
+        message: "Test SMS sent successfully", 
+        phone: phone,
+        content: testMessage
+      });
+    } catch (error) {
+      console.error("Error sending test SMS:", error);
+      res.status(500).json({ 
+        message: "Failed to send test SMS", 
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Simple test email endpoint (no auth required for testing)
   app.post('/api/test-email', async (req: any, res) => {
     try {
