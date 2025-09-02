@@ -1374,10 +1374,13 @@ export type InsertBusinessEventRegistration = z.infer<typeof insertBusinessEvent
 
 // Enhanced Event System Schemas
 export const insertCBAEventSchema = createInsertSchema(cbaEvents, {
-  eventDate: z.string().transform((val) => new Date(val)),
-  startTime: z.string().transform((val) => new Date(val)),
-  endTime: z.string().transform((val) => new Date(val)),
-  registrationDeadline: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+  eventDate: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)),
+  startTime: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)),
+  endTime: z.union([z.string(), z.date()]).transform((val) => val instanceof Date ? val : new Date(val)),
+  registrationDeadline: z.union([z.string(), z.date()]).optional().transform((val) => {
+    if (!val) return undefined;
+    return val instanceof Date ? val : new Date(val);
+  }),
   imageUrl: z.string().optional(),
 }).omit({ id: true, createdAt: true, updatedAt: true, currentRegistrations: true });
 
