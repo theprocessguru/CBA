@@ -1137,13 +1137,24 @@ Croydon Business Association
 
     try {
       console.log(`Sending simple test email from: ${this.config!.fromEmail} to: ${to}`);
+      console.log(`SMTP Config: ${this.config!.host}:${this.config!.port}, User: ${this.config!.user}`);
+      
+      // First, verify the SMTP connection
+      try {
+        await this.transporter!.verify();
+        console.log('SMTP connection verified successfully');
+      } catch (verifyError) {
+        console.error('SMTP verification failed:', verifyError);
+        return false;
+      }
       
       // Try with minimal headers and very simple content
       const result = await this.transporter!.sendMail({
         from: this.config!.fromEmail,
         to,
-        subject: 'Hello',
-        text: `Hello ${userName}, this is a test.`,
+        subject: 'Test Email from CBA Platform',
+        text: `Hello ${userName}, this is a test email to verify the system is working.`,
+        html: simpleHtml,
         headers: {
           'X-Priority': '3',
           'X-MSMail-Priority': 'Normal',
@@ -1152,11 +1163,22 @@ Croydon Business Association
         }
       });
 
-      console.log(`Test email sent to ${to}. Message ID: ${result.messageId}`);
-      console.log('SMTP Response:', result.response);
+      console.log(`✅ Test email sent successfully to ${to}`);
+      console.log(`📧 Message ID: ${result.messageId}`);
+      console.log(`📤 SMTP Response: ${result.response}`);
+      console.log(`🔐 Authentication: ${result.accepted?.length > 0 ? 'ACCEPTED' : 'REJECTED'}`);
+      
       return true;
     } catch (error) {
-      console.error('Failed to send test email:', error);
+      console.error('❌ FAILED to send test email:', error);
+      
+      // Log detailed error information
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+      
       return false;
     }
   }
