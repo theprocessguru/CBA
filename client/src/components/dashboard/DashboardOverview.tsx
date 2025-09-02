@@ -24,6 +24,7 @@ import { usePersonTypes } from "@/hooks/usePersonTypes";
 import { Business, Offer, Product } from "@shared/schema";
 import { RestrictedAccessNotice } from "@/components/RestrictedAccessNotice";
 import { hasRestrictedAccess } from "@/lib/accessControl";
+import BusinessProfileCompletion from "./BusinessProfileCompletion";
 
 const DashboardOverview = () => {
   const { user } = useAuth();
@@ -391,24 +392,8 @@ const DashboardOverview = () => {
         </Card>
       </div>
       
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <h4 className="font-medium text-neutral-900 mb-2">Business Profile Completion</h4>
-          {isLoading ? (
-            <Skeleton className="h-2.5 w-full mb-2" />
-          ) : (
-            <>
-              <Progress value={profileCompletion} className="h-2.5" />
-              <div className="flex justify-between mt-2 text-xs text-neutral-500">
-                <span>{profileCompletion}% complete</span>
-                <Link href="/dashboard/business-profile">
-                  <a className="text-primary hover:text-primary-dark">Complete now</a>
-                </Link>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+      {/* Enhanced Profile Completion */}
+      <BusinessProfileCompletion />
       
       <div>
         <h4 className="font-medium text-neutral-900 mb-4">Quick Actions</h4>

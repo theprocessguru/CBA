@@ -9573,6 +9573,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check QR handle availability
+  app.post('/api/check-qr-handle', isAuthenticated, async (req: any, res) => {
+    try {
+      const { qrHandle } = req.body;
+      const userId = req.user.id;
+      
+      if (!qrHandle || qrHandle.length < 3) {
+        return res.json({ available: false, message: "QR handle must be at least 3 characters" });
+      }
+      
+      // Check if handle is already taken by another user
+      const existingUser = await storage.getUserByQRHandle(qrHandle.toLowerCase());
+      const isAvailable = !existingUser || existingUser.id === userId;
+      
+      res.json({ 
+        available: isAvailable,
+        message: isAvailable ? "QR handle is available" : "QR handle is already taken"
+      });
+    } catch (error) {
+      console.error("Error checking QR handle:", error);
+      res.status(500).json({ available: false, message: "Failed to check availability" });
+    }
+  });
+
+  // Update QR handle
+  app.post('/api/update-qr-handle', isAuthenticated, async (req: any, res) => {
+    try {
+      const { qrHandle } = req.body;
+      const userId = req.user.id;
+      
+      if (!qrHandle || qrHandle.length < 3) {
+        return res.status(400).json({ message: "QR handle must be at least 3 characters" });
+      }
+      
+      // Check if handle is already taken by another user
+      const existingUser = await storage.getUserByQRHandle(qrHandle.toLowerCase());
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ message: "QR handle is already taken" });
+      }
+      
+      // Update user with new QR handle
+      await storage.updateUser(userId, { qrHandle: qrHandle.toUpperCase() });
+      
+      // Get updated user data
+      const updatedUser = await storage.getUser(userId);
+      
+      res.json({ 
+        success: true, 
+        qrHandle: updatedUser?.qrHandle,
+        message: "QR handle updated successfully"
+      });
+    } catch (error) {
+      console.error("Error updating QR handle:", error);
+      res.status(500).json({ message: "Failed to update QR handle" });
+    }
+  });
+
   // Update badge profile
   app.put('/api/update-badge-profile', isAuthenticated, async (req: any, res: Response) => {
     try {
