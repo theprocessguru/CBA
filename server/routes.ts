@@ -2708,6 +2708,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email diagnostics endpoint
+  app.post('/api/email-diagnostics', async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      const diagnostics: any = {
+        timestamp: new Date().toISOString(),
+        targetEmail: email,
+        tests: {}
+      };
+
+      // Test 1: Check if email service is configured
+      const isConfigured = emailService.isConfigured();
+      diagnostics.tests.configuration = {
+        status: isConfigured ? 'PASSED' : 'FAILED',
+        message: isConfigured ? 'Email service is configured' : 'Email service not configured'
+      };
+
+      if (!isConfigured) {
+        return res.json(diagnostics);
+      }
+
+      // Test 2: Test SMTP connection
+      try {
+        console.log('Testing SMTP connection...');
+        const connectionTest = await emailService.testConnection();
+        diagnostics.tests.connection = {
+          status: connectionTest ? 'PASSED' : 'FAILED',
+          message: connectionTest ? 'SMTP connection successful' : 'SMTP connection failed'
+        };
+      } catch (connError) {
+        console.error('SMTP connection error:', connError);
+        diagnostics.tests.connection = {
+          status: 'FAILED',
+          message: 'SMTP connection threw error',
+          error: connError instanceof Error ? connError.message : 'Unknown error'
+        };
+      }
+
+      // Test 3: Try sending test email
+      try {
+        console.log(`Attempting to send test email to: ${email}`);
+        const success = await emailService.sendSimpleTestEmail(email, 'Test User');
+        diagnostics.tests.emailSending = {
+          status: success ? 'PASSED' : 'FAILED',
+          message: success ? 'Test email sent successfully' : 'Email sending returned false'
+        };
+        
+        if (success) {
+          diagnostics.recommendation = "Email sent successfully! Check your inbox and spam folder.";
+        } else {
+          diagnostics.recommendation = "Email sending failed. Check SMTP configuration.";
+        }
+      } catch (emailError) {
+        console.error('Email sending error:', emailError);
+        diagnostics.tests.emailSending = {
+          status: 'FAILED',
+          message: 'Email sending threw error',
+          error: emailError instanceof Error ? emailError.message : 'Unknown error'
+        };
+        diagnostics.recommendation = "Email service error - check server logs for details.";
+      }
+
+      res.json(diagnostics);
+    } catch (error) {
+      console.error("Email diagnostics error:", error);
+      res.status(500).json({
+        message: "Diagnostics failed",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
   // Simple test email endpoint (no auth required for testing)
   app.post('/api/test-email', async (req: any, res) => {
     try {
@@ -2721,8 +2798,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email service is not configured" });
       }
 
+      console.log(`Test email request for: ${email}`);
+      
       // Send a simple test email
-      const success = await (emailService as any).sendSimpleTestEmail(email, name || 'Test User');
+      const success = await emailService.sendSimpleTestEmail(email, name || 'Test User');
+      
+      console.log(`Test email result: ${success}`);
       
       if (success) {
         res.json({ message: "Simple test email sent successfully", email });
@@ -2731,7 +2812,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       console.error("Error sending test email:", error);
-      res.status(500).json({ message: "Failed to send test email" });
+      res.status(500).json({ message: "Failed to send test email", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 
