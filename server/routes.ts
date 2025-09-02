@@ -5486,15 +5486,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/admin/email-templates/test', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const { subject, htmlContent, testEmail } = req.body;
+      const { subject, htmlContent, smsContent, testEmail } = req.body;
+      const recipientEmail = testEmail || req.user.email || 'admin@croydonba.org.uk';
       
       if (emailService.isConfigured()) {
+        // Send email
         await emailService.sendEmail(
-          testEmail || req.user.email || 'admin@croydonba.org.uk',
+          recipientEmail,
           subject,
           htmlContent
         );
-        res.json({ message: 'Test email sent successfully' });
+        console.log('✅ Test email sent successfully');
+        
+        // Send SMS if SMS content exists and user has phone number
+        if (smsContent && req.user.phone) {
+          try {
+            const { MyTAutomationService } = await import('./mytAutomationService');
+            const mytService = new MyTAutomationService();
+            
+            // Replace template variables in SMS content
+            const userName = req.user.firstName || 'Member';
+            const processedSmsContent = smsContent.replace('{{userName}}', userName);
+            
+            await mytService.sendSMSNotification(req.user.phone, processedSmsContent);
+            console.log(`✅ Test SMS sent to: ${req.user.phone}`);
+            
+            res.json({ 
+              message: 'Test email and SMS sent successfully',
+              email: recipientEmail,
+              sms: req.user.phone 
+            });
+          } catch (smsError) {
+            console.error('❌ Error sending SMS:', smsError);
+            res.json({ 
+              message: 'Test email sent successfully, but SMS failed',
+              email: recipientEmail,
+              smsError: 'SMS service unavailable'
+            });
+          }
+        } else {
+          const reason = !smsContent ? 'No SMS content' : 'No phone number';
+          console.log(`ℹ️ SMS not sent: ${reason}`);
+          res.json({ 
+            message: 'Test email sent successfully',
+            email: recipientEmail,
+            smsSkipped: reason
+          });
+        }
       } else {
         res.status(503).json({ message: 'Email service not configured' });
       }
