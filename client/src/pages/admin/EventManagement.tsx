@@ -13,6 +13,7 @@ import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image,
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { enGB } from "date-fns/locale";
 
 interface Event {
   id: number;
@@ -72,6 +73,29 @@ interface EventTimeSlot {
   requiresRegistration: boolean;
   displayOrder: number;
 }
+
+// Helper function to format dates in UK format (DD/MM/YYYY)
+const formatUKDate = (dateString: string | undefined) => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    return format(date, 'dd/MM/yyyy', { locale: enGB });
+  } catch (error) {
+    return dateString;
+  }
+};
+
+// Helper function to format date with time in UK format
+const formatUKDateTime = (dateString: string | undefined, timeString: string | undefined) => {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    const formattedDate = format(date, 'dd/MM/yyyy', { locale: enGB });
+    return timeString ? `${formattedDate} at ${timeString}` : formattedDate;
+  } catch (error) {
+    return dateString || '';
+  }
+};
 
 export default function EventManagement() {
   const { toast } = useToast();
@@ -288,6 +312,44 @@ export default function EventManagement() {
     const [status, setStatus] = useState(event?.status || "draft");
     const [topicsOfInterest, setTopicsOfInterest] = useState<string[]>(event?.topicsOfInterest || []);
     const [newTopic, setNewTopic] = useState("");
+    
+    // Function to populate test data
+    const populateTestData = () => {
+      const form = document.querySelector('form') as HTMLFormElement;
+      if (form) {
+        // Fill in realistic test data
+        (form.querySelector('[name="title"]') as HTMLInputElement).value = "AI Summit 2025";
+        (form.querySelector('[name="description"]') as HTMLTextAreaElement).value = "Join us for the premier AI Summit featuring cutting-edge discussions on artificial intelligence, machine learning, and future technology trends. Perfect for business leaders, developers, and tech enthusiasts.";
+        
+        // Set date to a future date (AI Summit date - October 1st, 2025)
+        const eventDate = new Date('2025-10-01');
+        (form.querySelector('[name="eventDate"]') as HTMLInputElement).value = eventDate.toISOString().split('T')[0];
+        
+        (form.querySelector('[name="startTime"]') as HTMLInputElement).value = "09:00";
+        (form.querySelector('[name="endTime"]') as HTMLInputElement).value = "17:00";
+        (form.querySelector('[name="location"]') as HTMLInputElement).value = "Croydon Conference Centre, 45 High Street, Croydon CR0 1QQ";
+        (form.querySelector('[name="maxCapacity"]') as HTMLInputElement).value = "200";
+        (form.querySelector('[name="registrationFee"]') as HTMLInputElement).value = "50.00";
+        (form.querySelector('[name="tags"]') as HTMLInputElement).value = "AI, Summit, Technology, Business, Networking";
+        
+        // Set checkboxes
+        (form.querySelector('[name="isActive"]') as HTMLInputElement).checked = true;
+        (form.querySelector('[name="isFeatured"]') as HTMLInputElement).checked = true;
+        
+        // Set event type to summit
+        setEventType("summit");
+        setStatus("published");
+        
+        // Add some topics of interest
+        setTopicsOfInterest([
+          "AI Fundamentals",
+          "Machine Learning Applications", 
+          "Business Automation",
+          "Future of Work",
+          "Ethics in AI"
+        ]);
+      }
+    };
     
     // Reset form state when event changes
     useEffect(() => {
@@ -611,9 +673,21 @@ export default function EventManagement() {
         </div>
       </div>
 
-      <Button type="submit" className="w-full" disabled={createEventMutation.isPending || updateEventMutation.isPending}>
-        {submitText}
-      </Button>
+      <div className="flex gap-2">
+        <Button type="submit" className="flex-1" disabled={createEventMutation.isPending || updateEventMutation.isPending}>
+          {submitText}
+        </Button>
+        {!event && (
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={populateTestData}
+            className="whitespace-nowrap"
+          >
+            Fill Test Data
+          </Button>
+        )}
+      </div>
     </form>
     );
   };
@@ -677,7 +751,7 @@ export default function EventManagement() {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center text-muted-foreground">
                       <Calendar className="w-4 h-4 mr-2" />
-                      {format(new Date(event.startDate), "MMM dd, yyyy")}
+                      {formatUKDate(event.eventDate || event.startDate)}
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="w-4 h-4 mr-2" />
