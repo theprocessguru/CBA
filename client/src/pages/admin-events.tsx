@@ -240,6 +240,30 @@ export default function AdminEventsPage() {
     }
   };
 
+  // Helper function to format date for input field (YYYY-MM-DD)
+  const formatDateForInput = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '';
+      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+    } catch (error) {
+      return '';
+    }
+  };
+
+  // Helper function to format datetime for input field (YYYY-MM-DDTHH:MM)
+  const formatDateTimeForInput = (dateString: string | undefined, timeString: string | undefined) => {
+    if (!dateString) return '';
+    try {
+      const date = formatDateForInput(dateString);
+      const time = timeString?.slice(0, 5) || '00:00'; // Get HH:MM
+      return `${date}T${time}`;
+    } catch (error) {
+      return '';
+    }
+  };
+
   const handleEdit = (event: EventData) => {
     setEditingEvent(event);
     setImageFile(null);
@@ -249,13 +273,13 @@ export default function AdminEventsPage() {
       eventSlug: event.eventSlug,
       description: event.description || '',
       eventType: event.eventType,
-      eventDate: event.eventDate?.split('T')[0] || '',
-      startTime: event.startTime?.slice(0, 16) || '',
-      endTime: event.endTime?.slice(0, 16) || '',
+      eventDate: formatDateForInput(event.eventDate),
+      startTime: formatDateTimeForInput(event.eventDate, event.startTime),
+      endTime: formatDateTimeForInput(event.eventDate, event.endTime),
       venue: event.venue,
       venueAddress: event.venueAddress || '',
       maxCapacity: event.maxCapacity,
-      registrationDeadline: event.registrationDeadline?.split('T')[0] || '',
+      registrationDeadline: formatDateForInput(event.registrationDeadline),
       isActive: event.isActive,
       isFeatured: event.isFeatured,
       requiresApproval: event.requiresApproval,
