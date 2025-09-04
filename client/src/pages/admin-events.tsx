@@ -905,7 +905,7 @@ export default function AdminEventsPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    {new Date(event.eventDate).toLocaleDateString('en-GB')}
+                    {formatUKDate(event.eventDate)}
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
