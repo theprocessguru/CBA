@@ -160,8 +160,8 @@ export default function EmailLogs() {
     },
     onSuccess: (data) => {
       toast({
-        title: "🎉 Mass Welcome Email Complete",
-        description: `Successfully sent ${data.totalSent} welcome emails to all users, ${data.totalFailed} failed`,
+        title: "🌐 AI Summit Ad Hoc Email Complete",
+        description: `Successfully sent ${data.totalSent} AI Summit emails to all users, ${data.totalFailed} failed`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/email/logs'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/email/statistics'] });
@@ -352,13 +352,13 @@ export default function EmailLogs() {
               </Button>
             </div>
 
-            {/* Send Welcome Emails */}
+            {/* Send Ad Hoc Email (AI Summit) */}
             <div className="border-t pt-6">
               <Alert className="mb-4 border-green-200 bg-green-50">
                 <Mail className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-800">
-                  <strong>🎉 One-off Welcome Email Campaign:</strong> Send a beautiful welcome email to all active users. 
-                  This includes information about CBA benefits, upcoming AI Summit 2025, and member portal access.
+                  <strong>🌐 AI Summit 2025 Ad Hoc Email:</strong> Send the AI Summit welcome/confirmation email to all active users. 
+                  Features keynote speakers (Jim Jordan, Lisa Allen, Saffron Saunders), event details, and registration confirmation.
                 </AlertDescription>
               </Alert>
               <Button 
@@ -367,7 +367,7 @@ export default function EmailLogs() {
                 className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
               >
                 <Send className="w-4 h-4 mr-2" />
-                {massWelcomeEmailMutation.isPending ? "Sending Welcome Emails..." : "🎉 Send Welcome Email to Everyone"}
+                {massWelcomeEmailMutation.isPending ? "Sending AI Summit Emails..." : "🌐 Send AI Summit Ad Hoc Email"}
               </Button>
             </div>
           </div>

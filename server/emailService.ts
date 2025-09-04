@@ -650,7 +650,7 @@ export class EmailService {
   }
 
   /**
-   * Send a welcome email to a user
+   * Send an ad hoc email (AI Summit welcome/confirmation)
    */
   async sendWelcomeEmail(
     recipientEmail: string,
@@ -664,95 +664,74 @@ export class EmailService {
       };
     }
 
-    // Define content based on participant type
-    const participantContent: Record<string, {greeting: string, message: string, features: string[]}> = {
-      attendee: {
-        greeting: "Welcome to the Croydon Business Association!",
-        message: "We're thrilled to have you as part of our vibrant business community. The Croydon Business Association is your gateway to networking, learning, and growing your business in South London.",
-        features: ["Access to exclusive networking events", "Business workshops and seminars", "Member directory and connections", "Event schedules and updates", "AI Summit 2025 early access"]
-      },
-      vip: {
-        greeting: "Welcome to our VIP Community!",
-        message: "As a VIP member, you're joining an exclusive circle of business leaders and entrepreneurs. We're honored to have you with us and look forward to providing you with premium experiences.",
-        features: ["VIP lounge access at all events", "Priority registration for workshops", "Exclusive networking sessions", "One-on-one mentoring opportunities", "Premium event invitations"]
-      },
-      volunteer: {
-        greeting: "Welcome to our Volunteer Team!",
-        message: "Thank you for your commitment to supporting our business community! Your dedication and service help make our events and initiatives successful.",
-        features: ["Volunteer coordination tools", "Training and development opportunities", "Recognition program participation", "Team communication channels", "Event planning involvement"]
-      },
-      team: {
-        greeting: "Welcome to the CBA Team!",
-        message: "Welcome aboard! As a team member, you're at the heart of everything we do. We're excited to have you contribute to our mission of empowering businesses in Croydon.",
-        features: ["Admin dashboard access", "Event management tools", "Member management system", "Analytics and reporting", "Internal team resources"]
-      },
-      speaker: {
-        greeting: "Welcome, Distinguished Speaker!",
-        message: "We're honored to have you share your expertise with our community. Your knowledge and experience will inspire and educate our members.",
-        features: ["Speaker resource center", "Presentation tools and support", "Professional networking opportunities", "Event coordination assistance", "Content promotion support"]
-      },
-      exhibitor: {
-        greeting: "Welcome to our Exhibition Network!",
-        message: "Thank you for choosing to showcase your business with us. We're committed to helping you make meaningful connections and grow your business.",
-        features: ["Exhibition space management", "Lead generation tools", "Networking event access", "Business directory listing", "Promotional opportunities"]
-      },
-      sponsor: {
-        greeting: "Welcome, Valued Sponsor!",
-        message: "Your partnership means everything to us. Together, we're building a stronger business community in Croydon and beyond.",
-        features: ["Brand visibility at events", "Speaking and presentation opportunities", "VIP networking access", "Sponsorship impact reports", "Partnership development support"]
-      }
-    };
-
-    const content = participantContent[participantType] || participantContent.attendee;
-    const featuresList = `<ul style="margin: 0; padding-left: 20px;">${content.features.map(f => `<li style="margin: 5px 0;">${f}</li>`).join('')}</ul>`;
-
     try {
-      const subject = `${content.greeting} - Welcome to CBA`;
+      const subject = `🌐 Welcome to the AI Summit 2025 – Hosted by Croydon Business Association 🌐`;
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">Croydon Business Association</h1>
-            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Building Business Success Together</p>
+            <h1 style="margin: 0; font-size: 28px;">🌐 AI Summit 2025 🌐</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Hosted by Croydon Business Association</p>
           </div>
           
           <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
-            <h2 style="color: #1f2937; margin-top: 0;">${content.greeting}</h2>
-            <p style="color: #374151; font-size: 18px; margin: 10px 0;">Hello ${recipientName}!</p>
+            <h2 style="color: #1f2937; margin-top: 0;">Dear ${recipientName},</h2>
             
-            <p style="color: #4b5563; line-height: 1.6;">${content.message}</p>
+            <p style="color: #4b5563; line-height: 1.6; font-size: 16px;">
+              Your registration for the <strong>AI Summit 2025</strong> is confirmed! Join us on <strong>Wednesday, 1st October at LSBU Croydon (10:00 AM – 4:00 PM)</strong> for a day of discovery, collaboration, and impact.
+            </p>
+            
+            <p style="color: #4b5563; line-height: 1.6; font-size: 16px;">
+              You'll be in the room with leaders shaping the future of AI—including the <strong>UK AI Minister, Mayor Jason Perry, MP Sarah Jones,</strong> and industry experts.
+            </p>
             
             <div style="background: #eff6ff; border: 1px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
-              <h4 style="margin: 0 0 15px 0; color: #1e40af;">🚀 What you can access:</h4>
-              ${featuresList}
+              <h4 style="margin: 0 0 15px 0; color: #1e40af;">✨ Here's what's waiting for you:</h4>
+              <ul style="margin: 0; padding-left: 20px; color: #4b5563; line-height: 1.8;">
+                <li><strong>Jim Jordan</strong> – Keynote on How Nokia reinvented itself 5 times in 160 years — a masterclass in resilience and reinvention.</li>
+                <li><strong>Lisa Allen</strong> – Beyond Algorithms: Cultivating Human Skills for the AI Age — a thought-provoking interactive keynote on the human side of AI.</li>
+                <li><strong>Saffron Saunders, CEO of Croydon StartUp</strong> – Keynote on entrepreneurial ecosystems and innovation.</li>
+                <li><strong>Croydon StartUp Workshop</strong> – A hands-on session equipping you with practical tools and strategies to accelerate your business growth.</li>
+                <li>Hands-on workshops with AI practitioners to give you real skills you can apply right away.</li>
+                <li>Networking with innovators and leaders across Croydon and beyond.</li>
+              </ul>
             </div>
             
             <div style="background: #f0fdf4; border: 1px solid #16a34a; padding: 20px; border-radius: 8px; margin: 25px 0;">
-              <h4 style="margin: 0 0 10px 0; color: #15803d;">🎯 Upcoming Highlights:</h4>
+              <h4 style="margin: 0 0 10px 0; color: #15803d;">⚡ Why it matters:</h4>
               <p style="margin: 0; color: #166534; line-height: 1.6;">
-                <strong>AI Summit 2025</strong> - October 1st, 2025<br>
-                Don't miss our flagship event featuring cutting-edge AI discussions, networking, and business innovation.
+                This summit is part of the Croydon Business Association's mission to transform Croydon into a better place to live, grow, and work—through powerful events, networking opportunities, and workshops at Zodiac Court and beyond.
               </p>
             </div>
+            
+            <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 25px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #92400e;">📍 Event Details</h4>
+              <p style="margin: 0; color: #92400e; line-height: 1.6;">
+                <strong>Date:</strong> Wednesday, 1st October 2025<br>
+                <strong>Time:</strong> 10:00 AM – 4:00 PM<br>
+                <strong>Location:</strong> LSBU Croydon
+              </p>
+            </div>
+            
+            <p style="color: #4b5563; line-height: 1.6; font-size: 16px;">
+              We're excited to welcome you on October 1st. Together, let's learn, grow, and collaborate to shape Croydon's future.
+            </p>
             
             <div style="text-align: center; margin: 30px 0;">
-              <a href="https://members.croydonba.org.uk/login" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
+              <a href="https://members.croydonba.org.uk/events" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
+                View Event Details
+              </a>
+              <a href="https://members.croydonba.org.uk/login" style="display: inline-block; background: linear-gradient(135deg, #16a34a, #059669); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
                 Access Member Portal
               </a>
-              <a href="https://members.croydonba.org.uk/events" style="display: inline-block; background: linear-gradient(135deg, #16a34a, #059669); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
-                View Events
-              </a>
             </div>
             
-            <div style="background: #fefbf3; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p style="margin: 0; color: #92400e; text-align: center;">
-                <strong>📞 Need help?</strong> Contact us at <a href="mailto:support@croydonba.org.uk" style="color: #92400e;">support@croydonba.org.uk</a> or call us at 020 8649 8000.
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f9fafb; border-radius: 8px;">
+              <p style="margin: 0; color: #6b7280; font-size: 16px; line-height: 1.6;">
+                <strong>Warm regards,</strong><br>
+                <strong style="color: #1f2937;">Croydon Business Association</strong><br>
+                <em style="color: #8b5cf6;">Empowering Croydon to live, grow & work better</em>
               </p>
             </div>
-            
-            <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 30px;">
-              Thank you for being part of the Croydon Business Association community!<br>
-              <strong>Together, we're building business success in South London.</strong>
-            </p>
           </div>
         </div>
       `;
