@@ -322,9 +322,10 @@ export default function AdminEventsPage() {
     if (!dateString) return '';
     try {
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return original if invalid
       return format(date, 'dd/MM/yyyy', { locale: enGB });
     } catch (error) {
-      return dateString;
+      return dateString || '';
     }
   };
 
@@ -910,13 +911,7 @@ export default function AdminEventsPage() {
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Clock className="h-4 w-4" />
-                    {new Date(event.startTime).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })} - {new Date(event.endTime).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
+                    {event.startTime?.slice(0, 5) || 'TBC'} - {event.endTime?.slice(0, 5) || 'TBC'}
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
