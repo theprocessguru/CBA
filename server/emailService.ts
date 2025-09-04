@@ -667,26 +667,74 @@ export class EmailService {
     try {
       const subject = `🌐 Welcome to the AI Summit 2025 – Hosted by Croydon Business Association 🌐`;
       const htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 28px;">🌐 AI Summit 2025 🌐</h1>
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>AI Summit 2025 - Croydon Business Association</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 0 auto; }
+          .header { background: linear-gradient(135deg, #0066cc, #8B5CF6); color: white; padding: 30px; text-align: center; }
+          .content { padding: 30px 20px; background-color: #ffffff; }
+          .highlight-box { 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border: 1px solid;
+          }
+          .blue-box { background: #eff6ff; border-color: #3b82f6; }
+          .green-box { background: #f0fdf4; border-color: #16a34a; }
+          .yellow-box { background: #fef3c7; border-color: #f59e0b; }
+          .button { 
+            display: inline-block; 
+            background: linear-gradient(135deg, #0066cc, #8B5CF6); 
+            color: white; 
+            padding: 15px 35px; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            font-weight: 600;
+            margin: 5px;
+          }
+          .button-green { 
+            background: linear-gradient(135deg, #16a34a, #059669); 
+          }
+          .footer { 
+            padding: 20px; 
+            text-align: center; 
+            background-color: #f9fafb; 
+            border-radius: 8px;
+            margin: 20px 0;
+          }
+          ul { padding-left: 20px; line-height: 1.8; }
+          li { margin: 8px 0; }
+          h1 { margin: 0; font-size: 28px; }
+          h2 { color: #1f2937; margin-top: 0; }
+          h4 { margin: 0 0 15px 0; }
+          .blue-box h4 { color: #1e40af; }
+          .green-box h4 { color: #15803d; }
+          .yellow-box h4 { color: #92400e; }
+          .green-box p { color: #166534; }
+          .yellow-box p { color: #92400e; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🌐 AI Summit 2025 🌐</h1>
             <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Hosted by Croydon Business Association</p>
           </div>
           
-          <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
-            <h2 style="color: #1f2937; margin-top: 0;">Dear ${recipientName},</h2>
+          <div class="content">
+            <h2>Dear ${recipientName},</h2>
             
-            <p style="color: #4b5563; line-height: 1.6; font-size: 16px;">
-              Your registration for the <strong>AI Summit 2025</strong> is confirmed! Join us on <strong>Wednesday, 1st October at LSBU Croydon (10:00 AM – 4:00 PM)</strong> for a day of discovery, collaboration, and impact.
-            </p>
+            <p>Your registration for the <strong>AI Summit 2025</strong> is confirmed! Join us on <strong>Wednesday, 1st October at LSBU Croydon (10:00 AM – 4:00 PM)</strong> for a day of discovery, collaboration, and impact.</p>
             
-            <p style="color: #4b5563; line-height: 1.6; font-size: 16px;">
-              You'll be in the room with leaders shaping the future of AI—including the <strong>UK AI Minister, Mayor Jason Perry, MP Sarah Jones,</strong> and industry experts.
-            </p>
+            <p>You'll be in the room with leaders shaping the future of AI—including the <strong>UK AI Minister, Mayor Jason Perry, MP Sarah Jones,</strong> and industry experts.</p>
             
-            <div style="background: #eff6ff; border: 1px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
-              <h4 style="margin: 0 0 15px 0; color: #1e40af;">✨ Here's what's waiting for you:</h4>
-              <ul style="margin: 0; padding-left: 20px; color: #4b5563; line-height: 1.8;">
+            <div class="highlight-box blue-box">
+              <h4>✨ Here's what's waiting for you:</h4>
+              <ul>
                 <li><strong>Jim Jordan</strong> – Keynote on How Nokia reinvented itself 5 times in 160 years — a masterclass in resilience and reinvention.</li>
                 <li><strong>Lisa Allen</strong> – Beyond Algorithms: Cultivating Human Skills for the AI Age — a thought-provoking interactive keynote on the human side of AI.</li>
                 <li><strong>Saffron Saunders, CEO of Croydon StartUp</strong> – Keynote on entrepreneurial ecosystems and innovation.</li>
@@ -696,37 +744,29 @@ export class EmailService {
               </ul>
             </div>
             
-            <div style="background: #f0fdf4; border: 1px solid #16a34a; padding: 20px; border-radius: 8px; margin: 25px 0;">
-              <h4 style="margin: 0 0 10px 0; color: #15803d;">⚡ Why it matters:</h4>
-              <p style="margin: 0; color: #166534; line-height: 1.6;">
-                This summit is part of the Croydon Business Association's mission to transform Croydon into a better place to live, grow, and work—through powerful events, networking opportunities, and workshops at Zodiac Court and beyond.
-              </p>
+            <div class="highlight-box green-box">
+              <h4>⚡ Why it matters:</h4>
+              <p>This summit is part of the Croydon Business Association's mission to transform Croydon into a better place to live, grow, and work—through powerful events, networking opportunities, and workshops at Zodiac Court and beyond.</p>
             </div>
             
-            <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 25px 0;">
-              <h4 style="margin: 0 0 10px 0; color: #92400e;">📍 Event Details</h4>
-              <p style="margin: 0; color: #92400e; line-height: 1.6;">
+            <div class="highlight-box yellow-box">
+              <h4>📍 Event Details</h4>
+              <p>
                 <strong>Date:</strong> Wednesday, 1st October 2025<br>
                 <strong>Time:</strong> 10:00 AM – 4:00 PM<br>
                 <strong>Location:</strong> LSBU Croydon
               </p>
             </div>
             
-            <p style="color: #4b5563; line-height: 1.6; font-size: 16px;">
-              We're excited to welcome you on October 1st. Together, let's learn, grow, and collaborate to shape Croydon's future.
+            <p>We're excited to welcome you on October 1st. Together, let's learn, grow, and collaborate to shape Croydon's future.</p>
+            
+            <p style="text-align: center; margin: 30px 0;">
+              <a href="https://members.croydonba.org.uk/events" class="button">View Event Details</a>
+              <a href="https://members.croydonba.org.uk/login" class="button button-green">Access Member Portal</a>
             </p>
             
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="https://members.croydonba.org.uk/events" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
-                View Event Details
-              </a>
-              <a href="https://members.croydonba.org.uk/login" style="display: inline-block; background: linear-gradient(135deg, #16a34a, #059669); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
-                Access Member Portal
-              </a>
-            </div>
-            
-            <div style="text-align: center; margin: 30px 0; padding: 20px; background: #f9fafb; border-radius: 8px;">
-              <p style="margin: 0; color: #6b7280; font-size: 16px; line-height: 1.6;">
+            <div class="footer">
+              <p style="margin: 0; color: #6b7280; font-size: 16px;">
                 <strong>Warm regards,</strong><br>
                 <strong style="color: #1f2937;">Croydon Business Association</strong><br>
                 <em style="color: #8b5cf6;">Empowering Croydon to live, grow & work better</em>
@@ -734,7 +774,9 @@ export class EmailService {
             </div>
           </div>
         </div>
-      `;
+      </body>
+      </html>
+    `;
 
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
