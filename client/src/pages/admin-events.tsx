@@ -34,6 +34,8 @@ import { Switch } from "@/components/ui/switch";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { enGB } from "date-fns/locale";
 
 interface EventData {
   id: number;
@@ -275,6 +277,55 @@ export default function AdminEventsPage() {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
+  };
+
+  // Function to populate test data for AI Summit 2025
+  const populateTestData = () => {
+    const testData = {
+      eventName: "AI Summit 2025",
+      eventSlug: "ai-summit-2025",
+      description: "Join us for the premier AI Summit featuring cutting-edge discussions on artificial intelligence, machine learning, and future technology trends. Perfect for business leaders, developers, and tech enthusiasts.",
+      eventType: "summit",
+      eventDate: "2025-10-01",
+      startTime: "2025-10-01T09:00",
+      endTime: "2025-10-01T17:00",
+      venue: "Croydon Conference Centre",
+      venueAddress: "45 High Street, Croydon CR0 1QQ, United Kingdom",
+      maxCapacity: 200,
+      registrationDeadline: "2025-09-25",
+      isActive: true,
+      isFeatured: true,
+      requiresApproval: false,
+      registrationFee: 50.00,
+      memberPrice: 35.00,
+      isRecurring: false,
+      recurringPattern: "",
+      tags: "AI, Summit, Technology, Business, Networking, Machine Learning",
+      imageUrl: "",
+      ghlWorkflowId: "",
+      ghlTagName: "",
+    };
+
+    // Use form.setValue to populate all fields
+    Object.entries(testData).forEach(([key, value]) => {
+      form.setValue(key as keyof EventFormData, value);
+    });
+
+    toast({
+      title: "Test Data Loaded",
+      description: "Form populated with AI Summit 2025 test data",
+    });
+  };
+
+  // Helper function to format dates in UK format
+  const formatUKDate = (dateString: string | undefined) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy', { locale: enGB });
+    } catch (error) {
+      return dateString;
+    }
   };
 
   const getEventTypeColor = (type: string) => {
@@ -764,6 +815,16 @@ export default function AdminEventsPage() {
                   >
                     Cancel
                   </Button>
+                  {!editingEvent && (
+                    <Button 
+                      type="button" 
+                      variant="secondary" 
+                      onClick={populateTestData}
+                      title="Fill form with AI Summit 2025 test data"
+                    >
+                      Fill Test Data
+                    </Button>
+                  )}
                   <Button 
                     type="submit" 
                     disabled={createEventMutation.isPending || updateEventMutation.isPending}
