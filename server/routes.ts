@@ -5810,6 +5810,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const extractTime = (dateValue: any) => {
         if (!dateValue) return undefined;
         try {
+          // If it's already a time string (HH:MM:SS or HH:MM), return as is
+          if (typeof dateValue === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(dateValue)) {
+            return dateValue.length === 5 ? `${dateValue}:00` : dateValue; // Add seconds if missing
+          }
+          
           const date = new Date(dateValue);
           if (isNaN(date.getTime())) return undefined;
           return date.toTimeString().split(' ')[0]; // Returns HH:MM:SS
@@ -5824,10 +5829,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         // Handle eventDate field
         eventDate: req.body.eventDate || extractDate(req.body.startDate),
-        // Handle startTime field
-        startTime: req.body.startTime || extractTime(req.body.startDate),
-        // Handle endTime field  
-        endTime: req.body.endTime || extractTime(req.body.endDate),
+        // Handle startTime field - ALWAYS process to ensure correct format
+        startTime: extractTime(req.body.startTime || req.body.startDate),
+        // Handle endTime field - ALWAYS process to ensure correct format
+        endTime: extractTime(req.body.endTime || req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
 
         createdAt: new Date(),
@@ -5877,6 +5882,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const extractTime = (dateValue: any) => {
         if (!dateValue) return undefined;
         try {
+          // If it's already a time string (HH:MM:SS or HH:MM), return as is
+          if (typeof dateValue === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(dateValue)) {
+            return dateValue.length === 5 ? `${dateValue}:00` : dateValue; // Add seconds if missing
+          }
+          
           const date = new Date(dateValue);
           if (isNaN(date.getTime())) return undefined;
           return date.toTimeString().split(' ')[0]; // Returns HH:MM:SS
@@ -5892,10 +5902,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         // Handle eventDate field
         eventDate: req.body.eventDate || extractDate(req.body.startDate),
-        // Handle startTime field
-        startTime: req.body.startTime || extractTime(req.body.startDate),
-        // Handle endTime field  
-        endTime: req.body.endTime || extractTime(req.body.endDate),
+        // Handle startTime field - ALWAYS process to ensure correct format
+        startTime: extractTime(req.body.startTime || req.body.startDate),
+        // Handle endTime field - ALWAYS process to ensure correct format
+        endTime: extractTime(req.body.endTime || req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
 
         updatedAt: new Date()
