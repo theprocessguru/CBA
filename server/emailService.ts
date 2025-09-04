@@ -769,10 +769,11 @@ export class EmailService {
 
       console.log(`Starting mass welcome email send to ${allUsers.length} users`);
 
-      // Send emails in batches to avoid overwhelming the email service
-      const batchSize = 10;
+      // Send emails in small batches to avoid Gmail rate limits
+      const batchSize = 3; // Reduced from 10 to 3 for Gmail compliance
       for (let i = 0; i < allUsers.length; i += batchSize) {
         const batch = allUsers.slice(i, i + batchSize);
+        console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(allUsers.length/batchSize)} (${batch.length} emails)`);
         
         // Process batch in parallel
         const batchPromises = batch.map(async (user) => {
@@ -833,9 +834,10 @@ export class EmailService {
           }
         });
 
-        // Add delay between batches to avoid rate limiting
+        // Add delay between batches to avoid Gmail rate limits
         if (i + batchSize < allUsers.length) {
-          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+          console.log(`⏳ Waiting 10 seconds before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 10000)); // 10 second delay
         }
       }
 
