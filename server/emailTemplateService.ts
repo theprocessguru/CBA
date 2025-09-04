@@ -251,6 +251,49 @@ export class EmailTemplateService {
         mytWorkflow: "attendee-nurture-sequence",
         variables: ["{{firstName}}", "{{lastName}}", "{{venue}}", "{{badgeId}}"],
         isActive: true
+      },
+      {
+        personType: "adhoc",
+        templateName: "Ad Hoc Email",
+        subject: "🌐 Welcome to the AI Summit 2025 – Hosted by Croydon Business Association 🌐",
+        htmlContent: `
+          <h2>Dear {{firstName}},</h2>
+          
+          <p>Your registration for the <strong>AI Summit 2025</strong> is confirmed! Join us on <strong>Wednesday, 1st October at LSBU Croydon (10:00 AM – 4:00 PM)</strong> for a day of discovery, collaboration, and impact.</p>
+          
+          <p>You'll be in the room with leaders shaping the future of AI—including the <strong>UK AI Minister, Mayor Jason Perry, MP Sarah Jones,</strong> and industry experts.</p>
+          
+          <h3>✨ Here's what's waiting for you:</h3>
+          <ul>
+            <li><strong>Jim Jordan</strong> – Keynote on How Nokia reinvented itself 5 times in 160 years — a masterclass in resilience and reinvention.</li>
+            <li><strong>Lisa Allen</strong> – Beyond Algorithms: Cultivating Human Skills for the AI Age — a thought-provoking interactive keynote on the human side of AI.</li>
+            <li><strong>Saffron Saunders, CEO of Croydon StartUp</strong> – Keynote on entrepreneurial ecosystems and innovation.</li>
+            <li><strong>Croydon StartUp Workshop</strong> – A hands-on session equipping you with practical tools and strategies to accelerate your business growth.</li>
+            <li>Hands-on workshops with AI practitioners to give you real skills you can apply right away.</li>
+            <li>Networking with innovators and leaders across Croydon and beyond.</li>
+          </ul>
+          
+          <h3>⚡ Why it matters:</h3>
+          <p>This summit is part of the Croydon Business Association's mission to transform Croydon into a better place to live, grow, and work—through powerful events, networking opportunities, and workshops at Zodiac Court and beyond.</p>
+          
+          <h3>📍 Event Details</h3>
+          <p>
+            <strong>Date:</strong> Wednesday, 1st October 2025<br>
+            <strong>Time:</strong> 10:00 AM – 4:00 PM<br>
+            <strong>Location:</strong> LSBU Croydon
+          </p>
+          
+          <p>We're excited to welcome you on October 1st. Together, let's learn, grow, and collaborate to shape Croydon's future.</p>
+          
+          <p><strong>Warm regards,</strong><br>
+          <strong>Croydon Business Association</strong><br>
+          <em>Empowering Croydon to live, grow & work better</em></p>
+        `,
+        smsContent: "🌐 AI Summit 2025 confirmed! October 1st, LSBU Croydon, 10 AM-4 PM. See you there, {{firstName}}!",
+        mytTags: ["ai-summit-2025", "confirmed", "adhoc"],
+        mytWorkflow: "ai-summit-reminder-sequence",
+        variables: ["{{firstName}}", "{{lastName}}", "{{fullName}}", "{{email}}", "{{company}}"],
+        isActive: true
       }
     ];
 
