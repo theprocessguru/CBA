@@ -152,6 +152,29 @@ export default function EmailLogs() {
     },
   });
 
+  // Mass welcome email mutation
+  const massWelcomeEmailMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/email/send-mass-welcome');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "🎉 Mass Welcome Email Complete",
+        description: `Successfully sent ${data.totalSent} welcome emails to all users, ${data.totalFailed} failed`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/email/logs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/email/statistics'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to send mass welcome emails",
+        variant: "destructive",
+      });
+    },
+  });
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
@@ -326,6 +349,25 @@ export default function EmailLogs() {
               >
                 <Send className="w-4 h-4 mr-2" />
                 {massPasswordResetMutation.isPending ? "Sending Reset Links..." : "🔐 Send Password Reset Emails"}
+              </Button>
+            </div>
+
+            {/* Send Welcome Emails */}
+            <div className="border-t pt-6">
+              <Alert className="mb-4 border-green-200 bg-green-50">
+                <Mail className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800">
+                  <strong>🎉 One-off Welcome Email Campaign:</strong> Send a beautiful welcome email to all active users. 
+                  This includes information about CBA benefits, upcoming AI Summit 2025, and member portal access.
+                </AlertDescription>
+              </Alert>
+              <Button 
+                onClick={() => massWelcomeEmailMutation.mutate()}
+                disabled={massWelcomeEmailMutation.isPending}
+                className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                {massWelcomeEmailMutation.isPending ? "Sending Welcome Emails..." : "🎉 Send Welcome Email to Everyone"}
               </Button>
             </div>
           </div>

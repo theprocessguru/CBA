@@ -650,6 +650,283 @@ export class EmailService {
   }
 
   /**
+   * Send a welcome email to a user
+   */
+  async sendWelcomeEmail(
+    recipientEmail: string,
+    recipientName: string,
+    participantType: string = 'attendee'
+  ): Promise<{ success: boolean; message: string }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        message: 'Email service not configured. Please contact IT support.'
+      };
+    }
+
+    // Define content based on participant type
+    const participantContent: Record<string, {greeting: string, message: string, features: string[]}> = {
+      attendee: {
+        greeting: "Welcome to the Croydon Business Association!",
+        message: "We're thrilled to have you as part of our vibrant business community. The Croydon Business Association is your gateway to networking, learning, and growing your business in South London.",
+        features: ["Access to exclusive networking events", "Business workshops and seminars", "Member directory and connections", "Event schedules and updates", "AI Summit 2025 early access"]
+      },
+      vip: {
+        greeting: "Welcome to our VIP Community!",
+        message: "As a VIP member, you're joining an exclusive circle of business leaders and entrepreneurs. We're honored to have you with us and look forward to providing you with premium experiences.",
+        features: ["VIP lounge access at all events", "Priority registration for workshops", "Exclusive networking sessions", "One-on-one mentoring opportunities", "Premium event invitations"]
+      },
+      volunteer: {
+        greeting: "Welcome to our Volunteer Team!",
+        message: "Thank you for your commitment to supporting our business community! Your dedication and service help make our events and initiatives successful.",
+        features: ["Volunteer coordination tools", "Training and development opportunities", "Recognition program participation", "Team communication channels", "Event planning involvement"]
+      },
+      team: {
+        greeting: "Welcome to the CBA Team!",
+        message: "Welcome aboard! As a team member, you're at the heart of everything we do. We're excited to have you contribute to our mission of empowering businesses in Croydon.",
+        features: ["Admin dashboard access", "Event management tools", "Member management system", "Analytics and reporting", "Internal team resources"]
+      },
+      speaker: {
+        greeting: "Welcome, Distinguished Speaker!",
+        message: "We're honored to have you share your expertise with our community. Your knowledge and experience will inspire and educate our members.",
+        features: ["Speaker resource center", "Presentation tools and support", "Professional networking opportunities", "Event coordination assistance", "Content promotion support"]
+      },
+      exhibitor: {
+        greeting: "Welcome to our Exhibition Network!",
+        message: "Thank you for choosing to showcase your business with us. We're committed to helping you make meaningful connections and grow your business.",
+        features: ["Exhibition space management", "Lead generation tools", "Networking event access", "Business directory listing", "Promotional opportunities"]
+      },
+      sponsor: {
+        greeting: "Welcome, Valued Sponsor!",
+        message: "Your partnership means everything to us. Together, we're building a stronger business community in Croydon and beyond.",
+        features: ["Brand visibility at events", "Speaking and presentation opportunities", "VIP networking access", "Sponsorship impact reports", "Partnership development support"]
+      }
+    };
+
+    const content = participantContent[participantType] || participantContent.attendee;
+    const featuresList = `<ul style="margin: 0; padding-left: 20px;">${content.features.map(f => `<li style="margin: 5px 0;">${f}</li>`).join('')}</ul>`;
+
+    try {
+      const subject = `${content.greeting} - Welcome to CBA`;
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 28px;">Croydon Business Association</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Building Business Success Together</p>
+          </div>
+          
+          <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+            <h2 style="color: #1f2937; margin-top: 0;">${content.greeting}</h2>
+            <p style="color: #374151; font-size: 18px; margin: 10px 0;">Hello ${recipientName}!</p>
+            
+            <p style="color: #4b5563; line-height: 1.6;">${content.message}</p>
+            
+            <div style="background: #eff6ff; border: 1px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 25px 0;">
+              <h4 style="margin: 0 0 15px 0; color: #1e40af;">🚀 What you can access:</h4>
+              ${featuresList}
+            </div>
+            
+            <div style="background: #f0fdf4; border: 1px solid #16a34a; padding: 20px; border-radius: 8px; margin: 25px 0;">
+              <h4 style="margin: 0 0 10px 0; color: #15803d;">🎯 Upcoming Highlights:</h4>
+              <p style="margin: 0; color: #166534; line-height: 1.6;">
+                <strong>AI Summit 2025</strong> - October 1st, 2025<br>
+                Don't miss our flagship event featuring cutting-edge AI discussions, networking, and business innovation.
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="https://members.croydonba.org.uk/login" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
+                Access Member Portal
+              </a>
+              <a href="https://members.croydonba.org.uk/events" style="display: inline-block; background: linear-gradient(135deg, #16a34a, #059669); color: white; text-decoration: none; padding: 15px 35px; border-radius: 6px; font-weight: 600; margin: 0 10px 10px 10px;">
+                View Events
+              </a>
+            </div>
+            
+            <div style="background: #fefbf3; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #92400e; text-align: center;">
+                <strong>📞 Need help?</strong> Contact us at <a href="mailto:support@croydonba.org.uk" style="color: #92400e;">support@croydonba.org.uk</a> or call us at 020 8649 8000.
+              </p>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px; text-align: center; margin-top: 30px;">
+              Thank you for being part of the Croydon Business Association community!<br>
+              <strong>Together, we're building business success in South London.</strong>
+            </p>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: recipientEmail,
+        subject: subject,
+        html: htmlContent,
+      };
+
+      await this.transporter!.sendMail(mailOptions);
+      
+      // Log the email to database
+      await this.logEmail(null, recipientEmail, subject, htmlContent, 'welcome', 'sent', {
+        participantType
+      });
+      
+      return {
+        success: true,
+        message: 'Welcome email sent successfully'
+      };
+    } catch (error: any) {
+      console.error('Error sending welcome email:', error);
+      
+      // Log the failed email
+      await this.logEmail(null, recipientEmail, 'Welcome Email', '', 'welcome', 'failed', {
+        participantType,
+        error: error.message || 'Failed to send welcome email'
+      });
+      
+      return {
+        success: false,
+        message: error.message || 'Failed to send welcome email'
+      };
+    }
+  }
+
+  /**
+   * Send welcome emails to all users (mass send)
+   */
+  async sendMassWelcomeEmails(): Promise<{ 
+    success: boolean; 
+    totalSent: number; 
+    totalFailed: number; 
+    results: Array<{ email: string; success: boolean; message: string }> 
+  }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ email: 'system', success: false, message: 'Email service not configured' }]
+      };
+    }
+
+    try {
+      // Import required modules
+      const { users } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      // Get ALL active users
+      const allUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          participantType: users.participantType
+        })
+        .from(users)
+        .where(eq(users.accountStatus, 'active'));
+
+      const results: Array<{ email: string; success: boolean; message: string }> = [];
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      console.log(`Starting mass welcome email send to ${allUsers.length} users`);
+
+      // Send emails in batches to avoid overwhelming the email service
+      const batchSize = 10;
+      for (let i = 0; i < allUsers.length; i += batchSize) {
+        const batch = allUsers.slice(i, i + batchSize);
+        
+        // Process batch in parallel
+        const batchPromises = batch.map(async (user) => {
+          try {
+            if (!user.email) {
+              throw new Error('No email address');
+            }
+
+            // Send welcome email
+            const emailResult = await this.sendWelcomeEmail(
+              user.email,
+              user.firstName || 'Member',
+              user.participantType || 'attendee'
+            );
+
+            if (emailResult.success) {
+              totalSent++;
+              return { 
+                email: user.email, 
+                success: true, 
+                message: 'Welcome email sent successfully' 
+              };
+            } else {
+              totalFailed++;
+              return { 
+                email: user.email, 
+                success: false, 
+                message: emailResult.message 
+              };
+            }
+
+          } catch (error) {
+            totalFailed++;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Failed to send welcome email to ${user.email}:`, errorMessage);
+            return { 
+              email: user.email || 'unknown', 
+              success: false, 
+              message: errorMessage 
+            };
+          }
+        });
+
+        // Wait for batch to complete
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Process results
+        batchResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            results.push(result.value);
+          } else {
+            totalFailed++;
+            results.push({ 
+              email: 'unknown', 
+              success: false, 
+              message: result.reason?.message || 'Promise rejected' 
+            });
+          }
+        });
+
+        // Add delay between batches to avoid rate limiting
+        if (i + batchSize < allUsers.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+        }
+      }
+
+      console.log(`Mass welcome email complete: ${totalSent} sent, ${totalFailed} failed`);
+
+      return {
+        success: true,
+        totalSent,
+        totalFailed,
+        results
+      };
+
+    } catch (error) {
+      console.error('Error in mass welcome email send:', error);
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ 
+          email: 'system', 
+          success: false, 
+          message: error instanceof Error ? error.message : 'Unknown error' 
+        }]
+      };
+    }
+  }
+
+  /**
    * Send admin welcome email with temporary password
    */
   async sendAdminWelcomeEmail(

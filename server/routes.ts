@@ -2584,6 +2584,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mass welcome email endpoint (admin only)
+  app.post('/api/admin/email/send-mass-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated mass welcome email send`);
+      
+      // Send welcome emails to all users
+      const result = await emailService.sendMassWelcomeEmails();
+      
+      if (result.success) {
+        res.json({
+          message: `Mass welcome email completed: ${result.totalSent} sent, ${result.totalFailed} failed`,
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      } else {
+        res.status(500).json({
+          message: "Mass welcome email failed",
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      }
+    } catch (error) {
+      console.error("Error in mass welcome email:", error);
+      res.status(500).json({ message: "Failed to send mass welcome emails" });
+    }
+  });
+
   // Get email logs and statistics (admin only)
   app.get('/api/admin/email/logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
