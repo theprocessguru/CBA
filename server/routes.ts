@@ -5815,8 +5815,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return dateValue.length === 5 ? `${dateValue}:00` : dateValue; // Add seconds if missing
           }
           
+          // Handle datetime-local format (YYYY-MM-DDTHH:MM)
+          if (typeof dateValue === 'string' && dateValue.includes('T')) {
+            const timePart = dateValue.split('T')[1];
+            if (timePart && /^\d{2}:\d{2}$/.test(timePart)) {
+              return `${timePart}:00`; // Add seconds
+            }
+          }
+          
           const date = new Date(dateValue);
-          if (isNaN(date.getTime())) return undefined;
+          if (isNaN(date.getTime())) {
+            console.warn('Invalid date value:', dateValue);
+            return undefined;
+          }
           return date.toTimeString().split(' ')[0]; // Returns HH:MM:SS
         } catch (error) {
           console.warn('Error parsing time:', dateValue, error);
@@ -5911,8 +5922,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return dateValue.length === 5 ? `${dateValue}:00` : dateValue; // Add seconds if missing
           }
           
+          // Handle datetime-local format (YYYY-MM-DDTHH:MM)
+          if (typeof dateValue === 'string' && dateValue.includes('T')) {
+            const timePart = dateValue.split('T')[1];
+            if (timePart && /^\d{2}:\d{2}$/.test(timePart)) {
+              return `${timePart}:00`; // Add seconds
+            }
+          }
+          
           const date = new Date(dateValue);
-          if (isNaN(date.getTime())) return undefined;
+          if (isNaN(date.getTime())) {
+            console.warn('Invalid date value:', dateValue);
+            return undefined;
+          }
           return date.toTimeString().split(' ')[0]; // Returns HH:MM:SS
         } catch (error) {
           console.warn('Error parsing time:', dateValue, error);
