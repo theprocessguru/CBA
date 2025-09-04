@@ -254,12 +254,19 @@ export default function AdminEventsPage() {
 
   // Helper function to format datetime for input field (YYYY-MM-DDTHH:MM)
   const formatDateTimeForInput = (dateString: string | undefined, timeString: string | undefined) => {
-    if (!dateString) return '';
+    if (!dateString || !timeString) return '';
     try {
-      const date = formatDateForInput(dateString);
-      const time = timeString?.slice(0, 5) || '00:00'; // Get HH:MM
-      return `${date}T${time}`;
+      // Get the base date in YYYY-MM-DD format
+      const baseDate = formatDateForInput(dateString);
+      if (!baseDate) return '';
+      
+      // Extract just the time part (HH:MM) from timeString
+      const time = timeString.includes(':') ? timeString.slice(0, 5) : '00:00';
+      
+      // Combine them properly
+      return `${baseDate}T${time}`;
     } catch (error) {
+      console.error('Date/time formatting error:', error);
       return '';
     }
   };
@@ -492,6 +499,9 @@ export default function AdminEventsPage() {
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          Date format in this field follows your browser settings. App displays dates in UK format (DD/MM/YYYY).
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -522,6 +532,9 @@ export default function AdminEventsPage() {
                         <FormControl>
                           <Input type="datetime-local" {...field} />
                         </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          Date/time format follows browser settings. App uses UK format.
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -537,6 +550,9 @@ export default function AdminEventsPage() {
                         <FormControl>
                           <Input type="datetime-local" {...field} />
                         </FormControl>
+                        <div className="text-xs text-muted-foreground">
+                          Date/time format follows browser settings. App uses UK format.
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
