@@ -315,26 +315,57 @@ export default function EventManagement() {
     
     // Function to populate test data
     const populateTestData = () => {
-      const form = document.querySelector('form') as HTMLFormElement;
-      if (form) {
-        // Fill in realistic test data
-        (form.querySelector('[name="title"]') as HTMLInputElement).value = "AI Summit 2025";
-        (form.querySelector('[name="description"]') as HTMLTextAreaElement).value = "Join us for the premier AI Summit featuring cutting-edge discussions on artificial intelligence, machine learning, and future technology trends. Perfect for business leaders, developers, and tech enthusiasts.";
-        
-        // Set date to a future date (AI Summit date - October 1st, 2025)
-        const eventDate = new Date('2025-10-01');
-        (form.querySelector('[name="eventDate"]') as HTMLInputElement).value = eventDate.toISOString().split('T')[0];
-        
-        (form.querySelector('[name="startTime"]') as HTMLInputElement).value = "09:00";
-        (form.querySelector('[name="endTime"]') as HTMLInputElement).value = "17:00";
-        (form.querySelector('[name="location"]') as HTMLInputElement).value = "Croydon Conference Centre, 45 High Street, Croydon CR0 1QQ";
-        (form.querySelector('[name="maxCapacity"]') as HTMLInputElement).value = "200";
-        (form.querySelector('[name="registrationFee"]') as HTMLInputElement).value = "50.00";
-        (form.querySelector('[name="tags"]') as HTMLInputElement).value = "AI, Summit, Technology, Business, Networking";
-        
-        // Set checkboxes
-        (form.querySelector('[name="isActive"]') as HTMLInputElement).checked = true;
-        (form.querySelector('[name="isFeatured"]') as HTMLInputElement).checked = true;
+      // Use React event simulation to properly fill form fields
+      setTimeout(() => {
+        const form = document.querySelector('form') as HTMLFormElement;
+        if (form) {
+          // Helper function to trigger React onChange
+          const setReactValue = (element: HTMLInputElement | HTMLTextAreaElement, value: string) => {
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+              element.constructor.prototype,
+              'value'
+            )?.set;
+            nativeInputValueSetter?.call(element, value);
+            element.dispatchEvent(new Event('input', { bubbles: true }));
+          };
+
+          // Fill in realistic test data
+          const titleInput = form.querySelector('[name="title"]') as HTMLInputElement;
+          if (titleInput) setReactValue(titleInput, "AI Summit 2025");
+          
+          const descInput = form.querySelector('[name="description"]') as HTMLTextAreaElement;
+          if (descInput) setReactValue(descInput, "Join us for the premier AI Summit featuring cutting-edge discussions on artificial intelligence, machine learning, and future technology trends. Perfect for business leaders, developers, and tech enthusiasts.");
+          
+          // Set date to a future date (AI Summit date - October 1st, 2025)
+          const eventDate = new Date('2025-10-01');
+          const dateInput = form.querySelector('[name="eventDate"]') as HTMLInputElement;
+          if (dateInput) setReactValue(dateInput, eventDate.toISOString().split('T')[0]);
+          
+          const startTimeInput = form.querySelector('[name="startTime"]') as HTMLInputElement;
+          if (startTimeInput) setReactValue(startTimeInput, "09:00");
+          
+          const endTimeInput = form.querySelector('[name="endTime"]') as HTMLInputElement;
+          if (endTimeInput) setReactValue(endTimeInput, "17:00");
+          
+          const locationInput = form.querySelector('[name="location"]') as HTMLInputElement;
+          if (locationInput) setReactValue(locationInput, "Croydon Conference Centre, 45 High Street, Croydon CR0 1QQ");
+          
+          const capacityInput = form.querySelector('[name="maxCapacity"]') as HTMLInputElement;
+          if (capacityInput) setReactValue(capacityInput, "200");
+          
+          const feeInput = form.querySelector('[name="registrationFee"]') as HTMLInputElement;
+          if (feeInput) setReactValue(feeInput, "50.00");
+          
+          const tagsInput = form.querySelector('[name="tags"]') as HTMLInputElement;
+          if (tagsInput) setReactValue(tagsInput, "AI, Summit, Technology, Business, Networking");
+          
+          // Set checkboxes by clicking them
+          const activeCheckbox = form.querySelector('[name="isActive"]') as HTMLInputElement;
+          if (activeCheckbox && !activeCheckbox.checked) activeCheckbox.click();
+          
+          const featuredCheckbox = form.querySelector('[name="isFeatured"]') as HTMLInputElement;
+          if (featuredCheckbox && !featuredCheckbox.checked) featuredCheckbox.click();
+        }
         
         // Set event type to summit
         setEventType("summit");
@@ -348,7 +379,7 @@ export default function EventManagement() {
           "Future of Work",
           "Ethics in AI"
         ]);
-      }
+      }, 100);
     };
     
     // Reset form state when event changes
@@ -677,15 +708,18 @@ export default function EventManagement() {
         <Button type="submit" className="flex-1" disabled={createEventMutation.isPending || updateEventMutation.isPending}>
           {submitText}
         </Button>
-        {!event && (
+        {!event ? (
           <Button 
             type="button" 
             variant="outline" 
             onClick={populateTestData}
             className="whitespace-nowrap"
+            title="Fill form with test data for AI Summit 2025"
           >
             Fill Test Data
           </Button>
+        ) : (
+          <div className="text-xs text-muted-foreground">Edit mode - no test data</div>
         )}
       </div>
     </form>
