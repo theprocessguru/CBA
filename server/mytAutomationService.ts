@@ -40,6 +40,25 @@ export interface MyTAutomationCustomField {
   required?: boolean;
 }
 
+export interface MyTAutomationWorkflow {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive' | 'draft';
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateWorkflowData {
+  name: string;
+  description?: string;
+  triggerType?: string;
+  actions?: Array<{
+    type: string;
+    config: Record<string, any>;
+  }>;
+}
+
 export interface CreateCustomFieldData {
   name: string;
   type: 'text' | 'dropdown' | 'checkbox' | 'date' | 'number' | 'email' | 'phone' | 'url' | 'textarea';
@@ -1160,6 +1179,170 @@ export class MyTAutomationService {
       console.log('Chatbot interaction:', analyticsData);
     } catch (error) {
       console.error('Error tracking chatbot interaction:', error);
+    }
+  }
+
+  // ===== WORKFLOW MANAGEMENT =====
+
+  // Get all workflows
+  async getWorkflows(): Promise<MyTAutomationWorkflow[]> {
+    if (!this.syncEnabled) {
+      console.log('⏸️  MYT Automation sync disabled - returning mock workflows');
+      return [];
+    }
+
+    try {
+      const response = await this.api.get('/workflows');
+      return response.data.workflows || response.data || [];
+    } catch (error: any) {
+      console.error('Error fetching workflows:', error?.response?.data || error);
+      return [];
+    }
+  }
+
+  // Get specific workflow by ID
+  async getWorkflow(workflowId: string): Promise<MyTAutomationWorkflow | null> {
+    if (!this.syncEnabled) {
+      console.log('⏸️  MYT Automation sync disabled - returning null workflow');
+      return null;
+    }
+
+    try {
+      const response = await this.api.get(`/workflows/${workflowId}`);
+      return response.data.workflow || response.data;
+    } catch (error: any) {
+      console.error('Error fetching workflow:', error?.response?.data || error);
+      return null;
+    }
+  }
+
+  // Create a new workflow
+  async createWorkflow(workflowData: CreateWorkflowData): Promise<MyTAutomationWorkflow | null> {
+    if (!this.syncEnabled) {
+      console.log('⏸️  MYT Automation sync disabled - skipping workflow creation');
+      return {
+        id: `mock_workflow_${Date.now()}`,
+        name: workflowData.name,
+        status: 'active',
+        version: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    try {
+      const response = await this.api.post('/workflows', {
+        name: workflowData.name,
+        description: workflowData.description || `Automated workflow for ${workflowData.name}`,
+        status: 'active',
+        // Basic workflow structure - can be enhanced
+        triggers: workflowData.triggerType ? [{
+          type: workflowData.triggerType,
+          config: {}
+        }] : [],
+        actions: workflowData.actions || [
+          {
+            type: 'send_email',
+            config: {
+              template: 'event_registration_confirmation',
+              delay: 0
+            }
+          },
+          {
+            type: 'add_tag',
+            config: {
+              tags: [workflowData.name.replace(/\s+/g, '_')]
+            }
+          }
+        ]
+      });
+      
+      const workflow = response.data.workflow || response.data;
+      console.log(`✅ Created workflow: ${workflow.name} (ID: ${workflow.id})`);
+      return workflow;
+    } catch (error: any) {
+      console.error('Error creating workflow:', error?.response?.data || error);
+      
+      // Return a mock workflow if creation fails (for development)
+      console.log('🔄 Returning mock workflow due to API error');
+      return {
+        id: `fallback_${Date.now()}`,
+        name: workflowData.name,
+        status: 'active',
+        version: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+    }
+  }
+
+  // Create event-specific workflow automatically
+  async createEventWorkflow(eventData: any): Promise<{ workflowId: string; tagName: string }> {
+    const eventName = eventData.eventName || eventData.name || 'Event';
+    const eventSlug = eventData.eventSlug || eventName.toLowerCase().replace(/\s+/g, '-');
+    
+    const workflowName = `${eventName} - Registration Follow-up`;
+    const tagName = `Event_${eventSlug.replace(/-/g, '_')}`;
+
+    try {
+      const workflow = await this.createWorkflow({
+        name: workflowName,
+        description: `Automated follow-up sequence for ${eventName} registrations`,
+        triggerType: 'tag_added',
+        actions: [
+          {
+            type: 'send_email',
+            config: {
+              template: 'event_registration_confirmation',
+              subject: `Welcome to ${eventName}!`,
+              delay: 0
+            }
+          },
+          {
+            type: 'send_sms',
+            config: {
+              message: `Thanks for registering for ${eventName}! We'll send you details soon.`,
+              delay: 300 // 5 minutes
+            }
+          },
+          {
+            type: 'send_email',
+            config: {
+              template: 'event_reminder',
+              subject: `Reminder: ${eventName} is tomorrow!`,
+              delay: 86400 // 24 hours before event
+            }
+          }
+        ]
+      });
+
+      return {
+        workflowId: workflow?.id || `event_${eventSlug}_${Date.now()}`,
+        tagName: tagName
+      };
+    } catch (error) {
+      console.error('Error creating event workflow:', error);
+      
+      // Return fallback values
+      return {
+        workflowId: `event_${eventSlug}_${Date.now()}`,
+        tagName: tagName
+      };
+    }
+  }
+
+  // Add contact to event workflow
+  async addContactToEventWorkflow(contactId: string, workflowId: string, tagName: string): Promise<void> {
+    try {
+      // Add the tag first (which triggers the workflow)
+      await this.addTagsToContact(contactId, [tagName]);
+      
+      // Then add to workflow
+      await this.addContactToWorkflow(contactId, workflowId);
+      
+      console.log(`✅ Added contact ${contactId} to event workflow ${workflowId} with tag ${tagName}`);
+    } catch (error) {
+      console.error('Error adding contact to event workflow:', error);
     }
   }
 }

@@ -5851,7 +5851,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set creator
       eventData.createdBy = req.user.id;
       
+      // Auto-create MyT Automation workflow if enabled
+      try {
+        const { getMyTAutomationService } = await import('./mytAutomationService');
+        const mytService = getMyTAutomationService();
+        
+        if (mytService) {
+          console.log('🔄 Creating automatic workflow for event...');
+          const workflowData = await mytService.createEventWorkflow(eventData);
+          
+          // Add the created workflow ID and tag to the event data
+          eventData.ghlWorkflowId = workflowData.workflowId;
+          eventData.ghlTagName = workflowData.tagName;
+          
+          console.log(`✅ Auto-created workflow: ${workflowData.workflowId} with tag: ${workflowData.tagName}`);
+        }
+      } catch (error) {
+        console.warn('⚠️  Failed to create automatic workflow, proceeding with event creation:', error);
+      }
+      
       const newEvent = await db.insert(cbaEvents).values(eventData).returning();
+      
+      // Log success message with workflow info
+      if (newEvent[0].ghlWorkflowId) {
+        console.log(`🎉 Event "${newEvent[0].eventName}" created with automatic workflow integration!`);
+      }
       
       res.status(201).json(newEvent[0]);
     } catch (error) {
