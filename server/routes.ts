@@ -672,43 +672,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Cannot impersonate another admin" });
       }
 
-      // Store original admin info in session
-      (req.session as any).originalAdmin = {
-        id: adminUser.id,
-        email: adminUser.email,
-        firstName: adminUser.firstName,
-        lastName: adminUser.lastName,
-        isAdmin: adminUser.isAdmin
-      };
+      // Get the auth token for this admin
+      const authToken = req.headers['authorization']?.replace('Bearer ', '');
+      if (!authToken) {
+        return res.status(400).json({ message: "Auth token required for impersonation" });
+      }
 
-      // Switch session to target user
-      (req.session as any).userId = targetUser.id;
-      (req.session as any).impersonating = true;
-      
-      console.log('Setting impersonation data in session:', {
-        userId: targetUser.id,
-        impersonating: true,
-        originalAdmin: (req.session as any).originalAdmin
+      // Store impersonation data linked to auth token
+      const { impersonationData } = await import('./localAuth');
+      impersonationData.set(authToken, {
+        impersonatedUserId: targetUser.id,
+        originalAdmin: {
+          id: adminUser.id,
+          email: adminUser.email,
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          isAdmin: adminUser.isAdmin
+        }
       });
       
-      // Save session
-      req.session.save((err: any) => {
-        if (err) {
-          console.error('Session save error during impersonation:', err);
-          return res.status(500).json({ message: "Failed to start impersonation" });
-        }
+      console.log('Setting impersonation data for token:', authToken.substring(0, 8) + '...');
+      console.log('Impersonating user:', targetUser.id, targetUser.email);
+      console.log('Original admin:', adminUser.email);
         
-        console.log('Session saved successfully after impersonation');
-        res.json({ 
-          success: true, 
-          message: `Now impersonating ${targetUser.firstName || targetUser.email}`,
-          targetUser: {
-            id: targetUser.id,
-            email: targetUser.email,
-            firstName: targetUser.firstName,
-            lastName: targetUser.lastName
-          }
-        });
+      res.json({ 
+        success: true, 
+        message: `Now impersonating ${targetUser.firstName || targetUser.email}`,
+        targetUser: {
+          id: targetUser.id,
+          email: targetUser.email,
+          firstName: targetUser.firstName,
+          lastName: targetUser.lastName
+        }
       });
     } catch (error) {
       console.error("Error starting impersonation:", error);
@@ -719,29 +714,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Exit impersonation
   app.post('/api/admin/exit-impersonation', isAuthenticated, async (req: any, res) => {
     try {
-      if (!req.session.impersonating || !req.session.originalAdmin) {
+      const authToken = req.headers['authorization']?.replace('Bearer ', '');
+      if (!authToken) {
+        return res.status(400).json({ message: "Auth token required" });
+      }
+
+      const { impersonationData } = await import('./localAuth');
+      const impersonation = impersonationData.get(authToken);
+      
+      if (!impersonation) {
         return res.status(400).json({ message: "Not currently impersonating" });
       }
 
-      const originalAdmin = req.session.originalAdmin;
+      // Clear impersonation data
+      impersonationData.delete(authToken);
       
-      // Restore original admin session
-      req.session.userId = originalAdmin.id;
-      delete req.session.impersonating;
-      delete req.session.originalAdmin;
+      console.log('Exited impersonation for token:', authToken.substring(0, 8) + '...');
+      console.log('Returning to admin:', impersonation.originalAdmin.email);
       
-      // Save session
-      req.session.save((err: any) => {
-        if (err) {
-          console.error('Session save error during exit impersonation:', err);
-          return res.status(500).json({ message: "Failed to exit impersonation" });
-        }
-        
-        res.json({ 
-          success: true, 
-          message: `Returned to admin account: ${originalAdmin.email}`,
-          originalAdmin
-        });
+      res.json({
+        success: true,
+        message: "Impersonation ended successfully"
       });
     } catch (error) {
       console.error("Error exiting impersonation:", error);

@@ -473,6 +473,18 @@ export async function setupLocalAuth(app: Express) {
 // Simple in-memory token store for Replit environment
 const authTokens = new Map<string, { userId: string; expiresAt: Date }>();
 
+// In-memory impersonation store for Replit environment
+export const impersonationData = new Map<string, {
+  impersonatedUserId: string;
+  originalAdmin: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isAdmin: boolean;
+  };
+}>();
+
 // Blacklist for logged out sessions - this ensures logout works even if session store fails
 const loggedOutSessions = new Set<string>();
 
@@ -490,21 +502,19 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (authToken) {
     const tokenData = authTokens.get(authToken);
     if (tokenData && tokenData.expiresAt > new Date()) {
-      // Check if session has impersonation info (session takes priority during impersonation)
-      const session = req.session as any;
-      console.log("Session data:", JSON.stringify(session, null, 2));
-      
-      if (session?.impersonating && session?.userId && session?.originalAdmin) {
-        // We're impersonating - use session user instead of token user
-        const impersonatedUser = await storage.getUser(session.userId);
+      // Check if this token has impersonation data
+      const impersonation = impersonationData.get(authToken);
+      if (impersonation) {
+        // We're impersonating - use impersonated user instead of token user
+        const impersonatedUser = await storage.getUser(impersonation.impersonatedUserId);
         if (impersonatedUser) {
           req.user = {
             ...impersonatedUser,
             isImpersonating: true,
-            originalAdmin: session.originalAdmin
+            originalAdmin: impersonation.originalAdmin
           };
           console.log("Authenticated via token but impersonating:", impersonatedUser.id, impersonatedUser.email);
-          console.log("Original admin:", session.originalAdmin?.email);
+          console.log("Original admin:", impersonation.originalAdmin?.email);
           return next();
         }
       }
