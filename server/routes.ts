@@ -117,7 +117,7 @@ function getFallbackChatbotResponse(message: string): string {
   }
   
   if (lowerMessage.includes('contact') || lowerMessage.includes('phone') || lowerMessage.includes('email')) {
-    return "You can reach us at hello@croydonbusiness.org or visit our contact page for more ways to get in touch. Our team typically responds within 24 hours. Is there something specific I can help you with right now?";
+    return "You can reach us at info@croydonba.org.uk or visit our contact page for more ways to get in touch. Our team typically responds within 24 hours. Is there something specific I can help you with right now?";
   }
   
   if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
@@ -129,7 +129,7 @@ function getFallbackChatbotResponse(message: string): string {
   }
   
   // Default response
-  return "Thank you for your message! I'm here to help with information about CBA membership, events, business support, and services. For detailed assistance, I can connect you with our team at hello@croydonbusiness.org. What specific information can I help you find?";
+  return "Thank you for your message! I'm here to help with information about CBA membership, events, business support, and services. For detailed assistance, I can connect you with our team at info@croydonba.org.uk. What specific information can I help you find?";
 }
 
 // Initialize Stripe

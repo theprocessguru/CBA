@@ -102,7 +102,7 @@ export default function MyTAutomationChatbot({
       setIsTyping(false);
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        text: "I'm having trouble connecting right now. Please try again in a moment, or feel free to contact us directly at hello@croydonbusiness.org",
+        text: "I'm having trouble connecting right now. Please try again in a moment, or feel free to contact us directly at info@croydonba.org.uk",
         isBot: true,
         timestamp: new Date()
       };
