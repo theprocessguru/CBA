@@ -24,6 +24,7 @@ import MembershipPage from "@/pages/membership";
 import Dashboard from "@/pages/dashboard";
 import BusinessProfile from "@/pages/dashboard/business-profile";
 import ProductsServices from "@/pages/dashboard/products-services";
+import AddProductService from "@/pages/dashboard/AddProductService";
 import SpecialOffers from "@/pages/dashboard/special-offers";
 import MemberDirectory from "@/pages/dashboard/member-directory";
 import ContentReports from "@/pages/admin/ContentReports";
@@ -596,6 +597,11 @@ function Router() {
       <Route path="/dashboard/products-services">
         <ProtectedRoute>
           <ProductsServices />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/dashboard/add-product-service">
+        <ProtectedRoute>
+          <AddProductService />
         </ProtectedRoute>
       </Route>
       <Route path="/dashboard/special-offers">

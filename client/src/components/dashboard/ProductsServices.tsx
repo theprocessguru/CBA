@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Package, Plus, PenSquare, Trash2, Tag, FileText, MoreVertical, Upload, X } from "lucide-react";
+import { useLocation } from "wouter";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { formatCurrency } from "@/lib/utils";
 
@@ -39,10 +40,8 @@ type ProductFormValues = z.infer<typeof productSchema>;
 
 const ProductsServices = () => {
   const [selectedTab, setSelectedTab] = useState("all");
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productsToShow, setProductsToShow] = useState<"all" | "products" | "services">("all");
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: business, isLoading: isLoadingBusiness, error: businessError } = useGetBusiness();
   const { data: products, isLoading: isLoadingProducts, error: productsError } = useGetMyProducts();
@@ -206,7 +205,7 @@ const ProductsServices = () => {
           <p className="text-neutral-600">Manage your products and services to showcase in the marketplace.</p>
         </div>
         <Button 
-          onClick={openCreateDialog} 
+          onClick={() => setLocation('/dashboard/add-product-service')} 
           className="mt-4 sm:mt-0"
         >
           <Plus className="mr-2 h-4 w-4" />
