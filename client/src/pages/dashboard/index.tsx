@@ -8,6 +8,10 @@ import { useAuth } from "@/hooks/useAuth";
 const Dashboard = () => {
   const { user } = useAuth();
   
+  // Check if admin is impersonating - if so, show user dashboard
+  const isImpersonating = (user as any)?.isImpersonating;
+  const shouldShowUserDashboard = !user?.isAdmin || isImpersonating;
+  
   return (
     <>
       <Helmet>
@@ -15,12 +19,12 @@ const Dashboard = () => {
         <meta name="description" content={META_DESCRIPTIONS.dashboard} />
       </Helmet>
       
-      {user?.isAdmin ? (
-        <AdminDashboard />
-      ) : (
+      {shouldShowUserDashboard ? (
         <DashboardLayout>
           <DashboardOverview />
         </DashboardLayout>
+      ) : (
+        <AdminDashboard />
       )}
     </>
   );
