@@ -28,11 +28,11 @@ import { formatCurrency } from "@/lib/utils";
 const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters").max(500, "Description must be less than 500 characters"),
-  price: z.string().transform(val => val === "" ? null : parseFloat(val)).optional().nullable(),
-  imageUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
+  price: z.string().optional(),
+  imageUrl: z.string().optional(),
   isService: z.boolean().default(false),
   isPublic: z.boolean().default(true),
-  categoryId: z.string().transform(val => val === "" ? null : parseInt(val)).optional().nullable(),
+  categoryId: z.string().optional(),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -118,17 +118,25 @@ const ProductsServices = () => {
   };
   
   const onSubmit = (data: ProductFormValues) => {
+    // Transform the data to correct types
+    const transformedData = {
+      ...data,
+      price: data.price && data.price !== "" ? parseFloat(data.price) : null,
+      categoryId: data.categoryId && data.categoryId !== "" && data.categoryId !== "none" ? parseInt(data.categoryId) : null,
+      imageUrl: data.imageUrl || undefined
+    };
+
     if (editingProduct) {
       updateProduct.mutate({ 
         id: editingProduct.id, 
-        data
+        data: transformedData
       }, {
         onSuccess: () => {
           setIsCreateDialogOpen(false);
         }
       });
     } else {
-      createProduct.mutate(data, {
+      createProduct.mutate(transformedData, {
         onSuccess: () => {
           setIsCreateDialogOpen(false);
         }
