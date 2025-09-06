@@ -492,6 +492,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     if (tokenData && tokenData.expiresAt > new Date()) {
       // Check if session has impersonation info (session takes priority during impersonation)
       const session = req.session as any;
+      console.log("Session data:", JSON.stringify(session, null, 2));
+      
       if (session?.impersonating && session?.userId && session?.originalAdmin) {
         // We're impersonating - use session user instead of token user
         const impersonatedUser = await storage.getUser(session.userId);
