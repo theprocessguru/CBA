@@ -276,6 +276,17 @@ export default function OrganizerScannerPage() {
       return;
     }
 
+    // Check if trying to check in an unregistered attendee
+    if (!scannedAttendee.isRegistered && scanType === 'check_in') {
+      playScanSound({ type: 'warning' });
+      toast({
+        title: "⚠️ Registration Required",
+        description: `${scannedAttendee.name} must be registered for AI Summit before checking in. Use the 'Register Now' button to complete their registration first.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     processScanMutation.mutate({
       badgeId: scannedAttendee.badgeId,
       eventId: selectedEventId,
@@ -771,17 +782,29 @@ export default function OrganizerScannerPage() {
               {/* Process Scan Button */}
               <Button 
                 onClick={handleProcessScan}
-                disabled={!scannedAttendee || !selectedEventId || processScanMutation.isPending}
-                className="w-full"
+                disabled={!scannedAttendee || !selectedEventId || processScanMutation.isPending || 
+                         (!scannedAttendee?.isRegistered && scanType === 'check_in')}
+                className={`w-full ${
+                  !scannedAttendee?.isRegistered && scanType === 'check_in' 
+                    ? 'bg-red-500 hover:bg-red-600' 
+                    : ''
+                }`}
                 size="lg"
               >
                 {processScanMutation.isPending ? 'Processing...' : 
+                 (!scannedAttendee?.isRegistered && scanType === 'check_in') ? '🚫 Registration Required' :
                  scanType === 'check_in' ? '➡️ Process Check-In' :
                  scanType === 'check_out' ? '⬅️ Process Check-Out' : '✓ Process Verification'}
               </Button>
+              
+              {!scannedAttendee?.isRegistered && scanType === 'check_in' && (
+                <p className="text-sm text-red-600 text-center mt-2">
+                  ⚠️ This person must be registered before checking in to AI Summit
+                </p>
+              )}
 
               {/* Ready Status */}
-              {scannedAttendee && selectedEventId && (
+              {scannedAttendee && selectedEventId && scannedAttendee.isRegistered && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-sm text-green-800">
                     <strong>Ready to process:</strong> {scanType.replace('_', ' ')} for {scannedAttendee.name} at {scanLocation}
