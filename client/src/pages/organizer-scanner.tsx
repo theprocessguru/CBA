@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useScannerSounds } from '@/hooks/useScannerSounds';
 import { Link } from 'wouter';
 import { Helmet } from 'react-helmet';
 import { apiRequest } from '@/lib/queryClient';
@@ -46,6 +47,8 @@ interface AttendeeInfo {
   lastScanTime?: string;
   totalSessionTime?: number; // in minutes
   sessionCount?: number;
+  isRegistered?: boolean;
+  registrationId?: number | null;
 }
 
 interface ScanRecord {
@@ -81,6 +84,7 @@ export default function OrganizerScannerPage() {
   const [activeSession, setActiveSession] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { playScanSound } = useScannerSounds();
 
   // Fetch available events for assignment
   const { data: events = [], isLoading: eventsLoading } = useQuery<EventOption[]>({
@@ -111,6 +115,22 @@ export default function OrganizerScannerPage() {
       setScannedAttendee(data);
       setManualBadgeId('');
       
+      // Play sound based on registration status
+      if (data.isRegistered) {
+        playScanSound({ type: 'success' });
+        toast({
+          title: "✅ Registered Attendee",
+          description: `${data.name} is registered for AI Summit`,
+        });
+      } else {
+        playScanSound({ type: 'warning' });
+        toast({
+          title: "⚠️ Not Registered",
+          description: `${data.name} is not registered for AI Summit. They may need to register on-the-spot.`,
+          variant: "destructive",
+        });
+      }
+      
       // Auto-suggest scan type based on current status
       if (data.currentStatus === 'checked_in') {
         setScanType('check_out');
@@ -119,8 +139,9 @@ export default function OrganizerScannerPage() {
       }
     },
     onError: (error: any) => {
+      playScanSound({ type: 'error' });
       toast({
-        title: "Attendee Not Found",
+        title: "❌ Attendee Not Found",
         description: error.message || "Could not find attendee with this badge ID",
         variant: "destructive",
       });
