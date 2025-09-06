@@ -673,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Store original admin info in session
-      req.session.originalAdmin = {
+      (req.session as any).originalAdmin = {
         id: adminUser.id,
         email: adminUser.email,
         firstName: adminUser.firstName,
@@ -682,8 +682,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Switch session to target user
-      req.session.userId = targetUser.id;
-      req.session.impersonating = true;
+      (req.session as any).userId = targetUser.id;
+      (req.session as any).impersonating = true;
+      
+      console.log('Setting impersonation data in session:', {
+        userId: targetUser.id,
+        impersonating: true,
+        originalAdmin: (req.session as any).originalAdmin
+      });
       
       // Save session
       req.session.save((err: any) => {
@@ -692,6 +698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(500).json({ message: "Failed to start impersonation" });
         }
         
+        console.log('Session saved successfully after impersonation');
         res.json({ 
           success: true, 
           message: `Now impersonating ${targetUser.firstName || targetUser.email}`,
