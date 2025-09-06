@@ -97,8 +97,7 @@ import EventDataExports from "@/pages/admin/EventDataExports";
 import AttendeeBooking from "@/pages/AttendeeBooking";
 import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
-import AffiliateDashboard from "@/pages/AffiliateDashboard";
-import AffiliateManagement from "@/pages/admin/AffiliateManagement";
+import AffiliateProgrammeComingSoon from "@/pages/AffiliateProgrammeComingSoon";
 import PersonTypes from "@/pages/admin/person-types";
 import PersonTypeImport from "@/pages/admin/PersonTypeImport";
 import Connections from "@/pages/Connections";
@@ -616,7 +615,7 @@ function Router() {
       </Route>
       <Route path="/dashboard/affiliate">
         <ProtectedRoute>
-          <AffiliateDashboard />
+          <AffiliateProgrammeComingSoon />
         </ProtectedRoute>
       </Route>
       <Route path="/dashboard/content-reports">
@@ -767,7 +766,7 @@ function Router() {
       <Route path="/admin/affiliates">
         <AdminRoute>
           <MainLayout>
-            <AffiliateManagement />
+            <AffiliateProgrammeComingSoon />
           </MainLayout>
         </AdminRoute>
       </Route>
