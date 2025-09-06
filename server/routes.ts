@@ -4370,14 +4370,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // First try AI Summit badges
       const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
       if (aiSummitBadge) {
-        // Get registration to find user
+        // Get registration to find user and validate registration status
+        let isRegistered = false;
+        let registrationId = null;
         try {
           const registration = await storage.getAISummitRegistrationById(aiSummitBadge.participantId);
           if (registration) {
             scannedUserId = registration.userId;
+            isRegistered = true;
+            registrationId = registration.id;
           }
         } catch (e) {
-          console.log('Registration not found for badge');
+          console.log('Registration not found for badge - person may not be properly registered');
+          isRegistered = false;
         }
         
         attendeeData = {
@@ -4388,14 +4393,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           company: aiSummitBadge.company,
           jobTitle: aiSummitBadge.jobTitle,
           customRole: aiSummitBadge.customRole,
-          source: 'ai_summit'
+          source: 'ai_summit',
+          isRegistered,
+          registrationId
         };
       } else {
-        // Try by QR handle (personal badges)
+        // Try by QR handle (personal badges) - but check for AI Summit registration
         const users = await storage.getAllUsers();
         const userByHandle = users.find(u => u.qrHandle === badgeId);
         if (userByHandle) {
           scannedUserId = userByHandle.id;
+          
+          // Check if this user has an AI Summit registration
+          let isRegistered = false;
+          let registrationId = null;
+          try {
+            const registration = await storage.getAISummitRegistrationByUserId(userByHandle.id);
+            if (registration) {
+              isRegistered = true;
+              registrationId = registration.id;
+            }
+          } catch (e) {
+            console.log('No AI Summit registration found for user');
+          }
+          
           attendeeData = {
             badgeId: userByHandle.qrHandle,
             name: `${userByHandle.firstName || ''} ${userByHandle.lastName || ''}`.trim() || userByHandle.email || 'Unknown',
@@ -4409,7 +4430,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             yearOfStudy: userByHandle.yearOfStudy,
             communityRole: userByHandle.communityRole,
             volunteerExperience: userByHandle.volunteerExperience,
-            source: 'qr_handle'
+            source: 'qr_handle',
+            isRegistered,
+            registrationId
           };
         }
       }
