@@ -490,7 +490,24 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (authToken) {
     const tokenData = authTokens.get(authToken);
     if (tokenData && tokenData.expiresAt > new Date()) {
-      // Token is valid, fetch user
+      // Check if session has impersonation info (session takes priority during impersonation)
+      const session = req.session as any;
+      if (session?.impersonating && session?.userId && session?.originalAdmin) {
+        // We're impersonating - use session user instead of token user
+        const impersonatedUser = await storage.getUser(session.userId);
+        if (impersonatedUser) {
+          req.user = {
+            ...impersonatedUser,
+            isImpersonating: true,
+            originalAdmin: session.originalAdmin
+          };
+          console.log("Authenticated via token but impersonating:", impersonatedUser.id, impersonatedUser.email);
+          console.log("Original admin:", session.originalAdmin?.email);
+          return next();
+        }
+      }
+      
+      // Normal token auth - no impersonation
       const user = await storage.getUser(tokenData.userId);
       if (user) {
         req.user = user; // Use the full user object
