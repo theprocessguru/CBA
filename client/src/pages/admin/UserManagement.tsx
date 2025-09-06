@@ -43,7 +43,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2, Trash2 } from "lucide-react";
+import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2, Trash2, LogIn } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const UserManagement = () => {
@@ -168,6 +168,29 @@ const UserManagement = () => {
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to delete user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const impersonateUserMutation = useMutation({
+    mutationFn: (userId: string) => {
+      return apiRequest("POST", `/api/admin/impersonate/${userId}`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: "Impersonation Started",
+        description: "You are now logged in as this user. Redirecting to their dashboard...",
+      });
+      // Redirect to dashboard after brief delay to show toast
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to impersonate user",
         variant: "destructive",
       });
     },
@@ -400,7 +423,19 @@ const UserManagement = () => {
                           {user.createdAt ? formatDistanceToNow(new Date(user.createdAt), { addSuffix: true }) : 'Unknown'}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 flex-wrap">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => impersonateUserMutation.mutate(user.id)}
+                              disabled={impersonateUserMutation.isPending}
+                              className="text-purple-600 hover:text-purple-700"
+                              title="Login as this user to see their dashboard experience"
+                            >
+                              <LogIn className="h-3 w-3 mr-1" />
+                              {impersonateUserMutation.isPending ? "..." : "Login As"}
+                            </Button>
+                            
                             <Button
                               size="sm"
                               variant="outline"

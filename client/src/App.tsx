@@ -124,12 +124,14 @@ import Footer from "@/components/layout/Footer";
 import BottomNavigation from "@/components/ui/bottom-navigation";
 import MyTAutomationChatbot from "@/components/MyTAutomationChatbot";
 import PWAInstaller from "@/components/PWAInstaller";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { useAuth } from "@/hooks/useAuth";
 
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
+      <ImpersonationBanner />
       <Navbar />
       <LocationWelcome />
       <main className="flex-grow pb-16 md:pb-0">

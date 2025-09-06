@@ -655,6 +655,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin impersonation endpoints
+  app.post('/api/admin/impersonate/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      const adminUser = req.user;
+      
+      // Get the user to impersonate
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Prevent impersonating other admins unless you're a super admin
+      if (targetUser.isAdmin && adminUser.id !== targetUser.id) {
+        return res.status(403).json({ message: "Cannot impersonate another admin" });
+      }
+
+      // Store original admin info in session
+      req.session.originalAdmin = {
+        id: adminUser.id,
+        email: adminUser.email,
+        firstName: adminUser.firstName,
+        lastName: adminUser.lastName,
+        isAdmin: adminUser.isAdmin
+      };
+
+      // Switch session to target user
+      req.session.userId = targetUser.id;
+      req.session.impersonating = true;
+      
+      // Save session
+      req.session.save((err: any) => {
+        if (err) {
+          console.error('Session save error during impersonation:', err);
+          return res.status(500).json({ message: "Failed to start impersonation" });
+        }
+        
+        res.json({ 
+          success: true, 
+          message: `Now impersonating ${targetUser.firstName || targetUser.email}`,
+          targetUser: {
+            id: targetUser.id,
+            email: targetUser.email,
+            firstName: targetUser.firstName,
+            lastName: targetUser.lastName
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Error starting impersonation:", error);
+      res.status(500).json({ message: "Failed to start impersonation" });
+    }
+  });
+
+  // Exit impersonation
+  app.post('/api/admin/exit-impersonation', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!req.session.impersonating || !req.session.originalAdmin) {
+        return res.status(400).json({ message: "Not currently impersonating" });
+      }
+
+      const originalAdmin = req.session.originalAdmin;
+      
+      // Restore original admin session
+      req.session.userId = originalAdmin.id;
+      delete req.session.impersonating;
+      delete req.session.originalAdmin;
+      
+      // Save session
+      req.session.save((err: any) => {
+        if (err) {
+          console.error('Session save error during exit impersonation:', err);
+          return res.status(500).json({ message: "Failed to exit impersonation" });
+        }
+        
+        res.json({ 
+          success: true, 
+          message: `Returned to admin account: ${originalAdmin.email}`,
+          originalAdmin
+        });
+      });
+    } catch (error) {
+      console.error("Error exiting impersonation:", error);
+      res.status(500).json({ message: "Failed to exit impersonation" });
+    }
+  });
+
   // Start trial membership with donation
   app.post('/api/start-trial-membership', isAuthenticated, async (req: any, res) => {
     try {
