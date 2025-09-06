@@ -48,7 +48,8 @@ import { formatDistanceToNow } from "date-fns";
 
 const UserManagement = () => {
   const [, navigate] = useLocation();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // What user types
+  const [searchTerm, setSearchTerm] = useState(""); // What triggers the API call
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [suspendingUser, setSuspendingUser] = useState<User | null>(null);
   const [suspensionReason, setSuspensionReason] = useState("");
@@ -329,15 +330,40 @@ const UserManagement = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <Label htmlFor="search">Search Users</Label>
-                <div className="relative mt-1">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
-                  <Input
-                    id="search"
-                    placeholder="Search by name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
+                <div className="flex gap-2 mt-1">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-neutral-400" />
+                    <Input
+                      id="search"
+                      placeholder="Search by name or email..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setSearchTerm(searchInput);
+                        }
+                      }}
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => setSearchTerm(searchInput)}
+                    className="px-4"
+                  >
+                    Search
+                  </Button>
+                  {searchTerm && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearchInput("");
+                        setSearchTerm("");
+                      }}
+                      className="px-4"
+                    >
+                      Clear
+                    </Button>
+                  )}
                 </div>
               </div>
               
