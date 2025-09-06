@@ -82,6 +82,8 @@ export default function OrganizerScannerPage() {
   const [scanType, setScanType] = useState<'check_in' | 'check_out' | 'verification'>('check_in');
   const [scanLocation, setScanLocation] = useState('Main Entrance');
   const [activeSession, setActiveSession] = useState<any>(null);
+  const [showSpotRegistration, setShowSpotRegistration] = useState(false);
+  const [spotRegData, setSpotRegData] = useState({ name: '', email: '', company: '', jobTitle: '', phone: '' });
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { playScanSound } = useScannerSounds();
@@ -146,6 +148,34 @@ export default function OrganizerScannerPage() {
         variant: "destructive",
       });
       setScannedAttendee(null);
+    },
+  });
+
+  // Spot registration mutation
+  const spotRegistrationMutation = useMutation({
+    mutationFn: async (data: { name: string; email: string; company?: string; jobTitle?: string; phone?: string; existingUserId?: string }) => {
+      const response = await apiRequest('POST', '/api/ai-summit/spot-registration', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      playScanSound({ type: 'success' });
+      toast({
+        title: "✅ Registration Successful",
+        description: `${data.registration.name} has been registered for AI Summit`,
+      });
+      
+      // Re-lookup the attendee after successful registration
+      lookupMutation.mutate(data.badgeId);
+      setShowSpotRegistration(false);
+      setSpotRegData({ name: '', email: '', company: '', jobTitle: '', phone: '' });
+    },
+    onError: (error: any) => {
+      playScanSound({ type: 'error' });
+      toast({
+        title: "❌ Registration Failed",
+        description: error.message || "Could not complete spot registration",
+        variant: "destructive",
+      });
     },
   });
 
@@ -384,10 +414,43 @@ export default function OrganizerScannerPage() {
 
               {/* Scanned Attendee Info */}
               {scannedAttendee && (
-                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <span className="font-medium text-green-800">Attendee Found</span>
+                <div className={`mt-4 p-4 rounded-lg ${
+                  scannedAttendee.isRegistered 
+                    ? 'bg-green-50 border border-green-200' 
+                    : 'bg-yellow-50 border border-yellow-300'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      {scannedAttendee.isRegistered ? (
+                        <>
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <span className="font-medium text-green-800">✅ Registered Attendee</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="h-5 w-5 text-yellow-600" />
+                          <span className="font-medium text-yellow-800">⚠️ Not Registered</span>
+                        </>
+                      )}
+                    </div>
+                    {!scannedAttendee.isRegistered && (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSpotRegData({
+                            name: scannedAttendee.name,
+                            email: scannedAttendee.email,
+                            company: scannedAttendee.company || '',
+                            jobTitle: scannedAttendee.jobTitle || '',
+                            phone: ''
+                          });
+                          setShowSpotRegistration(true);
+                        }}
+                        className="bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        📝 Register Now
+                      </Button>
+                    )}
                   </div>
                   
                   <div className="space-y-2 text-sm">
@@ -439,7 +502,114 @@ export default function OrganizerScannerPage() {
                         <span className="text-xs">{scannedAttendee.communityRole}</span>
                       </div>
                     )}
+                    
+                    {/* Registration Status */}
+                    <div className="flex justify-between items-center pt-2 border-t">
+                      <span className="text-gray-600 font-medium">Registration Status:</span>
+                      <Badge variant={scannedAttendee.isRegistered ? 'default' : 'destructive'}>
+                        {scannedAttendee.isRegistered ? 'Registered ✓' : 'Not Registered ✗'}
+                      </Badge>
+                    </div>
                   </div>
+                </div>
+              )}
+              
+              {/* Spot Registration Modal */}
+              {showSpotRegistration && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <Card className="w-full max-w-md">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <UserPlus className="h-5 w-5" />
+                        Quick Registration
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="spot-name">Name *</Label>
+                        <Input
+                          id="spot-name"
+                          value={spotRegData.name}
+                          onChange={(e) => setSpotRegData(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Full name"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="spot-email">Email *</Label>
+                        <Input
+                          id="spot-email"
+                          type="email"
+                          value={spotRegData.email}
+                          onChange={(e) => setSpotRegData(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="email@example.com"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="spot-company">Company</Label>
+                        <Input
+                          id="spot-company"
+                          value={spotRegData.company}
+                          onChange={(e) => setSpotRegData(prev => ({ ...prev, company: e.target.value }))}
+                          placeholder="Company name"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="spot-job">Job Title</Label>
+                        <Input
+                          id="spot-job"
+                          value={spotRegData.jobTitle}
+                          onChange={(e) => setSpotRegData(prev => ({ ...prev, jobTitle: e.target.value }))}
+                          placeholder="Job title"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="spot-phone">Phone</Label>
+                        <Input
+                          id="spot-phone"
+                          value={spotRegData.phone}
+                          onChange={(e) => setSpotRegData(prev => ({ ...prev, phone: e.target.value }))}
+                          placeholder="Phone number"
+                        />
+                      </div>
+                      
+                      <div className="flex gap-2 pt-4">
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setShowSpotRegistration(false);
+                            setSpotRegData({ name: '', email: '', company: '', jobTitle: '', phone: '' });
+                          }}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            if (!spotRegData.name || !spotRegData.email) {
+                              toast({
+                                title: "Missing Information",
+                                description: "Name and email are required",
+                                variant: "destructive",
+                              });
+                              return;
+                            }
+                            spotRegistrationMutation.mutate({
+                              ...spotRegData,
+                              existingUserId: scannedAttendee?.source === 'qr_handle' ? scannedAttendee.badgeId : undefined
+                            });
+                          }}
+                          disabled={spotRegistrationMutation.isPending}
+                          className="flex-1"
+                        >
+                          {spotRegistrationMutation.isPending ? 'Registering...' : 'Register'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
             </CardContent>

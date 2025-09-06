@@ -94,7 +94,7 @@ import bcrypt from "bcrypt";
 import { emailService } from "./emailService";
 import { aiService } from "./aiService";
 import { aiAdvancedService } from "./aiAdvancedService";
-import { badgeService, type BadgeInfo } from "./badgeService";
+import { badgeService, BadgeService, type BadgeInfo } from "./badgeService";
 import { LimitService } from "./limitService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
@@ -4357,6 +4357,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Event Organizer Scanner APIs
+
+  // Quick spot registration for AI Summit
+  app.post('/api/ai-summit/spot-registration', isAuthenticated, async (req: any, res) => {
+    try {
+      const { name, email, company, jobTitle, phone, existingUserId } = req.body;
+      
+      if (!name || !email) {
+        return res.status(400).json({ message: "Name and email are required" });
+      }
+      
+      let userId = existingUserId;
+      
+      // If no existing user ID, create or find user
+      if (!userId) {
+        let user = await storage.getUserByEmail(email);
+        if (!user) {
+          // Create new user for spot registration
+          user = await storage.createUser({
+            email,
+            firstName: name.split(' ')[0] || name,
+            lastName: name.split(' ').slice(1).join(' ') || '',
+            company: company || null,
+            jobTitle: jobTitle || null,
+            phone: phone || null,
+            participantType: 'attendee',
+            isActive: true,
+            emailVerified: true, // Auto-verify for spot registrations
+            password: null // No password required for spot registrations
+          });
+        }
+        userId = user.id;
+      }
+      
+      // Create AI Summit registration
+      const registration = await db
+        .insert(aiSummitRegistrations)
+        .values({
+          userId,
+          name,
+          email,
+          company: company || null,
+          jobTitle: jobTitle || null,
+          phoneNumber: phone || null,
+          businessType: company ? 'Business' : 'Individual',
+          aiInterest: 'General Interest',
+          participantRoles: JSON.stringify(['attendee']),
+          customRole: 'Spot Registration',
+          emailVerified: true,
+          registeredAt: new Date(),
+          source: 'spot_registration'
+        })
+        .returning();
+        
+      // Create badge for the spot registration
+      const badgeService = new BadgeService();
+      const badge = await badgeService.createParticipantBadge(registration[0].id.toString(), {
+        participantType: 'attendee',
+        name,
+        email,
+        company: company || null,
+        jobTitle: jobTitle || null,
+        participantId: registration[0].id.toString(),
+        customRole: 'Spot Registration'
+      });
+      
+      res.json({
+        success: true,
+        message: 'Spot registration successful!',
+        registration: registration[0],
+        badgeId: badge.badgeId,
+        userId
+      });
+      
+    } catch (error: any) {
+      console.error('Spot registration error:', error);
+      res.status(500).json({ 
+        message: 'Spot registration failed: ' + error.message 
+      });
+    }
+  });
 
   // Attendee lookup for organizer scanner with status
   app.get('/api/attendee-lookup/:badgeId', isAuthenticated, async (req: any, res) => {
