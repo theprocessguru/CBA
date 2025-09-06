@@ -515,8 +515,15 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // Attach full user data including isAdmin flag
-  req.user = user; // Use the full user object
+  // Attach full user data including isAdmin flag and impersonation info
+  req.user = {
+    ...user,
+    isImpersonating: session.impersonating || false,
+    originalAdmin: session.originalAdmin || null
+  };
   console.log("Authenticated via session:", user.id, user.email);
+  if (session.impersonating) {
+    console.log("Impersonating user, original admin:", session.originalAdmin?.email);
+  }
   next();
 };
