@@ -691,9 +691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      console.log('Setting impersonation data for token:', authToken.substring(0, 8) + '...');
-      console.log('Impersonating user:', targetUser.id, targetUser.email);
-      console.log('Original admin:', adminUser.email);
+      console.log(`Admin ${adminUser.email} is now impersonating ${targetUser.email}`);
         
       res.json({ 
         success: true, 
@@ -729,8 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Clear impersonation data
       impersonationData.delete(authToken);
       
-      console.log('Exited impersonation for token:', authToken.substring(0, 8) + '...');
-      console.log('Returning to admin:', impersonation.originalAdmin.email);
+      console.log(`Exited impersonation, returning to admin: ${impersonation.originalAdmin.email}`);
       
       res.json({
         success: true,

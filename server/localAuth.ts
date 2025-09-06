@@ -513,8 +513,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
             isImpersonating: true,
             originalAdmin: impersonation.originalAdmin
           };
-          console.log("Authenticated via token but impersonating:", impersonatedUser.id, impersonatedUser.email);
-          console.log("Original admin:", impersonation.originalAdmin?.email);
+          console.log("Authenticated via token but impersonating:", impersonatedUser.email);
           return next();
         }
       }
