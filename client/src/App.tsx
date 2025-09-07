@@ -878,7 +878,7 @@ function AddProductServiceWrapper() {
   const editId = urlParams.get('edit');
   
   const { data: editingProduct, isLoading } = useQuery<Product>({
-    queryKey: ['/api/products', editId],
+    queryKey: [`/api/products/${editId}`],
     enabled: !!editId,
   });
 

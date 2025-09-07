@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCreateProduct, useUpdateProduct } from "@/hooks/useProducts";
 import { useQuery } from "@tanstack/react-query";
 import { useGetBusiness } from "@/hooks/useBusiness";
@@ -77,15 +77,40 @@ const AddProductService = ({ editingProduct }: AddProductServiceProps) => {
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: editingProduct?.name || "",
-      description: editingProduct?.description || "",
-      price: editingProduct?.price ? String(editingProduct.price) : "",
-      imageUrl: editingProduct?.imageUrl || "",
-      isService: editingProduct?.isService || false,
-      isPublic: editingProduct?.isPublic !== false,
-      categoryId: editingProduct?.categoryId ? String(editingProduct.categoryId) : "",
+      name: "",
+      description: "",
+      price: "",
+      imageUrl: "",
+      isService: false,
+      isPublic: true,
+      categoryId: "",
     },
   });
+
+  // Update form when editingProduct changes
+  useEffect(() => {
+    if (editingProduct) {
+      form.reset({
+        name: editingProduct.name || "",
+        description: editingProduct.description || "",
+        price: editingProduct.price ? String(editingProduct.price) : "",
+        imageUrl: editingProduct.imageUrl || "",
+        isService: editingProduct.isService || false,
+        isPublic: editingProduct.isPublic !== false,
+        categoryId: editingProduct.categoryId ? String(editingProduct.categoryId) : "",
+      });
+    } else {
+      form.reset({
+        name: "",
+        description: "",
+        price: "",
+        imageUrl: "",
+        isService: false,
+        isPublic: true,
+        categoryId: "",
+      });
+    }
+  }, [editingProduct, form]);
   
   const onSubmit = (data: ProductFormValues) => {
     // Transform the data to correct types
