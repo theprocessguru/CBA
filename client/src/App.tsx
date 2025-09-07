@@ -25,6 +25,9 @@ import Dashboard from "@/pages/dashboard";
 import BusinessProfile from "@/pages/dashboard/business-profile";
 import ProductsServices from "@/pages/dashboard/products-services";
 import AddProductService from "@/pages/dashboard/AddProductService";
+import { useQuery } from "@tanstack/react-query";
+import { Product } from "@shared/schema";
+import { useLocation } from "wouter";
 import SpecialOffers from "@/pages/dashboard/special-offers";
 import MemberDirectory from "@/pages/dashboard/member-directory";
 import ContentReports from "@/pages/admin/ContentReports";
@@ -600,7 +603,7 @@ function Router() {
       </Route>
       <Route path="/dashboard/add-product-service">
         <ProtectedRoute>
-          <AddProductService />
+          <AddProductServiceWrapper />
         </ProtectedRoute>
       </Route>
       <Route path="/dashboard/special-offers">
@@ -866,6 +869,31 @@ function App() {
       </TooltipProvider>
     </QueryClientProvider>
   );
+}
+
+// Wrapper component to handle product editing
+function AddProductServiceWrapper() {
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split('?')[1] || '');
+  const editId = urlParams.get('edit');
+  
+  const { data: editingProduct, isLoading } = useQuery<Product>({
+    queryKey: ['/api/products', editId],
+    enabled: !!editId,
+  });
+
+  if (isLoading && editId) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading product data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <AddProductService editingProduct={editingProduct || null} />;
 }
 
 export default App;
