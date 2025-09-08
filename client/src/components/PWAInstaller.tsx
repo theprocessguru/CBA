@@ -102,7 +102,7 @@ export default function PWAInstaller() {
                 Add to your home screen for quick access to your badge!
               </p>
               <div className="text-xs text-blue-700 space-y-1">
-                <p>1. Tap the Share button (□↑) at the bottom</p>
+                <p>1. Tap the Share button (□↑) in your browser</p>
                 <p>2. Scroll down and tap "Add to Home Screen"</p>
                 <p>3. Tap "Add" to install the app</p>
               </div>
@@ -112,14 +112,22 @@ export default function PWAInstaller() {
               <p className="text-sm text-blue-800">
                 Install the CBA Badge app for quick access to your digital badge and event features.
               </p>
-              <Button
-                onClick={handleInstallClick}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-                size="sm"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Install App
-              </Button>
+              {deferredPrompt ? (
+                <Button
+                  onClick={handleInstallClick}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  size="sm"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Install App
+                </Button>
+              ) : (
+                <div className="text-xs text-blue-700 space-y-1">
+                  <p>On Chrome/Edge: Tap menu (⋮) → "Add to Home screen"</p>
+                  <p>On Firefox: Tap menu → "Install"</p>
+                  <p>Or look for the install prompt in your browser</p>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
