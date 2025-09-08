@@ -198,7 +198,7 @@ export function LocationWelcome() {
     <>
       {/* Location Permission Request */}
       {!locationEnabled && (
-        <div className="fixed bottom-4 right-4 z-50 max-w-sm sm:bottom-6 sm:right-6 
+        <div className="fixed bottom-20 right-4 z-50 max-w-sm sm:bottom-6 sm:right-6 
                         safe-area-inset-bottom safe-area-inset-right
                         md:max-w-sm lg:max-w-md">
           <Card className="shadow-lg border-primary/20 mx-2 sm:mx-0">
