@@ -38,7 +38,7 @@ interface AttendeeStats {
 export default function BadgeScanner() {
   const [badgeId, setBadgeId] = useState('');
   const [scanMode, setScanMode] = useState<'check_in' | 'check_out'>('check_in');
-  const [location, setLocation] = useState('main_entrance');
+  const [location, setLocation] = useState('LSBU - Main Entrance');
   const [staffMember, setStaffMember] = useState('');
   const [notes, setNotes] = useState('');
   const [lastResult, setLastResult] = useState<CheckInResult | null>(null);
@@ -406,11 +406,21 @@ export default function BadgeScanner() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="main_entrance">Main Entrance</SelectItem>
-                    <SelectItem value="exhibition_hall">Exhibition Hall</SelectItem>
-                    <SelectItem value="conference_room">Conference Room</SelectItem>
-                    <SelectItem value="networking_area">Networking Area</SelectItem>
-                    <SelectItem value="registration_desk">Registration Desk</SelectItem>
+                    {/* LSBU Venue */}
+                    <SelectItem value="LSBU - Main Entrance">🏢 LSBU - Main Entrance</SelectItem>
+                    <SelectItem value="LSBU - Auditorium">🎯 LSBU - Auditorium</SelectItem>
+                    <SelectItem value="LSBU - Workshop Room">🏫 LSBU - Workshop Room</SelectItem>
+                    <SelectItem value="LSBU - Exhibition Space">🎪 LSBU - Exhibition Space</SelectItem>
+                    <SelectItem value="LSBU - Refreshments">☕ LSBU - Refreshments</SelectItem>
+                    <SelectItem value="LSBU - In and Out">🚪 LSBU - In and Out</SelectItem>
+                    
+                    {/* Metrobank Venue */}
+                    <SelectItem value="Metrobank - Main Entrance">🏢 Metrobank - Main Entrance</SelectItem>
+                    <SelectItem value="Metrobank - Auditorium">🎯 Metrobank - Auditorium</SelectItem>
+                    <SelectItem value="Metrobank - Workshop Room">🏫 Metrobank - Workshop Room</SelectItem>
+                    <SelectItem value="Metrobank - Exhibition Space">🎪 Metrobank - Exhibition Space</SelectItem>
+                    <SelectItem value="Metrobank - Refreshments">☕ Metrobank - Refreshments</SelectItem>
+                    <SelectItem value="Metrobank - In and Out">🚪 Metrobank - In and Out</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
