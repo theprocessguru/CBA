@@ -356,7 +356,7 @@ export const events = pgTable("events", {
   maxCapacity: integer("max_capacity"),
   registrationFee: decimal("registration_fee", { precision: 10, scale: 2 }),
   economicImpactValue: decimal("economic_impact_value", { precision: 10, scale: 2 }).default("0.00"), // Economic impact value per attendee
-  status: varchar("status").default("draft"), // draft, published, ongoing, completed, cancelled
+  status: varchar("status").default("draft"), // draft, published, ongoing, completed, cancelled, archived
   tags: text("tags"), // JSON array of tags
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
