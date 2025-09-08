@@ -198,8 +198,10 @@ export function LocationWelcome() {
     <>
       {/* Location Permission Request */}
       {!locationEnabled && (
-        <div className="fixed bottom-4 right-4 z-50 max-w-sm">
-          <Card className="shadow-lg border-primary/20">
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm sm:bottom-6 sm:right-6 
+                        safe-area-inset-bottom safe-area-inset-right
+                        md:max-w-sm lg:max-w-md">
+          <Card className="shadow-lg border-primary/20 mx-2 sm:mx-0">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -240,7 +242,8 @@ export function LocationWelcome() {
 
       {/* Welcome Message */}
       {showWelcome && nearbyVenue && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full px-4">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full px-4 
+                        sm:top-20 sm:px-6 safe-area-inset-top">
           <Card className="shadow-xl border-primary bg-gradient-to-r from-primary/5 to-primary/10">
             <CardHeader className="relative">
               <Button
