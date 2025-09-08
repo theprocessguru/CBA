@@ -2073,7 +2073,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteEvent(id: number): Promise<void> {
-    await db.delete(events).where(eq(events.id, id));
+    // Archive event instead of deleting to preserve visitor scan data
+    await db
+      .update(events)
+      .set({ 
+        status: 'archived',
+        updatedAt: new Date() 
+      })
+      .where(eq(events.id, id));
   }
 
   // Event Registrations Implementation
