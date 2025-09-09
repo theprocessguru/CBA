@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore, Download } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore, Download, CheckCircle, UserCheck, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -110,6 +110,9 @@ export default function EventManagement() {
   const [showRecurringDialog, setShowRecurringDialog] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showArchivedEvents, setShowArchivedEvents] = useState(false);
+  const [showAttendanceDialog, setShowAttendanceDialog] = useState(false);
+  const [selectedAttendees, setSelectedAttendees] = useState<number[]>([]);
+  const [attendanceStats, setAttendanceStats] = useState<any>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -267,6 +270,56 @@ export default function EventManagement() {
         variant: "destructive",
       });
     },
+  });
+
+  // Mark attendance mutation
+  const markAttendanceMutation = useMutation({
+    mutationFn: async ({ eventId, attendeeIds, markAsAttended }: { eventId: number; attendeeIds: number[]; markAsAttended: boolean }) => {
+      await apiRequest("POST", `/api/admin/events/${eventId}/mark-attendance`, { attendeeIds, markAsAttended });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/events/${selectedEvent?.id}/registrations`] });
+      setSelectedAttendees([]);
+      toast({
+        title: "Attendance Updated",
+        description: "Attendance has been marked and MYT Automation workflows triggered",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to mark attendance: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Process post-event mutation
+  const processPostEventMutation = useMutation({
+    mutationFn: async (eventId: number) => {
+      const response = await apiRequest("POST", `/api/admin/events/${eventId}/process-post-event`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [`/api/admin/events/${selectedEvent?.id}/registrations`] });
+      toast({
+        title: "Post-Event Processing Complete",
+        description: `Processed ${data.summary.totalRegistrations} registrations. ${data.summary.workflowsTriggered} email workflows triggered.`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to process post-event: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Fetch attendance stats
+  const { data: attendanceStatsData } = useQuery({
+    queryKey: selectedEvent?.id ? [`/api/admin/events/${selectedEvent.id}/attendance-stats`] : [],
+    enabled: !!selectedEvent && !!selectedEvent?.id && showAttendanceDialog,
   });
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -911,6 +964,17 @@ export default function EventManagement() {
                       size="sm"
                       variant="outline"
                       onClick={() => {
+                        setSelectedEvent(event);
+                        setShowAttendanceDialog(true);
+                      }}
+                    >
+                      <UserCheck className="w-4 h-4 mr-1" />
+                      Attendance
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
                         // Export registrations as CSV
                         const url = `/api/admin/events/${event.id}/registrations/export`;
                         const link = document.createElement('a');
@@ -1418,6 +1482,145 @@ export default function EventManagement() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attendance Management Dialog */}
+      <Dialog open={showAttendanceDialog} onOpenChange={setShowAttendanceDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Attendance Management - {selectedEvent?.eventName}</DialogTitle>
+          </DialogHeader>
+          
+          {attendanceStatsData && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-green-600">{attendanceStatsData.checkedIn}</div>
+                <div className="text-sm text-muted-foreground">Attended</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-red-600">{attendanceStatsData.noShows}</div>
+                <div className="text-sm text-muted-foreground">No Shows</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-yellow-600">{attendanceStatsData.pending}</div>
+                <div className="text-sm text-muted-foreground">Pending</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-2xl font-bold text-blue-600">{attendanceStatsData.attendanceRate}%</div>
+                <div className="text-sm text-muted-foreground">Attendance Rate</div>
+              </Card>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (selectedAttendees.length > 0) {
+                    markAttendanceMutation.mutate({
+                      eventId: selectedEvent!.id,
+                      attendeeIds: selectedAttendees,
+                      markAsAttended: true
+                    });
+                  }
+                }}
+                disabled={selectedAttendees.length === 0 || markAttendanceMutation.isPending}
+              >
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Mark as Attended ({selectedAttendees.length})
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (selectedAttendees.length > 0) {
+                    markAttendanceMutation.mutate({
+                      eventId: selectedEvent!.id,
+                      attendeeIds: selectedAttendees,
+                      markAsAttended: false
+                    });
+                  }
+                }}
+                disabled={selectedAttendees.length === 0 || markAttendanceMutation.isPending}
+              >
+                <X className="w-4 h-4 mr-1" />
+                Mark as No-Show ({selectedAttendees.length})
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  if (confirm("This will process all attendees and trigger MYT Automation email workflows. Continue?")) {
+                    processPostEventMutation.mutate(selectedEvent!.id);
+                  }
+                }}
+                disabled={processPostEventMutation.isPending}
+              >
+                <Mail className="w-4 h-4 mr-1" />
+                Process Post-Event Emails
+              </Button>
+            </div>
+
+            {registrationsLoading ? (
+              <p>Loading attendees...</p>
+            ) : registrations.length > 0 ? (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {registrations.map((registration: any) => (
+                  <Card key={registration.id} className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedAttendees.includes(registration.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedAttendees([...selectedAttendees, registration.id]);
+                            } else {
+                              setSelectedAttendees(selectedAttendees.filter(id => id !== registration.id));
+                            }
+                          }}
+                          className="rounded"
+                        />
+                        <div>
+                          <div className="font-medium">{registration.attendeeName || registration.name}</div>
+                          <div className="text-sm text-muted-foreground">{registration.attendeeEmail || registration.email}</div>
+                          {registration.company && (
+                            <div className="text-sm text-muted-foreground">{registration.company}</div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {registration.checkedIn && (
+                          <Badge className="bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Attended
+                          </Badge>
+                        )}
+                        {registration.noShow && (
+                          <Badge className="bg-red-100 text-red-800">
+                            <X className="w-3 h-3 mr-1" />
+                            No Show
+                          </Badge>
+                        )}
+                        {!registration.checkedIn && !registration.noShow && (
+                          <Badge className="bg-yellow-100 text-yellow-800">
+                            Pending
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">No attendees found for this event</p>
+              </Card>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

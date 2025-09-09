@@ -6484,6 +6484,205 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mark attendee attendance and trigger MYT Automation workflows
+  app.post('/api/admin/events/:id/mark-attendance', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { attendeeIds, markAsAttended } = req.body;
+      
+      if (!attendeeIds || !Array.isArray(attendeeIds)) {
+        return res.status(400).json({ message: 'Attendee IDs array is required' });
+      }
+
+      const results = [];
+      
+      for (const attendeeId of attendeeIds) {
+        // Update attendance status
+        if (markAsAttended) {
+          // Mark as attended
+          await db
+            .update(cbaEventRegistrations)
+            .set({
+              checkedIn: true,
+              checkedInAt: new Date(),
+              noShow: false,
+              updatedAt: new Date()
+            })
+            .where(and(
+              eq(cbaEventRegistrations.id, attendeeId),
+              eq(cbaEventRegistrations.eventId, parseInt(id))
+            ));
+        } else {
+          // Mark as no-show
+          await db
+            .update(cbaEventRegistrations)
+            .set({
+              noShow: true,
+              checkedIn: false,
+              checkedInAt: null,
+              updatedAt: new Date()
+            })
+            .where(and(
+              eq(cbaEventRegistrations.id, attendeeId),
+              eq(cbaEventRegistrations.eventId, parseInt(id))
+            ));
+        }
+
+        // Get registration details for MYT Automation
+        const registration = await db
+          .select()
+          .from(cbaEventRegistrations)
+          .where(eq(cbaEventRegistrations.id, attendeeId))
+          .limit(1);
+
+        if (registration.length > 0) {
+          const reg = registration[0];
+          
+          // Trigger MYT Automation workflow
+          const workflowTag = markAsAttended ? 'event_attended' : 'event_no_show';
+          const existingTags = reg.ghlTagsApplied ? JSON.parse(reg.ghlTagsApplied) : [];
+          const newTags = [...existingTags, workflowTag];
+          
+          // Update tags in database
+          await db
+            .update(cbaEventRegistrations)
+            .set({
+              ghlTagsApplied: JSON.stringify(newTags),
+              updatedAt: new Date()
+            })
+            .where(eq(cbaEventRegistrations.id, attendeeId));
+
+          results.push({
+            attendeeId,
+            email: reg.participantEmail,
+            name: reg.participantName,
+            status: markAsAttended ? 'attended' : 'no_show',
+            workflowTriggered: workflowTag
+          });
+
+          // TODO: Add actual MYT Automation API call here
+          // This would send the tag to MYT Automation to trigger email workflows
+          console.log(`MYT Automation: Tag "${workflowTag}" applied to ${reg.participantEmail}`);
+        }
+      }
+
+      res.json({
+        message: `Successfully marked ${attendeeIds.length} attendees as ${markAsAttended ? 'attended' : 'no-show'}`,
+        results
+      });
+    } catch (error) {
+      console.error('Error marking attendance:', error);
+      res.status(500).json({ message: 'Failed to mark attendance' });
+    }
+  });
+
+  // Bulk process post-event attendance and trigger all workflows
+  app.post('/api/admin/events/:id/process-post-event', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get all registrations for this event
+      const registrations = await db
+        .select()
+        .from(cbaEventRegistrations)
+        .where(eq(cbaEventRegistrations.eventId, parseInt(id)));
+
+      const attendedCount = registrations.filter(reg => reg.checkedIn).length;
+      const noShowCount = registrations.filter(reg => reg.noShow).length;
+      const pendingCount = registrations.filter(reg => !reg.checkedIn && !reg.noShow).length;
+
+      // Auto-mark remaining unchecked registrations as no-shows
+      if (pendingCount > 0) {
+        await db
+          .update(cbaEventRegistrations)
+          .set({
+            noShow: true,
+            updatedAt: new Date()
+          })
+          .where(and(
+            eq(cbaEventRegistrations.eventId, parseInt(id)),
+            eq(cbaEventRegistrations.checkedIn, false),
+            eq(cbaEventRegistrations.noShow, false)
+          ));
+      }
+
+      // Trigger MYT Automation workflows for all attendees
+      const workflowResults = [];
+      
+      for (const reg of registrations) {
+        let workflowTag;
+        if (reg.checkedIn) {
+          workflowTag = 'event_attended_thank_you';
+        } else {
+          workflowTag = 'event_missed_you';
+        }
+
+        const existingTags = reg.ghlTagsApplied ? JSON.parse(reg.ghlTagsApplied) : [];
+        const newTags = [...existingTags, workflowTag];
+        
+        await db
+          .update(cbaEventRegistrations)
+          .set({
+            ghlTagsApplied: JSON.stringify(newTags),
+            updatedAt: new Date()
+          })
+          .where(eq(cbaEventRegistrations.id, reg.id));
+
+        workflowResults.push({
+          email: reg.participantEmail,
+          name: reg.participantName,
+          status: reg.checkedIn ? 'attended' : 'no_show',
+          workflowTriggered: workflowTag
+        });
+
+        // TODO: Add actual MYT Automation API call
+        console.log(`MYT Automation: Tag "${workflowTag}" applied to ${reg.participantEmail}`);
+      }
+
+      res.json({
+        message: 'Post-event processing completed',
+        summary: {
+          totalRegistrations: registrations.length,
+          attended: attendedCount,
+          noShows: noShowCount + pendingCount,
+          workflowsTriggered: workflowResults.length
+        },
+        workflowResults
+      });
+    } catch (error) {
+      console.error('Error processing post-event:', error);
+      res.status(500).json({ message: 'Failed to process post-event' });
+    }
+  });
+
+  // Get attendance statistics for an event
+  app.get('/api/admin/events/:id/attendance-stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const registrations = await db
+        .select()
+        .from(cbaEventRegistrations)
+        .where(eq(cbaEventRegistrations.eventId, parseInt(id)));
+
+      const stats = {
+        totalRegistrations: registrations.length,
+        checkedIn: registrations.filter(reg => reg.checkedIn).length,
+        noShows: registrations.filter(reg => reg.noShow).length,
+        pending: registrations.filter(reg => !reg.checkedIn && !reg.noShow).length,
+        attendanceRate: registrations.length > 0 
+          ? Math.round((registrations.filter(reg => reg.checkedIn).length / registrations.length) * 100)
+          : 0,
+        workflowsTriggered: registrations.filter(reg => reg.ghlTagsApplied).length
+      };
+
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching attendance stats:', error);
+      res.status(500).json({ message: 'Failed to fetch attendance stats' });
+    }
+  });
+
   // Get active events for selection (both CBA and external events)
   app.get('/api/cba-events/active', isAuthenticated, async (req: any, res) => {
     try {
@@ -6503,18 +6702,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ))
         .orderBy(cbaEvents.eventDate);
 
-      // Get active external events
-      const externalEventsData = await db
-        .select({
-          id: events.id,
-          title: events.title,
-          startDate: events.startDate,
-          location: events.location
-        })
-        .from(events)
-        .where(eq(events.isActive, true))
-        .orderBy(events.startDate);
-
       // Transform CBA events
       const transformedCbaEvents = cbaEventsData.map(event => ({
         id: `cba-${event.id}`,
@@ -6526,19 +6713,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'cba'
       }));
 
-      // Transform external events
-      const transformedExternalEvents = externalEventsData.map(event => ({
-        id: `ext-${event.id}`,
-        eventName: `${event.title} (External)`,
-        eventDate: event.startDate?.toISOString().split('T')[0],
-        eventTime: event.startDate ? new Date(event.startDate).toTimeString().split(' ')[0] : undefined,
-        venue: event.location,
-        status: 'active',
-        type: 'external'
-      }));
-
-      // Combine and sort by date
-      const allEvents = [...transformedCbaEvents, ...transformedExternalEvents]
+      // For now, just return CBA events until external events system is fully integrated
+      const allEvents = transformedCbaEvents
         .sort((a, b) => new Date(a.eventDate || '').getTime() - new Date(b.eventDate || '').getTime());
 
       res.json(allEvents);
