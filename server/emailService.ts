@@ -84,6 +84,94 @@ export class EmailService {
   }
 
   /**
+   * Get admin email for BCC notifications
+   */
+  private getAdminEmail(): string {
+    return process.env.ADMIN_BCC_EMAIL || 'admin@croydonba.org.uk';
+  }
+
+  /**
+   * Send registration notification to admin
+   */
+  async sendRegistrationNotification(
+    userName: string,
+    userEmail: string,
+    registrationType: string,
+    additionalDetails?: any
+  ): Promise<{ success: boolean; message: string }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        message: 'Email service not configured'
+      };
+    }
+
+    try {
+      const subject = `🎉 New ${registrationType} Registration - ${userName}`;
+      
+      const detailsHtml = additionalDetails ? 
+        Object.entries(additionalDetails)
+          .map(([key, value]) => `<tr><td style="padding: 5px; font-weight: bold; text-transform: capitalize;">${key.replace(/([A-Z])/g, ' $1').trim()}:</td><td style="padding: 5px;">${value}</td></tr>`)
+          .join('') : '';
+
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #10B981, #059669); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">New Registration Alert</h1>
+            <p style="margin: 5px 0 0 0; opacity: 0.9;">${registrationType} Registration</p>
+          </div>
+          
+          <div style="background: white; padding: 20px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">📋 Registration Details</h2>
+            
+            <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+              <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Name:</td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${userName}</td></tr>
+              <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Email:</td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${userEmail}</td></tr>
+              <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Type:</td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${registrationType}</td></tr>
+              <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Registration Time:</td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${new Date().toLocaleString()}</td></tr>
+              ${detailsHtml}
+            </table>
+            
+            <div style="background: #f0f9ff; border: 1px solid #0ea5e9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #0c4a6e;">
+                <strong>💡 Next Steps:</strong> Review the registration and follow up as needed. The user will receive a verification email to confirm their account.
+              </p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: this.getAdminEmail(),
+        subject: subject,
+        html: htmlContent,
+      };
+
+      await this.transporter!.sendMail(mailOptions);
+      
+      // Log the notification email
+      await this.logEmail(null, this.getAdminEmail(), subject, htmlContent, 'admin_notification', 'sent', {
+        registrationType,
+        userEmail,
+        userName
+      });
+      
+      return {
+        success: true,
+        message: 'Registration notification sent to admin'
+      };
+    } catch (error: any) {
+      console.error('Error sending registration notification:', error);
+      
+      return {
+        success: false,
+        message: error.message || 'Failed to send registration notification'
+      };
+    }
+  }
+
+  /**
    * Log email to the database for tracking
    */
   private async logEmail(
@@ -151,6 +239,7 @@ export class EmailService {
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
+        bcc: this.getAdminEmail(), // BCC admin on all emails
         subject: subject,
         html: htmlContent,
       };
@@ -306,6 +395,7 @@ export class EmailService {
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
+        bcc: this.getAdminEmail(), // BCC admin on all emails
         subject: subject,
         html: htmlContent,
       };

@@ -219,6 +219,28 @@ export async function setupLocalAuth(app: Express) {
         // Don't fail the registration if email fails
       }
 
+      // Send registration notification to admin
+      try {
+        if (emailService) {
+          const additionalDetails = {
+            company: businessName || 'Not provided',
+            phone: phone,
+            homeAddress: `${homeAddress}, ${homeCity}, ${homePostcode}`,
+            personTypes: personTypeIds.length > 0 ? personTypeIds.join(', ') : 'Standard user'
+          };
+          
+          await emailService.sendRegistrationNotification(
+            `${firstName} ${lastName}`,
+            email,
+            'User Account',
+            additionalDetails
+          );
+        }
+      } catch (notificationError) {
+        console.error("Failed to send registration notification:", notificationError);
+        // Don't fail the registration if notification fails
+      }
+
       // Set session
       (req.session as any).userId = user.id;
       (req.session as any).user = {

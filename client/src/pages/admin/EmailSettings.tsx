@@ -74,6 +74,42 @@ const EmailSettings = () => {
     },
   });
 
+  const testVerificationMutation = useMutation({
+    mutationFn: (email: string) => {
+      return apiRequest("POST", "/api/admin/email/test-verification", { email });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Verification Email Test Sent",
+        description: "Check your inbox for the verification email test.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Verification Email Test Failed",
+        description: error instanceof Error ? error.message : "Failed to send verification email",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const emailDiagnosticsMutation = useMutation({
+    mutationFn: (email: string) => {
+      return apiRequest("POST", "/api/email-diagnostics", { email });
+    },
+    onSuccess: (data) => {
+      console.log('Email diagnostics:', data);
+      // We'll display this in the UI
+    },
+    onError: (error) => {
+      toast({
+        title: "Diagnostics Failed",
+        description: error instanceof Error ? error.message : "Failed to run email diagnostics",
+        variant: "destructive",
+      });
+    },
+  });
+
   const { data: emailStatus } = useQuery({
     queryKey: ['/api/admin/email/status'],
     retry: false,

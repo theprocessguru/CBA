@@ -8493,6 +8493,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .returning();
 
+      // Send registration notification to admin
+      try {
+        if (emailService) {
+          const additionalDetails = {
+            company: company || 'Not provided',
+            jobTitle: jobTitle || 'Not provided',
+            phone: phone || 'Not provided',
+            sessionType: sessionType,
+            talkTitle: talkTitle,
+            audienceLevel: audienceLevel,
+            previousSpeaking: previousSpeaking ? 'Yes' : 'No',
+            bio: bio?.substring(0, 200) + (bio?.length > 200 ? '...' : '') || 'Not provided'
+          };
+          
+          await emailService.sendRegistrationNotification(
+            name,
+            email,
+            'AI Summit Speaker',
+            additionalDetails
+          );
+        }
+      } catch (notificationError) {
+        console.error("Failed to send speaker registration notification:", notificationError);
+        // Don't fail the registration if notification fails
+      }
+
       res.json({ 
         success: true, 
         message: "Speaker account created successfully! You can now log in with your email and password. Our program committee will review your proposal and contact you soon.",
