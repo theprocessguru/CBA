@@ -191,6 +191,34 @@ export async function setupLocalAuth(app: Express) {
         }
       }
 
+      // Send verification email if email service is available and user not verified
+      try {
+        if (emailService && !user.emailVerified) {
+          // Generate verification token
+          const verificationToken = crypto.randomUUID();
+          const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+          
+          // Update user with verification token
+          await storage.updateUserVerificationToken(user.id, verificationToken, verificationTokenExpiry);
+          
+          const emailResult = await emailService.sendVerificationEmail(
+            email,
+            user.firstName || 'Member',
+            verificationToken,
+            user.participantType || 'attendee'
+          );
+          
+          if (!emailResult.success) {
+            console.error("Failed to send verification email:", emailResult.message);
+          } else {
+            console.log(`Verification email sent to: ${email}`);
+          }
+        }
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        // Don't fail the registration if email fails
+      }
+
       // Set session
       (req.session as any).userId = user.id;
       (req.session as any).user = {
@@ -203,6 +231,8 @@ export async function setupLocalAuth(app: Express) {
 
       res.json({ 
         success: true, 
+        message: "Registration successful! Please check your email to verify your account.",
+        requiresVerification: !user.emailVerified,
         user: {
           id: user.id,
           email: user.email,
