@@ -6393,26 +6393,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active events for selection
   app.get('/api/cba-events/active', isAuthenticated, async (req: any, res) => {
     try {
-      // Return sample active events
-      const events = [
-        {
-          id: 1,
-          eventName: "Monthly Networking Breakfast",
-          eventDate: "2025-08-15",
-          eventTime: "08:00 AM",
-          venue: "Croydon Business Centre",
-          status: "active"
-        },
-        {
-          id: 2,
-          eventName: "Digital Marketing Workshop", 
-          eventDate: "2025-08-22",
-          eventTime: "02:00 PM",
-          venue: "Business Hub Croydon",
-          status: "active"
-        }
-      ];
-      res.json(events);
+      // Get active events from database (using current schema)
+      const events = await db
+        .select({
+          id: cbaEvents.id,
+          eventName: cbaEvents.eventName,
+          eventDate: cbaEvents.eventDate,
+          startTime: cbaEvents.startTime,
+          venue: cbaEvents.venue
+        })
+        .from(cbaEvents)
+        .where(eq(cbaEvents.isActive, true))
+        .orderBy(cbaEvents.eventDate);
+
+      // Transform for frontend compatibility
+      const transformedEvents = events.map(event => ({
+        id: event.id,
+        eventName: event.eventName,
+        eventDate: event.eventDate,
+        eventTime: event.startTime,
+        venue: event.venue,
+        status: 'active'
+      }));
+
+      res.json(transformedEvents);
     } catch (error) {
       console.error('Error fetching active events:', error);
       res.status(500).json({ message: 'Failed to fetch events' });
