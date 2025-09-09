@@ -69,6 +69,8 @@ export class EmailService {
       tls: {
         rejectUnauthorized: false
       },
+      connectionTimeout: 10000, // 10 seconds
+      socketTimeout: 10000, // 10 seconds  
       debug: true,
       logger: false
     });
