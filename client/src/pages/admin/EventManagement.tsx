@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -906,6 +906,21 @@ export default function EventManagement() {
                     >
                       <Users className="w-4 h-4 mr-1" />
                       Attendees
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        // Export registrations as CSV
+                        const url = `/api/admin/events/${event.id}/registrations/export`;
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.click();
+                      }}
+                      title="Export attendee list for external organizers"
+                    >
+                      <Download className="w-4 h-4 mr-1" />
+                      Export CSV
                     </Button>
                     <Button
                       size="sm"

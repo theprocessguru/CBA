@@ -6390,6 +6390,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export event registrations as CSV for external event organizers
+  app.get('/api/admin/events/:id/registrations/export', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Get event details
+      const event = await db
+        .select()
+        .from(cbaEvents)
+        .where(eq(cbaEvents.id, parseInt(id)))
+        .limit(1);
+        
+      if (event.length === 0) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+      
+      let registrations = [];
+      
+      if (event[0].eventName === 'First AI Summit Croydon 2025') {
+        // AI Summit registrations
+        const aiSummitRegs = await db
+          .select()
+          .from(aiSummitRegistrations)
+          .orderBy(aiSummitRegistrations.registeredAt);
+        
+        registrations = aiSummitRegs.map(reg => ({
+          name: reg.name,
+          email: reg.email,
+          phone: reg.phoneNumber,
+          company: reg.company,
+          jobTitle: reg.jobTitle,
+          registrationType: JSON.parse(reg.participantRoles || '["attendee"]')[0],
+          registeredAt: reg.registeredAt?.toISOString().split('T')[0],
+          accessibilityNeeds: reg.accessibilityNeeds
+        }));
+      } else {
+        // Regular CBA event registrations
+        const cbaRegs = await db
+          .select()
+          .from(cbaEventRegistrations)
+          .where(eq(cbaEventRegistrations.eventId, parseInt(id)))
+          .orderBy(cbaEventRegistrations.registeredAt);
+          
+        registrations = cbaRegs.map(reg => ({
+          name: reg.attendeeName,
+          email: reg.attendeeEmail,
+          phone: reg.phoneNumber || '',
+          company: reg.company || '',
+          jobTitle: reg.jobTitle || '',
+          registrationType: reg.registrationType || 'attendee',
+          registeredAt: reg.registeredAt?.toISOString().split('T')[0],
+          dietaryRequirements: reg.dietaryRequirements || ''
+        }));
+      }
+      
+      // Generate CSV content
+      const headers = [
+        'Full Name',
+        'Email Address',
+        'Phone Number',
+        'Company',
+        'Job Title',
+        'Registration Type',
+        'Registration Date',
+        'Special Requirements'
+      ];
+      
+      const csvRows = [
+        headers.join(','),
+        ...registrations.map(reg => [
+          `"${reg.name || ''}"`,
+          `"${reg.email || ''}"`,
+          `"${reg.phone || ''}"`,
+          `"${reg.company || ''}"`,
+          `"${reg.jobTitle || ''}"`,
+          `"${reg.registrationType || ''}"`,
+          `"${reg.registeredAt || ''}"`,
+          `"${reg.dietaryRequirements || reg.accessibilityNeeds || ''}"`
+        ].join(','))
+      ];
+      
+      const csvContent = csvRows.join('\n');
+      const fileName = `${event[0].eventSlug || 'event'}-registrations-${new Date().toISOString().split('T')[0]}.csv`;
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+      res.send(csvContent);
+      
+    } catch (error) {
+      console.error('Error exporting registrations:', error);
+      res.status(500).json({ message: 'Failed to export registrations' });
+    }
+  });
+
   // Get active events for selection (both CBA and external events)
   app.get('/api/cba-events/active', isAuthenticated, async (req: any, res) => {
     try {
