@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -106,6 +106,10 @@ export default function EventManagement() {
   const [showRegistrationsDialog, setShowRegistrationsDialog] = useState(false);
   const [showSubEventsDialog, setShowSubEventsDialog] = useState(false);
   const [showCreateSubEventDialog, setShowCreateSubEventDialog] = useState(false);
+  const [showCopyDialog, setShowCopyDialog] = useState(false);
+  const [showRecurringDialog, setShowRecurringDialog] = useState(false);
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false);
+  const [showArchivedEvents, setShowArchivedEvents] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -194,6 +198,72 @@ export default function EventManagement() {
       toast({
         title: "Error",
         description: "Failed to delete event: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Archive event mutation
+  const archiveEventMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: number; reason?: string }) => {
+      await apiRequest("POST", `/api/admin/events/${id}/archive`, { reason });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setShowArchiveDialog(false);
+      toast({
+        title: "Event Archived",
+        description: "Event has been archived successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to archive event: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Copy event mutation
+  const copyEventMutation = useMutation({
+    mutationFn: async ({ id, newDate }: { id: number; newDate: string }) => {
+      await apiRequest("POST", `/api/admin/events/${id}/copy`, { newDate });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setShowCopyDialog(false);
+      toast({
+        title: "Event Copied",
+        description: "Event has been copied successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to copy event: " + error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create recurring events mutation
+  const createRecurringMutation = useMutation({
+    mutationFn: async ({ id, maxInstances }: { id: number; maxInstances: number }) => {
+      await apiRequest("POST", `/api/admin/events/${id}/recurring`, { maxInstances });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      setShowRecurringDialog(false);
+      toast({
+        title: "Recurring Events Created",
+        description: "Recurring event instances have been created successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create recurring events: " + error.message,
         variant: "destructive",
       });
     },
@@ -852,6 +922,39 @@ export default function EventManagement() {
                     </Button>
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setShowCopyDialog(true);
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-1" />
+                      Copy
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setShowArchiveDialog(true);
+                      }}
+                    >
+                      <Archive className="w-4 h-4 mr-1" />
+                      Archive
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setShowRecurringDialog(true);
+                      }}
+                    >
+                      <Repeat className="w-4 h-4 mr-1" />
+                      Recurring
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={() => {
                         if (confirm("Are you sure you want to delete this event?")) {
@@ -1177,6 +1280,128 @@ export default function EventManagement() {
             <Button type="submit" className="w-full">
               Create Sub-Event
             </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Copy Event Dialog */}
+      <Dialog open={showCopyDialog} onOpenChange={setShowCopyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Copy Event</DialogTitle>
+          </DialogHeader>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const newDate = formData.get('newDate') as string;
+              if (selectedEvent && newDate) {
+                copyEventMutation.mutate({ id: selectedEvent.id, newDate });
+              }
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="newDate">New Event Date</Label>
+              <Input
+                id="newDate"
+                name="newDate"
+                type="date"
+                required
+                className="mt-1"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowCopyDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={copyEventMutation.isPending}>
+                {copyEventMutation.isPending ? "Copying..." : "Copy Event"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archive Event Dialog */}
+      <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Archive Event</DialogTitle>
+          </DialogHeader>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const reason = formData.get('reason') as string;
+              if (selectedEvent) {
+                archiveEventMutation.mutate({ id: selectedEvent.id, reason });
+              }
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="reason">Archive Reason (Optional)</Label>
+              <Textarea
+                id="reason"
+                name="reason"
+                placeholder="Enter reason for archiving this event..."
+                className="mt-1"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowArchiveDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={archiveEventMutation.isPending}>
+                {archiveEventMutation.isPending ? "Archiving..." : "Archive Event"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recurring Events Dialog */}
+      <Dialog open={showRecurringDialog} onOpenChange={setShowRecurringDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Recurring Events</DialogTitle>
+          </DialogHeader>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const maxInstances = parseInt(formData.get('maxInstances') as string);
+              if (selectedEvent && maxInstances) {
+                createRecurringMutation.mutate({ id: selectedEvent.id, maxInstances });
+              }
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="maxInstances">Number of Instances to Create</Label>
+              <Input
+                id="maxInstances"
+                name="maxInstances"
+                type="number"
+                min="1"
+                max="24"
+                defaultValue="6"
+                required
+                className="mt-1"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                This will create future instances based on the event's recurring pattern.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setShowRecurringDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createRecurringMutation.isPending}>
+                {createRecurringMutation.isPending ? "Creating..." : "Create Instances"}
+              </Button>
+            </div>
           </form>
         </DialogContent>
       </Dialog>
