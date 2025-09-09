@@ -30,13 +30,13 @@ export class EmailService {
   }
 
   private initializeFromEnv() {
-    // Use Gmail SMTP configuration
-    let host = 'smtp.gmail.com';
-    let port = '587';
-    let user = 'members.app.croydonba@gmail.com';
-    let password = 'czxebizjpvswmzei'; // App password
-    let fromEmail = 'members.app.croydonba@gmail.com';
-    let fromName = 'Croydon Business Association';
+    // Use Gmail SMTP configuration from environment variables
+    let host = process.env.SMTP_HOST || 'smtp.gmail.com';
+    let port = process.env.SMTP_PORT || '587';
+    let user = process.env.SMTP_USER || 'members.app.croydonba@gmail.com';
+    let password = process.env.SMTP_PASSWORD; // Get from environment variable
+    let fromEmail = process.env.FROM_EMAIL || 'members.app.croydonba@gmail.com';
+    let fromName = process.env.FROM_NAME || 'Croydon Business Association';
 
     if (host && port && user && password && fromEmail) {
       console.log(`Email service initialized with Gmail SMTP`);
