@@ -6390,11 +6390,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get active events for selection
+  // Get active events for selection (both CBA and external events)
   app.get('/api/cba-events/active', isAuthenticated, async (req: any, res) => {
     try {
-      // Get active events from database (using current schema)
-      const events = await db
+      // Get active CBA events
+      const cbaEventsData = await db
         .select({
           id: cbaEvents.id,
           eventName: cbaEvents.eventName,
@@ -6403,20 +6403,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
           venue: cbaEvents.venue
         })
         .from(cbaEvents)
-        .where(eq(cbaEvents.isActive, true))
+        .where(and(
+          eq(cbaEvents.isActive, true),
+          eq(cbaEvents.isArchived, false)
+        ))
         .orderBy(cbaEvents.eventDate);
 
-      // Transform for frontend compatibility
-      const transformedEvents = events.map(event => ({
-        id: event.id,
-        eventName: event.eventName,
+      // Get active external events
+      const externalEventsData = await db
+        .select({
+          id: events.id,
+          title: events.title,
+          startDate: events.startDate,
+          location: events.location
+        })
+        .from(events)
+        .where(eq(events.isActive, true))
+        .orderBy(events.startDate);
+
+      // Transform CBA events
+      const transformedCbaEvents = cbaEventsData.map(event => ({
+        id: `cba-${event.id}`,
+        eventName: `${event.eventName} (CBA)`,
         eventDate: event.eventDate,
         eventTime: event.startTime,
         venue: event.venue,
-        status: 'active'
+        status: 'active',
+        type: 'cba'
       }));
 
-      res.json(transformedEvents);
+      // Transform external events
+      const transformedExternalEvents = externalEventsData.map(event => ({
+        id: `ext-${event.id}`,
+        eventName: `${event.title} (External)`,
+        eventDate: event.startDate?.toISOString().split('T')[0],
+        eventTime: event.startDate ? new Date(event.startDate).toTimeString().split(' ')[0] : undefined,
+        venue: event.location,
+        status: 'active',
+        type: 'external'
+      }));
+
+      // Combine and sort by date
+      const allEvents = [...transformedCbaEvents, ...transformedExternalEvents]
+        .sort((a, b) => new Date(a.eventDate || '').getTime() - new Date(b.eventDate || '').getTime());
+
+      res.json(allEvents);
     } catch (error) {
       console.error('Error fetching active events:', error);
       res.status(500).json({ message: 'Failed to fetch events' });
