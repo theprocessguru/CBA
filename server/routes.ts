@@ -6240,6 +6240,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Archive event
+  app.post('/api/admin/events/:id/archive', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { reason } = req.body;
+      
+      const archivedEvent = await storage.archiveCBAEvent(parseInt(id), req.user.id, reason);
+      res.json({ message: 'Event archived successfully', event: archivedEvent });
+    } catch (error) {
+      console.error('Error archiving event:', error);
+      res.status(500).json({ message: 'Failed to archive event' });
+    }
+  });
+
+  // Unarchive event
+  app.post('/api/admin/events/:id/unarchive', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const unarchivedEvent = await storage.unarchiveCBAEvent(parseInt(id));
+      res.json({ message: 'Event unarchived successfully', event: unarchivedEvent });
+    } catch (error) {
+      console.error('Error unarchiving event:', error);
+      res.status(500).json({ message: 'Failed to unarchive event' });
+    }
+  });
+
+  // Get archived events
+  app.get('/api/admin/events/archived', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const archivedEvents = await storage.getArchivedCBAEvents();
+      
+      // Parse tags field for frontend consumption
+      const eventsWithParsedFields = archivedEvents.map(event => ({
+        ...event,
+        tags: event.tags ? 
+          (event.tags.startsWith('[') ? JSON.parse(event.tags) : event.tags.split(',').map(tag => tag.trim())) 
+          : []
+      }));
+      
+      res.json(eventsWithParsedFields);
+    } catch (error) {
+      console.error('Error fetching archived events:', error);
+      res.status(500).json({ message: 'Failed to fetch archived events' });
+    }
+  });
+
+  // Copy event with new date
+  app.post('/api/admin/events/:id/copy', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { newDate } = req.body;
+      
+      if (!newDate) {
+        return res.status(400).json({ message: 'New date is required' });
+      }
+      
+      const copiedEvent = await storage.copyCBAEvent(parseInt(id), newDate, req.user.id);
+      res.json({ message: 'Event copied successfully', event: copiedEvent });
+    } catch (error) {
+      console.error('Error copying event:', error);
+      res.status(500).json({ message: 'Failed to copy event' });
+    }
+  });
+
+  // Create recurring event instances
+  app.post('/api/admin/events/:id/recurring', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { maxInstances } = req.body;
+      
+      const recurringEvents = await storage.createRecurringCBAEventInstances(parseInt(id), maxInstances);
+      res.json({ 
+        message: `Created ${recurringEvents.length} recurring event instances`, 
+        events: recurringEvents 
+      });
+    } catch (error) {
+      console.error('Error creating recurring events:', error);
+      res.status(500).json({ message: 'Failed to create recurring events' });
+    }
+  });
+
+  // Get recurring event instances
+  app.get('/api/admin/events/:id/recurring', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      
+      const recurringEvents = await storage.getRecurringCBAEventInstances(parseInt(id));
+      res.json(recurringEvents);
+    } catch (error) {
+      console.error('Error fetching recurring events:', error);
+      res.status(500).json({ message: 'Failed to fetch recurring events' });
+    }
+  });
+
   // Get event registrations
   app.get('/api/admin/events/:id/registrations', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
