@@ -87,7 +87,7 @@ export class EmailService {
    * Get admin email for BCC notifications
    */
   private getAdminEmail(): string {
-    return process.env.ADMIN_BCC_EMAIL || 'admin@croydonba.org.uk';
+    return process.env.ADMIN_BCC_EMAIL || 'steven.ball@me.com';
   }
 
   /**
