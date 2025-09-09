@@ -381,7 +381,7 @@ export class EmailService {
               
               <div style="background: #fef3c7; border: 1px solid #f59e0b; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <p style="margin: 0; color: #92400e;">
-                  <strong>⚠️ Important:</strong> This verification link will expire in 24 hours.
+                  <strong>⚠️ Important:</strong> This verification link will expire in 7 days.
                 </p>
               </div>
               

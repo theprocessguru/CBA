@@ -196,7 +196,7 @@ export async function setupLocalAuth(app: Express) {
         if (emailService && !user.emailVerified) {
           // Generate verification token
           const verificationToken = crypto.randomUUID();
-          const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+          const verificationTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
           
           // Update user with verification token
           await storage.updateUserVerificationToken(user.id, verificationToken, verificationTokenExpiry);
