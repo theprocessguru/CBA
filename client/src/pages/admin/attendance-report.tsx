@@ -95,11 +95,9 @@ export default function AttendanceReportPage() {
     }))
   ];
 
-  // Get events that have finished or are currently running
+  // Get all active events (both upcoming and past events)
   const reportableEvents = events.filter(event => {
-    const eventDate = new Date(event.eventDate);
-    const today = new Date();
-    return eventDate <= today; // Show events that have started
+    return event.isActive; // Show all active events regardless of date
   });
 
   // Fetch final attendance report
