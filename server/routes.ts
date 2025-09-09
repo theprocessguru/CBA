@@ -8311,9 +8311,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         agreesToTerms
       } = req.body;
 
-      // Basic validation  
-      if (!name || !email || !talkTitle || !req.body.topicOutline || !password) {
-        return res.status(400).json({ message: "Name, email, talk title, topic outline, and password are required" });
+      // Basic validation
+      if (!name || !email || !bio || !talkTitle || !talkDescription || !keyTakeaways || !password) {
+        return res.status(400).json({ message: "Name, email, bio, talk title, description, key takeaways, and password are required" });
       }
 
       if (!agreesToTerms) {

@@ -4147,6 +4147,22 @@ const AISummit = () => {
                     </div>
                   </div>
 
+                  {/* Speaker Profile */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-neutral-800">Speaker Profile</h3>
+                    <div>
+                      <Label htmlFor="speakerBio">Professional Bio *</Label>
+                      <Textarea
+                        id="speakerBio"
+                        required
+                        value={speakerData.bio}
+                        onChange={(e) => handleSpeakerInputChange('bio', e.target.value)}
+                        placeholder="Provide a professional biography highlighting your expertise, experience, and credentials (100-200 words)..."
+                        rows={4}
+                      />
+                    </div>
+                  </div>
+
                   {/* Session Information */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-neutral-800">Session Information</h3>
@@ -4179,14 +4195,37 @@ const AISummit = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="topicOutline">Topic Outline *</Label>
+                      <Label htmlFor="talkDescription">Session Description *</Label>
+                      <Textarea
+                        id="talkDescription"
+                        required
+                        value={speakerData.talkDescription}
+                        onChange={(e) => handleSpeakerInputChange('talkDescription', e.target.value)}
+                        placeholder="Detailed description of your session content, what attendees will learn, and the format (300-500 words)..."
+                        rows={5}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="keyTakeaways">Key Takeaways *</Label>
+                      <Textarea
+                        id="keyTakeaways"
+                        required
+                        value={speakerData.keyTakeaways}
+                        onChange={(e) => handleSpeakerInputChange('keyTakeaways', e.target.value)}
+                        placeholder="List 3-5 specific takeaways attendees will gain from your session (bullet points or numbered list)..."
+                        rows={4}
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="topicOutline">Topic Outline</Label>
                       <Textarea
                         id="topicOutline"
-                        required
                         value={speakerData.topicOutline}
                         onChange={(e) => handleSpeakerInputChange('topicOutline', e.target.value)}
-                        placeholder="Briefly describe what your session will cover and key points you'll discuss (200-400 words)..."
-                        rows={4}
+                        placeholder="Optional: Additional outline or structure of your presentation..."
+                        rows={3}
                       />
                     </div>
 
