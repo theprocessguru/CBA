@@ -861,8 +861,24 @@ export const cbaEvents = pgTable("cba_events", {
   requiresApproval: boolean("requires_approval").default(false),
   registrationFee: integer("registration_fee").default(0), // in pence
   memberPrice: integer("member_price").default(0), // special member pricing
+  // Archive and status fields
+  isArchived: boolean("is_archived").default(false),
+  archivedAt: timestamp("archived_at"),
+  archivedBy: varchar("archived_by").references(() => users.id),
+  archiveReason: text("archive_reason"),
+  // Recurring event fields
   isRecurring: boolean("is_recurring").default(false),
-  recurringPattern: varchar("recurring_pattern"), // weekly, monthly, etc.
+  recurringPattern: varchar("recurring_pattern"), // weekly, monthly, yearly
+  recurringFrequency: integer("recurring_frequency").default(1), // every X weeks/months/years
+  recurringDayOfWeek: integer("recurring_day_of_week"), // 0-6 for weekly events (0 = Sunday)
+  recurringDayOfMonth: integer("recurring_day_of_month"), // 1-31 for monthly events
+  recurringMonth: integer("recurring_month"), // 1-12 for yearly events  
+  recurringEndDate: date("recurring_end_date"), // when to stop creating recurring events
+  maxRecurrences: integer("max_recurrences"), // max number of instances to create
+  // Copy and parent tracking
+  parentEventId: integer("parent_event_id").references(() => cbaEvents.id), // if this event was copied from another
+  isCopy: boolean("is_copy").default(false),
+  copyNumber: integer("copy_number"), // 1st copy, 2nd copy, etc.
   tags: text("tags"), // JSON array of event tags
   imageUrl: text("image_url"),
   ghlWorkflowId: varchar("ghl_workflow_id"), // MyT Automation workflow ID for automation
