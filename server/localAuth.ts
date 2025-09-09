@@ -424,7 +424,7 @@ export async function setupLocalAuth(app: Express) {
 
       // Generate secure token
       const token = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
       // Save token to database
       await storage.createPasswordResetToken({

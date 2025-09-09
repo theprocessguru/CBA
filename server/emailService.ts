@@ -1226,7 +1226,7 @@ Croydon Business Association
               ${resetUrl}
             </p>
             
-            <p><strong>This link will expire in 1 hour</strong> for security reasons.</p>
+            <p><strong>This link will expire in 7 days</strong> for security reasons.</p>
             
             <p>If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
             
