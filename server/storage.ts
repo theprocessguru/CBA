@@ -329,6 +329,16 @@ export interface IStorage {
   deleteCBAEvent(id: number): Promise<boolean>;
   getCBAEventsByType(eventType: string): Promise<CBAEvent[]>;
   getCBAEventsByDateRange(startDate: Date, endDate: Date): Promise<CBAEvent[]>;
+  
+  // Archive and copy operations
+  archiveCBAEvent(eventId: number, userId: string, reason?: string): Promise<CBAEvent>;
+  getArchivedCBAEvents(): Promise<CBAEvent[]>;
+  unarchiveCBAEvent(eventId: number): Promise<CBAEvent>;
+  copyCBAEvent(eventId: number, newDate: string, userId: string): Promise<CBAEvent>;
+  
+  // Recurring event operations
+  createRecurringCBAEventInstances(parentEventId: number, maxInstances?: number): Promise<CBAEvent[]>;
+  getRecurringCBAEventInstances(parentEventId: number): Promise<CBAEvent[]>;
 
   // CBA Event Registration operations
   createCBAEventRegistration(registration: InsertCBAEventRegistration): Promise<CBAEventRegistration>;
@@ -2647,6 +2657,173 @@ export class DatabaseStorage implements IStorage {
         gte(cbaEvents.eventDate, startDate),
         lte(cbaEvents.eventDate, endDate)
       ))
+      .orderBy(asc(cbaEvents.eventDate));
+  }
+
+  // Archive and copy operations
+  async archiveCBAEvent(eventId: number, userId: string, reason?: string): Promise<CBAEvent> {
+    const [archivedEvent] = await db
+      .update(cbaEvents)
+      .set({
+        isArchived: true,
+        archivedAt: new Date(),
+        archivedBy: userId,
+        archiveReason: reason,
+        isActive: false,
+        updatedAt: new Date()
+      })
+      .where(eq(cbaEvents.id, eventId))
+      .returning();
+    return archivedEvent;
+  }
+
+  async getArchivedCBAEvents(): Promise<CBAEvent[]> {
+    return db.select().from(cbaEvents)
+      .where(eq(cbaEvents.isArchived, true))
+      .orderBy(desc(cbaEvents.archivedAt));
+  }
+
+  async unarchiveCBAEvent(eventId: number): Promise<CBAEvent> {
+    const [unarchivedEvent] = await db
+      .update(cbaEvents)
+      .set({
+        isArchived: false,
+        archivedAt: null,
+        archivedBy: null,
+        archiveReason: null,
+        isActive: true,
+        updatedAt: new Date()
+      })
+      .where(eq(cbaEvents.id, eventId))
+      .returning();
+    return unarchivedEvent;
+  }
+
+  async copyCBAEvent(eventId: number, newDate: string, userId: string): Promise<CBAEvent> {
+    // Get the original event
+    const originalEvent = await this.getCBAEventById(eventId);
+    if (!originalEvent) {
+      throw new Error('Event not found');
+    }
+
+    // Count existing copies to determine copy number
+    const existingCopies = await db.select().from(cbaEvents)
+      .where(eq(cbaEvents.parentEventId, eventId));
+    
+    const copyNumber = existingCopies.length + 1;
+
+    // Create the copy with new date and modified name
+    const copyData = {
+      ...originalEvent,
+      id: undefined, // Remove ID to create new event
+      eventName: `${originalEvent.eventName} (Copy ${copyNumber})`,
+      eventSlug: `${originalEvent.eventSlug}-copy-${copyNumber}`,
+      eventDate: newDate,
+      parentEventId: eventId,
+      isCopy: true,
+      copyNumber,
+      createdBy: userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      currentRegistrations: 0, // Reset registration count
+      // Clear automation fields for the copy
+      ghlWorkflowId: null,
+      ghlTagName: null
+    };
+
+    // Remove undefined values
+    Object.keys(copyData).forEach(key => {
+      if (copyData[key] === undefined) {
+        delete copyData[key];
+      }
+    });
+
+    const [newEvent] = await db.insert(cbaEvents).values(copyData).returning();
+    return newEvent;
+  }
+
+  // Recurring event operations
+  async createRecurringCBAEventInstances(parentEventId: number, maxInstances: number = 12): Promise<CBAEvent[]> {
+    const parentEvent = await this.getCBAEventById(parentEventId);
+    if (!parentEvent || !parentEvent.isRecurring) {
+      throw new Error('Event not found or not set as recurring');
+    }
+
+    const createdEvents: CBAEvent[] = [];
+    let currentDate = new Date(parentEvent.eventDate);
+    const endDate = parentEvent.recurringEndDate ? new Date(parentEvent.recurringEndDate) : null;
+    const frequency = parentEvent.recurringFrequency || 1;
+
+    for (let i = 1; i <= maxInstances; i++) {
+      // Calculate next date based on pattern
+      const nextDate = new Date(currentDate);
+      
+      switch (parentEvent.recurringPattern) {
+        case 'weekly':
+          nextDate.setDate(currentDate.getDate() + (7 * frequency));
+          break;
+        case 'monthly':
+          nextDate.setMonth(currentDate.getMonth() + frequency);
+          // Handle day of month adjustment for monthly events
+          if (parentEvent.recurringDayOfMonth) {
+            nextDate.setDate(parentEvent.recurringDayOfMonth);
+          }
+          break;
+        case 'yearly':
+          nextDate.setFullYear(currentDate.getFullYear() + frequency);
+          // Handle specific month/day for yearly events
+          if (parentEvent.recurringMonth) {
+            nextDate.setMonth(parentEvent.recurringMonth - 1); // 0-indexed
+          }
+          if (parentEvent.recurringDayOfMonth) {
+            nextDate.setDate(parentEvent.recurringDayOfMonth);
+          }
+          break;
+        default:
+          throw new Error('Invalid recurring pattern');
+      }
+
+      // Check if we've reached the end date or max recurrences
+      if (endDate && nextDate > endDate) break;
+      if (parentEvent.maxRecurrences && i > parentEvent.maxRecurrences) break;
+
+      // Create the recurring instance
+      const instanceData = {
+        ...parentEvent,
+        id: undefined,
+        eventName: `${parentEvent.eventName} (${nextDate.toLocaleDateString()})`,
+        eventSlug: `${parentEvent.eventSlug}-${nextDate.toISOString().split('T')[0]}`,
+        eventDate: nextDate.toISOString().split('T')[0],
+        parentEventId: parentEventId,
+        isCopy: false,
+        copyNumber: null,
+        currentRegistrations: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        // Clear automation fields for instances
+        ghlWorkflowId: null,
+        ghlTagName: null
+      };
+
+      // Remove undefined values
+      Object.keys(instanceData).forEach(key => {
+        if (instanceData[key] === undefined) {
+          delete instanceData[key];
+        }
+      });
+
+      const [newInstance] = await db.insert(cbaEvents).values(instanceData).returning();
+      createdEvents.push(newInstance);
+      
+      currentDate = nextDate;
+    }
+
+    return createdEvents;
+  }
+
+  async getRecurringCBAEventInstances(parentEventId: number): Promise<CBAEvent[]> {
+    return db.select().from(cbaEvents)
+      .where(eq(cbaEvents.parentEventId, parentEventId))
       .orderBy(asc(cbaEvents.eventDate));
   }
 
