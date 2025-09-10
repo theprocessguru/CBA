@@ -597,7 +597,13 @@ export class OnboardingService {
       }
       
       // Log onboarding completion
-      console.log(`Onboarding completed for ${user.email} as ${primaryType}`);
+      console.log(`✅ Onboarding completed for ${user.email} as ${primaryType} - Status: ${emailStatus}`);
+      
+      if (emailStatus === 'myt_workflow_triggered') {
+        console.log(`📧 Welcome email will be sent automatically by MYT Automation workflow`);
+      } else if (emailStatus === 'myt_automation_failed') {
+        console.log(`⚠️  MYT Automation sync failed - welcome email may need manual trigger`);
+      }
       
       // Update user to mark onboarding as sent (optional)
       await db
