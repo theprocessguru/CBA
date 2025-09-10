@@ -14701,6 +14701,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get database statistics for bulk sync overview
+  app.get("/api/admin/database-stats", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Get counts from all tables
+      const userCount = await db.select({ count: sql<number>`count(*)::int` }).from(users);
+      const attendeeCount = await db.select({ count: sql<number>`count(*)::int` }).from(aiSummitRegistrations);
+      const speakerCount = await db.select({ count: sql<number>`count(*)::int` }).from(aiSummitSpeakerInterests);
+      const exhibitorCount = await db.select({ count: sql<number>`count(*)::int` }).from(aiSummitExhibitorRegistrations);
+      const businessCount = await db.select({ count: sql<number>`count(*)::int` }).from(businesses);
+
+      res.json({
+        totalUsers: userCount[0]?.count || 0,
+        totalAttendees: attendeeCount[0]?.count || 0,
+        totalSpeakers: speakerCount[0]?.count || 0,
+        totalExhibitors: exhibitorCount[0]?.count || 0,
+        totalBusinesses: businessCount[0]?.count || 0,
+      });
+    } catch (error: any) {
+      console.error("Database stats error:", error);
+      res.status(500).json({ 
+        message: "Failed to get database stats", 
+        error: error.message 
+      });
+    }
+  });
+
   // Bulk sync all existing data to MYT Automation
   app.post("/api/myt-automation/bulk-sync", isAuthenticated, async (req: Request, res: Response) => {
     try {

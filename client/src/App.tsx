@@ -109,6 +109,7 @@ import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
 import EmailTemplates from "@/pages/admin/EmailTemplates";
+import BulkSync from "@/pages/admin/BulkSync";
 import SpeakerSlotSelection from "@/pages/SpeakerSlotSelection";
 import Jobs from "@/pages/jobs";
 import JobDetails from "@/pages/job-details";
@@ -798,6 +799,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <EmailTemplates />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/bulk-sync">
+        <AdminRoute>
+          <MainLayout>
+            <BulkSync />
           </MainLayout>
         </AdminRoute>
       </Route>
