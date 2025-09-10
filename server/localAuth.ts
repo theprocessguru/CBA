@@ -276,12 +276,10 @@ export async function setupLocalAuth(app: Express) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Check if email is verified
+      // Email verification is now disabled - auto-verify if not already verified
       if (!user.emailVerified) {
-        return res.status(403).json({ 
-          message: "Please verify your email before logging in. Check your inbox for the verification link.",
-          emailNotVerified: true 
-        });
+        await storage.updateUser(user.id, { emailVerified: true });
+        console.log(`Auto-verified user ${user.email} during login`);
       }
 
       // Set session
