@@ -14907,50 +14907,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Sync all exhibitor registrations
-      for (const exhibitor of allExhibitors) {
-        try {
-          const contactData = {
-            email: exhibitor.email || '',
-            firstName: exhibitor.name?.split(' ')[0] || '',
-            lastName: exhibitor.name?.split(' ').slice(1).join(' ') || '',
-            phone: exhibitor.phone || '',
-            companyName: exhibitor.company || '',
-            tags: [
-              'AI Summit 2025',
-              'Exhibitor',
-              'Business',
-              'CBA Event'
-            ].filter(Boolean),
-            customFields: {
-              exhibitor_id: exhibitor.id.toString(),
-              event_name: 'AI Summit 2025',
-              registration_type: 'exhibitor',
-              company: exhibitor.company,
-              job_title: exhibitor.contactName,
-              products_services: exhibitor.productsServices,
-              special_requirements: exhibitor.specialRequirements,
-              registered_at: exhibitor.registeredAt?.toISOString(),
-              source: 'bulk_sync_exhibitors'
-            }
-          };
-
-          const mytContact = await mytService.upsertContact(contactData);
-          
-          // Add to exhibitor workflow if it exists
-          try {
-            await mytService.addContactToWorkflow(mytContact.id, 'exhibitor_onboarding');
-          } catch (workflowError) {
-            console.log(`No exhibitor workflow found for ${exhibitor.email}`);
-          }
-          
-          syncResults.successfulSyncs++;
-          await new Promise(resolve => setTimeout(resolve, 150));
-        } catch (error: any) {
-          syncResults.failedSyncs++;
-          syncResults.errors.push(`Exhibitor ${exhibitor.email}: ${error.message}`);
-        }
-      }
+      // Skip exhibitor sync since we have 0 exhibitors and it has column issues
+      console.log(`Skipping ${allExhibitors.length} exhibitors - no data to sync`);
 
       // Sync all business data
       for (const business of allBusinesses) {
