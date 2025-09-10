@@ -513,26 +513,8 @@ export class OnboardingService {
       
       const message = await this.getWelcomeMessage(primaryType, userWithTypes);
       
-      // Send welcome email and record it
-      const emailService = new EmailService();
-      let emailStatus = 'pending';
-      
-      try {
-        if (emailService.isConfigured()) {
-          await emailService.sendEmail(
-            user.email,
-            message.subject,
-            message.htmlContent
-          );
-          emailStatus = 'sent';
-        } else {
-          console.log(`Email service not configured. Would send to ${user.email}: ${message.subject}`);
-          emailStatus = 'failed';
-        }
-      } catch (error) {
-        console.error(`Failed to send email to ${user.email}:`, error);
-        emailStatus = 'failed';
-      }
+      // Welcome emails now handled by MYT Automation workflows
+      let emailStatus = 'myt_automation';
       
       // Record email communication
       const { emailCommunications } = await import("@shared/schema");
@@ -593,10 +575,13 @@ export class OnboardingService {
           console.log(`Updated MyT Automation contact for ${user.email} with tags: ${newTags.join(', ')}`);
         }
         
-        // Add contact to workflow if specified
+        // Add contact to workflow if specified (this triggers welcome emails in MYT Automation)
         if (message.mytWorkflow && contact) {
           await mytService.addContactToWorkflow(contact.id, message.mytWorkflow);
-          console.log(`Added ${user.email} to workflow: ${message.mytWorkflow}`);
+          console.log(`Added ${user.email} to MYT Automation workflow: ${message.mytWorkflow} (welcome email will be sent automatically)`);
+          emailStatus = 'myt_workflow_triggered';
+        } else {
+          console.log(`No workflow specified for ${primaryType} - welcome email may need manual trigger in MYT Automation`);
         }
         
         // Send SMS via MyT Automation if available
@@ -607,6 +592,7 @@ export class OnboardingService {
         
       } catch (error) {
         console.error('Error syncing with MyT Automation:', error);
+        emailStatus = 'myt_automation_failed';
         // Don't throw - we still want to complete onboarding even if MyT sync fails
       }
       
