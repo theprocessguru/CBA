@@ -2928,7 +2928,6 @@ export class DatabaseStorage implements IStorage {
   // AI Summit specific stubs
   async createAISummitRegistration(registration: any): Promise<AISummitRegistration> { throw new Error('Not implemented'); }
   async createAISummitExhibitorRegistration(registration: any): Promise<AISummitExhibitorRegistration> { throw new Error('Not implemented'); }
-  async createAISummitSpeakerInterest(interest: any): Promise<AISummitSpeakerInterest> { throw new Error('Not implemented'); }
   async updateAISummitBadge(badgeId: string, updates: any): Promise<AISummitBadge> { throw new Error('Not implemented'); }
   async getBadgesByParticipantType(participantType: string): Promise<AISummitBadge[]> { return []; }
   async getBadgesByEmail(email: string): Promise<AISummitBadge[]> { return []; }
