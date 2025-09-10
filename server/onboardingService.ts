@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, personTypes, userPersonTypes, emailTemplates, onboardingLog } from "@shared/schema";
+import { users, personTypes, userPersonTypes, emailTemplates } from "@shared/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { EmailService } from "./emailService";
 import { MyTAutomationService } from "./mytAutomationService";
@@ -560,7 +560,7 @@ export class OnboardingService {
           // Update existing contact with tags
           const existingTags = contact.tags || [];
           const newTags = message.mytTags || [];
-          const combinedTags = [...new Set([...existingTags, ...newTags])];
+          const combinedTags = Array.from(new Set([...existingTags, ...newTags]));
           
           await mytService.updateContact(contact.id, {
             tags: combinedTags,
