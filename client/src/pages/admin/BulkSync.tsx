@@ -36,14 +36,14 @@ export default function BulkSync() {
   // Get database stats
   const { data: dbStats, isLoading: statsLoading } = useQuery({
     queryKey: ['/api/admin/database-stats'],
-    queryFn: () => apiRequest('/api/admin/database-stats'),
   });
 
   // Bulk sync mutation
   const bulkSyncMutation = useMutation({
-    mutationFn: () => apiRequest('/api/myt-automation/bulk-sync', {
-      method: 'POST',
-    }),
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/myt-automation/bulk-sync');
+      return await response.json();
+    },
     onSuccess: (data: BulkSyncResponse) => {
       setSyncResults(data.results);
       toast({
