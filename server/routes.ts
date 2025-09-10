@@ -43,6 +43,8 @@ import {
   eventScanners,
   scanHistory,
   scanSessions,
+  aiSummitSpeakerInterests,
+  aiSummitExhibitorRegistrations,
   users,
   businesses,
   membershipTiers,
@@ -14696,6 +14698,291 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching directory:", error);
       res.status(500).json({ message: "Failed to fetch directory" });
+    }
+  });
+
+  // Bulk sync all existing data to MYT Automation
+  app.post("/api/myt-automation/bulk-sync", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { MyTAutomationService } = await import('./mytAutomationService');
+      const mytService = new MyTAutomationService();
+
+      const syncResults = {
+        totalUsers: 0,
+        totalSpeakers: 0,
+        totalExhibitors: 0,
+        totalAttendees: 0,
+        totalBusinesses: 0,
+        successfulSyncs: 0,
+        failedSyncs: 0,
+        errors: [] as string[]
+      };
+
+      // Get all users
+      const allUsers = await db.select().from(users);
+      syncResults.totalUsers = allUsers.length;
+
+      // Get all AI Summit registrations
+      const allRegistrations = await db.select().from(aiSummitRegistrations);
+      syncResults.totalAttendees = allRegistrations.length;
+
+      // Get all speaker interests
+      const allSpeakers = await db.select().from(aiSummitSpeakerInterests);
+      syncResults.totalSpeakers = allSpeakers.length;
+
+      // Get all exhibitor registrations
+      const allExhibitors = await db.select().from(aiSummitExhibitorRegistrations);
+      syncResults.totalExhibitors = allExhibitors.length;
+
+      // Get all businesses
+      const allBusinesses = await db.select().from(businesses);
+      syncResults.totalBusinesses = allBusinesses.length;
+
+      console.log(`🚀 Starting bulk sync: ${syncResults.totalUsers} users, ${syncResults.totalAttendees} attendees, ${syncResults.totalSpeakers} speakers, ${syncResults.totalExhibitors} exhibitors, ${syncResults.totalBusinesses} businesses`);
+
+      // Sync all users
+      for (const userData of allUsers) {
+        try {
+          const contactData = {
+            email: userData.email || '',
+            firstName: userData.firstName || '',
+            lastName: userData.lastName || '',
+            phone: userData.phone || '',
+            companyName: userData.company || '',
+            tags: [
+              'CBA Member',
+              userData.participantType || 'member',
+              userData.membershipTier || 'starter'
+            ].filter(Boolean),
+            customFields: {
+              user_id: userData.id,
+              membership_tier: userData.membershipTier,
+              membership_status: userData.membershipStatus,
+              participant_type: userData.participantType,
+              job_title: userData.jobTitle,
+              company: userData.company,
+              bio: userData.bio,
+              qr_handle: userData.qrHandle,
+              title: userData.title,
+              created_at: userData.createdAt?.toISOString(),
+              source: 'bulk_sync_users',
+              profile_complete: !!(userData.firstName && userData.lastName && userData.company && userData.jobTitle)
+            }
+          };
+
+          await mytService.upsertContact(contactData);
+          syncResults.successfulSyncs++;
+          
+          // Add slight delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error: any) {
+          syncResults.failedSyncs++;
+          syncResults.errors.push(`User ${userData.email}: ${error.message}`);
+        }
+      }
+
+      // Sync all AI Summit attendee registrations
+      for (const registration of allRegistrations) {
+        try {
+          const contactData = {
+            email: registration.email || '',
+            firstName: registration.name?.split(' ')[0] || '',
+            lastName: registration.name?.split(' ').slice(1).join(' ') || '',
+            phone: registration.phoneNumber || '',
+            companyName: registration.company || '',
+            tags: [
+              'AI Summit 2025',
+              'Attendee',
+              'CBA Event'
+            ].filter(Boolean),
+            customFields: {
+              registration_id: registration.id.toString(),
+              event_name: 'AI Summit 2025',
+              registration_type: 'attendee',
+              company: registration.company,
+              job_title: registration.jobTitle,
+              registered_at: registration.registeredAt?.toISOString(),
+              source: 'bulk_sync_registrations'
+            }
+          };
+
+          await mytService.upsertContact(contactData);
+          syncResults.successfulSyncs++;
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error: any) {
+          syncResults.failedSyncs++;
+          syncResults.errors.push(`Registration ${registration.email}: ${error.message}`);
+        }
+      }
+
+      // Sync all speaker interests
+      for (const speaker of allSpeakers) {
+        try {
+          const contactData = {
+            email: speaker.email || '',
+            firstName: speaker.name?.split(' ')[0] || '',
+            lastName: speaker.name?.split(' ').slice(1).join(' ') || '',
+            phone: speaker.phone || '',
+            companyName: speaker.company || '',
+            tags: [
+              'AI Summit 2025',
+              'Speaker',
+              'Expert',
+              'CBA Event'
+            ].filter(Boolean),
+            customFields: {
+              speaker_id: speaker.id.toString(),
+              event_name: 'AI Summit 2025',
+              registration_type: 'speaker',
+              company: speaker.company,
+              job_title: speaker.jobTitle,
+              website: speaker.website,
+              linkedin: speaker.linkedIn,
+              bio: speaker.bio,
+              talk_title: speaker.talkTitle,
+              talk_description: speaker.talkDescription,
+              talk_duration: speaker.talkDuration?.toString(),
+              audience_level: speaker.audienceLevel,
+              speaking_experience: speaker.speakingExperience,
+              key_takeaways: speaker.keyTakeaways,
+              registered_at: speaker.registeredAt?.toISOString(),
+              source: 'bulk_sync_speakers',
+              session_type: speaker.sessionType
+            }
+          };
+
+          const mytContact = await mytService.upsertContact(contactData);
+          
+          // Add to speaker preparation workflow if it exists
+          try {
+            await mytService.addContactToWorkflow(mytContact.id, 'speaker_preparation');
+          } catch (workflowError) {
+            console.log(`No speaker workflow found for ${speaker.email}`);
+          }
+          
+          syncResults.successfulSyncs++;
+          await new Promise(resolve => setTimeout(resolve, 150));
+        } catch (error: any) {
+          syncResults.failedSyncs++;
+          syncResults.errors.push(`Speaker ${speaker.email}: ${error.message}`);
+        }
+      }
+
+      // Sync all exhibitor registrations
+      for (const exhibitor of allExhibitors) {
+        try {
+          const contactData = {
+            email: exhibitor.email || '',
+            firstName: exhibitor.name?.split(' ')[0] || '',
+            lastName: exhibitor.name?.split(' ').slice(1).join(' ') || '',
+            phone: exhibitor.phone || '',
+            companyName: exhibitor.company || '',
+            tags: [
+              'AI Summit 2025',
+              'Exhibitor',
+              'Business',
+              'CBA Event'
+            ].filter(Boolean),
+            customFields: {
+              exhibitor_id: exhibitor.id.toString(),
+              event_name: 'AI Summit 2025',
+              registration_type: 'exhibitor',
+              company: exhibitor.company,
+              job_title: exhibitor.jobTitle,
+              stand_size: exhibitor.standSize,
+              products_services: exhibitor.productsServices,
+              special_requirements: exhibitor.specialRequirements,
+              registered_at: exhibitor.registeredAt?.toISOString(),
+              source: 'bulk_sync_exhibitors'
+            }
+          };
+
+          const mytContact = await mytService.upsertContact(contactData);
+          
+          // Add to exhibitor workflow if it exists
+          try {
+            await mytService.addContactToWorkflow(mytContact.id, 'exhibitor_onboarding');
+          } catch (workflowError) {
+            console.log(`No exhibitor workflow found for ${exhibitor.email}`);
+          }
+          
+          syncResults.successfulSyncs++;
+          await new Promise(resolve => setTimeout(resolve, 150));
+        } catch (error: any) {
+          syncResults.failedSyncs++;
+          syncResults.errors.push(`Exhibitor ${exhibitor.email}: ${error.message}`);
+        }
+      }
+
+      // Sync all business data
+      for (const business of allBusinesses) {
+        try {
+          // Get the user who owns this business
+          const businessOwner = await db.select().from(users).where(eq(users.id, business.userId)).limit(1);
+          const owner = businessOwner[0];
+          
+          if (owner?.email) {
+            const contactData = {
+              email: owner.email,
+              firstName: owner.firstName || '',
+              lastName: owner.lastName || '',
+              phone: business.phone || owner.phone || '',
+              companyName: business.name || '',
+              tags: [
+                'Business Owner',
+                'CBA Member',
+                'Directory Listed'
+              ].filter(Boolean),
+              customFields: {
+                business_id: business.id.toString(),
+                user_id: business.userId,
+                business_name: business.name,
+                business_description: business.description,
+                business_address: business.address,
+                business_city: business.city,
+                business_postcode: business.postcode,
+                business_phone: business.phone,
+                business_email: business.email,
+                business_website: business.website,
+                business_established: business.established,
+                employee_count: business.employeeCount?.toString(),
+                is_verified: business.isVerified?.toString(),
+                business_created_at: business.createdAt?.toISOString(),
+                source: 'bulk_sync_businesses'
+              }
+            };
+
+            await mytService.upsertContact(contactData);
+            syncResults.successfulSyncs++;
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error: any) {
+          syncResults.failedSyncs++;
+          syncResults.errors.push(`Business ${business.name}: ${error.message}`);
+        }
+      }
+
+      console.log(`✅ Bulk sync completed: ${syncResults.successfulSyncs} successful, ${syncResults.failedSyncs} failed`);
+
+      res.json({
+        message: 'Bulk sync completed',
+        results: syncResults
+      });
+
+    } catch (error: any) {
+      console.error("Bulk sync error:", error);
+      res.status(500).json({ 
+        message: "Bulk sync failed", 
+        error: error.message 
+      });
     }
   });
 
