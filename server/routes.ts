@@ -8027,40 +8027,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Don't fail registration if onboarding fails
       }
 
-      // Send verification email if email service is available and user not verified
+      // Auto-verify all new users (verification disabled)
       try {
-        if (emailService && !user.emailVerified) {
-          // Generate verification token if not already present
-          let verificationToken = user.verificationToken;
-          if (!verificationToken) {
-            verificationToken = crypto.randomUUID();
-            const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-            
-            // Update user with verification token
-            await storage.updateUserVerificationToken(user.id, verificationToken, verificationTokenExpiry);
-          }
-          
-          const emailResult = await emailService.sendVerificationEmail(
-            email,
-            name,
-            verificationToken,
-            participantType || 'attendee'
-          );
-          
-          if (!emailResult.success) {
-            console.error("Failed to send verification email:", emailResult.message);
-          }
-        }
-      } catch (emailError) {
-        console.error("Failed to send verification email:", emailError);
-        // Don't fail the registration if email fails
+        await storage.updateUser(user.id, { emailVerified: true });
+        console.log(`User ${email} auto-verified (verification disabled)`);
+      } catch (verificationError) {
+        console.error("Failed to auto-verify user:", verificationError);
       }
 
       res.json({ 
         success: true, 
-        message: "Registration successful! Please check your email to verify your account and access your QR codes.",
+        message: "Registration successful! Your account is ready to use.",
         registrationId: registration.id,
-        requiresVerification: !user.emailVerified
+        requiresVerification: false
       });
 
     } catch (error: any) {
@@ -8485,7 +8464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           aiInterest: 'Speaking and Education',
           participantRoles: JSON.stringify(['speaker']),
           customRole: sessionType || 'talk',
-          emailVerified: true, // Auto-verify speaker accounts
+          emailVerified: true, // Auto-verify all accounts (verification disabled)
           emailVerificationToken,
           userId: user.id,
           registeredAt: new Date(),
