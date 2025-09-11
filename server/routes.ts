@@ -1784,6 +1784,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // MyT Automation (Go High Level) integration routes
   
+  // MyT Automation diagnostic endpoint
+  app.get('/api/myt-automation/diagnostics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const mytAutomationService = getMyTAutomationService();
+      
+      // Check environment variables
+      const syncEnabled = process.env.MYT_AUTOMATION_SYNC_ENABLED !== 'false';
+      const hasApiKey = !!process.env.GHL_API_KEY;
+      const hasOAuthToken = !!process.env.GHL_OAUTH_TOKEN;
+      
+      const diagnostics = {
+        status: 'checking',
+        syncEnabled,
+        hasApiKey,
+        hasOAuthToken,
+        syncEnabledValue: process.env.MYT_AUTOMATION_SYNC_ENABLED,
+        serviceInitialized: !!mytAutomationService,
+        testConnection: null as any,
+        error: null as string | null
+      };
+      
+      if (!mytAutomationService) {
+        diagnostics.status = 'not_configured';
+        diagnostics.error = 'MyT Automation service not initialized';
+        return res.json(diagnostics);
+      }
+      
+      // Try to fetch contacts to test the connection
+      try {
+        const contacts = await mytAutomationService.getContacts();
+        diagnostics.status = 'connected';
+        diagnostics.testConnection = {
+          success: true,
+          contactCount: contacts.length,
+          message: `Successfully connected to MYT Automation. Found ${contacts.length} contacts.`
+        };
+      } catch (error: any) {
+        diagnostics.status = 'error';
+        diagnostics.testConnection = {
+          success: false,
+          error: error.message || 'Failed to connect to MYT Automation'
+        };
+      }
+      
+      res.json(diagnostics);
+    } catch (error) {
+      console.error("Error in MYT diagnostics:", error);
+      res.status(500).json({ 
+        status: 'error',
+        message: "Failed to run diagnostics",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+  
   app.get('/api/ghl/test', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const mytAutomationService = getMyTAutomationService();
