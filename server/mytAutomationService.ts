@@ -80,8 +80,13 @@ export class MyTAutomationService {
     this.oauthToken = process.env.GHL_OAUTH_TOKEN || '';
     this.syncEnabled = process.env.MYT_AUTOMATION_SYNC_ENABLED !== 'false';
     
+    console.log(`🎯 MYT_AUTOMATION_SYNC_ENABLED: "${process.env.MYT_AUTOMATION_SYNC_ENABLED}"`);
+    console.log(`🎯 Sync enabled: ${this.syncEnabled}`);
+    
     if (!this.syncEnabled) {
       console.log('🔄 MYT Automation syncing is DISABLED - Users will be stored in CBA app only');
+    } else {
+      console.log('✅ MYT Automation syncing is ENABLED - Real API calls active');
     }
     
     if (!this.apiKey && this.syncEnabled) {
