@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Link, useLocation } from "wouter";
-import { ArrowLeft, Upload, Database, Users, Building, AlertTriangle, CheckCircle2, Loader2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Upload, Database, Users, Building, AlertTriangle, CheckCircle2, Loader2, ExternalLink, Download, FileSpreadsheet, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -78,6 +78,41 @@ export default function BulkSync() {
   const progressPercentage = syncResults 
     ? Math.round(((syncResults.successfulSyncs + syncResults.failedSyncs) / Math.max(totalRecords, 1)) * 100)
     : 0;
+
+  // Export handlers
+  const handleExport = async (type: string) => {
+    try {
+      const response = await fetch(`/api/admin/export/${type}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `cba_${type}_export_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export Successful",
+        description: `Successfully exported ${type} data as CSV`,
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: `Failed to export ${type} data`,
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="container max-w-6xl mx-auto p-6">
@@ -149,6 +184,97 @@ export default function BulkSync() {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Data Export Card */}
+      <Card className="mb-6" data-testid="card-data-export">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileSpreadsheet className="h-5 w-5" />
+            Export Data to CSV
+          </CardTitle>
+          <CardDescription>
+            Download your data as CSV files for backup or import into other systems
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <Button
+                onClick={() => handleExport('users')}
+                variant="outline"
+                className="justify-start"
+                disabled={!dbStats?.totalUsers}
+                data-testid="button-export-users"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Users ({dbStats?.totalUsers || 0})
+              </Button>
+              
+              <Button
+                onClick={() => handleExport('ai-summit')}
+                variant="outline"
+                className="justify-start"
+                disabled={!dbStats?.totalAttendees}
+                data-testid="button-export-ai-summit"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export AI Summit ({dbStats?.totalAttendees || 0})
+              </Button>
+              
+              <Button
+                onClick={() => handleExport('speakers')}
+                variant="outline"
+                className="justify-start"
+                disabled={!dbStats?.totalSpeakers}
+                data-testid="button-export-speakers"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Speakers ({dbStats?.totalSpeakers || 0})
+              </Button>
+              
+              <Button
+                onClick={() => handleExport('exhibitors')}
+                variant="outline"
+                className="justify-start"
+                disabled={!dbStats?.totalExhibitors}
+                data-testid="button-export-exhibitors"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Exhibitors ({dbStats?.totalExhibitors || 0})
+              </Button>
+              
+              <Button
+                onClick={() => handleExport('businesses')}
+                variant="outline"
+                className="justify-start"
+                disabled={!dbStats?.totalBusinesses}
+                data-testid="button-export-businesses"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Businesses ({dbStats?.totalBusinesses || 0})
+              </Button>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <Button
+                onClick={() => handleExport('all')}
+                className="w-full md:w-auto"
+                size="lg"
+                disabled={!totalRecords}
+                data-testid="button-export-all"
+              >
+                <Package className="h-4 w-4 mr-2" />
+                Export All Data ({totalRecords} records)
+              </Button>
+              <p className="text-sm text-muted-foreground mt-2">
+                Downloads a combined CSV with all users, registrations, speakers, and businesses
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

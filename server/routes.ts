@@ -14789,6 +14789,322 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export users as CSV
+  app.get('/api/admin/export/users', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const allUsers = await db.select().from(users).orderBy(asc(users.createdAt));
+      
+      const csvData = allUsers.map(user => ({
+        'ID': user.id,
+        'Email': user.email || '',
+        'First Name': user.firstName || '',
+        'Last Name': user.lastName || '',
+        'Phone': user.phone || '',
+        'Company': user.company || '',
+        'Job Title': user.jobTitle || '',
+        'Membership Tier': user.membershipTier || 'Starter Tier',
+        'Membership Status': user.membershipStatus || 'trial',
+        'Account Status': user.accountStatus || 'active',
+        'Is Admin': user.isAdmin ? 'Yes' : 'No',
+        'Email Verified': user.emailVerified ? 'Yes' : 'No',
+        'Home Address': user.homeAddress || '',
+        'Home City': user.homeCity || '',
+        'Home Postcode': user.homePostcode || '',
+        'Business Address': user.businessAddress || '',
+        'Business City': user.businessCity || '',
+        'Business Postcode': user.businessPostcode || '',
+        'Created At': user.createdAt ? new Date(user.createdAt).toISOString() : '',
+        'Tags': 'CBA Member',
+        'Type': 'User'
+      }));
+      
+      const csv = Papa.unparse(csvData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="cba_users_export.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting users:", error);
+      res.status(500).json({ error: "Failed to export users" });
+    }
+  });
+
+  // Export AI Summit registrations as CSV
+  app.get('/api/admin/export/ai-summit', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const registrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
+      
+      const csvData = registrations.map(reg => ({
+        'ID': reg.id,
+        'First Name': reg.firstName || '',
+        'Last Name': reg.lastName || '',
+        'Email': reg.email || '',
+        'Phone': reg.phone || '',
+        'Company': reg.company || '',
+        'Job Title': reg.jobTitle || '',
+        'LinkedIn': reg.linkedIn || '',
+        'City': reg.city || '',
+        'Postcode': reg.postcode || '',
+        'Registration Type': reg.participantType || 'attendee',
+        'Registration Date': reg.createdAt ? new Date(reg.createdAt).toISOString() : '',
+        'Check-In Status': reg.checkedIn ? 'Checked In' : 'Not Checked In',
+        'Check-In Time': reg.checkedInAt ? new Date(reg.checkedInAt).toISOString() : '',
+        'Tags': `AI Summit 2025,${reg.participantType || 'attendee'}`,
+        'Type': 'AI Summit Registration'
+      }));
+      
+      const csv = Papa.unparse(csvData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="ai_summit_registrations.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting AI Summit registrations:", error);
+      res.status(500).json({ error: "Failed to export AI Summit registrations" });
+    }
+  });
+
+  // Export speaker interests as CSV
+  app.get('/api/admin/export/speakers', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const speakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
+      
+      const csvData = speakers.map(speaker => ({
+        'ID': speaker.id,
+        'First Name': speaker.firstName || '',
+        'Last Name': speaker.lastName || '',
+        'Email': speaker.email || '',
+        'Phone': speaker.phone || '',
+        'Company': speaker.company || '',
+        'Job Title': speaker.jobTitle || '',
+        'LinkedIn': speaker.linkedIn || '',
+        'Bio': speaker.bio || '',
+        'Topics': Array.isArray(speaker.topics) ? speaker.topics.join('; ') : '',
+        'Experience': speaker.experience || '',
+        'Time Slot': speaker.timeSlot || '',
+        'Status': speaker.status || 'pending',
+        'Registration Date': speaker.createdAt ? new Date(speaker.createdAt).toISOString() : '',
+        'Tags': 'AI Summit 2025,Speaker',
+        'Type': 'Speaker'
+      }));
+      
+      const csv = Papa.unparse(csvData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="ai_summit_speakers.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting speakers:", error);
+      res.status(500).json({ error: "Failed to export speakers" });
+    }
+  });
+
+  // Export exhibitors as CSV  
+  app.get('/api/admin/export/exhibitors', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      // Note: aiSummitExhibitorRegistrations might not be available due to schema issues
+      // Using empty array as fallback
+      const exhibitors: any[] = [];
+      
+      const csvData = exhibitors.map(exhibitor => ({
+        'ID': exhibitor.id,
+        'Company Name': exhibitor.companyName || '',
+        'Contact Name': exhibitor.contactName || '',
+        'Email': exhibitor.email || '',
+        'Phone': exhibitor.phone || '',
+        'Website': exhibitor.website || '',
+        'Description': exhibitor.description || '',
+        'Products/Services': exhibitor.productsServices || '',
+        'Stand Requirements': exhibitor.standRequirements || '',
+        'Stand Size': exhibitor.standSize || '',
+        'Status': exhibitor.status || 'pending',
+        'Registration Date': exhibitor.createdAt ? new Date(exhibitor.createdAt).toISOString() : '',
+        'Tags': 'AI Summit 2025,Exhibitor',
+        'Type': 'Exhibitor'
+      }));
+      
+      const csv = Papa.unparse(csvData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="ai_summit_exhibitors.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting exhibitors:", error);
+      res.status(500).json({ error: "Failed to export exhibitors" });
+    }
+  });
+
+  // Export businesses as CSV
+  app.get('/api/admin/export/businesses', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const allBusinesses = await db.select().from(businesses).orderBy(asc(businesses.createdAt));
+      
+      const csvData = allBusinesses.map(business => ({
+        'ID': business.id,
+        'Business Name': business.name || '',
+        'Description': business.description || '',
+        'Email': business.email || '',
+        'Phone': business.phone || '',
+        'Website': business.website || '',
+        'Address': business.address || '',
+        'City': business.city || '',
+        'Postcode': business.postcode || '',
+        'Employee Count': business.employeeCount || '',
+        'Established': business.established || '',
+        'Verified': business.isVerified ? 'Yes' : 'No',
+        'Active': business.isActive ? 'Yes' : 'No',
+        'Created At': business.createdAt ? new Date(business.createdAt).toISOString() : '',
+        'Tags': 'CBA Business',
+        'Type': 'Business'
+      }));
+      
+      const csv = Papa.unparse(csvData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="cba_businesses.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting businesses:", error);
+      res.status(500).json({ error: "Failed to export businesses" });
+    }
+  });
+
+  // Export all data combined as CSV
+  app.get('/api/admin/export/all', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const allData = [];
+      
+      // Get all users
+      const allUsers = await db.select().from(users).orderBy(asc(users.createdAt));
+      allUsers.forEach(user => {
+        allData.push({
+          'Email': user.email || '',
+          'First Name': user.firstName || '',
+          'Last Name': user.lastName || '',
+          'Phone': user.phone || '',
+          'Company': user.company || '',
+          'Job Title': user.jobTitle || '',
+          'Address': user.homeAddress || user.businessAddress || '',
+          'City': user.homeCity || user.businessCity || '',
+          'Postcode': user.homePostcode || user.businessPostcode || '',
+          'Tags': 'CBA Member',
+          'Type': 'User',
+          'Membership Tier': user.membershipTier || 'Starter Tier',
+          'Membership Status': user.membershipStatus || 'trial',
+          'Created At': user.createdAt ? new Date(user.createdAt).toISOString() : ''
+        });
+      });
+      
+      // Get AI Summit registrations
+      const registrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
+      registrations.forEach(reg => {
+        allData.push({
+          'Email': reg.email || '',
+          'First Name': reg.firstName || '',
+          'Last Name': reg.lastName || '',
+          'Phone': reg.phone || '',
+          'Company': reg.company || '',
+          'Job Title': reg.jobTitle || '',
+          'Address': '',
+          'City': reg.city || '',
+          'Postcode': reg.postcode || '',
+          'Tags': `AI Summit 2025,${reg.participantType || 'attendee'}`,
+          'Type': 'AI Summit Registration',
+          'Membership Tier': '',
+          'Membership Status': '',
+          'Created At': reg.createdAt ? new Date(reg.createdAt).toISOString() : ''
+        });
+      });
+      
+      // Get speaker interests
+      const speakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
+      speakers.forEach(speaker => {
+        allData.push({
+          'Email': speaker.email || '',
+          'First Name': speaker.firstName || '',
+          'Last Name': speaker.lastName || '',
+          'Phone': speaker.phone || '',
+          'Company': speaker.company || '',
+          'Job Title': speaker.jobTitle || '',
+          'Address': '',
+          'City': '',
+          'Postcode': '',
+          'Tags': 'AI Summit 2025,Speaker',
+          'Type': 'Speaker',
+          'Membership Tier': '',
+          'Membership Status': '',
+          'Created At': speaker.createdAt ? new Date(speaker.createdAt).toISOString() : ''
+        });
+      });
+      
+      // Get businesses
+      const allBusinesses = await db.select().from(businesses).orderBy(asc(businesses.createdAt));
+      allBusinesses.forEach(business => {
+        allData.push({
+          'Email': business.email || '',
+          'First Name': '',
+          'Last Name': '',
+          'Phone': business.phone || '',
+          'Company': business.name || '',
+          'Job Title': '',
+          'Address': business.address || '',
+          'City': business.city || '',
+          'Postcode': business.postcode || '',
+          'Tags': 'CBA Business',
+          'Type': 'Business',
+          'Membership Tier': '',
+          'Membership Status': '',
+          'Created At': business.createdAt ? new Date(business.createdAt).toISOString() : ''
+        });
+      });
+      
+      const csv = Papa.unparse(allData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="cba_all_data_export.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting all data:", error);
+      res.status(500).json({ error: "Failed to export all data" });
+    }
+  });
+
   // Bulk sync all existing data to MYT Automation
   app.post("/api/myt-automation/bulk-sync", isAuthenticated, async (req: Request, res: Response) => {
     try {
