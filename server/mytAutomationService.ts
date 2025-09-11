@@ -73,15 +73,18 @@ export class MyTAutomationService {
   private apiV2: AxiosInstance;
   private apiKey: string;
   private oauthToken: string;
+  private locationId: string;
   private syncEnabled: boolean;
 
   constructor() {
     this.apiKey = process.env.GHL_API_KEY || '';
     this.oauthToken = process.env.GHL_OAUTH_TOKEN || '';
+    this.locationId = process.env.GHL_LOCATION_ID || '';
     this.syncEnabled = process.env.MYT_AUTOMATION_SYNC_ENABLED !== 'false';
     
     console.log(`🎯 MYT_AUTOMATION_SYNC_ENABLED: "${process.env.MYT_AUTOMATION_SYNC_ENABLED}"`);
     console.log(`🎯 Sync enabled: ${this.syncEnabled}`);
+    console.log(`📍 Location ID: ${this.locationId ? 'Configured' : 'Missing!'}`);
     
     if (!this.syncEnabled) {
       console.log('🔄 MYT Automation syncing is DISABLED - Users will be stored in CBA app only');
@@ -89,8 +92,13 @@ export class MyTAutomationService {
       console.log('✅ MYT Automation syncing is ENABLED - Real API calls active');
     }
     
-    if (!this.apiKey && this.syncEnabled) {
-      throw new Error('GHL_API_KEY is required for MyT Automation');
+    if (this.syncEnabled) {
+      if (!this.apiKey) {
+        throw new Error('GHL_API_KEY is required for MyT Automation');
+      }
+      if (!this.locationId) {
+        throw new Error('GHL_LOCATION_ID is required for MyT Automation');
+      }
     }
 
     // API v1 for existing functionality (contacts, companies, workflows)
@@ -140,7 +148,10 @@ export class MyTAutomationService {
   // Create new contact
   async createContact(contactData: Partial<MyTAutomationContact>): Promise<MyTAutomationContact> {
     try {
-      const response = await this.api.post('/contacts', contactData);
+      const response = await this.api.post('/contacts', {
+        ...contactData,
+        locationId: this.locationId
+      });
       return response.data.contact;
     } catch (error: any) {
       console.error('Error creating MyT Automation contact:', error);
@@ -251,8 +262,11 @@ export class MyTAutomationService {
         }
       }
 
-      // Create new contact
-      const response = await this.api.post('/contacts', contactData);
+      // Create new contact with location ID
+      const response = await this.api.post('/contacts', {
+        ...contactData,
+        locationId: this.locationId
+      });
       return response.data.contact;
     } catch (error: any) {
       console.error('Error upserting MyT Automation contact:', {
