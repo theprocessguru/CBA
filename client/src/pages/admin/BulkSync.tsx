@@ -28,13 +28,21 @@ interface BulkSyncResponse {
   results: BulkSyncResults;
 }
 
+interface DatabaseStats {
+  totalUsers: number;
+  totalAttendees: number;
+  totalSpeakers: number;
+  totalExhibitors: number;
+  totalBusinesses: number;
+}
+
 export default function BulkSync() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [syncResults, setSyncResults] = useState<BulkSyncResults | null>(null);
 
   // Get database stats
-  const { data: dbStats, isLoading: statsLoading } = useQuery({
+  const { data: dbStats, isLoading: statsLoading } = useQuery<DatabaseStats>({
     queryKey: ['/api/admin/database-stats'],
   });
 
