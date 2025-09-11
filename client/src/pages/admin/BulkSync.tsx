@@ -84,9 +84,16 @@ export default function BulkSync() {
     try {
       console.log('Starting export for:', type);
       
+      // Get the auth token from localStorage
+      const authToken = localStorage.getItem('authToken');
+      console.log('Using auth token:', authToken ? 'Present' : 'Missing');
+      
       const response = await fetch(`/api/admin/export/${type}`, {
         method: 'GET',
         credentials: 'include',
+        headers: {
+          'Authorization': authToken ? `Bearer ${authToken}` : '',
+        },
       });
       
       console.log('Export response status:', response.status);
