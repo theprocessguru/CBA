@@ -14834,7 +14834,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`🚀 Starting bulk sync: ${syncResults.totalUsers} users, ${syncResults.totalAttendees} attendees, ${syncResults.totalSpeakers} speakers, ${syncResults.totalExhibitors} exhibitors, ${syncResults.totalBusinesses} businesses`);
 
-      // Sync all users
+      // Helper function to add delay
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+      
+      // Sync all users with rate limiting (100ms delay between calls)
       for (const userData of allUsers) {
         try {
           const contactData = {
@@ -14867,8 +14870,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await mytService.upsertContact(contactData);
           syncResults.successfulSyncs++;
           
-          // Add slight delay to avoid rate limiting
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Add delay to avoid rate limiting (300ms per call)
+          await delay(300);
         } catch (error: any) {
           syncResults.failedSyncs++;
           syncResults.errors.push(`User ${userData.email}: ${error.message}`);
@@ -14903,7 +14906,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await mytService.upsertContact(contactData);
           syncResults.successfulSyncs++;
           
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await delay(300);
         } catch (error: any) {
           syncResults.failedSyncs++;
           syncResults.errors.push(`Registration ${registration.email}: ${error.message}`);
@@ -14956,7 +14959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           syncResults.successfulSyncs++;
-          await new Promise(resolve => setTimeout(resolve, 150));
+          await delay(300);
         } catch (error: any) {
           syncResults.failedSyncs++;
           syncResults.errors.push(`Speaker ${speaker.email}: ${error.message}`);
@@ -15008,7 +15011,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             syncResults.successfulSyncs++;
           }
           
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await delay(300);
         } catch (error: any) {
           syncResults.failedSyncs++;
           syncResults.errors.push(`Business ${business.name}: ${error.message}`);
