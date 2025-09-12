@@ -14790,13 +14790,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export users as CSV
-  app.get('/api/admin/export/users', isAuthenticated, async (req: Request, res: Response) => {
+  app.get('/api/admin/export/users', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-      const user = req.user;
-      
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
 
       const allUsers = await db.select().from(users).orderBy(asc(users.createdAt));
       
@@ -14836,13 +14831,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export AI Summit registrations as CSV
-  app.get('/api/admin/export/ai-summit', isAuthenticated, async (req: Request, res: Response) => {
+  app.get('/api/admin/export/ai-summit', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-      const user = req.user;
-      
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
 
       const registrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
       
@@ -14877,13 +14867,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export speaker interests as CSV
-  app.get('/api/admin/export/speakers', isAuthenticated, async (req: Request, res: Response) => {
+  app.get('/api/admin/export/speakers', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-      const user = req.user;
-      
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
 
       const speakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
       
@@ -14918,13 +14903,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export exhibitors as CSV  
-  app.get('/api/admin/export/exhibitors', isAuthenticated, async (req: Request, res: Response) => {
+  app.get('/api/admin/export/exhibitors', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-      const user = req.user;
-      
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
 
       // Note: aiSummitExhibitorRegistrations might not be available due to schema issues
       // Using empty array as fallback
@@ -14959,13 +14939,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export businesses as CSV
-  app.get('/api/admin/export/businesses', isAuthenticated, async (req: Request, res: Response) => {
+  app.get('/api/admin/export/businesses', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-      const user = req.user;
-      
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
 
       const allBusinesses = await db.select().from(businesses).orderBy(asc(businesses.createdAt));
       
@@ -15000,13 +14975,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export all data combined as CSV
-  app.get('/api/admin/export/all', isAuthenticated, async (req: Request, res: Response) => {
+  app.get('/api/admin/export/all', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-      const user = req.user;
-      
-      if (!user?.isAdmin) {
-        return res.status(403).json({ message: "Admin access required" });
-      }
 
       const allData = [];
       
