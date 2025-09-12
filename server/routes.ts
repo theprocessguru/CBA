@@ -17,6 +17,8 @@ import {
   insertInteractionSchema,
   insertAISummitVolunteerSchema,
   insertAISummitTeamMemberSchema,
+  insertAISummitWorkshopSchema,
+  insertAISummitSpeakingSessionSchema,
   insertMarketplaceListingSchema,
   insertBarterListingSchema,
   aiSummitRegistrations,
@@ -61,6 +63,7 @@ import {
   exhibitorStandVisitors,
   eventTimeSlots,
   timeSlotSpeakers,
+  timeSlotRegistrations,
   insertEventTimeSlotSchema,
   insertTimeSlotSpeakerSchema,
   eventMoodEntries,
@@ -4477,8 +4480,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           participantRoles: JSON.stringify(['attendee']),
           customRole: 'Spot Registration',
           emailVerified: true,
-          registeredAt: new Date(),
-          source: 'spot_registration'
+          registeredAt: new Date()
         })
         .returning();
         
@@ -4805,7 +4807,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const scans = await db
         .select({
           id: scanHistory.id,
-          badgeId: scanHistory.badgeId,
+          personalBadgeEventId: scanHistory.personalBadgeEventId,
           scanType: scanHistory.scanType,
           scanLocation: scanHistory.scanLocation,
           scanTimestamp: scanHistory.scanTimestamp,
@@ -4827,12 +4829,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           const user = await storage.getUserById(scan.scannedUserId);
           if (user) {
-            attendeeName = `${user.firstName} ${user.lastName}`.trim() || user.name || user.email;
+            attendeeName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown';
           }
         } catch (error) {
           // Try to get name from badge lookup
           try {
-            const response = await fetch(`http://localhost:5000/api/attendee-lookup/${scan.badgeId}`, {
+            const response = await fetch(`http://localhost:5000/api/attendee-lookup/${scan.personalBadgeEventId}`, {
               headers: { Authorization: req.headers.authorization }
             });
             if (response.ok) {
@@ -4859,7 +4861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...scan,
           attendeeName,
           eventName,
-          badgeId: scan.badgeId || `USER-${scan.scannedUserId}`
+          badgeId: scan.personalBadgeEventId ? scan.personalBadgeEventId.toString() : `USER-${scan.scannedUserId}`
         };
       }));
 
@@ -5999,7 +6001,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const popularEvents = popularEventsData.length > 0 ? popularEventsData.map(event => ({
         name: event.name,
         attendees: event.attendees || 0,
-        date: event.date?.toISOString().split('T')[0] || ''
+        date: typeof event.date === 'string' ? event.date : (event.date?.toISOString().split('T')[0] || '')
       })) : [
         { name: 'No events yet', attendees: 0, date: new Date().toISOString().split('T')[0] }
       ];
@@ -7299,8 +7301,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const registration = await storage.createEventRegistration({
         eventId: parseInt(eventId),
         userId,
-        participantName: registrationData.participantName || `${req.user.firstName} ${req.user.lastName}`,
-        participantEmail: registrationData.participantEmail || req.user.email,
+        name: registrationData.name || `${req.user.firstName} ${req.user.lastName}`,
+        email: registrationData.email || req.user.email,
         registrationType: registrationData.registrationType || 'general',
         ticketId: `TICKET-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
         status: 'confirmed'
@@ -7769,7 +7771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create badges for all exhibitor attendees
       let badges = [];
       try {
-        badges = await badgeService.createExhibitorBadges(
+        badges = await badgeService.createExhibitorBadge(
           registration.id.toString(), 
           attendees, 
           companyName
@@ -8589,7 +8591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const badgeHTML = await badgeService.getPrintableBadge(badgeId);
       
       // Send email with printable badge
-      const emailResult = await emailService.sendPrintableBadgeEmail(email, badgeId, badgeHTML);
+      const emailResult = await emailService.sendPrintableBadge(email, badgeId, badgeHTML);
       
       if (emailResult.success) {
         res.json({ message: "Printable badge sent successfully" });
@@ -8847,7 +8849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const teamMember = await storage.createAISummitTeamMember(validatedData);
       
       // Create team member badge
-      const badge = await badgeService.createTeamMemberBadge(teamMember.id.toString(), teamMember);
+      const badge = await badgeService.createTeamBadge(teamMember.id.toString(), teamMember);
 
       res.json({ 
         success: true, 
@@ -9083,7 +9085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send confirmation email with QR code
-      const emailService = getEmailService();
+      // Using imported emailService directly
       if (emailService) {
         try {
           await emailService.sendNotificationEmail({
