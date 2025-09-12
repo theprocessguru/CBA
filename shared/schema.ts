@@ -876,7 +876,7 @@ export const cbaEvents = pgTable("cba_events", {
   recurringEndDate: date("recurring_end_date"), // when to stop creating recurring events
   maxRecurrences: integer("max_recurrences"), // max number of instances to create
   // Copy and parent tracking
-  parentEventId: integer("parent_event_id").references(() => cbaEvents.id), // if this event was copied from another
+  parentEventId: integer("parent_event_id"), // if this event was copied from another
   isCopy: boolean("is_copy").default(false),
   copyNumber: integer("copy_number"), // 1st copy, 2nd copy, etc.
   tags: text("tags"), // JSON array of event tags
@@ -888,6 +888,14 @@ export const cbaEvents = pgTable("cba_events", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+// Relations for cbaEvents to handle self-reference
+export const cbaEventsRelations = relations(cbaEvents, ({ one }) => ({
+  parentEvent: one(cbaEvents, {
+    fields: [cbaEvents.parentEventId],
+    references: [cbaEvents.id],
+  }),
+}));
 
 // Event time slots for detailed scheduling
 export const eventTimeSlots = pgTable("event_time_slots", {

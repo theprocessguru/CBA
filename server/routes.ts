@@ -4455,9 +4455,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             jobTitle: jobTitle || null,
             phone: phone || null,
             participantType: 'attendee',
-            isActive: true,
             emailVerified: true, // Auto-verify for spot registrations
-            password: null // No password required for spot registrations
+            passwordHash: null // No password required for spot registrations
           });
         }
         userId = user.id;
@@ -4517,7 +4516,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { badgeId } = req.params;
       const { includeStatus, eventId } = req.query;
       
-      let attendeeData = null;
+      let attendeeData: any = null;
       let scannedUserId = null;
       
       // First try AI Summit badges
@@ -4527,7 +4526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let isRegistered = false;
         let registrationId = null;
         try {
-          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.participantId);
+          const registration = await storage.getAISummitRegistrationById(parseInt(aiSummitBadge.participantId));
           if (registration) {
             scannedUserId = registration.userId;
             isRegistered = true;
@@ -4605,7 +4604,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           const eventScans = recentScans.filter(scan => 
             scan.eventId?.toString() === eventId.toString()
-          ).sort((a, b) => new Date(a.scanTimestamp).getTime() - new Date(b.scanTimestamp).getTime());
+          ).sort((a, b) => {
+            const aTime = a.scanTimestamp ? new Date(a.scanTimestamp).getTime() : 0;
+            const bTime = b.scanTimestamp ? new Date(b.scanTimestamp).getTime() : 0;
+            return aTime - bTime;
+          });
 
           // Determine current status
           let currentStatus = 'unknown';
@@ -4626,7 +4629,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const scan = eventScans[i];
               const nextScan = eventScans[i + 1];
               
-              if (scan.scanType === 'check_in' && nextScan.scanType === 'check_out') {
+              if (scan.scanType === 'check_in' && nextScan.scanType === 'check_out' 
+                  && scan.scanTimestamp && nextScan.scanTimestamp) {
                 const sessionTime = (new Date(nextScan.scanTimestamp).getTime() - 
                                    new Date(scan.scanTimestamp).getTime()) / (1000 * 60);
                 totalSessionTime += sessionTime;
@@ -4664,8 +4668,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
         if (aiSummitBadge) {
-          const registration = await storage.getAISummitRegistrationById(aiSummitBadge.participantId);
-          if (registration) {
+          const registration = await storage.getAISummitRegistrationById(parseInt(aiSummitBadge.participantId));
+          if (registration && registration.userId) {
             scannedUser = await storage.getUserById(registration.userId);
           }
         }
@@ -4698,7 +4702,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .filter(scan => scan.scanType === 'check_in' && scan.eventId?.toString() === eventId)
           .pop();
         
-        if (lastCheckIn) {
+        if (lastCheckIn && lastCheckIn.scanTimestamp) {
           const checkInTime = new Date(lastCheckIn.scanTimestamp);
           const checkOutTime = new Date();
           sessionDuration = (checkOutTime.getTime() - checkInTime.getTime()) / (1000 * 60); // minutes
@@ -6491,12 +6495,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .orderBy(cbaEventRegistrations.registeredAt);
           
         registrations = cbaRegs.map(reg => ({
-          name: reg.attendeeName,
-          email: reg.attendeeEmail,
-          phone: reg.phoneNumber || '',
-          company: reg.company || '',
-          jobTitle: reg.jobTitle || '',
-          registrationType: reg.registrationType || 'attendee',
+          name: reg.participantName,
+          email: reg.participantEmail,
+          phone: reg.participantPhone || '',
+          company: reg.participantCompany || '',
+          jobTitle: reg.participantJobTitle || '',
+          registrationType: reg.participantCompany ? 'business' : 'attendee',
           registeredAt: reg.registeredAt?.toISOString().split('T')[0],
           dietaryRequirements: reg.dietaryRequirements || ''
         }));
@@ -8209,13 +8213,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = await storage.createUser({
         email: contactEmail,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         firstName: contactName.split(' ')[0] || '',
         lastName: contactName.split(' ').slice(1).join(' ') || '',
         participantType: 'sponsor',
-        companyName: companyName,
-        phoneNumber: contactPhone || '',
-        createdAt: new Date()
+        company: companyName,
+        phone: contactPhone || ''
       });
 
       // Store sponsor details in database
