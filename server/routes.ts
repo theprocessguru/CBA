@@ -15086,10 +15086,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("🎯 Starting MYT Automation comprehensive data export...");
       
       // Fetch all users with complete profile information
-      const allUsers = await db.select().from(users).orderBy(asc(users.createdAt));
+      const allUsers = await db.select().from(users);
       
       // Fetch all businesses with details
-      const allBusinesses = await db.select().from(businesses).orderBy(asc(businesses.createdAt));
+      const allBusinesses = await db.select().from(businesses);
       
       // Fetch all AI Summit registrations
       const allAISummitRegistrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
@@ -15113,7 +15113,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allEventRegistrations = await db.select().from(cbaEventRegistrations).orderBy(desc(cbaEventRegistrations.registeredAt));
       
       // Fetch all exhibitor registrations
-      const allExhibitors = await db.select().from(aiSummitExhibitorRegistrations).orderBy(asc(aiSummitExhibitorRegistrations.createdAt));
+      const allExhibitors = await db.select().from(aiSummitExhibitorRegistrations);
       
       // Format contacts for MYT Automation
       const contacts = [];
