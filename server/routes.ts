@@ -14983,104 +14983,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Export all data combined as CSV
+  // Export all data combined as CSV - COMPREHENSIVE VERSION
   app.get('/api/admin/export/all', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
-
       const allData = [];
       
-      // Get all users
+      // Get all users with ALL fields (except sensitive ones)
       const allUsers = await db.select().from(users).orderBy(asc(users.createdAt));
       allUsers.forEach(user => {
         allData.push({
+          'Record Type': 'User',
+          'User ID': user.id || '',
           'Email': user.email || '',
           'First Name': user.firstName || '',
           'Last Name': user.lastName || '',
-          'Phone': user.phone || '',
-          'Company': user.company || '',
-          'Job Title': user.jobTitle || '',
-          'Address': user.homeAddress || user.businessAddress || '',
-          'City': user.homeCity || user.businessCity || '',
-          'Postcode': user.homePostcode || user.businessPostcode || '',
-          'Tags': 'CBA Member',
-          'Type': 'User',
+          'Profile Image URL': user.profileImageUrl || '',
+          'Is Admin': user.isAdmin ? 'Yes' : 'No',
           'Membership Tier': user.membershipTier || 'Starter Tier',
           'Membership Status': user.membershipStatus || 'trial',
-          'Created At': user.createdAt ? new Date(user.createdAt).toISOString() : ''
+          'Membership Start Date': user.membershipStartDate ? new Date(user.membershipStartDate).toISOString() : '',
+          'Membership End Date': user.membershipEndDate ? new Date(user.membershipEndDate).toISOString() : '',
+          'Is Trial Member': user.isTrialMember ? 'Yes' : 'No',
+          'Trial Donation Paid': user.trialDonationPaid ? 'Yes' : 'No',
+          'Donation Amount': user.donationAmount || '',
+          'Donation Date': user.donationDate ? new Date(user.donationDate).toISOString() : '',
+          'Account Status': user.accountStatus || 'active',
+          'Suspension Reason': user.suspensionReason || '',
+          'Suspended At': user.suspendedAt ? new Date(user.suspendedAt).toISOString() : '',
+          'Suspended By': user.suspendedBy || '',
+          'QR Handle': user.qrHandle || '',
+          'Title': user.title || '',
+          'Company': user.company || '',
+          'Job Title': user.jobTitle || '',
+          'Phone': user.phone || '',
+          'Bio': user.bio || '',
+          'Home Address': user.homeAddress || '',
+          'Home City': user.homeCity || '',
+          'Home Postcode': user.homePostcode || '',
+          'Home Country': user.homeCountry || 'UK',
+          'Business Address': user.businessAddress || '',
+          'Business City': user.businessCity || '',
+          'Business Postcode': user.businessPostcode || '',
+          'Business Country': user.businessCountry || 'UK',
+          'Email Verified': user.emailVerified ? 'Yes' : 'No',
+          'Participant Type': user.participantType || 'attendee',
+          'Is Profile Hidden': user.isProfileHidden ? 'Yes' : 'No',
+          'University': user.university || '',
+          'Student ID': user.studentId || '',
+          'Course': user.course || '',
+          'Year of Study': user.yearOfStudy || '',
+          'Community Role': user.communityRole || '',
+          'Volunteer Experience': user.volunteerExperience || '',
+          'Created At': user.createdAt ? new Date(user.createdAt).toISOString() : '',
+          'Updated At': user.updatedAt ? new Date(user.updatedAt).toISOString() : '',
+          'Tags': 'CBA Member'
         });
       });
       
-      // Get AI Summit registrations
+      // Get AI Summit registrations with ALL fields
       const registrations = await db.select().from(aiSummitRegistrations);
       registrations.forEach(reg => {
         allData.push({
+          'Record Type': 'AI Summit Registration',
+          'Registration ID': reg.id || '',
+          'User ID': reg.userId || '',
+          'Name': reg.name || '',
           'Email': reg.email || '',
-          'First Name': reg.name || '',
-          'Last Name': '',
-          'Phone': reg.phoneNumber || '',
           'Company': reg.company || '',
           'Job Title': reg.jobTitle || '',
-          'Address': '',
-          'City': '',
-          'Postcode': '',
-          'Tags': `AI Summit 2025,${reg.participantRoles || 'attendee'}`,
-          'Type': 'AI Summit Registration',
-          'Membership Tier': '',
-          'Membership Status': '',
-          'Created At': reg.registeredAt ? new Date(reg.registeredAt).toISOString() : ''
+          'Phone Number': reg.phoneNumber || '',
+          'Business Type': reg.businessType || '',
+          'AI Interest': reg.aiInterest || '',
+          'Accessibility Needs': reg.accessibilityNeeds || '',
+          'Comments': reg.comments || '',
+          'Participant Roles': reg.participantRoles || '["attendee"]',
+          'Custom Role': reg.customRole || '',
+          'Email Verified': reg.emailVerified ? 'Yes' : 'No',
+          'Pricing Status': reg.pricingStatus || 'free',
+          'Custom Price': reg.customPrice || '',
+          'Invoice Required': reg.invoiceRequired ? 'Yes' : 'No',
+          'Invoice Notes': reg.invoiceNotes || '',
+          'Admin Notes': reg.adminNotes || '',
+          'Payment Status': reg.paymentStatus || 'not_required',
+          'Invoice Sent At': reg.invoiceSentAt ? new Date(reg.invoiceSentAt).toISOString() : '',
+          'Paid At': reg.paidAt ? new Date(reg.paidAt).toISOString() : '',
+          'Registered At': reg.registeredAt ? new Date(reg.registeredAt).toISOString() : '',
+          'Tags': `AI Summit 2025,${reg.participantRoles || 'attendee'}`
         });
       });
       
-      // Get speaker interests
+      // Get speaker interests with ALL fields
       const speakers = await db.select().from(aiSummitSpeakerInterests);
       speakers.forEach(speaker => {
         allData.push({
+          'Record Type': 'Speaker Interest',
+          'Speaker ID': speaker.id || '',
+          'User ID': speaker.userId || '',
+          'Name': speaker.name || '',
           'Email': speaker.email || '',
-          'First Name': speaker.name || '',
-          'Last Name': '',
           'Phone': speaker.phone || '',
           'Company': speaker.company || '',
           'Job Title': speaker.jobTitle || '',
-          'Address': '',
-          'City': '',
-          'Postcode': '',
-          'Tags': 'AI Summit 2025,Speaker',
-          'Type': 'Speaker',
-          'Membership Tier': '',
-          'Membership Status': '',
-          'Created At': speaker.registeredAt ? new Date(speaker.registeredAt).toISOString() : ''
+          'Website': speaker.website || '',
+          'LinkedIn': speaker.linkedIn || '',
+          'Bio': speaker.bio || '',
+          'Session Type': speaker.sessionType || 'talk',
+          'Talk Title': speaker.talkTitle || '',
+          'Talk Description': speaker.talkDescription || '',
+          'Talk Duration': speaker.talkDuration || '',
+          'Audience Level': speaker.audienceLevel || '',
+          'Speaking Experience': speaker.speakingExperience || '',
+          'Previous Speaking': speaker.previousSpeaking ? 'Yes' : 'No',
+          'Tech Requirements': speaker.techRequirements || '',
+          'Available Slots': speaker.availableSlots || '',
+          'Motivation to Speak': speaker.motivationToSpeak || '',
+          'Key Takeaways': speaker.keyTakeaways || '',
+          'Interactive Elements': speaker.interactiveElements ? 'Yes' : 'No',
+          'Handouts Provided': speaker.handoutsProvided ? 'Yes' : 'No',
+          'Agrees to Terms': speaker.agreesToTerms ? 'Yes' : 'No',
+          'Source': speaker.source || '',
+          'Registered At': speaker.registeredAt ? new Date(speaker.registeredAt).toISOString() : '',
+          'Tags': 'AI Summit 2025,Speaker'
         });
       });
       
-      // Get businesses
+      // Get businesses with ALL fields
       const allBusinesses = await db.select().from(businesses).orderBy(asc(businesses.createdAt));
       allBusinesses.forEach(business => {
         allData.push({
-          'Email': business.email || '',
-          'First Name': '',
-          'Last Name': '',
-          'Phone': business.phone || '',
-          'Company': business.name || '',
-          'Job Title': '',
+          'Record Type': 'Business',
+          'Business ID': business.id || '',
+          'User ID': business.userId || '',
+          'Business Name': business.name || '',
+          'Description': business.description || '',
           'Address': business.address || '',
-          'City': business.city || '',
+          'City': business.city || 'Croydon',
           'Postcode': business.postcode || '',
-          'Tags': 'CBA Business',
-          'Type': 'Business',
-          'Membership Tier': '',
-          'Membership Status': '',
-          'Created At': business.createdAt ? new Date(business.createdAt).toISOString() : ''
+          'Phone': business.phone || '',
+          'Email': business.email || '',
+          'Website': business.website || '',
+          'Logo': business.logo || '',
+          'Cover Image': business.coverImage || '',
+          'Category ID': business.categoryId || '',
+          'Established': business.established || '',
+          'Employee Count': business.employeeCount || '',
+          'Is Verified': business.isVerified ? 'Yes' : 'No',
+          'Is Active': business.isActive ? 'Yes' : 'No',
+          'Created At': business.createdAt ? new Date(business.createdAt).toISOString() : '',
+          'Updated At': business.updatedAt ? new Date(business.updatedAt).toISOString() : '',
+          'Tags': 'CBA Business'
         });
       });
       
       const csv = Papa.unparse(allData);
       
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename="cba_all_data_export.csv"');
+      res.setHeader('Content-Disposition', 'attachment; filename="cba_comprehensive_data_export.csv"');
       res.send(csv);
     } catch (error) {
-      console.error("Error exporting all data:", error);
-      res.status(500).json({ error: "Failed to export all data" });
+      console.error("Error exporting comprehensive data:", error);
+      res.status(500).json({ error: "Failed to export comprehensive data" });
     }
   });
 
