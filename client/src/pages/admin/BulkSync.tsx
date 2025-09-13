@@ -318,6 +318,24 @@ export default function BulkSync() {
               </Button>
             </div>
             
+            <Separator className="my-4" />
+            
+            <div>
+              <h3 className="font-medium mb-3">Special Exports</h3>
+              <Button
+                onClick={() => handleExport('organic-signups')}
+                variant="outline"
+                className="justify-start"
+                data-testid="button-export-organic"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export Organic App Signups (Non-Imported Users)
+              </Button>
+              <p className="text-sm text-muted-foreground mt-2">
+                Downloads a CSV with all users who signed up directly through the app, excluding imported users
+              </p>
+            </div>
+            
             <Separator />
             
             <div className="space-y-4">

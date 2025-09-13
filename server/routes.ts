@@ -14947,6 +14947,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export organic app signups (non-imported users) as CSV
+  app.get('/api/admin/export/organic-signups', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
+    try {
+      // Get all users who signed up through the app (not imported)
+      const organicUsers = await db.select().from(users)
+        .where(sql`${users.id} NOT LIKE 'import_%'`)
+        .orderBy(desc(users.createdAt));
+      
+      // Get additional data from AI Summit registrations for these users
+      const aiSummitData = await db.select().from(aiSummitRegistrations);
+      const aiSummitMap = new Map(aiSummitData.map(reg => [reg.userId, reg]));
+      
+      const csvData = organicUsers.map(user => {
+        const aiSummitReg = aiSummitMap.get(user.id);
+        
+        return {
+          'User ID': user.id || '',
+          'Email': user.email || '',
+          'First Name': user.firstName || '',
+          'Last Name': user.lastName || '',
+          'Phone': user.phone || '',
+          'Company': user.company || '',
+          'Job Title': user.jobTitle || '',
+          'Title': user.title || '',
+          'Bio': user.bio || '',
+          'QR Handle': user.qrHandle || '',
+          'Membership Tier': user.membershipTier || 'Starter Tier',
+          'Membership Status': user.membershipStatus || 'trial',
+          'Account Status': user.accountStatus || 'active',
+          'Is Admin': user.isAdmin ? 'Yes' : 'No',
+          'Email Verified': user.emailVerified ? 'Yes' : 'No',
+          'Home Address': user.homeAddress || '',
+          'Home City': user.homeCity || '',
+          'Home Postcode': user.homePostcode || '',
+          'Home Country': user.homeCountry || 'UK',
+          'Business Address': user.businessAddress || '',
+          'Business City': user.businessCity || '',
+          'Business Postcode': user.businessPostcode || '',
+          'Business Country': user.businessCountry || 'UK',
+          'Participant Type': user.participantType || 'attendee',
+          'University': user.university || '',
+          'Student ID': user.studentId || '',
+          'Course': user.course || '',
+          'Year of Study': user.yearOfStudy || '',
+          'Community Role': user.communityRole || '',
+          'Volunteer Experience': user.volunteerExperience || '',
+          'Is Trial Member': user.isTrialMember ? 'Yes' : 'No',
+          'Trial Donation Paid': user.trialDonationPaid ? 'Yes' : 'No',
+          'Donation Amount': user.donationAmount || '',
+          'Donation Date': user.donationDate ? new Date(user.donationDate).toISOString() : '',
+          'Membership Start Date': user.membershipStartDate ? new Date(user.membershipStartDate).toISOString() : '',
+          'Membership End Date': user.membershipEndDate ? new Date(user.membershipEndDate).toISOString() : '',
+          'Profile Hidden': user.isProfileHidden ? 'Yes' : 'No',
+          'Registration Date': user.createdAt ? new Date(user.createdAt).toISOString() : '',
+          'Last Updated': user.updatedAt ? new Date(user.updatedAt).toISOString() : '',
+          // AI Summit specific fields if they registered
+          'AI Summit Business Type': aiSummitReg?.businessType || '',
+          'AI Summit AI Interest': aiSummitReg?.aiInterest || '',
+          'AI Summit Participant Roles': aiSummitReg?.participantRoles || '',
+          'AI Summit Comments': aiSummitReg?.comments || '',
+          'AI Summit Accessibility Needs': aiSummitReg?.accessibilityNeeds || '',
+          'AI Summit Pricing Status': aiSummitReg?.pricingStatus || '',
+          'AI Summit Payment Status': aiSummitReg?.paymentStatus || '',
+          'Signup Type': user.id.startsWith('ai_summit_') ? 'AI Summit Registration' : 
+                         user.id.startsWith('admin-') ? 'Admin Account' : 
+                         user.id.startsWith('user_') ? 'Special Registration' : 'Direct Signup',
+          'Tags': 'Organic Signup,CBA Member'
+        };
+      });
+      
+      const csv = Papa.unparse(csvData);
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename="organic_app_signups.csv"');
+      res.send(csv);
+    } catch (error) {
+      console.error("Error exporting organic signups:", error);
+      res.status(500).json({ error: "Failed to export organic signups" });
+    }
+  });
+
   // Export businesses as CSV
   app.get('/api/admin/export/businesses', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
