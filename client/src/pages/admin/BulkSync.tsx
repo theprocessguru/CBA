@@ -272,20 +272,39 @@ export default function BulkSync() {
             
             <Separator />
             
-            <div>
-              <Button
-                onClick={() => handleExport('all')}
-                className="w-full md:w-auto"
-                size="lg"
-                disabled={!totalRecords}
-                data-testid="button-export-all"
-              >
-                <Package className="h-4 w-4 mr-2" />
-                Export All Data ({totalRecords} records)
-              </Button>
-              <p className="text-sm text-muted-foreground mt-2">
-                Downloads a combined CSV with all users, registrations, speakers, and businesses
-              </p>
+            <div className="space-y-4">
+              <div>
+                <Button
+                  onClick={() => handleExport('all')}
+                  className="w-full md:w-auto"
+                  size="lg"
+                  disabled={!totalRecords}
+                  data-testid="button-export-all"
+                >
+                  <Package className="h-4 w-4 mr-2" />
+                  Export All Data ({totalRecords} records)
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Downloads a combined CSV with all users, registrations, speakers, and businesses
+                </p>
+              </div>
+              
+              <div>
+                <Button
+                  onClick={() => window.location.href = '/api/admin/export/myt-automation'}
+                  className="w-full md:w-auto"
+                  size="lg"
+                  variant="default"
+                  disabled={!totalRecords}
+                  data-testid="button-export-myt-automation"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export for MYT Automation (JSON)
+                </Button>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Downloads all data in JSON format optimized for MYT Automation import with proper contact fields and tags
+                </p>
+              </div>
             </div>
           </div>
         </CardContent>
