@@ -47,6 +47,7 @@ import {
   scanSessions,
   aiSummitSpeakerInterests,
   aiSummitExhibitorRegistrations,
+  aiSummitVolunteers,
   users,
   businesses,
   membershipTiers,
