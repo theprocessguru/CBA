@@ -15092,25 +15092,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allBusinesses = await db.select().from(businesses);
       
       // Fetch all AI Summit registrations
-      const allAISummitRegistrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
+      const allAISummitRegistrations = await db.select().from(aiSummitRegistrations);
       
       // Fetch all volunteers
-      const allVolunteers = await db.select().from(aiSummitVolunteers).orderBy(asc(aiSummitVolunteers.createdAt));
+      const allVolunteers = await db.select().from(aiSummitVolunteers);
       
       // Fetch all speaker interests
-      const allSpeakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
+      const allSpeakers = await db.select().from(aiSummitSpeakerInterests);
       
       // Fetch all job postings
-      const allJobPostings = await db.select().from(jobPostings).orderBy(desc(jobPostings.createdAt));
+      const allJobPostings = await db.select().from(jobPostings);
       
       // Fetch all job applications
-      const allJobApplications = await db.select().from(jobApplications).orderBy(desc(jobApplications.createdAt));
+      const allJobApplications = await db.select().from(jobApplications);
       
       // Fetch all CBA events
-      const allCBAEvents = await db.select().from(cbaEvents).orderBy(desc(cbaEvents.startDate));
+      const allCBAEvents = await db.select().from(cbaEvents);
       
       // Fetch all event registrations
-      const allEventRegistrations = await db.select().from(cbaEventRegistrations).orderBy(desc(cbaEventRegistrations.registeredAt));
+      const allEventRegistrations = await db.select().from(cbaEventRegistrations);
       
       // Fetch all exhibitor registrations
       const allExhibitors = await db.select().from(aiSummitExhibitorRegistrations);
