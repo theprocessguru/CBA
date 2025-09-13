@@ -15080,6 +15080,370 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export comprehensive data for MYT Automation
+  app.get('/api/admin/export/myt-automation', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
+    try {
+      console.log("🎯 Starting MYT Automation comprehensive data export...");
+      
+      // Fetch all users with complete profile information
+      const allUsers = await db.select().from(users).orderBy(asc(users.createdAt));
+      
+      // Fetch all businesses with details
+      const allBusinesses = await db.select().from(businesses).orderBy(asc(businesses.createdAt));
+      
+      // Fetch all AI Summit registrations
+      const allAISummitRegistrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
+      
+      // Fetch all volunteers
+      const allVolunteers = await db.select().from(aiSummitVolunteers).orderBy(asc(aiSummitVolunteers.createdAt));
+      
+      // Fetch all speaker interests
+      const allSpeakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
+      
+      // Fetch all job postings
+      const allJobPostings = await db.select().from(jobPostings).orderBy(desc(jobPostings.createdAt));
+      
+      // Fetch all job applications
+      const allJobApplications = await db.select().from(jobApplications).orderBy(desc(jobApplications.createdAt));
+      
+      // Fetch all CBA events
+      const allCBAEvents = await db.select().from(cbaEvents).orderBy(desc(cbaEvents.startDate));
+      
+      // Fetch all event registrations
+      const allEventRegistrations = await db.select().from(cbaEventRegistrations).orderBy(desc(cbaEventRegistrations.registeredAt));
+      
+      // Fetch all exhibitor registrations
+      const allExhibitors = await db.select().from(aiSummitExhibitorRegistrations).orderBy(asc(aiSummitExhibitorRegistrations.createdAt));
+      
+      // Format contacts for MYT Automation
+      const contacts = [];
+      
+      // Process users
+      for (const user of allUsers) {
+        const tags = ['CBA Platform User'];
+        if (user.isAdmin) tags.push('Admin');
+        if (user.membershipTier) tags.push(`Membership: ${user.membershipTier}`);
+        if (user.membershipStatus) tags.push(`Status: ${user.membershipStatus}`);
+        if (user.isTrialMember) tags.push('Trial Member');
+        if (user.emailVerified) tags.push('Email Verified');
+        
+        contacts.push({
+          id: user.id,
+          email: user.email || '',
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          phone: user.phone || '',
+          companyName: user.company || '',
+          jobTitle: user.jobTitle || '',
+          tags: tags,
+          customFields: {
+            user_id: user.id,
+            qr_handle: user.qrHandle || '',
+            title: user.title || '',
+            membership_tier: user.membershipTier || 'Starter Tier',
+            membership_status: user.membershipStatus || 'trial',
+            account_status: user.accountStatus || 'active',
+            is_admin: user.isAdmin ? 'true' : 'false',
+            email_verified: user.emailVerified ? 'true' : 'false',
+            profile_hidden: user.isProfileHidden ? 'true' : 'false',
+            bio: user.bio || '',
+            home_address: user.homeAddress || '',
+            home_city: user.homeCity || '',
+            home_postcode: user.homePostcode || '',
+            business_address: user.businessAddress || '',
+            business_city: user.businessCity || '',
+            business_postcode: user.businessPostcode || '',
+            created_at: user.createdAt ? new Date(user.createdAt).toISOString() : '',
+            source: 'cba_platform_user'
+          }
+        });
+      }
+      
+      // Process AI Summit registrations
+      for (const registration of allAISummitRegistrations) {
+        const tags = ['AI Summit 2025'];
+        if (registration.participantType) tags.push(`Type: ${registration.participantType}`);
+        if (registration.checkedIn) tags.push('Checked In');
+        
+        contacts.push({
+          id: `ai_summit_${registration.id}`,
+          email: registration.email || '',
+          firstName: registration.firstName || '',
+          lastName: registration.lastName || '',
+          phone: registration.phone || '',
+          companyName: registration.company || '',
+          jobTitle: registration.jobTitle || '',
+          tags: tags,
+          customFields: {
+            registration_id: registration.id.toString(),
+            participant_type: registration.participantType || 'attendee',
+            linkedin: registration.linkedIn || '',
+            city: registration.city || '',
+            postcode: registration.postcode || '',
+            checked_in: registration.checkedIn ? 'true' : 'false',
+            checked_in_at: registration.checkedInAt ? new Date(registration.checkedInAt).toISOString() : '',
+            created_at: registration.createdAt ? new Date(registration.createdAt).toISOString() : '',
+            source: 'ai_summit_registration'
+          }
+        });
+      }
+      
+      // Process speakers
+      for (const speaker of allSpeakers) {
+        const tags = ['AI Summit 2025', 'Speaker', 'Expert'];
+        if (speaker.status) tags.push(`Status: ${speaker.status}`);
+        
+        contacts.push({
+          id: `speaker_${speaker.id}`,
+          email: speaker.email || '',
+          firstName: speaker.firstName || '',
+          lastName: speaker.lastName || '',
+          phone: speaker.phone || '',
+          companyName: speaker.company || '',
+          jobTitle: speaker.jobTitle || '',
+          tags: tags,
+          customFields: {
+            speaker_id: speaker.id.toString(),
+            linkedin: speaker.linkedIn || '',
+            bio: speaker.bio || '',
+            topics: Array.isArray(speaker.topics) ? speaker.topics.join(', ') : '',
+            experience: speaker.experience || '',
+            time_slot: speaker.timeSlot || '',
+            status: speaker.status || 'pending',
+            created_at: speaker.createdAt ? new Date(speaker.createdAt).toISOString() : '',
+            source: 'ai_summit_speaker'
+          }
+        });
+      }
+      
+      // Process volunteers
+      for (const volunteer of allVolunteers) {
+        const tags = ['AI Summit 2025', 'Volunteer'];
+        if (volunteer.role) tags.push(`Role: ${volunteer.role}`);
+        if (volunteer.status) tags.push(`Status: ${volunteer.status}`);
+        
+        contacts.push({
+          id: `volunteer_${volunteer.id}`,
+          email: volunteer.email || '',
+          firstName: volunteer.firstName || '',
+          lastName: volunteer.lastName || '',
+          phone: volunteer.phone || '',
+          companyName: volunteer.company || '',
+          tags: tags,
+          customFields: {
+            volunteer_id: volunteer.id.toString(),
+            role: volunteer.role || '',
+            availability: volunteer.availability || '',
+            experience: volunteer.experience || '',
+            skills: volunteer.skills || '',
+            motivation: volunteer.motivation || '',
+            city: volunteer.city || '',
+            postcode: volunteer.postcode || '',
+            status: volunteer.status || 'pending',
+            created_at: volunteer.createdAt ? new Date(volunteer.createdAt).toISOString() : '',
+            source: 'ai_summit_volunteer'
+          }
+        });
+      }
+      
+      // Process exhibitors
+      for (const exhibitor of allExhibitors) {
+        const tags = ['AI Summit 2025', 'Exhibitor'];
+        if (exhibitor.standSize) tags.push(`Stand: ${exhibitor.standSize}`);
+        
+        contacts.push({
+          id: `exhibitor_${exhibitor.id}`,
+          email: exhibitor.email || '',
+          firstName: exhibitor.contactFirstName || '',
+          lastName: exhibitor.contactLastName || '',
+          phone: exhibitor.contactPhone || '',
+          companyName: exhibitor.companyName || '',
+          jobTitle: exhibitor.contactJobTitle || '',
+          tags: tags,
+          customFields: {
+            exhibitor_id: exhibitor.id.toString(),
+            company_description: exhibitor.companyDescription || '',
+            website: exhibitor.website || '',
+            stand_size: exhibitor.standSize || '',
+            stand_requirements: exhibitor.standRequirements || '',
+            product_demo: exhibitor.productDemo ? 'true' : 'false',
+            products_services: exhibitor.productsServices || '',
+            created_at: exhibitor.createdAt ? new Date(exhibitor.createdAt).toISOString() : '',
+            source: 'ai_summit_exhibitor'
+          }
+        });
+      }
+      
+      // Format companies for MYT Automation
+      const companies = allBusinesses.map(business => ({
+        id: business.id.toString(),
+        name: business.name || '',
+        website: business.website || '',
+        phone: business.phone || '',
+        email: business.email || '',
+        address: business.address || '',
+        city: business.city || '',
+        postalCode: business.postcode || '',
+        customFields: {
+          business_id: business.id.toString(),
+          user_id: business.userId || '',
+          description: business.description || '',
+          industry: business.industry || '',
+          established: business.established || '',
+          employee_count: business.employeeCount?.toString() || '',
+          is_verified: business.isVerified ? 'true' : 'false',
+          created_at: business.createdAt ? new Date(business.createdAt).toISOString() : '',
+          logo_url: business.logoUrl || '',
+          profile_image_url: business.profileImageUrl || '',
+          banner_image_url: business.bannerImageUrl || '',
+          source: 'cba_business_directory'
+        }
+      }));
+      
+      // Format event registrations
+      const event_registrations = [];
+      
+      // Add AI Summit registrations
+      for (const registration of allAISummitRegistrations) {
+        event_registrations.push({
+          id: registration.id.toString(),
+          event_name: 'AI Summit Croydon 2025',
+          event_date: '2025-10-01',
+          participant_type: registration.participantType || 'attendee',
+          email: registration.email || '',
+          name: `${registration.firstName || ''} ${registration.lastName || ''}`.trim(),
+          company: registration.company || '',
+          job_title: registration.jobTitle || '',
+          phone: registration.phone || '',
+          checked_in: registration.checkedIn || false,
+          checked_in_at: registration.checkedInAt ? new Date(registration.checkedInAt).toISOString() : null,
+          registered_at: registration.createdAt ? new Date(registration.createdAt).toISOString() : ''
+        });
+      }
+      
+      // Add CBA event registrations
+      for (const registration of allEventRegistrations) {
+        // Find the corresponding event
+        const event = allCBAEvents.find(e => e.id === registration.eventId);
+        event_registrations.push({
+          id: registration.id.toString(),
+          event_name: event?.title || 'Unknown Event',
+          event_date: event?.startDate ? new Date(event.startDate).toISOString() : '',
+          participant_type: 'attendee',
+          email: registration.email || '',
+          name: registration.name || '',
+          company: registration.company || '',
+          job_title: registration.jobTitle || '',
+          phone: registration.phone || '',
+          checked_in: registration.checkedIn || false,
+          checked_in_at: registration.checkedInAt ? new Date(registration.checkedInAt).toISOString() : null,
+          registered_at: registration.registeredAt ? new Date(registration.registeredAt).toISOString() : ''
+        });
+      }
+      
+      // Format volunteers
+      const volunteers = allVolunteers.map(volunteer => ({
+        id: volunteer.id.toString(),
+        email: volunteer.email || '',
+        name: `${volunteer.firstName || ''} ${volunteer.lastName || ''}`.trim(),
+        phone: volunteer.phone || '',
+        company: volunteer.company || '',
+        role: volunteer.role || '',
+        availability: volunteer.availability || '',
+        experience: volunteer.experience || '',
+        skills: volunteer.skills || '',
+        motivation: volunteer.motivation || '',
+        status: volunteer.status || 'pending',
+        created_at: volunteer.createdAt ? new Date(volunteer.createdAt).toISOString() : ''
+      }));
+      
+      // Format speakers
+      const speakers = allSpeakers.map(speaker => ({
+        id: speaker.id.toString(),
+        email: speaker.email || '',
+        name: `${speaker.firstName || ''} ${speaker.lastName || ''}`.trim(),
+        phone: speaker.phone || '',
+        company: speaker.company || '',
+        job_title: speaker.jobTitle || '',
+        linkedin: speaker.linkedIn || '',
+        bio: speaker.bio || '',
+        topics: Array.isArray(speaker.topics) ? speaker.topics : [],
+        experience: speaker.experience || '',
+        time_slot: speaker.timeSlot || '',
+        status: speaker.status || 'pending',
+        created_at: speaker.createdAt ? new Date(speaker.createdAt).toISOString() : ''
+      }));
+      
+      // Format job postings
+      const job_postings = allJobPostings.map(job => ({
+        id: job.id.toString(),
+        title: job.title || '',
+        company: job.companyName || '',
+        location: job.location || '',
+        type: job.type || '',
+        experience_level: job.experienceLevel || '',
+        salary_min: job.salaryMin || null,
+        salary_max: job.salaryMax || null,
+        description: job.description || '',
+        requirements: job.requirements || '',
+        benefits: job.benefits || '',
+        application_deadline: job.applicationDeadline ? new Date(job.applicationDeadline).toISOString() : null,
+        status: job.status || 'active',
+        created_at: job.createdAt ? new Date(job.createdAt).toISOString() : '',
+        posted_by: job.postedBy || ''
+      }));
+      
+      // Format job applications
+      const job_applications = allJobApplications.map(app => ({
+        id: app.id.toString(),
+        job_id: app.jobId.toString(),
+        applicant_id: app.applicantId || '',
+        cover_letter: app.coverLetter || '',
+        resume_url: app.resumeUrl || '',
+        status: app.status || 'pending',
+        applied_at: app.appliedAt ? new Date(app.appliedAt).toISOString() : ''
+      }));
+      
+      // Create comprehensive response
+      const exportData = {
+        export_date: new Date().toISOString(),
+        summary: {
+          total_contacts: contacts.length,
+          total_companies: companies.length,
+          total_event_registrations: event_registrations.length,
+          total_volunteers: volunteers.length,
+          total_speakers: speakers.length,
+          total_job_postings: job_postings.length,
+          total_job_applications: job_applications.length,
+          breakdown: {
+            users: allUsers.length,
+            ai_summit_registrations: allAISummitRegistrations.length,
+            cba_event_registrations: allEventRegistrations.length,
+            businesses: allBusinesses.length,
+            exhibitors: allExhibitors.length
+          }
+        },
+        contacts,
+        companies,
+        event_registrations,
+        volunteers,
+        speakers,
+        job_postings,
+        job_applications
+      };
+      
+      console.log(`✅ MYT Automation export completed: ${contacts.length} contacts, ${companies.length} companies`);
+      
+      res.json(exportData);
+    } catch (error: any) {
+      console.error("MYT Automation export error:", error);
+      res.status(500).json({ 
+        message: "Failed to export data for MYT Automation", 
+        error: error.message 
+      });
+    }
+  });
+
   // Bulk sync all existing data to MYT Automation
   app.post("/api/myt-automation/bulk-sync", isAuthenticated, async (req: Request, res: Response) => {
     try {
