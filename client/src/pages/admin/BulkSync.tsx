@@ -79,6 +79,54 @@ export default function BulkSync() {
     ? Math.round(((syncResults.successfulSyncs + syncResults.failedSyncs) / Math.max(totalRecords, 1)) * 100)
     : 0;
 
+  // Export handler for MYT Automation
+  const handleMYTExport = async () => {
+    try {
+      console.log('Starting MYT Automation export');
+      
+      // Get the auth token from localStorage
+      const authToken = localStorage.getItem('authToken');
+      console.log('Using auth token:', authToken ? 'Present' : 'Missing');
+      
+      const response = await fetch('/api/admin/export/myt-automation', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Authorization': authToken ? `Bearer ${authToken}` : '',
+        },
+      });
+      
+      console.log('Export response status:', response.status);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Export error:', errorText);
+        throw new Error(`Export failed: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `myt_automation_export_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      toast({
+        title: "Export Successful",
+        description: "Successfully exported all data for MYT Automation",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data for MYT Automation",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Export handlers
   const handleExport = async (type: string) => {
     try {
@@ -291,7 +339,7 @@ export default function BulkSync() {
               
               <div>
                 <Button
-                  onClick={() => window.location.href = '/api/admin/export/myt-automation'}
+                  onClick={handleMYTExport}
                   className="w-full md:w-auto"
                   size="lg"
                   variant="default"
