@@ -14840,7 +14840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/export/ai-summit', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
 
-      const registrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
+      const registrations = await db.select().from(aiSummitRegistrations);
       
       const csvData = registrations.map(reg => ({
         'ID': reg.id,
@@ -14876,7 +14876,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/export/speakers', isAuthenticated, isAdmin, async (req: Request, res: Response) => {
     try {
 
-      const speakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
+      const speakers = await db.select().from(aiSummitSpeakerInterests);
       
       const csvData = speakers.map(speaker => ({
         'ID': speaker.id,
@@ -15008,7 +15008,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Get AI Summit registrations
-      const registrations = await db.select().from(aiSummitRegistrations).orderBy(asc(aiSummitRegistrations.createdAt));
+      const registrations = await db.select().from(aiSummitRegistrations);
       registrations.forEach(reg => {
         allData.push({
           'Email': reg.email || '',
@@ -15029,7 +15029,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Get speaker interests
-      const speakers = await db.select().from(aiSummitSpeakerInterests).orderBy(asc(aiSummitSpeakerInterests.createdAt));
+      const speakers = await db.select().from(aiSummitSpeakerInterests);
       speakers.forEach(speaker => {
         allData.push({
           'Email': speaker.email || '',

@@ -337,22 +337,6 @@ export default function BulkSync() {
                 </p>
               </div>
               
-              <div>
-                <Button
-                  onClick={handleMYTExport}
-                  className="w-full md:w-auto"
-                  size="lg"
-                  variant="default"
-                  disabled={!totalRecords}
-                  data-testid="button-export-myt-automation"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export for MYT Automation (JSON)
-                </Button>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Downloads all data in JSON format optimized for MYT Automation import with proper contact fields and tags
-                </p>
-              </div>
             </div>
           </div>
         </CardContent>
