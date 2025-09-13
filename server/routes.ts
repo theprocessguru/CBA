@@ -15404,10 +15404,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
         applied_at: app.appliedAt ? new Date(app.appliedAt).toISOString() : ''
       }));
       
+      // Create attendees list combining ALL users (everyone is an attendee)
+      const attendees = [];
+      
+      // Add all platform users as attendees
+      for (const user of allUsers) {
+        attendees.push({
+          id: user.id,
+          email: user.email || '',
+          firstName: user.firstName || '',
+          lastName: user.lastName || '',
+          phone: user.phone || '',
+          company: user.company || '',
+          jobTitle: user.jobTitle || '',
+          city: user.homeCity || user.businessCity || '',
+          postcode: user.homePostcode || user.businessPostcode || '',
+          participantType: user.participantType || 'attendee',
+          membershipTier: user.membershipTier || 'Starter Tier',
+          membershipStatus: user.membershipStatus || 'trial',
+          isAdmin: user.isAdmin || false,
+          source: 'platform_user',
+          tags: ['CBA Member', 'AI Summit 2025 Attendee']
+        });
+      }
+      
+      // Add all AI Summit registrations as attendees (merge if same email)
+      for (const registration of allAISummitRegistrations) {
+        const existingAttendee = attendees.find(a => a.email === registration.email);
+        if (!existingAttendee) {
+          attendees.push({
+            id: `ai_summit_${registration.id}`,
+            email: registration.email || '',
+            firstName: registration.firstName || '',
+            lastName: registration.lastName || '',
+            phone: registration.phone || '',
+            company: registration.company || '',
+            jobTitle: registration.jobTitle || '',
+            city: registration.city || '',
+            postcode: registration.postcode || '',
+            participantType: registration.participantType || 'attendee',
+            membershipTier: null,
+            membershipStatus: null,
+            isAdmin: false,
+            source: 'ai_summit_registration',
+            tags: ['AI Summit 2025 Attendee', 'Event Registration']
+          });
+        }
+      }
+      
+      // Add all speakers as attendees (merge if same email)
+      for (const speaker of allSpeakers) {
+        const existingAttendee = attendees.find(a => a.email === speaker.email);
+        if (!existingAttendee) {
+          attendees.push({
+            id: `speaker_${speaker.id}`,
+            email: speaker.email || '',
+            firstName: speaker.firstName || '',
+            lastName: speaker.lastName || '',
+            phone: speaker.phone || '',
+            company: speaker.company || '',
+            jobTitle: speaker.jobTitle || '',
+            city: speaker.city || '',
+            postcode: speaker.postcode || '',
+            participantType: 'speaker',
+            membershipTier: null,
+            membershipStatus: null,
+            isAdmin: false,
+            source: 'ai_summit_speaker',
+            tags: ['AI Summit 2025 Attendee', 'Speaker']
+          });
+        }
+      }
+      
+      // Add all volunteers as attendees (merge if same email)
+      for (const volunteer of allVolunteers) {
+        const existingAttendee = attendees.find(a => a.email === volunteer.email);
+        if (!existingAttendee) {
+          attendees.push({
+            id: `volunteer_${volunteer.id}`,
+            email: volunteer.email || '',
+            firstName: volunteer.firstName || '',
+            lastName: volunteer.lastName || '',
+            phone: volunteer.phone || '',
+            company: volunteer.company || '',
+            jobTitle: '',
+            city: volunteer.city || '',
+            postcode: volunteer.postcode || '',
+            participantType: 'volunteer',
+            membershipTier: null,
+            membershipStatus: null,
+            isAdmin: false,
+            source: 'ai_summit_volunteer',
+            tags: ['AI Summit 2025 Attendee', 'Volunteer']
+          });
+        }
+      }
+      
+      // Add all exhibitors as attendees (merge if same email)
+      for (const exhibitor of allExhibitors) {
+        const existingAttendee = attendees.find(a => a.email === exhibitor.email);
+        if (!existingAttendee) {
+          attendees.push({
+            id: `exhibitor_${exhibitor.id}`,
+            email: exhibitor.email || '',
+            firstName: exhibitor.contactFirstName || '',
+            lastName: exhibitor.contactLastName || '',
+            phone: exhibitor.contactPhone || '',
+            company: exhibitor.companyName || '',
+            jobTitle: exhibitor.contactJobTitle || '',
+            city: '',
+            postcode: '',
+            participantType: 'exhibitor',
+            membershipTier: null,
+            membershipStatus: null,
+            isAdmin: false,
+            source: 'ai_summit_exhibitor',
+            tags: ['AI Summit 2025 Attendee', 'Exhibitor']
+          });
+        }
+      }
+      
       // Create comprehensive response
       const exportData = {
         export_date: new Date().toISOString(),
         summary: {
+          total_attendees: attendees.length,
           total_contacts: contacts.length,
           total_companies: companies.length,
           total_event_registrations: event_registrations.length,
@@ -15423,7 +15544,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             exhibitors: allExhibitors.length
           }
         },
-        contacts,
+        attendees,  // All users as attendees
+        contacts,   // Original contacts with tags and custom fields
         companies,
         event_registrations,
         volunteers,
