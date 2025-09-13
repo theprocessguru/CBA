@@ -15015,19 +15015,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       registrations.forEach(reg => {
         allData.push({
           'Email': reg.email || '',
-          'First Name': reg.firstName || '',
-          'Last Name': reg.lastName || '',
-          'Phone': reg.phone || '',
+          'First Name': reg.name || '',
+          'Last Name': '',
+          'Phone': reg.phoneNumber || '',
           'Company': reg.company || '',
           'Job Title': reg.jobTitle || '',
           'Address': '',
-          'City': reg.city || '',
-          'Postcode': reg.postcode || '',
-          'Tags': `AI Summit 2025,${reg.participantType || 'attendee'}`,
+          'City': '',
+          'Postcode': '',
+          'Tags': `AI Summit 2025,${reg.participantRoles || 'attendee'}`,
           'Type': 'AI Summit Registration',
           'Membership Tier': '',
           'Membership Status': '',
-          'Created At': reg.createdAt ? new Date(reg.createdAt).toISOString() : ''
+          'Created At': reg.registeredAt ? new Date(reg.registeredAt).toISOString() : ''
         });
       });
       
@@ -15036,8 +15036,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       speakers.forEach(speaker => {
         allData.push({
           'Email': speaker.email || '',
-          'First Name': speaker.firstName || '',
-          'Last Name': speaker.lastName || '',
+          'First Name': speaker.name || '',
+          'Last Name': '',
           'Phone': speaker.phone || '',
           'Company': speaker.company || '',
           'Job Title': speaker.jobTitle || '',
@@ -15048,7 +15048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Type': 'Speaker',
           'Membership Tier': '',
           'Membership Status': '',
-          'Created At': speaker.createdAt ? new Date(speaker.createdAt).toISOString() : ''
+          'Created At': speaker.registeredAt ? new Date(speaker.registeredAt).toISOString() : ''
         });
       });
       
