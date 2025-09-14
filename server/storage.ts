@@ -534,10 +534,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listUsers(options?: { search?: string; status?: string; limit?: number }): Promise<User[]> {
-    let query = db.select().from(users);
+    const conditions: any[] = [];
     
     if (options?.search) {
-      query = query.where(
+      conditions.push(
         or(
           like(users.email, `%${options.search}%`),
           like(users.firstName, `%${options.search}%`),
@@ -547,14 +547,21 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (options?.status && options.status !== 'all') {
-      query = query.where(eq(users.accountStatus, options.status));
+      conditions.push(eq(users.accountStatus, options.status));
     }
     
-    if (options?.limit) {
-      query = query.limit(options.limit);
-    }
+    const query = db.select().from(users);
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     
-    return await query;
+    if (whereClause && options?.limit) {
+      return await query.where(whereClause).limit(options.limit);
+    } else if (whereClause) {
+      return await query.where(whereClause);
+    } else if (options?.limit) {
+      return await query.limit(options.limit);
+    } else {
+      return await query;
+    }
   }
 
   async suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User> {
@@ -698,7 +705,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listBusinesses(options?: { categoryId?: number; search?: string; limit?: number }): Promise<Business[]> {
-    let query = db
+    const conditions: any[] = [
+      eq(businesses.isActive, true),
+      or(
+        isNull(users.isProfileHidden),
+        eq(users.isProfileHidden, false)
+      )
+    ];
+    
+    if (options?.categoryId) {
+      conditions.push(eq(businesses.categoryId, options.categoryId));
+    }
+    
+    if (options?.search) {
+      conditions.push(
+        or(
+          like(businesses.name, `%${options.search}%`),
+          like(businesses.description, `%${options.search}%`)
+        )
+      );
+    }
+    
+    const query = db
       .select({
         id: businesses.id,
         userId: businesses.userId,
@@ -722,45 +750,22 @@ export class DatabaseStorage implements IStorage {
       })
       .from(businesses)
       .leftJoin(users, eq(businesses.userId, users.id))
-      .where(
-        and(
-          eq(businesses.isActive, true),
-          or(
-            isNull(users.isProfileHidden),
-            eq(users.isProfileHidden, false)
-          )
-        )
+      .where(and(...conditions))
+      .orderBy(
+        // Priority sorting: businesses with contact info (phone, email, or website) first
+        sql`CASE 
+          WHEN (${businesses.phone} IS NOT NULL AND ${businesses.phone} != '') 
+            OR (${businesses.email} IS NOT NULL AND ${businesses.email} != '') 
+            OR (${businesses.website} IS NOT NULL AND ${businesses.website} != '') 
+          THEN 0 
+          ELSE 1 
+        END`,
+        desc(businesses.createdAt)
       );
-    
-    if (options?.categoryId) {
-      query = query.where(eq(businesses.categoryId, options.categoryId));
-    }
-    
-    if (options?.search) {
-      query = query.where(
-        or(
-          like(businesses.name, `%${options.search}%`),
-          like(businesses.description, `%${options.search}%`)
-        )
-      );
-    }
     
     if (options?.limit) {
-      query = query.limit(options.limit);
+      return await query.limit(options.limit);
     }
-    
-    // Sort by contact completeness first (businesses with contact info first), then by creation date
-    query = query.orderBy(
-      // Priority sorting: businesses with contact info (phone, email, or website) first
-      sql`CASE 
-        WHEN (${businesses.phone} IS NOT NULL AND ${businesses.phone} != '') 
-          OR (${businesses.email} IS NOT NULL AND ${businesses.email} != '') 
-          OR (${businesses.website} IS NOT NULL AND ${businesses.website} != '') 
-        THEN 0 
-        ELSE 1 
-      END`,
-      desc(businesses.createdAt)
-    );
     
     return await query;
   }
@@ -795,14 +800,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listProducts(options?: { categoryId?: number; search?: string; isService?: boolean; isPublic?: boolean; limit?: number }): Promise<Product[]> {
-    let query = db.select().from(products);
+    const conditions: any[] = [];
     
     if (options?.categoryId) {
-      query = query.where(eq(products.categoryId, options.categoryId));
+      conditions.push(eq(products.categoryId, options.categoryId));
     }
     
     if (options?.search) {
-      query = query.where(
+      conditions.push(
         or(
           like(products.name, `%${options.search}%`),
           like(products.description, `%${options.search}%`)
@@ -811,20 +816,24 @@ export class DatabaseStorage implements IStorage {
     }
     
     if (options?.isService !== undefined) {
-      query = query.where(eq(products.isService, options.isService));
+      conditions.push(eq(products.isService, options.isService));
     }
     
     if (options?.isPublic !== undefined) {
-      query = query.where(eq(products.isPublic, options.isPublic));
+      conditions.push(eq(products.isPublic, options.isPublic));
     }
     
-    if (options?.limit) {
-      query = query.limit(options.limit);
+    const query = db.select().from(products).orderBy(desc(products.createdAt));
+    
+    if (conditions.length > 0 && options?.limit) {
+      return await query.where(and(...conditions)).limit(options.limit);
+    } else if (conditions.length > 0) {
+      return await query.where(and(...conditions));
+    } else if (options?.limit) {
+      return await query.limit(options.limit);
+    } else {
+      return await query;
     }
-    
-    query = query.orderBy(desc(products.createdAt));
-    
-    return await query;
   }
 
   // Offer operations
@@ -857,7 +866,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listActiveOffers(options?: { limit?: number, includePublic?: boolean, membersOnly?: boolean, includeMemberOnly?: boolean }): Promise<Offer[]> {
-    let whereConditions = [
+    const whereConditions = [
       eq(offers.isActive, true),
       or(
         sql`${offers.validUntil} IS NULL`,
@@ -877,13 +886,13 @@ export class DatabaseStorage implements IStorage {
       whereConditions.push(eq(offers.memberOnlyDiscount, false));
     }
 
-    let query = db.select().from(offers).where(and(...whereConditions));
+    const query = db.select().from(offers)
+      .where(and(...whereConditions))
+      .orderBy(desc(offers.createdAt));
     
     if (options?.limit) {
-      query = query.limit(options.limit);
+      return await query.limit(options.limit);
     }
-    
-    query = query.orderBy(desc(offers.createdAt));
     
     return await query;
   }
@@ -938,14 +947,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listMarketplaceListings(options?: { categoryId?: number; search?: string; limit?: number }): Promise<MarketplaceListing[]> {
-    let query = db.select().from(marketplaceListings).where(eq(marketplaceListings.status, 'active'));
+    const conditions: any[] = [eq(marketplaceListings.status, 'active')];
 
     if (options?.categoryId) {
-      query = query.where(eq(marketplaceListings.categoryId, options.categoryId));
+      conditions.push(eq(marketplaceListings.categoryId, options.categoryId));
     }
 
     if (options?.search) {
-      query = query.where(
+      conditions.push(
         or(
           like(marketplaceListings.title, `%${options.search}%`),
           like(marketplaceListings.description, `%${options.search}%`)
@@ -953,11 +962,15 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
+    const query = db.select().from(marketplaceListings)
+      .where(and(...conditions))
+      .orderBy(desc(marketplaceListings.createdAt));
+
     if (options?.limit) {
-      query = query.limit(options.limit);
+      return await query.limit(options.limit);
     }
 
-    return await query.orderBy(desc(marketplaceListings.createdAt));
+    return await query;
   }
 
   // Barter Listings operations
@@ -990,14 +1003,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   async listBarterListings(options?: { categoryId?: number; search?: string; limit?: number }): Promise<BarterListing[]> {
-    let query = db.select().from(barterListings).where(eq(barterListings.status, 'active'));
+    const conditions: any[] = [eq(barterListings.status, 'active')];
 
     if (options?.categoryId) {
-      query = query.where(eq(barterListings.categoryId, options.categoryId));
+      conditions.push(eq(barterListings.categoryId, options.categoryId));
     }
 
     if (options?.search) {
-      query = query.where(
+      conditions.push(
         or(
           like(barterListings.title, `%${options.search}%`),
           like(barterListings.description, `%${options.search}%`),
@@ -1007,11 +1020,15 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
+    const query = db.select().from(barterListings)
+      .where(and(...conditions))
+      .orderBy(desc(barterListings.createdAt));
+
     if (options?.limit) {
-      query = query.limit(options.limit);
+      return await query.limit(options.limit);
     }
 
-    return query.orderBy(desc(barterListings.createdAt));
+    return await query;
   }
 
   // Transaction operations
@@ -1021,22 +1038,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTransactionsByBusinessId(businessId: number, role?: 'seller' | 'buyer'): Promise<Transaction[]> {
-    let query = db.select().from(transactions);
+    let condition;
     
     if (role === 'seller') {
-      query = query.where(eq(transactions.sellerBusinessId, businessId));
+      condition = eq(transactions.sellerBusinessId, businessId);
     } else if (role === 'buyer') {
-      query = query.where(eq(transactions.buyerBusinessId, businessId));
+      condition = eq(transactions.buyerBusinessId, businessId);
     } else {
-      query = query.where(
-        or(
-          eq(transactions.sellerBusinessId, businessId),
-          eq(transactions.buyerBusinessId, businessId)
-        )
+      condition = or(
+        eq(transactions.sellerBusinessId, businessId),
+        eq(transactions.buyerBusinessId, businessId)
       );
     }
 
-    return query.orderBy(desc(transactions.createdAt));
+    return await db.select().from(transactions)
+      .where(condition)
+      .orderBy(desc(transactions.createdAt));
   }
 
   async createTransaction(transaction: InsertTransaction): Promise<Transaction> {
@@ -1060,22 +1077,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getBarterExchangesByBusinessId(businessId: number, role?: 'initiator' | 'responder'): Promise<BarterExchange[]> {
-    let query = db.select().from(barterExchanges);
+    let condition;
     
     if (role === 'initiator') {
-      query = query.where(eq(barterExchanges.initiatorBusinessId, businessId));
+      condition = eq(barterExchanges.initiatorBusinessId, businessId);
     } else if (role === 'responder') {
-      query = query.where(eq(barterExchanges.responderBusinessId, businessId));
+      condition = eq(barterExchanges.responderBusinessId, businessId);
     } else {
-      query = query.where(
-        or(
-          eq(barterExchanges.initiatorBusinessId, businessId),
-          eq(barterExchanges.responderBusinessId, businessId)
-        )
+      condition = or(
+        eq(barterExchanges.initiatorBusinessId, businessId),
+        eq(barterExchanges.responderBusinessId, businessId)
       );
     }
 
-    return query.orderBy(desc(barterExchanges.createdAt));
+    return await db.select().from(barterExchanges)
+      .where(condition)
+      .orderBy(desc(barterExchanges.createdAt));
   }
 
   async createBarterExchange(exchange: InsertBarterExchange): Promise<BarterExchange> {

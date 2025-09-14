@@ -774,7 +774,13 @@ export class BadgeService {
       isActive: false
     });
   }
-}
+
+  /**
+   * Generate a printable badge with QR code (legacy method)
+   */
+  async generatePrintableBadge(badgeInfo: AISummitBadge): Promise<string> {
+    // Generate QR code for the badge
+    const qrCodeDataUrl = await QRCode.toDataURL(badgeInfo.badgeId, {
       width: 200,
       margin: 2,
       color: {

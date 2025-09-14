@@ -9462,7 +9462,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ==================== USER PROFILE MANAGEMENT ====================
   
-  // Update user profile
+  // Get complete user profile with personTypes and organizationMemberships
+  app.get("/api/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      // Get user data
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's person types
+      const userPersonTypes = await storage.getUserPersonTypes(userId);
+      
+      // Get user's organization memberships
+      const organizationMemberships = await storage.getUserOrganizationMemberships(userId);
+
+      // Return safe profile data (exclude sensitive fields)
+      const safeProfile = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phone: user.phone,
+        homeAddress: user.homeAddress,
+        homeCity: user.homeCity,
+        homePostcode: user.homePostcode,
+        homeCountry: user.homeCountry,
+        bio: user.bio,
+        company: user.company,
+        jobTitle: user.jobTitle,
+        memberSegment: user.memberSegment,
+        rolesData: user.rolesData,
+        mytContactId: user.mytContactId,
+        membershipTier: user.membershipTier,
+        membershipStatus: user.membershipStatus,
+        isAdmin: user.isAdmin,
+        isProfileHidden: user.isProfileHidden,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        personTypes: userPersonTypes.map(upt => upt.personType),
+        organizationMemberships
+      };
+
+      res.json(safeProfile);
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Failed to fetch user profile" });
+    }
+  });
+
+  // Update comprehensive user profile with dynamic roles and MYT sync
+  app.patch("/api/profile", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User ID not found" });
+      }
+
+      const { 
+        memberSegment,
+        firstName, 
+        lastName, 
+        phone, 
+        homeAddress,
+        homeCity,
+        homePostcode,
+        bio,
+        rolesData,
+        personTypeIds,
+        organizationMemberships
+      } = req.body;
+
+      // Update basic user info
+      const updateData: any = {};
+      if (memberSegment !== undefined) updateData.memberSegment = memberSegment;
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (phone !== undefined) updateData.phone = phone;
+      if (homeAddress !== undefined) updateData.homeAddress = homeAddress;
+      if (homeCity !== undefined) updateData.homeCity = homeCity;
+      if (homePostcode !== undefined) updateData.homePostcode = homePostcode;
+      if (bio !== undefined) updateData.bio = bio;
+      if (rolesData !== undefined) updateData.rolesData = rolesData;
+
+      // Update user profile
+      await storage.updateUser(userId, updateData);
+
+      // Update person types if provided
+      if (personTypeIds && Array.isArray(personTypeIds)) {
+        await storage.setUserPersonTypes(userId, personTypeIds);
+      }
+
+      // Update organization memberships if provided
+      if (organizationMemberships && Array.isArray(organizationMemberships)) {
+        await storage.updateUserOrganizationMemberships(userId, organizationMemberships);
+      }
+
+      // TODO: Add MYT sync here
+      // const mytResult = await mytAutomationService.upsertContact(user, personTypes, organizationMemberships);
+      // if (mytResult.success && mytResult.contactId) {
+      //   await storage.updateUser(userId, { mytContactId: mytResult.contactId });
+      // }
+
+      res.json({ success: true, message: "Profile updated successfully" });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update user profile" });
+    }
+  });
+
+  // Legacy endpoint for backwards compatibility
   app.patch("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
