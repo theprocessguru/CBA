@@ -1,5 +1,7 @@
 # Business Automation Platform
 
+*For complete build history and technical journey, see PROJECT_BUILD_DOCUMENTATION.md*
+
 ## Overview
 This platform is a comprehensive business automation solution designed to help businesses automate operations, manage workflows, track performance, and streamline processes to improve efficiency and productivity. Its vision is to be the UK's leading AI-powered business association, offering practical AI tools and automation services tailored for small businesses, with ambitions to educate, motivate, develop, inspire, and empower entrepreneurs.
 
