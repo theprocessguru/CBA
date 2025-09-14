@@ -72,6 +72,12 @@ export const users = pgTable("users", {
   emailVerified: boolean("email_verified").default(false),
   verificationToken: varchar("verification_token"),
   verificationTokenExpiry: timestamp("verification_token_expiry"),
+  // Member segmentation for dashboard/profile experience
+  memberSegment: varchar("member_segment").default("resident"), // resident, business_owner
+  // Role-specific data stored as JSON for dynamic profiling
+  rolesData: jsonb("roles_data"), // e.g., {"educator": {...}, "volunteer": {...}}
+  // MYT Automation integration
+  mytContactId: varchar("myt_contact_id"), // External ID for MYT sync
   // Deprecated - use userPersonTypes table instead
   participantType: varchar("participant_type").default("attendee"), // attendee, volunteer, speaker, etc.
   // Profile visibility
@@ -1348,6 +1354,59 @@ export const barterExchangesRelations = relations(barterExchanges, ({ one }) => 
     references: [businesses.id],
   }),
 }));
+
+// Profile update schemas for dynamic role system
+export const roleConfigSchemas = {
+  educator: z.object({
+    schoolName: z.string().optional(),
+    educatorRole: z.string().optional(),
+    subjectTaught: z.string().optional(),
+    schoolType: z.string().optional(),
+  }),
+  volunteer: z.object({
+    volunteerSkills: z.string().optional(),
+    volunteerAreas: z.string().optional(),
+    volunteerAvailability: z.string().optional(),
+    volunteerFrequency: z.string().optional(),
+    volunteerExperience: z.string().optional(),
+    volunteerTimeSlots: z.string().optional(),
+  }),
+  trainer: z.object({
+    trainingSpecialty: z.string().optional(),
+    targetAudience: z.string().optional(),
+    trainingMethods: z.string().optional(),
+    trainingVenue: z.string().optional(),
+    certifications: z.string().optional(),
+  }),
+  media: z.object({
+    mediaOutlet: z.string().optional(),
+    mediaType: z.string().optional(),
+    coverageArea: z.string().optional(),
+    socialMediaHandle: z.string().optional(),
+    audienceReach: z.string().optional(),
+    specialtyBeats: z.string().optional(),
+  }),
+  student: z.object({
+    studyInstitution: z.string().optional(),
+    courseOfStudy: z.string().optional(),
+    studyLevel: z.string().optional(),
+    yearOfStudy: z.string().optional(),
+    expectedGraduation: z.string().optional(),
+    studyMode: z.string().optional(),
+  }),
+};
+
+export const profileUpdateSchema = z.object({
+  memberSegment: z.enum(["resident", "business_owner"]).optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  phone: z.string().optional(),
+  homeAddress: z.string().optional(),
+  homeCity: z.string().optional(),
+  homePostcode: z.string().optional(),
+  bio: z.string().optional(),
+  rolesData: z.record(z.string(), z.unknown()).optional(),
+});
 
 // Create insert schemas
 export const upsertUserSchema = createInsertSchema(users);
