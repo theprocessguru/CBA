@@ -30,16 +30,17 @@ export class EmailService {
   }
 
   private initializeFromEnv() {
-    // Use Gmail SMTP configuration from environment variables
-    let host = process.env.SMTP_HOST || 'smtp.gmail.com';
-    let port = process.env.SMTP_PORT || '587';
-    let user = process.env.SMTP_USER || 'members.app.croydonba@gmail.com';
-    let password = process.env.SMTP_PASSWORD; // Get from environment variable
-    let fromEmail = process.env.FROM_EMAIL || 'members.app.croydonba@gmail.com';
-    let fromName = process.env.FROM_NAME || 'Croydon Business Association';
+    // Force Gmail SMTP configuration - ignore old environment variables
+    let host = 'smtp.gmail.com';
+    let port = '587';
+    let user = 'members.app.croydonba@gmail.com';
+    let password = process.env.SMTP_PASSWORD; // This is the new app password
+    let fromEmail = 'members.app.croydonba@gmail.com';
+    let fromName = 'Croydon Business Association';
 
-    if (host && port && user && password && fromEmail) {
+    if (password) {
       console.log(`Email service initialized with Gmail SMTP`);
+      console.log(`Using Gmail account: ${user}`);
       this.config = {
         host,
         port: parseInt(port),
@@ -51,7 +52,7 @@ export class EmailService {
       };
       this.createTransporter();
     } else {
-      console.warn('Email service not properly configured - missing required environment variables');
+      console.warn('Email service not properly configured - SMTP_PASSWORD not set');
     }
   }
 
