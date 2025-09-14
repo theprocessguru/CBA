@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DynamicDashboardLayout from "@/components/dashboard/DynamicDashboardLayout";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import AdminDashboard from "@/pages/admin-dashboard";
 import { META_DESCRIPTIONS } from "@/lib/constants";
@@ -20,9 +20,9 @@ const Dashboard = () => {
       </Helmet>
       
       {shouldShowUserDashboard ? (
-        <DashboardLayout>
+        <DynamicDashboardLayout>
           <DashboardOverview />
-        </DashboardLayout>
+        </DynamicDashboardLayout>
       ) : (
         <AdminDashboard />
       )}
