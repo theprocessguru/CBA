@@ -626,11 +626,20 @@ const AISummit = () => {
       if (!data.email?.trim()) {
         throw new Error("Email address is required");
       }
+      if (!data.phone?.trim()) {
+        throw new Error("Phone number is required for event updates and safety notifications");
+      }
       
       // Email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email.trim())) {
         throw new Error("Please provide a valid email address");
+      }
+      
+      // Phone validation - basic check for minimum length
+      const cleanPhone = data.phone.trim().replace(/[\s\-\(\)]/g, '');
+      if (cleanPhone.length < 10) {
+        throw new Error("Please provide a valid phone number with at least 10 digits");
       }
 
       const submissionData = {

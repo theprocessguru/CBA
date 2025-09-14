@@ -122,6 +122,7 @@ import BusinessEventManagement from "@/pages/BusinessEventManagement";
 import BusinessEvents from "@/pages/BusinessEvents";
 import EconomicGrowth from "@/pages/EconomicGrowth";
 import VolunteerEvents from "@/pages/VolunteerEvents";
+import PhoneRecovery from "@/pages/PhoneRecovery";
 
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -234,6 +235,9 @@ function Router() {
       </Route>
       <Route path="/verify-email">
         <VerifyEmail />
+      </Route>
+      <Route path="/phone-recovery">
+        <PhoneRecovery />
       </Route>
       <Route path="/auth-test">
         <AuthTest />

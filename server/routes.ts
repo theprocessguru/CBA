@@ -7880,6 +7880,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user phone number (data recovery endpoint)
+  app.post('/api/user/update-phone', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).user?.id;
+      const userEmail = (req as any).user?.email;
+      const { phone } = req.body;
+      
+      if (!phone || phone.trim() === '') {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+      
+      // Validate phone has minimum digits
+      const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+      if (cleanPhone.length < 10 || !/^\d+$/.test(cleanPhone)) {
+        return res.status(400).json({ message: "Please provide a valid phone number with at least 10 digits" });
+      }
+      
+      // Update user's phone in users table
+      await db
+        .update(users)
+        .set({ 
+          phone: phone.trim(),
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+      
+      // Also update in AI Summit registrations if they have one
+      await db
+        .update(aiSummitRegistrations)
+        .set({ 
+          phoneNumber: phone.trim()
+        })
+        .where(eq(aiSummitRegistrations.userId, userId));
+      
+      // Log the recovery
+      console.log(`Phone recovery: User ${userEmail} updated phone to ${phone}`);
+      
+      res.json({ 
+        success: true, 
+        message: "Phone number updated successfully" 
+      });
+    } catch (error) {
+      console.error("Error updating phone:", error);
+      res.status(500).json({ message: "Failed to update phone number" });
+    }
+  });
+
   app.post("/api/ai-summit-registration", async (req, res) => {
     try {
       const { 
@@ -7899,6 +7946,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Basic validation
       if (!name || !email) {
         return res.status(400).json({ message: "Name and email are required" });
+      }
+      
+      // Phone validation - now required
+      if (!phoneNumber || phoneNumber.trim() === '') {
+        return res.status(400).json({ message: "Phone number is required for event updates and safety notifications" });
+      }
+      
+      // Validate phone has minimum digits (removing spaces/dashes)
+      const cleanPhone = phoneNumber.replace(/[\s\-\(\)\+]/g, '');
+      if (cleanPhone.length < 10 || !/^\d+$/.test(cleanPhone)) {
+        return res.status(400).json({ message: "Please provide a valid phone number with at least 10 digits" });
       }
 
       // Email validation
