@@ -210,46 +210,140 @@ export class EmailTemplateService {
       },
       {
         personType: "attendee",
-        templateName: "Attendee Welcome Email",
-        subject: "Welcome to AI Summit 2025! Your Registration is Confirmed 🎯",
+        templateName: "AI Summit 2025 Welcome - Registration Confirmed",
+        subject: "🚀 Welcome to AI Summit 2025! Your Digital Journey Starts Now 🎯",
         htmlContent: `
-          <h2>Hi {{firstName}}!</h2>
-          <p>Your registration for AI Summit 2025 is confirmed! Get ready for an incredible day of AI innovation and networking.</p>
-          
-          <h3>Event Details:</h3>
-          <ul>
-            <li>📅 Date: March 28, 2025</li>
-            <li>⏰ Time: 9:00 AM - 6:00 PM</li>
-            <li>📍 Venue: {{venue}}</li>
-            <li>🎫 Your Badge ID: {{badgeId}}</li>
-          </ul>
-          
-          <h3>What You Get:</h3>
-          <ul>
-            <li>✅ Full day conference access</li>
-            <li>🎤 20+ expert speakers</li>
-            <li>🏢 50+ exhibitors showcase</li>
-            <li>🤝 Structured networking sessions</li>
-            <li>☕ Refreshments and lunch included</li>
-            <li>📱 Event app with attendee matching</li>
-            <li>🎁 Delegate pack with exclusive offers</li>
-          </ul>
-          
-          <h3>Prepare for the Event:</h3>
-          <ol>
-            <li>Download the event app (link coming soon)</li>
-            <li>Browse the agenda and plan your day</li>
-            <li>Book 1-2-1 meetings with other attendees</li>
-            <li>Prepare questions for Q&A sessions</li>
-          </ol>
-          
-          <p>Need assistance? Contact us at events@croydonba.org.uk</p>
-          <p>See you at the summit!</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+              <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🚀 AI Summit 2025</h1>
+              <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Your Registration is Confirmed!</p>
+            </div>
+            
+            <!-- Main Content -->
+            <div style="padding: 30px; background: white; border: 1px solid #e5e7eb; border-top: none;">
+              <h2 style="color: #1f2937; margin-top: 0;">Hi {{firstName}}! 🎉</h2>
+              
+              <p style="color: #4b5563; font-size: 18px; line-height: 1.6;">
+                <strong>Welcome to the future!</strong> Your registration for AI Summit 2025 is confirmed, and we're absolutely thrilled to have you join us for this groundbreaking event.
+              </p>
+
+              <div style="background: linear-gradient(90deg, #EBF8FF, #F0F9FF); border-left: 4px solid #3B82F6; padding: 20px; margin: 25px 0; border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-top: 0; font-size: 18px;">🗓️ Essential Event Details</h3>
+                <ul style="color: #374151; margin: 10px 0; padding-left: 20px;">
+                  <li><strong>📅 Date:</strong> Wednesday, October 1st, 2025</li>
+                  <li><strong>⏰ Time:</strong> 10:00 AM - 4:00 PM</li>
+                  <li><strong>📍 Venue:</strong> London South Bank University (LSBU) Croydon Campus</li>
+                  <li><strong>🎫 Your Digital Badge ID:</strong> {{badgeId}}</li>
+                  <li><strong>✉️ Your Email:</strong> {{email}}</li>
+                </ul>
+              </div>
+
+              <!-- QR Code & App Instructions -->
+              <div style="background: #F8FAFC; border: 2px solid #E2E8F0; padding: 25px; margin: 25px 0; border-radius: 10px;">
+                <h3 style="color: #0F172A; margin-top: 0; font-size: 18px;">📱 Your High-Tech Event Experience</h3>
+                <p style="color: #475569; margin: 15px 0;">
+                  Get ready for a seamless, high-tech event experience! Here's how to access everything digitally:
+                </p>
+                <ul style="color: #475569; margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>📲 Download Your QR Code:</strong> Visit <a href="https://members.croydonba.org.uk/mobile-badge" style="color: #3B82F6; text-decoration: none;">members.croydonba.org.uk/mobile-badge</a> to access your personalized digital badge</li>
+                  <li><strong>🔍 QR Code Benefits:</strong> Instant check-in, networking contact exchange, session feedback, and exclusive content access</li>
+                  <li><strong>📱 Event App Coming Soon:</strong> We'll send you download links 1 week before the event for real-time updates and networking</li>
+                  <li><strong>💫 Smart Networking:</strong> Use your QR code to instantly connect with other attendees, speakers, and exhibitors</li>
+                </ul>
+                <div style="background: #DBEAFE; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <p style="margin: 0; color: #1E40AF; font-weight: 600;">
+                    🔥 Pro Tip: Screenshot your QR code or save it to your phone's wallet for ultra-fast access!
+                  </p>
+                </div>
+              </div>
+
+              <!-- LSBU Entry Process -->
+              <div style="background: #F0FDF4; border: 2px solid #BBF7D0; padding: 25px; margin: 25px 0; border-radius: 10px;">
+                <h3 style="color: #166534; margin-top: 0; font-size: 18px;">🏢 LSBU Croydon Campus - Entry Instructions</h3>
+                <p style="color: #15803D; margin: 15px 0;">
+                  <strong>Address:</strong> 1 Addiscombe Rd, Croydon CR0 5AS
+                </p>
+                <ol style="color: #166534; margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>Arrival:</strong> Please arrive between 9:30-10:00 AM for smooth registration</li>
+                  <li><strong>Main Reception:</strong> Enter through the main LSBU reception area</li>
+                  <li><strong>Digital Check-In:</strong> Show your QR code (from your phone or printed) to our registration team</li>
+                  <li><strong>Security:</strong> You may need to show photo ID alongside your digital badge</li>
+                  <li><strong>Accessibility:</strong> The venue is fully accessible - contact us if you need assistance</li>
+                  <li><strong>Parking:</strong> Limited on-site parking available (£5) - public transport recommended</li>
+                </ol>
+                <div style="background: #DCFCE7; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <p style="margin: 0; color: #166534; font-weight: 600;">
+                    🚇 Transport: Closest stations are East Croydon (5-min walk) and Addiscombe (3-min walk)
+                  </p>
+                </div>
+              </div>
+
+              <!-- What You Get -->
+              <div style="margin: 25px 0;">
+                <h3 style="color: #1f2937; font-size: 18px;">✨ Your AI Summit 2025 Experience Includes:</h3>
+                <div style="display: grid; margin: 15px 0;">
+                  <ul style="color: #374151; margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                    <li><strong>🎤 Keynote by Jim Jordan:</strong> "How Nokia reinvented itself 5 times in 160 years" - A masterclass in resilience</li>
+                    <li><strong>🧠 Interactive Keynote by Lisa Allen:</strong> "Beyond Algorithms: Cultivating Human Skills for the AI Age"</li>
+                    <li><strong>🚀 Croydon StartUp CEO Presentation:</strong> Entrepreneurial ecosystems and innovation insights</li>
+                    <li><strong>🛠️ Hands-on Workshops:</strong> Practical AI tools you can implement immediately</li>
+                    <li><strong>👥 Structured Networking:</strong> Connect with 200+ innovators, leaders, and visionaries</li>
+                    <li><strong>🍽️ Full Catering:</strong> Welcome coffee, networking lunch, and afternoon refreshments</li>
+                    <li><strong>🎁 Exclusive Delegate Pack:</strong> Resources, offers, and take-home materials</li>
+                    <li><strong>🎥 Session Recordings:</strong> Access to key presentations (available post-event)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Next Steps -->
+              <div style="background: #FEF3C7; border: 2px solid #F59E0B; padding: 25px; margin: 25px 0; border-radius: 10px;">
+                <h3 style="color: #92400E; margin-top: 0; font-size: 18px;">🎯 Your Next Steps (Complete by Sept 25th):</h3>
+                <ol style="color: #A16207; margin: 10px 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>📲 Get Your QR Badge:</strong> Visit <a href="https://members.croydonba.org.uk/mobile-badge" style="color: #B45309;">members.croydonba.org.uk/mobile-badge</a> and save to your phone</li>
+                  <li><strong>📝 Complete Your Profile:</strong> Add your bio and interests at <a href="https://members.croydonba.org.uk/my-profile" style="color: #B45309;">members.croydonba.org.uk/my-profile</a> for better networking</li>
+                  <li><strong>🧠 Prepare Questions:</strong> Think about challenges you'd like AI experts to address</li>
+                  <li><strong>🤝 Set Networking Goals:</strong> What connections do you want to make? Who do you want to meet?</li>
+                  <li><strong>📅 Block Your Calendar:</strong> Full day event - arrive early, stay for networking drinks</li>
+                </ol>
+                <div style="background: #FDE68A; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <p style="margin: 0; color: #92400E; font-weight: 600;">
+                    📧 Event app download link will be sent 1 week before the summit with final details!
+                  </p>
+                </div>
+              </div>
+
+              <!-- Contact & Support -->
+              <div style="background: #F1F5F9; padding: 20px; border-radius: 8px; margin: 25px 0; text-align: center;">
+                <h3 style="color: #0F172A; margin-top: 0;">Need Help or Have Questions?</h3>
+                <p style="color: #475569; margin: 10px 0;">
+                  📧 <strong>Event Support:</strong> <a href="mailto:events@croydonba.org.uk" style="color: #3B82F6;">events@croydonba.org.uk</a><br>
+                  📞 <strong>WhatsApp Support:</strong> +44 7XXX XXX XXX (Available 9 AM - 6 PM)<br>
+                  🌐 <strong>Event Updates:</strong> <a href="https://members.croydonba.org.uk/ai-summit" style="color: #3B82F6;">members.croydonba.org.uk/ai-summit</a>
+                </p>
+              </div>
+
+              <!-- Closing -->
+              <div style="text-align: center; padding: 25px 0;">
+                <h3 style="color: #1f2937; margin-bottom: 15px;">🚀 Ready to Shape the Future Together?</h3>
+                <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 15px 0;">
+                  This isn't just another conference - it's your opportunity to be part of Croydon's AI transformation. You'll leave with practical tools, valuable connections, and the inspiration to drive real change in your work and community.
+                </p>
+                <p style="color: #1f2937; font-size: 18px; font-weight: bold; margin: 20px 0;">
+                  See you on October 1st, {{firstName}}! 🎉
+                </p>
+                <p style="color: #6b7280; font-style: italic;">
+                  <strong>Croydon Business Association</strong><br>
+                  <em>Empowering Croydon to live, grow & work better</em>
+                </p>
+              </div>
+            </div>
+          </div>
         `,
-        smsContent: "Hi {{firstName}}! You're registered for AI Summit 2025 on March 28. Badge ID: {{badgeId}}. Check your email for full details. See you there!",
-        mytTags: ["attendee", "ai-summit-2025", "registered", "attendee-confirmed"],
-        mytWorkflow: "attendee-nurture-sequence",
-        variables: ["{{firstName}}", "{{lastName}}", "{{venue}}", "{{badgeId}}"],
+        smsContent: "🚀 AI Summit 2025 confirmed! Oct 1st, LSBU Croydon, 10 AM-4 PM. Get your QR badge at members.croydonba.org.uk/mobile-badge. Badge ID: {{badgeId}}. See you there, {{firstName}}! 🎯",
+        mytTags: ["attendee", "ai-summit-2025", "registered", "attendee-confirmed", "qr-enabled", "lsbu-event"],
+        mytWorkflow: "ai-summit-attendee-nurture-sequence",
+        variables: ["{{firstName}}", "{{lastName}}", "{{fullName}}", "{{email}}", "{{venue}}", "{{badgeId}}", "{{eventName}}", "{{eventDate}}"],
         isActive: true
       },
       {

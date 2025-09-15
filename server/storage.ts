@@ -21,6 +21,7 @@ import {
   aiSummitWorkshopRegistrations,
   aiSummitSpeakingSessions,
   aiSummitSessionRegistrations,
+  aiSummitVenues,
   type User,
   type UpsertUser,
   type Business,
@@ -64,6 +65,8 @@ import {
   type InsertAISummitSpeakingSession,
   type AISummitSpeakingSessionRegistration,
   type InsertAISummitSpeakingSessionRegistration,
+  type AISummitVenue,
+  type InsertAISummitVenue,
   contentReports,
   type ContentReport,
   type InsertContentReport,
@@ -237,6 +240,13 @@ export interface IStorage {
   createAISummitRegistration(registration: InsertAISummitRegistration): Promise<AISummitRegistration>;
   createAISummitExhibitorRegistration(registration: InsertAISummitExhibitorRegistration): Promise<AISummitExhibitorRegistration>;
   createAISummitSpeakerInterest(interest: InsertAISummitSpeakerInterest): Promise<AISummitSpeakerInterest>;
+  
+  // AI Summit venue operations
+  createAISummitVenue(venue: InsertAISummitVenue): Promise<AISummitVenue>;
+  getAISummitVenueById(id: number): Promise<AISummitVenue | undefined>;
+  getAllAISummitVenues(): Promise<AISummitVenue[]>;
+  updateAISummitVenue(id: number, venue: Partial<InsertAISummitVenue>): Promise<AISummitVenue>;
+  deleteAISummitVenue(id: number): Promise<boolean>;
   
   // Badge management operations
   createAISummitBadge(badge: InsertAISummitBadge): Promise<AISummitBadge>;
@@ -1437,6 +1447,55 @@ export class DatabaseStorage implements IStorage {
       .values(interestData)
       .returning();
     return interest;
+  }
+
+  // AI Summit venue operations
+  async createAISummitVenue(venueData: InsertAISummitVenue): Promise<AISummitVenue> {
+    const [venue] = await db
+      .insert(aiSummitVenues)
+      .values(venueData)
+      .returning();
+    return venue;
+  }
+
+  async getAISummitVenueById(id: number): Promise<AISummitVenue | undefined> {
+    const [venue] = await db
+      .select()
+      .from(aiSummitVenues)
+      .where(eq(aiSummitVenues.id, id));
+    return venue;
+  }
+
+  async getAllAISummitVenues(): Promise<AISummitVenue[]> {
+    return await db
+      .select()
+      .from(aiSummitVenues)
+      .where(eq(aiSummitVenues.isActive, true))
+      .orderBy(asc(aiSummitVenues.name));
+  }
+
+  async updateAISummitVenue(id: number, venueData: Partial<InsertAISummitVenue>): Promise<AISummitVenue> {
+    const [venue] = await db
+      .update(aiSummitVenues)
+      .set({
+        ...venueData,
+        updatedAt: new Date(),
+      })
+      .where(eq(aiSummitVenues.id, id))
+      .returning();
+    return venue;
+  }
+
+  async deleteAISummitVenue(id: number): Promise<boolean> {
+    const result = await db
+      .update(aiSummitVenues)
+      .set({ 
+        isActive: false,
+        updatedAt: new Date() 
+      })
+      .where(eq(aiSummitVenues.id, id))
+      .returning();
+    return result.length > 0;
   }
 
   // Badge management operations

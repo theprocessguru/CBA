@@ -701,6 +701,40 @@ export const aiSummitTeamMembers = pgTable("ai_summit_team_members", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// AI Summit venues table for managing different spaces
+export const aiSummitVenues = pgTable("ai_summit_venues", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(), // e.g., "Main Auditorium", "Workshop Room A", "Exhibition Hall"
+  displayName: varchar("display_name").notNull(), // e.g., "Croydon College Main Auditorium"
+  description: text("description"),
+  venueType: varchar("venue_type").notNull(), // auditorium, classroom, workshop_room, exhibition_hall, breakout_room, outdoor_space
+  building: varchar("building"), // e.g., "Main Building", "Technology Center"
+  floor: varchar("floor"), // e.g., "Ground Floor", "First Floor", "2nd Floor"
+  roomNumber: varchar("room_number"), // e.g., "A101", "Main Hall", "Tech Lab 1"
+  maxCapacity: integer("max_capacity").notNull(),
+  seatingStyle: varchar("seating_style"), // theater, classroom, boardroom, u_shape, banquet, cocktail, standing
+  techEquipment: text("tech_equipment"), // JSON array of available equipment
+  accessibility: text("accessibility"), // Accessibility features available
+  location: text("location"), // Detailed location/directions
+  mapUrl: varchar("map_url"), // Link to venue map or image
+  hasProjector: boolean("has_projector").default(false),
+  hasScreen: boolean("has_screen").default(false),
+  hasAudioSystem: boolean("has_audio_system").default(false),
+  hasWifi: boolean("has_wifi").default(true),
+  hasPowerOutlets: boolean("has_power_outlets").default(true),
+  hasAirConditioning: boolean("has_air_conditioning").default(true),
+  hasNaturalLight: boolean("has_natural_light").default(true),
+  canRecordVideo: boolean("can_record_video").default(false),
+  canLivestream: boolean("can_livestream").default(false),
+  setupTime: integer("setup_time").default(30), // Setup time needed in minutes
+  cleanupTime: integer("cleanup_time").default(15), // Cleanup time needed in minutes
+  hourlyRate: decimal("hourly_rate", { precision: 10, scale: 2 }), // Cost per hour if applicable
+  isActive: boolean("is_active").default(true),
+  notes: text("notes"), // Additional venue information
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // AI Summit workshop sessions table
 export const aiSummitWorkshops = pgTable("ai_summit_workshops", {
   id: serial("id").primaryKey(),
@@ -712,7 +746,8 @@ export const aiSummitWorkshops = pgTable("ai_summit_workshops", {
   duration: integer("duration").notNull(), // Duration in minutes
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
-  room: varchar("room").notNull(), // Room name/number
+  venueId: integer("venue_id").references(() => aiSummitVenues.id), // Reference to venues table
+  room: varchar("room").notNull(), // Room name/number (kept for backward compatibility)
   maxCapacity: integer("max_capacity").notNull(),
   currentRegistrations: integer("current_registrations").default(0),
   category: varchar("category").notNull(), // beginner, intermediate, advanced, business, technical
@@ -763,7 +798,8 @@ export const aiSummitSpeakingSessions = pgTable("ai_summit_speaking_sessions", {
   duration: integer("duration").notNull(), // Duration in minutes
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
-  venue: varchar("venue").notNull(), // Main stage, conference room, etc.
+  venueId: integer("venue_id").references(() => aiSummitVenues.id), // Reference to venues table
+  venue: varchar("venue").notNull(), // Main stage, conference room, etc. (kept for backward compatibility)
   maxCapacity: integer("max_capacity").notNull(),
   currentRegistrations: integer("current_registrations").default(0),
   audienceLevel: varchar("audience_level").notNull(), // all, beginner, intermediate, advanced, business_leaders
@@ -1435,6 +1471,7 @@ export const insertAISummitWorkshopSchema = createInsertSchema(aiSummitWorkshops
 export const insertAISummitWorkshopRegistrationSchema = createInsertSchema(aiSummitWorkshopRegistrations).omit({ id: true });
 export const insertAISummitSpeakingSessionSchema = createInsertSchema(aiSummitSpeakingSessions).omit({ id: true });
 export const insertAISummitSpeakingSessionRegistrationSchema = createInsertSchema(aiSummitSessionRegistrations).omit({ id: true });
+export const insertAISummitVenueSchema = createInsertSchema(aiSummitVenues).omit({ id: true, createdAt: true, updatedAt: true });
 
 export const insertBusinessEventSchema = createInsertSchema(businessEvents).omit({
   id: true,
@@ -1588,6 +1625,9 @@ export type AISummitSpeakingSession = typeof aiSummitSpeakingSessions.$inferSele
 
 export type InsertAISummitSpeakingSessionRegistration = z.infer<typeof insertAISummitSpeakingSessionRegistrationSchema>;
 export type AISummitSpeakingSessionRegistration = typeof aiSummitSessionRegistrations.$inferSelect;
+
+export type InsertAISummitVenue = z.infer<typeof insertAISummitVenueSchema>;
+export type AISummitVenue = typeof aiSummitVenues.$inferSelect;
 
 // Event Mood Sentiment Tracking System
 export const eventMoodEntries = pgTable("event_mood_entries", {
