@@ -7,10 +7,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Save, Settings, Users, Star, AlertCircle } from "lucide-react";
+import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { 
+  EducatorSection, 
+  VolunteerSection, 
+  StudentSection, 
+  StartupFounderSection, 
+  JobSeekerSection,
+  ROLE_METADATA,
+  type RoleComponentType
+} from "@/components/profile/roles";
+import { apiRequest } from "@/lib/queryClient";
 
 interface PersonType {
   id: number;
@@ -48,12 +58,15 @@ interface UserWithPersonTypes {
   membershipStatus: string;
   isAdmin: boolean;
   personTypes?: PersonType[];
+  rolesData?: Record<string, any>;
 }
 
 export default function Profile() {
   const [profileData, setProfileData] = useState<UserWithPersonTypes | null>(null);
   const [assignedPersonTypes, setAssignedPersonTypes] = useState<number[]>([]);
   const [primaryPersonType, setPrimaryPersonType] = useState<number | null>(null);
+  const [rolesData, setRolesData] = useState<Record<string, any>>({});
+  const [openRoles, setOpenRoles] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -143,9 +156,27 @@ export default function Profile() {
     },
   });
 
+  // Update role data mutation
+  const updateRoleDataMutation = useMutation({
+    mutationFn: async (updatedRoleData: Record<string, any>) => {
+      return apiRequest('PATCH', '/api/profile', { rolesData: updatedRoleData });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update role data",
+        variant: "destructive",
+      });
+    },
+  });
+
   useEffect(() => {
     if (user) {
       setProfileData(user);
+      setRolesData(user.rolesData || {});
     }
   }, [user]);
 
@@ -185,6 +216,81 @@ export default function Profile() {
     if (profileData) {
       updateProfileMutation.mutate(profileData);
     }
+  };
+
+  const handleSaveRoleData = async (roleName: string, roleData: Record<string, any>) => {
+    const updatedRoleData = {
+      ...rolesData,
+      [roleName]: roleData
+    };
+    setRolesData(updatedRoleData);
+    await updateRoleDataMutation.mutateAsync(updatedRoleData);
+  };
+
+  const toggleRoleSection = (roleName: string) => {
+    setOpenRoles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(roleName)) {
+        newSet.delete(roleName);
+      } else {
+        newSet.add(roleName);
+      }
+      return newSet;
+    });
+  };
+
+  const getAssignedRoles = (): RoleComponentType[] => {
+    if (!allPersonTypes || assignedPersonTypes.length === 0) return [];
+    
+    const roleMap: Record<string, RoleComponentType> = {
+      'educator': 'educator',
+      'volunteer': 'volunteer', 
+      'student': 'student',
+      'startup_founder': 'startup_founder',
+      'job_seeker': 'job_seeker'
+    };
+    
+    const assignedRoles: RoleComponentType[] = [];
+    assignedPersonTypes.forEach(typeId => {
+      const personType = allPersonTypes.find(t => t.id === typeId);
+      if (personType && roleMap[personType.name]) {
+        assignedRoles.push(roleMap[personType.name]);
+      }
+    });
+    
+    return assignedRoles;
+  };
+
+  const calculateProfileCompletion = (): number => {
+    if (!profileData) return 0;
+    
+    const basicFields = ['firstName', 'lastName', 'email', 'bio'];
+    const completedBasic = basicFields.filter(field => 
+      profileData[field as keyof UserWithPersonTypes]
+    ).length;
+    
+    const basicCompletion = (completedBasic / basicFields.length) * 50; // 50% for basic info
+    
+    const assignedRoles = getAssignedRoles();
+    if (assignedRoles.length === 0) return Math.round(basicCompletion);
+    
+    let roleCompletion = 0;
+    assignedRoles.forEach(roleName => {
+      const roleData = rolesData[roleName] || {};
+      const roleFields = Object.keys(roleData).filter(key => 
+        roleData[key] && roleData[key] !== ''
+      );
+      
+      // Estimate 8-12 fields per role for completion calculation
+      const estimatedFields = 10;
+      const completion = Math.min((roleFields.length / estimatedFields) * 100, 100);
+      roleCompletion += completion;
+    });
+    
+    const avgRoleCompletion = roleCompletion / assignedRoles.length;
+    const totalCompletion = basicCompletion + (avgRoleCompletion * 0.5); // 50% for role data
+    
+    return Math.round(totalCompletion);
   };
 
   const getTypeColor = (color: string) => {
@@ -249,9 +355,30 @@ export default function Profile() {
         </div>
       </div>
 
+      {/* Profile Completion */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold">Profile Completion</h3>
+              <p className="text-sm text-gray-600">Complete your profile to unlock all features</p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-blue-600">{calculateProfileCompletion()}%</div>
+              <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden mt-1">
+                <div 
+                  className="h-full bg-blue-500 transition-all duration-300"
+                  style={{ width: `${calculateProfileCompletion()}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Profile Information */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -346,6 +473,81 @@ export default function Profile() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Role-Specific Sections */}
+          {getAssignedRoles().length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                <h2 className="text-xl font-semibold">Role-Specific Profiles</h2>
+              </div>
+              
+              {getAssignedRoles().map((roleName) => {
+                const roleData = rolesData[roleName] || {};
+                const isOpen = openRoles.has(roleName);
+                
+                switch (roleName) {
+                  case 'educator':
+                    return (
+                      <EducatorSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  case 'volunteer':
+                    return (
+                      <VolunteerSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  case 'student':
+                    return (
+                      <StudentSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  case 'startup_founder':
+                    return (
+                      <StartupFounderSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  case 'job_seeker':
+                    return (
+                      <JobSeekerSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  default:
+                    return null;
+                }
+              })}
+            </div>
+          )}
         </div>
 
         {/* Person Types Management */}

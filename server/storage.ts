@@ -118,6 +118,9 @@ import {
   type InsertPersonType,
   type UserPersonType,
   type InsertUserPersonType,
+  organizationMemberships,
+  type OrganizationMembership,
+  type InsertOrganizationMembership,
   eventMoodEntries,
   eventMoodAggregations,
   type EventMoodEntry,
@@ -433,6 +436,11 @@ export interface IStorage {
   removePersonTypeFromUser(userId: string, personTypeId: number): Promise<boolean>;
   setPrimaryPersonType(userId: string, personTypeId: number): Promise<boolean>;
   getUsersByPersonType(personTypeId: number): Promise<User[]>;
+  setUserPersonTypes(userId: string, personTypeIds: number[]): Promise<UserPersonType[]>;
+
+  // Organization Memberships operations
+  getUserOrganizationMemberships(userId: string): Promise<OrganizationMembership[]>;
+  updateUserOrganizationMemberships(userId: string, memberships: InsertOrganizationMembership[]): Promise<OrganizationMembership[]>;
 
   // Event Mood Sentiment operations
   createMoodEntry(entry: InsertEventMoodEntry): Promise<EventMoodEntry>;
@@ -2505,6 +2513,70 @@ export class DatabaseStorage implements IStorage {
           ...userIds.map(u => eq(users.id, u.userId))
         )
       );
+  }
+
+  async setUserPersonTypes(userId: string, personTypeIds: number[]): Promise<UserPersonType[]> {
+    // First, remove all existing person type assignments for this user
+    await db
+      .delete(userPersonTypes)
+      .where(eq(userPersonTypes.userId, userId));
+
+    // If no person types provided, return empty array
+    if (personTypeIds.length === 0) {
+      return [];
+    }
+
+    // Insert new person type assignments
+    // Make the first one primary by default
+    const insertData = personTypeIds.map((typeId, index) => ({
+      userId,
+      personTypeId: typeId,
+      isPrimary: index === 0,
+      assignedAt: new Date(),
+    }));
+
+    const result = await db
+      .insert(userPersonTypes)
+      .values(insertData)
+      .returning();
+
+    return result;
+  }
+
+  // Organization Memberships operations
+  async getUserOrganizationMemberships(userId: string): Promise<OrganizationMembership[]> {
+    return await db
+      .select()
+      .from(organizationMemberships)
+      .where(eq(organizationMemberships.userId, userId))
+      .orderBy(desc(organizationMemberships.isActive), asc(organizationMemberships.organizationName));
+  }
+
+  async updateUserOrganizationMemberships(userId: string, memberships: InsertOrganizationMembership[]): Promise<OrganizationMembership[]> {
+    // First, delete all existing memberships for this user
+    await db
+      .delete(organizationMemberships)
+      .where(eq(organizationMemberships.userId, userId));
+
+    // If no memberships provided, return empty array
+    if (memberships.length === 0) {
+      return [];
+    }
+
+    // Insert new memberships
+    const insertData = memberships.map(membership => ({
+      ...membership,
+      userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    const result = await db
+      .insert(organizationMemberships)
+      .values(insertData)
+      .returning();
+
+    return result;
   }
 
   // Event Mood Sentiment operations
