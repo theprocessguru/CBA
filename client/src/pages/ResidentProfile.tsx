@@ -151,7 +151,7 @@ export default function ResidentProfile() {
       
       // Set selected person types
       if (profileWithDefaults.personTypes && Array.isArray(profileWithDefaults.personTypes)) {
-        setSelectedPersonTypes(profileWithDefaults.personTypes.filter(pt => pt && pt.id).map((pt: PersonType) => pt.id));
+        setSelectedPersonTypes(profileWithDefaults.personTypes.filter((pt: PersonType) => pt && pt.id).map((pt: PersonType) => pt.id));
       }
       
       // Set organization memberships
