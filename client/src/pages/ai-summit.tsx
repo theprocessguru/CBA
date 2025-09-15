@@ -89,6 +89,7 @@ const AISummit = () => {
     confirmEmail: "",
     mobileNumber: "",
     password: "",
+    confirmPassword: "",
     participantType: "resident" // "resident" or "business_owner"
   });
 
@@ -466,7 +467,7 @@ const AISummit = () => {
       }
       
       // Phone validation - basic check for minimum length
-      const cleanPhone = data.phone.trim().replace(/[\s\-\(\)]/g, '');
+      const cleanPhone = data.mobileNumber.trim().replace(/[\s\-\(\)]/g, '');
       if (cleanPhone.length < 10) {
         throw new Error("Please provide a valid phone number with at least 10 digits");
       }
@@ -474,8 +475,7 @@ const AISummit = () => {
       const submissionData = {
         ...data,
         name: `${data.firstName.trim()} ${data.lastName.trim()}`,
-        phoneNumber: data.phone || "",
-        organizationMemberships: showOrganizationMemberships ? organizationMemberships.filter(org => org.organizationName) : undefined,
+        phoneNumber: data.mobileNumber || "",
       };
       const response = await apiRequest("POST", "/api/ai-summit-registration", submissionData);
       return response.json();
@@ -489,41 +489,14 @@ const AISummit = () => {
       });
       setShowRegistrationForm(false);
       setRegistrationData({
-        name: "",
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
-        homeAddress: "",
-        homeCity: "",
-        homePostcode: "",
-        participantType: "attendee",
-        customRole: "",
-        company: "",
-        jobTitle: "",
-        phoneNumber: "",
-        businessType: "",
-        aiInterest: "",
-        accessibilityNeeds: "",
-        comments: "",
+        confirmEmail: "",
+        mobileNumber: "",
         password: "",
         confirmPassword: "",
-        interestAreas: [] as string[],
-        selectedPersonTypes: [] as number[],
-        tshirtSize: "",
-        gender: "",
-        businessName: "",
-        businessCategory: "",
-        businessDescription: "",
-        // Councillor-specific fields
-        title: "",
-        council: "",
-        ward: "",
-        constituency: "",
-        officeAddress: "",
-        officeCity: "",
-        officePostcode: "",
-        bio: "",
+        participantType: "resident"
       });
       // Refresh registration status
       refetchStatus();
@@ -1017,15 +990,15 @@ const AISummit = () => {
 
   // Admin test data fill function
   const fillTestData = () => {
-    if (selfRegisterPersonTypes.length > 0) {
+    if (allPersonTypes.length > 0) {
       // Select all available person types
-      const allPersonTypeIds = selfRegisterPersonTypes.map((type: any) => type.id);
+      const allPersonTypeIds = allPersonTypes.map((type: any) => type.id);
       
       setRegistrationData({
         firstName: "John",
         lastName: "Smith",
         email: "john.smith@test.com",
-        phone: "+44 7700 900123",
+        mobileNumber: "+44 7700 900123",
         postcode: "SW1A 1AA",
         dateOfBirth: "1985-06-15",
         selectedPersonTypes: allPersonTypeIds,
@@ -1071,47 +1044,13 @@ const AISummit = () => {
         specialtyBeats: "AI, Machine Learning, Startup News"
       });
 
-      // Set organization memberships for community group
-      setOrganizationMemberships([
-        {
-          name: "Local Business Association",
-          role: "Member",
-          yearsActive: "3"
-        },
-        {
-          name: "Tech Entrepreneurs Network",
-          role: "Committee Member", 
-          yearsActive: "2"
-        }
-      ]);
+      // Organization memberships removed for simplified form
     }
   };
 
-  // Organization membership helpers
-  const handleOrganizationChange = (index: number, field: string, value: string) => {
-    setOrganizationMemberships(prev => prev.map((org, i) => 
-      i === index ? { ...org, [field]: value } : org
-    ));
-  };
+  // Organization membership helpers removed for simplified form
 
-  const addOrganization = () => {
-    setOrganizationMemberships(prev => [...prev, {
-      organizationName: '',
-      organizationType: '',
-      role: '',
-      isActive: true,
-      description: '',
-      contactEmail: '',
-      contactPhone: '',
-      websiteUrl: ''
-    }]);
-  };
-
-  const removeOrganization = (index: number) => {
-    if (organizationMemberships.length > 1) {
-      setOrganizationMemberships(prev => prev.filter((_, i) => i !== index));
-    }
-  };
+  // Organization functions removed for simplified form
 
   const handleExhibitorInputChange = (field: string, value: string | number | boolean) => {
     setExhibitorData(prev => ({
