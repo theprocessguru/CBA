@@ -1159,7 +1159,7 @@ const AISummit = () => {
                   Opening the Future: The Minister for AI Takes the Stage
                 </h2>
                 <p className="text-lg md:text-xl text-white">
-                  Don't Miss Feryal Clark's Opening Keynote!
+                  Don't Miss Kanishka Narayan's Opening Keynote!
                 </p>
               </div>
               <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
