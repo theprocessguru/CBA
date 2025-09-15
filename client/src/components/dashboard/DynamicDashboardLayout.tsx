@@ -39,6 +39,8 @@ const DynamicDashboardLayout = ({ children }: DynamicDashboardLayoutProps) => {
 
   // Use profile data if available, fallback to user data
   const userData = profile || user;
+  
+  // Safely get sidebar items and dashboard title with null protection
   const sidebarItems = getSidebarItemsForUser(userData);
   const dashboardTitle = getDashboardTitle(userData);
 
@@ -148,14 +150,23 @@ const DynamicDashboardLayout = ({ children }: DynamicDashboardLayoutProps) => {
                 )}
                 
                 {/* Person Types */}
-                {userData?.personTypes && userData.personTypes.length > 0 && (
+                {userData?.personTypes && Array.isArray(userData.personTypes) && userData.personTypes.length > 0 && (
                   <div className="mb-3">
                     <div className="flex flex-wrap gap-1">
-                      {userData.personTypes.filter(type => type && type.name).map((type: any, index: number) => (
-                        <Badge key={index} variant="outline" className="text-xs" data-testid={`badge-role-${type.name}`}>
-                          {type.displayName || type.name}
-                        </Badge>
-                      ))}
+                      {userData.personTypes
+                        .filter(type => 
+                          type && 
+                          typeof type === 'object' && 
+                          type.name && 
+                          typeof type.name === 'string' &&
+                          type.name.length > 0
+                        )
+                        .map((type: any, index: number) => (
+                          <Badge key={`${type.name}-${index}`} variant="outline" className="text-xs" data-testid={`badge-role-${type.name}`}>
+                            {type.displayName || type.name}
+                          </Badge>
+                        ))
+                      }
                     </div>
                   </div>
                 )}

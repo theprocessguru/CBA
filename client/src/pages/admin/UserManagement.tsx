@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { User } from "@shared/schema";
+import { User, PersonType, UserPersonType } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
@@ -43,7 +43,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2, Trash2, LogIn } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Users, UserCheck, UserX, Search, AlertTriangle, ArrowLeft, Edit2, Trash2, LogIn, Settings, Star } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 const UserManagement = () => {
@@ -56,6 +57,7 @@ const UserManagement = () => {
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<User>>({});
   const [deletingUser, setDeletingUser] = useState<User | null>(null);
+  const [managingPersonTypesUser, setManagingPersonTypesUser] = useState<User | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -87,6 +89,17 @@ const UserManagement = () => {
       
       return response.json();
     },
+  });
+
+  // Fetch all person types
+  const { data: allPersonTypes = [] } = useQuery<PersonType[]>({
+    queryKey: ['/api/person-types'],
+  });
+
+  // Fetch user's person types when managing
+  const { data: userPersonTypes = [] } = useQuery<UserPersonType[]>({
+    queryKey: [`/api/users/${managingPersonTypesUser?.id}/person-types`],
+    enabled: !!managingPersonTypesUser,
   });
 
   const suspendUserMutation = useMutation({
@@ -197,6 +210,47 @@ const UserManagement = () => {
     },
   });
 
+  // Person type assignment mutation
+  const assignPersonTypeMutation = useMutation({
+    mutationFn: async ({ userId, typeId, action, isPrimary }: { userId: string; typeId: number; action: 'add' | 'remove' | 'setPrimary'; isPrimary?: boolean }) => {
+      if (action === 'add') {
+        const response = await fetch(`/api/admin/users/${userId}/person-types`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ personTypeId: typeId, isPrimary: isPrimary || false }),
+        });
+        if (!response.ok) throw new Error('Failed to assign person type');
+        return response.json();
+      } else if (action === 'remove') {
+        const response = await fetch(`/api/admin/users/${userId}/person-types/${typeId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to remove person type');
+        return response.json();
+      } else if (action === 'setPrimary') {
+        const response = await fetch(`/api/admin/users/${userId}/person-types/${typeId}/primary`, {
+          method: 'PUT',
+        });
+        if (!response.ok) throw new Error('Failed to set primary person type');
+        return response.json();
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${managingPersonTypesUser?.id}/person-types`] });
+      toast({
+        title: "Person Type Updated",
+        description: "User's person type has been updated successfully",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error instanceof Error ? error.message : "Failed to update person type",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSuspendUser = () => {
     if (!suspendingUser || !suspensionReason.trim()) return;
 
@@ -204,6 +258,57 @@ const UserManagement = () => {
       userId: suspendingUser.id,
       reason: suspensionReason,
     });
+  };
+
+  const handlePersonTypeToggle = (typeId: number) => {
+    if (!managingPersonTypesUser) return;
+    
+    const isCurrentlyAssigned = userPersonTypes.some(upt => upt.personTypeId === typeId);
+    
+    if (isCurrentlyAssigned) {
+      // Remove person type
+      assignPersonTypeMutation.mutate({ 
+        userId: managingPersonTypesUser.id, 
+        typeId, 
+        action: 'remove' 
+      });
+    } else {
+      // Add person type
+      const isPrimary = userPersonTypes.length === 0; // First type becomes primary
+      assignPersonTypeMutation.mutate({ 
+        userId: managingPersonTypesUser.id, 
+        typeId, 
+        action: 'add', 
+        isPrimary 
+      });
+    }
+  };
+
+  const handleSetPrimary = (typeId: number) => {
+    if (!managingPersonTypesUser) return;
+    
+    const isAssigned = userPersonTypes.some(upt => upt.personTypeId === typeId);
+    if (isAssigned) {
+      assignPersonTypeMutation.mutate({ 
+        userId: managingPersonTypesUser.id, 
+        typeId, 
+        action: 'setPrimary' 
+      });
+    }
+  };
+
+  const getTypeColor = (color?: string) => {
+    switch (color) {
+      case 'red': return 'bg-red-100 text-red-800 border-red-200';
+      case 'blue': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'green': return 'bg-green-100 text-green-800 border-green-200';
+      case 'yellow': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'purple': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'pink': return 'bg-pink-100 text-pink-800 border-pink-200';
+      case 'orange': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'indigo': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
   };
 
   const handleEditUser = (user: User) => {
@@ -470,6 +575,16 @@ const UserManagement = () => {
                             >
                               <Edit2 className="h-3 w-3 mr-1" />
                               Edit
+                            </Button>
+                            
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setManagingPersonTypesUser(user)}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Settings className="h-3 w-3 mr-1" />
+                              Manage Types
                             </Button>
                             
                             <Button
@@ -826,6 +941,156 @@ const UserManagement = () => {
                   >
                     Cancel
                   </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Person Types Management Dialog */}
+        <Dialog open={!!managingPersonTypesUser} onOpenChange={(open) => {
+          if (!open) {
+            setManagingPersonTypesUser(null);
+          }
+        }}>
+          <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Settings className="h-5 w-5 mr-2" />
+                Manage Person Types for {managingPersonTypesUser?.firstName} {managingPersonTypesUser?.lastName}
+              </DialogTitle>
+            </DialogHeader>
+            
+            {managingPersonTypesUser && (
+              <div className="space-y-6">
+                {/* Current Assigned Types */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Currently Assigned Types</h3>
+                  {userPersonTypes.length > 0 ? (
+                    <div className="space-y-3">
+                      {userPersonTypes.map((upt) => {
+                        const type = allPersonTypes.find(t => t.id === upt.personTypeId);
+                        if (!type) return null;
+                        
+                        const isPrimary = upt.isPrimary;
+                        
+                        return (
+                          <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getTypeColor(type.color)}>
+                                    {type.displayName}
+                                  </Badge>
+                                  {type.isAdminOnly && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      Admin Assigned
+                                    </Badge>
+                                  )}
+                                  {isPrimary && (
+                                    <Badge variant="outline" className="text-xs">
+                                      <Star className="h-3 w-3 mr-1" />
+                                      Primary
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                                <p className="text-xs text-gray-500 mt-1">Category: {type.category}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              {!isPrimary && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleSetPrimary(type.id)}
+                                  disabled={assignPersonTypeMutation.isPending}
+                                  className="text-xs"
+                                >
+                                  Set Primary
+                                </Button>
+                              )}
+                              
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handlePersonTypeToggle(type.id)}
+                                disabled={assignPersonTypeMutation.isPending}
+                                className="text-xs"
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-gray-500">
+                      No person types assigned yet
+                    </div>
+                  )}
+                </div>
+
+                {/* Available Types to Assign */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Available Types to Assign</h3>
+                  
+                  {/* Admin-Only Roles */}
+                  <div className="mb-4">
+                    <h4 className="font-medium mb-2 text-orange-700">Admin-Only Roles</h4>
+                    <div className="space-y-2">
+                      {allPersonTypes.filter(type => type.isAdminOnly && !userPersonTypes.some(upt => upt.personTypeId === type.id)).map((type) => (
+                        <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg bg-amber-50">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={false}
+                              onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                              disabled={assignPersonTypeMutation.isPending}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Badge className={getTypeColor(type.color)}>
+                                  {type.displayName}
+                                </Badge>
+                                <Badge variant="destructive" className="text-xs">
+                                  Admin Only
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Self-Selectable Interests */}
+                  <div>
+                    <h4 className="font-medium mb-2 text-green-700">Self-Selectable Interests</h4>
+                    <div className="space-y-2">
+                      {allPersonTypes.filter(type => !type.isAdminOnly && !userPersonTypes.some(upt => upt.personTypeId === type.id)).map((type) => (
+                        <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <Checkbox
+                              checked={false}
+                              onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                              disabled={assignPersonTypeMutation.isPending}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Badge className={getTypeColor(type.color)}>
+                                  {type.displayName}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

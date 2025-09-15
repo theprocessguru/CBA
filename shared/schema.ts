@@ -2044,6 +2044,8 @@ export const personTypes = pgTable("person_types", {
   icon: varchar("icon"), // Icon identifier for UI
   priority: integer("priority").default(0), // Display order priority
   isActive: boolean("is_active").default(true),
+  isAdminOnly: boolean("is_admin_only").default(false), // Only admins can assign these roles
+  category: varchar("category").default("role"), // "role", "interest", "stakeholder"
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -2072,6 +2074,8 @@ export const insertPersonTypeSchema = createInsertSchema(personTypes, {
   icon: z.string().optional(),
   priority: z.number().default(0),
   isActive: z.boolean().default(true),
+  isAdminOnly: z.boolean().default(false),
+  category: z.enum(["role", "interest", "stakeholder"]).default("role"),
 }).omit({ id: true, createdAt: true, updatedAt: true });
 
 export type InsertPersonType = z.infer<typeof insertPersonTypeSchema>;

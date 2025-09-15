@@ -11311,6 +11311,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get person types by category (with admin permissions check)
+  app.get('/api/person-types/by-category', async (req: any, res) => {
+    try {
+      const { category, isAdminOnly } = req.query;
+      const conditions = [eq(personTypes.isActive, true)];
+      
+      if (category) {
+        conditions.push(eq(personTypes.category, category));
+      }
+      
+      if (isAdminOnly !== undefined) {
+        conditions.push(eq(personTypes.isAdminOnly, isAdminOnly === 'true'));
+      }
+      
+      const types = await db
+        .select()
+        .from(personTypes)
+        .where(and(...conditions))
+        .orderBy(asc(personTypes.priority), asc(personTypes.name));
+      
+      res.json(types);
+    } catch (error) {
+      console.error('Error fetching person types by category:', error);
+      res.status(500).json({ message: 'Failed to fetch person types' });
+    }
+  });
+
+  // Get available person types for user (excludes admin-only types unless user is admin)
+  app.get('/api/person-types/available', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+      
+      const user = await storage.getUser(userId);
+      const isUserAdmin = user?.isAdmin || false;
+      
+      const conditions = [eq(personTypes.isActive, true)];
+      
+      // If not admin, exclude admin-only types
+      if (!isUserAdmin) {
+        conditions.push(eq(personTypes.isAdminOnly, false));
+      }
+      
+      const types = await db
+        .select()
+        .from(personTypes)
+        .where(and(...conditions))
+        .orderBy(asc(personTypes.priority), asc(personTypes.name));
+      
+      res.json(types);
+    } catch (error) {
+      console.error('Error fetching available person types:', error);
+      res.status(500).json({ message: 'Failed to fetch person types' });
+    }
+  });
+
   // Create new person type (admin only)
   app.post('/api/admin/person-types', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
@@ -11369,6 +11427,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error assigning person type:', error);
       res.status(500).json({ message: 'Failed to assign person type' });
+    }
+  });
+
+  // Self-assign interest type (user can assign interests to themselves)
+  app.post('/api/users/me/person-types', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const { personTypeId, notes } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+      
+      // Check if the person type exists and is not admin-only
+      const [personType] = await db
+        .select()
+        .from(personTypes)
+        .where(eq(personTypes.id, personTypeId));
+        
+      if (!personType) {
+        return res.status(404).json({ message: 'Person type not found' });
+      }
+      
+      if (personType.isAdminOnly) {
+        return res.status(403).json({ message: 'This person type can only be assigned by administrators' });
+      }
+      
+      const assignment = await storage.assignPersonTypeToUser({
+        userId,
+        personTypeId,
+        isPrimary: false, // Self-assigned interests are never primary
+        assignedBy: userId, // User assigned it to themselves
+        notes: notes || 'Self-assigned interest'
+      });
+      
+      res.json(assignment);
+    } catch (error) {
+      console.error('Error self-assigning person type:', error);
+      res.status(500).json({ message: 'Failed to assign person type' });
+    }
+  });
+
+  // Remove self-assigned interest type (users can remove their own interests)
+  app.delete('/api/users/me/person-types/:personTypeId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.id;
+      const personTypeId = parseInt(req.params.personTypeId);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+      
+      // Check if the person type is admin-only
+      const [personType] = await db
+        .select()
+        .from(personTypes)
+        .where(eq(personTypes.id, personTypeId));
+        
+      if (!personType) {
+        return res.status(404).json({ message: 'Person type not found' });
+      }
+      
+      if (personType.isAdminOnly) {
+        return res.status(403).json({ message: 'Admin-only roles can only be removed by administrators' });
+      }
+      
+      const success = await storage.removePersonTypeFromUser(userId, personTypeId);
+      res.json({ success });
+    } catch (error) {
+      console.error('Error removing self-assigned person type:', error);
+      res.status(500).json({ message: 'Failed to remove person type' });
     }
   });
 

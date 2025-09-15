@@ -76,9 +76,15 @@ export default function Profile() {
     refetchOnWindowFocus: false,
   });
 
-  // Fetch available person types
-  const { data: allPersonTypes = [], isLoading: typesLoading } = useQuery<PersonType[]>({
+  // Fetch available person types (only those user can self-assign)
+  const { data: availablePersonTypes = [], isLoading: typesLoading } = useQuery<PersonType[]>({
+    queryKey: ['/api/person-types/available'],
+  });
+  
+  // Fetch all person types (for admin use)
+  const { data: allPersonTypes = [], isLoading: allTypesLoading } = useQuery<PersonType[]>({
     queryKey: ['/api/person-types'],
+    enabled: user?.isAdmin || false,
   });
 
   // Fetch user's current person types
@@ -114,8 +120,50 @@ export default function Profile() {
     },
   });
 
-  // Update person types mutation
-  const updatePersonTypesMutation = useMutation({
+  // Self-assign interest types mutation (for users)
+  const selfAssignPersonTypeMutation = useMutation({
+    mutationFn: async ({ typeId, action }: { typeId: number; action: 'add' | 'remove' }) => {
+      if (action === 'add') {
+        const response = await fetch('/api/users/me/person-types', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ personTypeId: typeId }),
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to assign person type');
+        }
+        return response.json();
+      } else if (action === 'remove') {
+        const response = await fetch(`/api/users/me/person-types/${typeId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to remove person type');
+        }
+        return response.json();
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Interest Updated",
+        description: "Your interest has been updated",
+      });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id}/person-types`] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Admin-only person types mutation (for admins)
+  const adminAssignPersonTypeMutation = useMutation({
     mutationFn: async ({ typeId, action, isPrimary }: { typeId: number; action: 'add' | 'remove' | 'setPrimary'; isPrimary?: boolean }) => {
       if (action === 'add') {
         const response = await fetch(`/api/admin/users/${user?.id}/person-types`, {
@@ -195,20 +243,58 @@ export default function Profile() {
   const handlePersonTypeToggle = (typeId: number) => {
     const isCurrentlyAssigned = assignedPersonTypes.includes(typeId);
     
+    // Find the person type to check if it's admin-only
+    const personType = availablePersonTypes.find(pt => pt.id === typeId) || allPersonTypes.find(pt => pt.id === typeId);
+    
+    if (!personType) {
+      toast({
+        title: "Error",
+        description: "Person type not found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (isCurrentlyAssigned) {
       // Remove person type
-      updatePersonTypesMutation.mutate({ typeId, action: 'remove' });
+      if (personType.isAdminOnly && !user?.isAdmin) {
+        toast({
+          title: "Permission Denied",
+          description: "Admin-only roles can only be removed by administrators",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (personType.isAdminOnly || user?.isAdmin) {
+        adminAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+      } else {
+        selfAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+      }
     } else {
       // Add person type
-      const isPrimary = assignedPersonTypes.length === 0; // First type becomes primary
-      updatePersonTypesMutation.mutate({ typeId, action: 'add', isPrimary });
+      if (personType.isAdminOnly && !user?.isAdmin) {
+        toast({
+          title: "Permission Denied",
+          description: "This role can only be assigned by administrators",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (personType.isAdminOnly || user?.isAdmin) {
+        const isPrimary = assignedPersonTypes.length === 0; // First type becomes primary
+        adminAssignPersonTypeMutation.mutate({ typeId, action: 'add', isPrimary });
+      } else {
+        selfAssignPersonTypeMutation.mutate({ typeId, action: 'add' });
+      }
     }
   };
 
   const handleSetPrimary = (typeId: number) => {
     if (assignedPersonTypes.includes(typeId)) {
       setPrimaryPersonType(typeId);
-      updatePersonTypesMutation.mutate({ typeId, action: 'setPrimary' });
+      adminAssignPersonTypeMutation.mutate({ typeId, action: 'setPrimary' });
     }
   };
 
@@ -551,26 +637,105 @@ export default function Profile() {
         </div>
 
         {/* Person Types Management */}
-        <div>
+        <div className="space-y-6">
+          {/* Current Assigned Types */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Your Access Types
+                Your Current Types
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {assignedPersonTypes.length > 0 ? (
+                <div className="space-y-3">
+                  {userPersonTypes.map((upt) => {
+                    const type = [...availablePersonTypes, ...allPersonTypes].find(t => t.id === upt.personTypeId);
+                    if (!type) return null;
+                    
+                    const isPrimary = primaryPersonType === type.id;
+                    
+                    return (
+                      <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <Badge className={getTypeColor(type.color)}>
+                                {type.displayName}
+                              </Badge>
+                              {type.isAdminOnly && (
+                                <Badge variant="secondary" className="text-xs">
+                                  Admin Assigned
+                                </Badge>
+                              )}
+                              {isPrimary && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Star className="h-3 w-3 mr-1" />
+                                  Primary
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                            <p className="text-xs text-gray-500 mt-1">Category: {type.category}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          {!isPrimary && !type.isAdminOnly && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleSetPrimary(type.id)}
+                              disabled={adminAssignPersonTypeMutation.isPending}
+                              className="text-xs"
+                            >
+                              Set Primary
+                            </Button>
+                          )}
+                          
+                          {(!type.isAdminOnly || user?.isAdmin) && (
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handlePersonTypeToggle(type.id)}
+                              disabled={selfAssignPersonTypeMutation.isPending || adminAssignPersonTypeMutation.isPending}
+                              className="text-xs"
+                            >
+                              Remove
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  No person types assigned yet
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Self-Selectable Interests */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Express Your Interests
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Your selected types determine what features you can access in the platform.
+                  Select interests to receive relevant opportunities and notifications.
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-3">
-                {allPersonTypes.map((type) => {
+                {availablePersonTypes.filter(type => type.category === 'interest').map((type) => {
                   const isAssigned = assignedPersonTypes.includes(type.id);
-                  const isPrimary = primaryPersonType === type.id;
                   
                   return (
                     <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -578,41 +743,77 @@ export default function Profile() {
                         <Checkbox
                           checked={isAssigned}
                           onCheckedChange={() => handlePersonTypeToggle(type.id)}
-                          disabled={updatePersonTypesMutation.isPending}
+                          disabled={selfAssignPersonTypeMutation.isPending}
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <Badge className={getTypeColor(type.color)}>
                               {type.displayName}
                             </Badge>
-                            {isPrimary && (
-                              <Badge variant="outline" className="text-xs">
-                                <Star className="h-3 w-3 mr-1" />
-                                Primary
-                              </Badge>
-                            )}
                           </div>
                           <p className="text-xs text-gray-600 mt-1">{type.description}</p>
                         </div>
                       </div>
-                      
-                      {isAssigned && !isPrimary && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleSetPrimary(type.id)}
-                          disabled={updatePersonTypesMutation.isPending}
-                          className="text-xs"
-                        >
-                          Set Primary
-                        </Button>
-                      )}
                     </div>
                   );
                 })}
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          {/* Admin-Only Section */}
+          {user?.isAdmin && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Admin: Assign Roles
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Admin-only roles that can only be assigned by administrators.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="space-y-3">
+                  {allPersonTypes.filter(type => type.isAdminOnly).map((type) => {
+                    const isAssigned = assignedPersonTypes.includes(type.id);
+                    
+                    return (
+                      <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg bg-amber-50">
+                        <div className="flex items-center space-x-3">
+                          <Checkbox
+                            checked={isAssigned}
+                            onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                            disabled={adminAssignPersonTypeMutation.isPending}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <Badge className={getTypeColor(type.color)}>
+                                {type.displayName}
+                              </Badge>
+                              <Badge variant="destructive" className="text-xs">
+                                Admin Only
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Access Summary */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="p-3 bg-blue-50 rounded-lg">
                 <h4 className="font-semibold text-sm text-blue-800">Your Current Access:</h4>
                 <p className="text-sm text-blue-700 mt-1">{getUserAccessDescription()}</p>
               </div>

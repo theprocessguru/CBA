@@ -367,31 +367,42 @@ export const ADMIN_SIDEBAR_ITEMS: SidebarItem[] = [
 
 // Helper function to get sidebar items for a user
 export function getSidebarItemsForUser(user: any): SidebarItem[] {
-  if (user?.isAdmin) {
+  // Always return at least base items, even if user is null/undefined
+  if (!user) {
+    return [...BASE_SIDEBAR_ITEMS];
+  }
+
+  if (user.isAdmin) {
     return ADMIN_SIDEBAR_ITEMS;
   }
 
   const items: SidebarItem[] = [...BASE_SIDEBAR_ITEMS];
   
   // Add member segment specific items
-  if (user?.memberSegment === 'business_owner') {
+  if (user.memberSegment === 'business_owner') {
     const businessItems = ROLE_CONFIGS.business_owner.sidebarItems.filter(
       item => !BASE_SIDEBAR_ITEMS.find(base => base.id === item.id)
     );
     items.push(...businessItems);
   }
   
-  // Add role-specific items based on personTypes
-  if (user?.personTypes && Array.isArray(user.personTypes)) {
-    for (const personType of user.personTypes) {
-      if (personType && personType.name) {
-        const roleConfig = ROLE_CONFIGS[personType.name];
-        if (roleConfig) {
-          const roleItems = roleConfig.sidebarItems.filter(
-            item => !items.find(existing => existing.id === item.id)
-          );
-          items.push(...roleItems);
-        }
+  // Add role-specific items based on personTypes with comprehensive null safety
+  if (user.personTypes && Array.isArray(user.personTypes) && user.personTypes.length > 0) {
+    // Filter out null, undefined, or invalid personTypes
+    const validPersonTypes = user.personTypes.filter(
+      personType => personType && 
+                   typeof personType === 'object' && 
+                   personType.name && 
+                   typeof personType.name === 'string'
+    );
+    
+    for (const personType of validPersonTypes) {
+      const roleConfig = ROLE_CONFIGS[personType.name];
+      if (roleConfig && roleConfig.sidebarItems) {
+        const roleItems = roleConfig.sidebarItems.filter(
+          item => item && item.id && !items.find(existing => existing && existing.id === item.id)
+        );
+        items.push(...roleItems);
       }
     }
   }
@@ -401,19 +412,32 @@ export function getSidebarItemsForUser(user: any): SidebarItem[] {
 
 // Helper function to get dashboard title for a user
 export function getDashboardTitle(user: any): string {
-  if (user?.isAdmin) {
+  // Always return a fallback title if user is null/undefined
+  if (!user) {
+    return 'My Dashboard';
+  }
+
+  if (user.isAdmin) {
     return 'Admin Dashboard';
   }
   
-  if (user?.memberSegment === 'business_owner') {
+  if (user.memberSegment === 'business_owner') {
     return 'My Business Dashboard';
   }
   
-  if (user?.personTypes && user.personTypes.length > 0) {
-    const primaryRole = user.personTypes[0];
-    if (primaryRole && primaryRole.name) {
+  // Safe navigation for personTypes with comprehensive null checks
+  if (user.personTypes && Array.isArray(user.personTypes) && user.personTypes.length > 0) {
+    // Find the first valid personType
+    const primaryRole = user.personTypes.find(
+      personType => personType && 
+                   typeof personType === 'object' && 
+                   personType.name && 
+                   typeof personType.name === 'string'
+    );
+    
+    if (primaryRole) {
       const roleConfig = ROLE_CONFIGS[primaryRole.name];
-      if (roleConfig) {
+      if (roleConfig && roleConfig.displayName) {
         return `${roleConfig.displayName} Portal`;
       }
     }

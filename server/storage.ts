@@ -425,6 +425,7 @@ export interface IStorage {
   
   // Person Types operations
   listPersonTypes(): Promise<PersonType[]>;
+  listPersonTypesByCategory(category?: string, isAdminOnly?: boolean): Promise<PersonType[]>;
   getPersonTypeById(id: number): Promise<PersonType | undefined>;
   createPersonType(personType: InsertPersonType): Promise<PersonType>;
   updatePersonType(id: number, personType: Partial<InsertPersonType>): Promise<PersonType>;
@@ -2405,6 +2406,24 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(personTypes)
       .where(eq(personTypes.isActive, true))
+      .orderBy(asc(personTypes.priority), asc(personTypes.name));
+  }
+
+  async listPersonTypesByCategory(category?: string, isAdminOnly?: boolean): Promise<PersonType[]> {
+    const conditions = [eq(personTypes.isActive, true)];
+    
+    if (category) {
+      conditions.push(eq(personTypes.category, category));
+    }
+    
+    if (isAdminOnly !== undefined) {
+      conditions.push(eq(personTypes.isAdminOnly, isAdminOnly));
+    }
+    
+    return await db
+      .select()
+      .from(personTypes)
+      .where(and(...conditions))
       .orderBy(asc(personTypes.priority), asc(personTypes.name));
   }
 
