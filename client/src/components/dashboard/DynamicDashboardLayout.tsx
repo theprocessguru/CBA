@@ -151,9 +151,9 @@ const DynamicDashboardLayout = ({ children }: DynamicDashboardLayoutProps) => {
                 {userData?.personTypes && userData.personTypes.length > 0 && (
                   <div className="mb-3">
                     <div className="flex flex-wrap gap-1">
-                      {userData.personTypes.map((type: any, index: number) => (
+                      {userData.personTypes.filter(type => type && type.name).map((type: any, index: number) => (
                         <Badge key={index} variant="outline" className="text-xs" data-testid={`badge-role-${type.name}`}>
-                          {type.displayName}
+                          {type.displayName || type.name}
                         </Badge>
                       ))}
                     </div>
