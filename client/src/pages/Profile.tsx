@@ -21,42 +21,9 @@ import {
   type RoleComponentType
 } from "@/components/profile/roles";
 import { apiRequest } from "@/lib/queryClient";
+import { PersonType, UserPersonType, User as DbUser } from "@shared/schema";
 
-interface PersonType {
-  id: number;
-  name: string;
-  displayName: string;
-  description: string;
-  color: string;
-  icon: string;
-  priority: number;
-  isActive: boolean;
-}
-
-interface UserPersonType {
-  id: number;
-  userId: string;
-  personTypeId: number;
-  isPrimary: boolean;
-  assignedAt: string;
-  assignedBy: string;
-  notes?: string;
-}
-
-interface UserWithPersonTypes {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  company?: string;
-  bio?: string;
-  title?: string;
-  jobTitle?: string;
-  qrHandle?: string;
-  membershipTier: string;
-  membershipStatus: string;
-  isAdmin: boolean;
+interface UserWithPersonTypes extends DbUser {
   personTypes?: PersonType[];
   rolesData?: Record<string, any>;
 }
