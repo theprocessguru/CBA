@@ -55,7 +55,7 @@ export class OnboardingService {
         venue: "Croydon Conference Centre",
         badgeId: user.id.slice(0, 8).toUpperCase(),
         eventName: "AI Summit 2025",
-        eventDate: "March 28, 2025"
+        eventDate: "October 1st, 2025"
       };
 
       return {

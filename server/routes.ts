@@ -7854,8 +7854,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AI Summit Registration endpoint
   // Check user's AI Summit registration status
-  app.get('/api/my-ai-summit-status', isAuthenticated, async (req: any, res) => {
+  app.get('/api/my-ai-summit-status', async (req: any, res) => {
     try {
+      // Allow unauthenticated access - return default status if no user
+      if (!req.user || !req.user.email) {
+        return res.json({
+          isRegistered: false,
+          hasBadge: false,
+          registrationId: null,
+          badgeId: null,
+          participantType: null
+        });
+      }
+      
       const userEmail = req.user.email;
       
       // Check if user has an AI Summit registration
@@ -8108,7 +8119,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'vip': 'vip',
           'team': 'team_member',
           'media': 'media',
-          'attendee': 'attendee'
+          'attendee': 'attendee',
+          // Map basic participant types from simplified form to attendee
+          'resident': 'attendee',
+          'business_owner': 'attendee'
         };
         
         const personTypeName = typeMapping[participantType] || 'attendee';
