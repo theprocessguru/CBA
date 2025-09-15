@@ -80,6 +80,7 @@ const AISummit = () => {
   
   // Password visibility for simplified form
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   // Simplified registration form with only 7 fields
   const [registrationData, setRegistrationData] = useState({
     firstName: "",
@@ -2479,6 +2480,38 @@ const AISummit = () => {
                       </button>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">Password must be at least 8 characters long</p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="confirmPassword" data-testid="label-confirm-password">Confirm Password <span className="text-red-500">*</span></Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        data-testid="input-confirm-password"
+                        value={registrationData.confirmPassword || ''}
+                        onChange={(e) => setRegistrationData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        required
+                        placeholder="Re-enter your password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        data-testid="button-toggle-confirm-password"
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4 text-gray-400" />
+                        ) : (
+                          <Eye className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                    {registrationData.password && registrationData.confirmPassword && registrationData.password !== registrationData.confirmPassword && (
+                      <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                    )}
                   </div>
 
                   <div className="space-y-3">
