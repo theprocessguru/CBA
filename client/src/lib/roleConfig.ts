@@ -384,12 +384,14 @@ export function getSidebarItemsForUser(user: any): SidebarItem[] {
   // Add role-specific items based on personTypes
   if (user?.personTypes && Array.isArray(user.personTypes)) {
     for (const personType of user.personTypes) {
-      const roleConfig = ROLE_CONFIGS[personType.name];
-      if (roleConfig) {
-        const roleItems = roleConfig.sidebarItems.filter(
-          item => !items.find(existing => existing.id === item.id)
-        );
-        items.push(...roleItems);
+      if (personType && personType.name) {
+        const roleConfig = ROLE_CONFIGS[personType.name];
+        if (roleConfig) {
+          const roleItems = roleConfig.sidebarItems.filter(
+            item => !items.find(existing => existing.id === item.id)
+          );
+          items.push(...roleItems);
+        }
       }
     }
   }
@@ -409,9 +411,11 @@ export function getDashboardTitle(user: any): string {
   
   if (user?.personTypes && user.personTypes.length > 0) {
     const primaryRole = user.personTypes[0];
-    const roleConfig = ROLE_CONFIGS[primaryRole.name];
-    if (roleConfig) {
-      return `${roleConfig.displayName} Portal`;
+    if (primaryRole && primaryRole.name) {
+      const roleConfig = ROLE_CONFIGS[primaryRole.name];
+      if (roleConfig) {
+        return `${roleConfig.displayName} Portal`;
+      }
     }
   }
   

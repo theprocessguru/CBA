@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { ProfileCompletionWidget } from "@/components/ui/ProfileCompletionWidget";
 import { 
   LogOut,
   Menu,
@@ -42,50 +42,7 @@ const DynamicDashboardLayout = ({ children }: DynamicDashboardLayoutProps) => {
   const sidebarItems = getSidebarItemsForUser(userData);
   const dashboardTitle = getDashboardTitle(userData);
 
-  // Calculate profile completion
-  const calculateProfileCompletion = (userData: any) => {
-    if (!userData) return 0;
-    
-    let completed = 0;
-    let total = 0;
-    
-    // Basic profile fields
-    const basicFields = ['firstName', 'lastName', 'phone', 'bio'];
-    basicFields.forEach(field => {
-      total++;
-      if (userData[field]) completed++;
-    });
-    
-    // Member segment
-    total++;
-    if (userData.memberSegment) completed++;
-    
-    // Person types
-    total++;
-    if (userData.personTypes && userData.personTypes.length > 0) completed++;
-    
-    // Address fields for residents
-    if (userData.memberSegment === 'resident') {
-      const addressFields = ['homeAddress', 'homeCity', 'homePostcode'];
-      addressFields.forEach(field => {
-        total++;
-        if (userData[field]) completed++;
-      });
-    }
-    
-    // Business fields for business owners
-    if (userData.memberSegment === 'business_owner') {
-      const businessFields = ['company', 'jobTitle'];
-      businessFields.forEach(field => {
-        total++;
-        if (userData[field]) completed++;
-      });
-    }
-    
-    return Math.round((completed / total) * 100);
-  };
-
-  const profileCompletion = calculateProfileCompletion(userData);
+  // Enhanced profile completion now handled by ProfileCompletionWidget
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col">
@@ -203,23 +160,13 @@ const DynamicDashboardLayout = ({ children }: DynamicDashboardLayoutProps) => {
                   </div>
                 )}
                 
-                {/* Profile Completion */}
-                <div className="mb-3">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-neutral-600">Profile Complete</span>
-                    <span className="text-xs text-neutral-600" data-testid="text-profile-completion">
-                      {profileCompletion}%
-                    </span>
-                  </div>
-                  <Progress value={profileCompletion} className="h-2" />
-                  {profileCompletion < 100 && (
-                    <Link href="/profile">
-                      <a className="text-xs text-primary hover:underline mt-1 inline-block" data-testid="link-complete-profile">
-                        Complete your profile →
-                      </a>
-                    </Link>
-                  )}
-                </div>
+                {/* Enhanced Profile Completion */}
+                <ProfileCompletionWidget 
+                  userData={userData}
+                  variant="sidebar"
+                  showNextSteps={false}
+                  showSections={false}
+                />
               </div>
             )}
             
