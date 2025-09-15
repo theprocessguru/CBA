@@ -8091,15 +8091,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         // Use provided participant type or default to 'attendee'
         const actualParticipantType = participantType || 'attendee';
-        badge = await badgeService.createBadge({
-          participantType: actualParticipantType,
-          participantId: registration.id.toString(),
-          name,
-          email,
-          company: company || undefined,
-          jobTitle: jobTitle || undefined,
-          customRole: customRole || undefined
-        });
+        
+        // Call the correct badge creation method based on participant type
+        switch (actualParticipantType) {
+          case 'attendee':
+            badge = await badgeService.createAttendeeBadge(registration.id.toString(), {
+              name,
+              email,
+              company: company || undefined,
+              jobTitle: jobTitle || undefined
+            });
+            break;
+          case 'exhibitor':
+            badge = await badgeService.createExhibitorBadge(registration.id.toString(), {
+              contactName: name,
+              contactEmail: email,
+              companyName: company || undefined,
+              contactJobTitle: jobTitle || undefined
+            });
+            break;
+          case 'speaker':
+            badge = await badgeService.createSpeakerBadge(registration.id.toString(), {
+              name,
+              email,
+              company: company || undefined,
+              jobTitle: jobTitle || undefined
+            });
+            break;
+          case 'volunteer':
+            badge = await badgeService.createVolunteerBadge(registration.id.toString(), {
+              name,
+              email,
+              role: jobTitle || customRole || 'Volunteer'
+            });
+            break;
+          case 'team':
+            badge = await badgeService.createTeamBadge(registration.id.toString(), {
+              name,
+              email,
+              role: jobTitle || customRole || 'Team Member'
+            });
+            break;
+          default:
+            // Default to attendee badge for any other participant type
+            badge = await badgeService.createAttendeeBadge(registration.id.toString(), {
+              name,
+              email,
+              company: company || undefined,
+              jobTitle: jobTitle || undefined
+            });
+        }
+        console.log(`Badge created successfully for ${email}: ${badge.badgeId}`);
       } catch (badgeError) {
         console.error("Failed to create attendee badge:", badgeError);
         // Don't fail the registration if badge creation fails
