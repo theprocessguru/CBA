@@ -455,7 +455,7 @@ const AISummit = () => {
       if (!data.email?.trim()) {
         throw new Error("Email address is required");
       }
-      if (!data.phone?.trim()) {
+      if (!data.mobileNumber?.trim()) {
         throw new Error("Phone number is required for event updates and safety notifications");
       }
       
