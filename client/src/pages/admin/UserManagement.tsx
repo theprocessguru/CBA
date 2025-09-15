@@ -979,7 +979,7 @@ const UserManagement = () => {
                             <div className="flex items-center space-x-3">
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
-                                  <Badge className={getTypeColor(type.color)}>
+                                  <Badge className={getTypeColor(type.color ?? undefined)}>
                                     {type.displayName}
                                   </Badge>
                                   {type.isAdminOnly && (
@@ -1045,13 +1045,13 @@ const UserManagement = () => {
                         <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg bg-amber-50">
                           <div className="flex items-center space-x-3">
                             <Checkbox
-                              checked={false}
+                              checked={userPersonTypes.some(upt => upt.personTypeId === type.id)}
                               onCheckedChange={() => handlePersonTypeToggle(type.id)}
                               disabled={assignPersonTypeMutation.isPending}
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <Badge className={getTypeColor(type.color)}>
+                                <Badge className={getTypeColor(type.color ?? undefined)}>
                                   {type.displayName}
                                 </Badge>
                                 <Badge variant="destructive" className="text-xs">
@@ -1074,13 +1074,13 @@ const UserManagement = () => {
                         <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center space-x-3">
                             <Checkbox
-                              checked={false}
+                              checked={userPersonTypes.some(upt => upt.personTypeId === type.id)}
                               onCheckedChange={() => handlePersonTypeToggle(type.id)}
                               disabled={assignPersonTypeMutation.isPending}
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <Badge className={getTypeColor(type.color)}>
+                                <Badge className={getTypeColor(type.color ?? undefined)}>
                                   {type.displayName}
                                 </Badge>
                               </div>
