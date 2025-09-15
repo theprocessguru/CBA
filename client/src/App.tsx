@@ -105,6 +105,7 @@ import PersonTypes from "@/pages/admin/person-types";
 import PersonTypeImport from "@/pages/admin/PersonTypeImport";
 import Connections from "@/pages/Connections";
 import Profile from "@/pages/Profile";
+import ResidentProfile from "@/pages/ResidentProfile";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
@@ -516,6 +517,13 @@ function Router() {
         <MainLayout>
           <Profile />
         </MainLayout>
+      </Route>
+      <Route path="/profile">
+        <ProtectedRoute>
+          <MainLayout>
+            <ResidentProfile />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       <Route path="/admin/ghl">
         <MainLayout>

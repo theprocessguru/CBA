@@ -188,7 +188,7 @@ export default function Profile() {
   };
 
   const getTypeColor = (color: string) => {
-    const colorMap = {
+    const colorMap: Record<string, string> = {
       blue: "bg-blue-100 text-blue-800",
       indigo: "bg-indigo-100 text-indigo-800",
       green: "bg-green-100 text-green-800",
