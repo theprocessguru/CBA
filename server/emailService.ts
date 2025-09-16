@@ -790,6 +790,7 @@ export class EmailService {
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
+        bcc: this.getAdminEmail(), // BCC admin on template-based emails
         subject: subject,
         html: htmlContent,
       };
@@ -979,6 +980,7 @@ export class EmailService {
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
+        bcc: this.getAdminEmail(), // BCC admin on admin welcome emails
         subject: `Welcome to CBA Admin Portal - Your Administrator Access`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -1086,6 +1088,7 @@ Croydon Business Association
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
+        bcc: this.getAdminEmail(), // BCC admin on badge emails
         subject: `Your AI Summit 2025 Badge - Ready to Print`,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -1548,6 +1551,7 @@ Croydon Business Association
       await this.transporter!.sendMail({
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to,
+        bcc: this.getAdminEmail(), // BCC admin on welcome emails
         subject: 'Welcome to Croydon Business Association',
         html: htmlContent,
       });
@@ -1570,6 +1574,7 @@ Croydon Business Association
       await this.transporter!.sendMail({
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to,
+        bcc: this.getAdminEmail(), // BCC admin on notification emails
         subject,
         html,
       });
