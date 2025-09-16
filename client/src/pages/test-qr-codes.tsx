@@ -8,53 +8,53 @@ import { Helmet } from 'react-helmet';
 export default function TestQRCodesPage() {
   const testUsers = [
     {
-      name: "John Smith",
-      email: "john@example.com",
-      qrHandle: "CBA-JOHN-2025",
-      participantType: "attendee",
-      company: "Smith & Associates"
-    },
-    {
-      name: "Sarah Johnson", 
-      email: "sarah@techcorp.com",
-      qrHandle: "CBA-SARAH-2025",
-      participantType: "exhibitor",
-      company: "TechCorp Solutions"
-    },
-    {
-      name: "Dr. Michael Brown",
-      email: "mbrown@university.edu", 
-      qrHandle: "CBA-MICHAEL-2025",
-      participantType: "speaker",
-      company: "London University"
-    },
-    {
-      name: "Emma Wilson",
-      email: "emma@volunteer.org",
-      qrHandle: "CBA-EMMA-2025", 
-      participantType: "volunteer",
-      company: "Community Volunteers"
-    },
-    {
-      name: "Alex Thompson",
-      email: "alex@cbateam.org",
-      qrHandle: "CBA-ALEX-2025",
+      name: "Admin User",
+      email: "admin@croydonba.org.uk",
+      qrHandle: "ADMIN-CBA-2025",
       participantType: "team",
-      company: "CBA Staff"
+      company: "CBA"
     },
     {
-      name: "Test Volunteer",
-      email: "volunteer@test.com",
-      qrHandle: "VOLUNTEER-TEST-2025",
-      participantType: "volunteer",
-      company: "London South Bank University - Student"
+      name: "Ben Admin", 
+      email: "ben@croydonba.org.uk",
+      qrHandle: "BEN-CBA-2025",
+      participantType: "attendee",
+      company: "CBA"
     },
     {
-      name: "Victoria Collins",
-      email: "vcollins@mayor.gov.uk",
-      qrHandle: "CBA-VICTORIA-2025",
-      participantType: "special_guest",
-      company: "Croydon Council"
+      name: "Steven Ball - The Process Guru",
+      email: "steve@croydonba.org.uk", 
+      qrHandle: "theprocessguru",
+      participantType: "speaker",
+      company: "The Process Guru"
+    },
+    {
+      name: "Ayesha Rehmat",
+      email: "ayesha@croydonba.org.uk",
+      qrHandle: "AYESHA -CBA-2025", 
+      participantType: "team",
+      company: "CBA"
+    },
+    {
+      name: "Oumesh Sauba",
+      email: "oumesh@croydonba.org.uk",
+      qrHandle: "OUMESH-CBA-2025",
+      participantType: "team",
+      company: "CBA"
+    },
+    {
+      name: "Antonio Lewis",
+      email: "info@tvox.uk",
+      qrHandle: "TVOX-CREATIVE-AGENCY",
+      participantType: "attendee",
+      company: "TVOX Creative Agency"
+    },
+    {
+      name: "Oumesh Sauba",
+      email: "oumesh.sauba@gmail.com",
+      qrHandle: "mytsoftware",
+      participantType: "attendee",
+      company: "MYT Software"
     }
   ];
 
@@ -174,7 +174,7 @@ export default function TestQRCodesPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
               <h3 className="font-medium text-blue-900 mb-2">Alternative Testing Method:</h3>
               <p className="text-blue-800 text-sm">
-                If camera scanning doesn't work, you can manually enter any of the QR handles (like "CBA-JOHN-2025") 
+                If camera scanning doesn't work, you can manually enter any of the QR handles (like "ADMIN-CBA-2025" or "theprocessguru") 
                 into the manual entry field to test the lookup functionality.
               </p>
             </div>
