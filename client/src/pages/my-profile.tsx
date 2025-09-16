@@ -80,7 +80,7 @@ const MyProfile = () => {
     setProfileData({
       firstName: "John",
       lastName: "Tester",
-      email: profile?.email || "admin@test.com",
+      email: (profile as any)?.email || "admin@test.com",
       phone: "+44 7700 900123",
       company: "Test Business Solutions Ltd",
       jobTitle: "Senior Business Analyst",
@@ -118,14 +118,14 @@ const MyProfile = () => {
   const handleCancel = () => {
     if (profile) {
       setProfileData({
-        firstName: profile.firstName || "",
-        lastName: profile.lastName || "",
-        email: profile.email || "",
-        phone: profile.phone || "",
-        company: profile.company || "",
-        jobTitle: profile.jobTitle || "",
-        bio: profile.bio || "",
-        isProfileHidden: profile.isProfileHidden || false
+        firstName: (profile as any).firstName || "",
+        lastName: (profile as any).lastName || "",
+        email: (profile as any).email || "",
+        phone: (profile as any).phone || "",
+        company: (profile as any).company || "",
+        jobTitle: (profile as any).jobTitle || "",
+        bio: (profile as any).bio || "",
+        isProfileHidden: (profile as any).isProfileHidden || false
       });
     }
     setIsEditing(false);

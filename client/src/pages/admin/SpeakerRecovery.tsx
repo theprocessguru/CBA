@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Users, UserCheck, Calendar, AlertCircle, Zap } from "lucide-react";
 import { Link } from "wouter";
 
@@ -27,6 +28,7 @@ interface PotentialSpeaker {
 }
 
 export default function SpeakerRecovery() {
+  const { user } = useAuth();
   const [selectedAttendee, setSelectedAttendee] = useState<PotentialSpeaker | null>(null);
   const [convertForm, setConvertForm] = useState({
     talkTitle: '',
@@ -111,6 +113,29 @@ export default function SpeakerRecovery() {
     convertToSpeakerMutation.mutate({
       attendeeId: selectedAttendee.id,
       ...convertForm
+    });
+  };
+
+  // Fill test data function for admin convenience
+  const fillSpeakerTestData = () => {
+    if (!user?.isAdmin || !selectedAttendee) return;
+    
+    setConvertForm({
+      talkTitle: 'AI Innovation in Modern Business: Practical Applications and Future Trends',
+      talkDescription: 'This comprehensive session explores how artificial intelligence is transforming business operations across industries. We\'ll examine real-world case studies, discuss implementation strategies, and look ahead to emerging AI technologies that will shape the future of work. Perfect for business leaders looking to harness AI for competitive advantage.',
+      talkDuration: '45',
+      audienceLevel: 'Intermediate',
+      sessionType: 'talk',
+      bio: `${selectedAttendee.name} is a seasoned professional with extensive experience in technology and business transformation. With a background in ${selectedAttendee.company || 'leading organizations'}, they specialize in implementing innovative solutions that drive efficiency and growth. As a thought leader in AI applications, they bring practical insights from real-world projects and a passion for sharing knowledge with the business community.`,
+      website: selectedAttendee.company ? `https://www.${selectedAttendee.company.toLowerCase().replace(/\s+/g, '')}.com` : 'https://www.example.com',
+      linkedIn: `https://linkedin.com/in/${selectedAttendee.name.toLowerCase().replace(/\s+/g, '-')}`,
+      speakingExperience: 'Experienced speaker with presentations at industry conferences and corporate events',
+      previousSpeaking: true,
+      techRequirements: 'Projector, microphone, laptop connection (HDMI), internet access',
+      motivationToSpeak: 'Passionate about sharing practical AI knowledge and helping businesses understand how to implement these technologies effectively for real business value.',
+      keyTakeaways: '• Understand key AI applications in business contexts\n• Learn practical implementation strategies\n• Discover emerging trends and future opportunities\n• Get actionable insights for your organization',
+      interactiveElements: true,
+      handoutsProvided: true
     });
   };
 
@@ -237,6 +262,22 @@ export default function SpeakerRecovery() {
             <CardContent>
               {selectedAttendee ? (
                 <div className="space-y-4">
+                  {/* Admin Fill Data Button */}
+                  {user?.isAdmin && (
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={fillSpeakerTestData}
+                        className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                        title="Fill speaker form with realistic test data for testing purposes"
+                        data-testid="button-fill-speaker-data"
+                      >
+                        🧪 Fill with Test Data
+                      </Button>
+                    </div>
+                  )}
+                  
                   {/* Basic Info Display */}
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <p className="font-medium">{selectedAttendee.name}</p>

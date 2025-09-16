@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { Mail, Settings, CheckCircle, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,6 +24,7 @@ interface EmailConfig {
 
 const EmailSettings = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [config, setConfig] = useState<EmailConfig>({
     host: '',
     port: 587,
@@ -115,6 +117,22 @@ const EmailSettings = () => {
     retry: false,
   });
 
+  // Fill test data function for admin convenience
+  const fillEmailTestData = () => {
+    if (!user?.isAdmin) return;
+    
+    setConfig({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      user: 'your-email@gmail.com',
+      password: 'your-app-password',
+      fromEmail: 'noreply@croydonba.org.uk',
+      fromName: 'Croydon Business Association',
+    });
+    setTestEmail('admin@croydonba.org.uk');
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     configureEmailMutation.mutate(config);
@@ -179,6 +197,22 @@ const EmailSettings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Admin Fill Data Button */}
+                {user?.isAdmin && (
+                  <div className="mb-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={fillEmailTestData}
+                      className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                      title="Fill form with Gmail SMTP test configuration"
+                      data-testid="button-fill-email-data"
+                    >
+                      🧪 Fill with Gmail Test Config
+                    </Button>
+                  </div>
+                )}
+                
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
