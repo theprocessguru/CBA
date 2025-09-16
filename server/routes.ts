@@ -2778,6 +2778,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send AI Summit 2025 welcome email to specific user (admin only)
+  app.post('/api/admin/email/send-ai-summit-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: "Email address is required" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated AI Summit welcome email for ${email}`);
+
+      // Find the user in the database
+      const [user] = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          participantType: users.participantType
+        })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get the attendee template from the database
+      const [template] = await db
+        .select()
+        .from(emailTemplates)
+        .where(
+          and(
+            eq(emailTemplates.personType, "attendee"),
+            eq(emailTemplates.isActive, true)
+          )
+        )
+        .limit(1);
+
+      if (!template) {
+        return res.status(404).json({ message: "AI Summit attendee email template not found" });
+      }
+
+      // Generate badge ID from user ID (first 8 characters uppercase)
+      const badgeId = user.id.substring(0, 8).toUpperCase();
+
+      // Prepare template variables
+      const templateVariables = {
+        '{{firstName}}': user.firstName || 'Member',
+        '{{lastName}}': user.lastName || '',
+        '{{fullName}}': `${user.firstName || 'Member'} ${user.lastName || ''}`.trim(),
+        '{{email}}': user.email,
+        '{{badgeId}}': badgeId,
+        '{{eventName}}': 'AI Summit 2025',
+        '{{eventDate}}': 'October 1st, 2025',
+        '{{venue}}': 'London South Bank University (LSBU) Croydon Campus'
+      };
+
+      // Replace variables in subject and content
+      let subject = template.subject;
+      let htmlContent = template.htmlContent;
+
+      for (const [variable, value] of Object.entries(templateVariables)) {
+        const regex = new RegExp(variable.replace(/[{}]/g, '\\$&'), 'g');
+        subject = subject.replace(regex, value);
+        htmlContent = htmlContent.replace(regex, value);
+      }
+
+      // Send the email
+      await emailService.sendEmail(
+        user.email,
+        subject,
+        htmlContent,
+        'ai_summit_welcome',
+        user.id
+      );
+
+      console.log(`AI Summit welcome email sent successfully to ${user.email}`);
+
+      res.json({
+        success: true,
+        message: `AI Summit welcome email sent successfully to ${user.email}`,
+        userDetails: {
+          name: templateVariables['{{fullName}}'],
+          email: user.email,
+          badgeId: badgeId,
+          participantType: user.participantType
+        }
+      });
+
+    } catch (error) {
+      console.error("Error sending AI Summit welcome email:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Failed to send AI Summit welcome email",
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  });
+
+
   // Get email logs and statistics (admin only)
   app.get('/api/admin/email/logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
