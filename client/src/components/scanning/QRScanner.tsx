@@ -59,11 +59,26 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
         
         const qrScanner = new QrScanner(
           videoRef.current!,
-          (result) => handleScanResult(result.data),
+          (result) => {
+            console.log('QR Code detected:', result.data);
+            handleScanResult(result.data);
+          },
           {
             highlightScanRegion: true,
             highlightCodeOutline: true,
             preferredCamera: 'environment', // Use back camera on mobile
+            maxScansPerSecond: 25, // Increase scan frequency for better detection
+            calculateScanRegion: (video) => {
+              // Use a larger scan region for better detection
+              const smallestDimension = Math.min(video.videoWidth, video.videoHeight);
+              const scanRegionSize = Math.round(0.7 * smallestDimension);
+              return {
+                x: Math.round((video.videoWidth - scanRegionSize) / 2),
+                y: Math.round((video.videoHeight - scanRegionSize) / 2),
+                width: scanRegionSize,
+                height: scanRegionSize,
+              };
+            },
           }
         );
         
