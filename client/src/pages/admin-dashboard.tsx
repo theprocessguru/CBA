@@ -24,7 +24,9 @@ import {
   Upload,
   Send,
   Mail,
-  Sparkles
+  Sparkles,
+  QrCode,
+  ScanLine
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -237,6 +239,18 @@ function AdminSidebar() {
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Send size={18} />
               <span>Onboarding</span>
+            </div>
+          </Link>
+          <Link href="/organizer-scanner">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-green-50 text-gray-700 hover:text-green-700">
+              <ScanLine size={18} />
+              <span>Event Scanner</span>
+            </div>
+          </Link>
+          <Link href="/test-qr-codes">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-700">
+              <QrCode size={18} />
+              <span>Test QR Codes</span>
             </div>
           </Link>
         </div>
