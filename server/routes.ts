@@ -720,6 +720,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isAdmin: adminUser.isAdmin
         }
       });
+
+      // Also set session impersonation data for session-based authentication
+      const session = req.session as any;
+      session.impersonating = true;
+      session.impersonatedUserId = targetUser.id;
+      session.originalAdmin = {
+        id: adminUser.id,
+        email: adminUser.email,
+        firstName: adminUser.firstName,
+        lastName: adminUser.lastName,
+        isAdmin: adminUser.isAdmin
+      };
       
       console.log(`Admin ${adminUser.email} is now impersonating ${targetUser.email}`);
         
@@ -756,6 +768,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Clear impersonation data
       impersonationData.delete(authToken);
+
+      // Also clear session impersonation data
+      const session = req.session as any;
+      session.impersonating = false;
+      delete session.impersonatedUserId;
+      delete session.originalAdmin;
       
       console.log(`Exited impersonation, returning to admin: ${impersonation.originalAdmin.email}`);
       

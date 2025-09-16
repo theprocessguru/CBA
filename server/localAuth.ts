@@ -566,6 +566,21 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
+  // Check if session has impersonation data
+  if (session.impersonating && session.impersonatedUserId) {
+    // We're impersonating - use impersonated user instead of session user
+    const impersonatedUser = await storage.getUser(session.impersonatedUserId);
+    if (impersonatedUser) {
+      req.user = {
+        ...impersonatedUser,
+        isImpersonating: true,
+        originalAdmin: session.originalAdmin
+      };
+      console.log("Authenticated via session but impersonating:", impersonatedUser.email);
+      return next();
+    }
+  }
+
   // Fetch fresh user data from database to ensure we have current admin status
   const user = await storage.getUser(session.userId);
   if (!user) {
@@ -573,15 +588,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // Attach full user data including isAdmin flag and impersonation info
-  req.user = {
-    ...user,
-    isImpersonating: session.impersonating || false,
-    originalAdmin: session.originalAdmin || null
-  };
+  // Normal session auth - no impersonation
+  req.user = user;
   console.log("Authenticated via session:", user.id, user.email);
-  if (session.impersonating) {
-    console.log("Impersonating user, original admin:", session.originalAdmin?.email);
-  }
   next();
 };
