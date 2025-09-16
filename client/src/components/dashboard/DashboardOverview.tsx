@@ -80,6 +80,21 @@ const DashboardOverview = () => {
   
   // Determine what dashboard content to show based on user types
   const renderPersonalizedDashboard = () => {
+    // Prioritize based on primary type first, then fallback to any type
+    if (primaryType === 'volunteer') {
+      return renderVolunteerDashboard();
+    }
+    if (primaryType === 'resident') {
+      return renderResidentDashboard();
+    }
+    if (primaryType === 'student') {
+      return renderStudentDashboard();
+    }
+    if (primaryType === 'business') {
+      return renderBusinessDashboard();
+    }
+    
+    // Fallback logic for users without clear primary type
     // Volunteers get volunteer-specific dashboard
     if (hasVolunteerType && !hasBusinessType) {
       return renderVolunteerDashboard();
@@ -95,8 +110,13 @@ const DashboardOverview = () => {
       return renderStudentDashboard();
     }
     
-    // Business users or mixed types get business dashboard
-    return renderBusinessDashboard();
+    // Business users get business dashboard
+    if (hasBusinessType) {
+      return renderBusinessDashboard();
+    }
+    
+    // Final fallback - default to resident dashboard for everyone else
+    return renderResidentDashboard();
   };
 
   const renderVolunteerDashboard = () => (
@@ -398,24 +418,28 @@ const DashboardOverview = () => {
       <div>
         <h4 className="font-medium text-neutral-900 mb-4">Quick Actions</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Link href="/dashboard/business-profile">
+          <Link href={hasBusinessType ? "/dashboard/business-profile" : "/profile"}>
             <Button className="w-full justify-start" variant="outline">
               <Building className="mr-2 h-4 w-4" />
               Update Profile
             </Button>
           </Link>
-          <Link href="/dashboard/products-services">
-            <Button className="w-full justify-start" variant="outline">
-              <Box className="mr-2 h-4 w-4" />
-              Add Products
-            </Button>
-          </Link>
-          <Link href="/dashboard/special-offers">
-            <Button className="w-full justify-start" variant="outline">
-              <Tag className="mr-2 h-4 w-4" />
-              Create Offer
-            </Button>
-          </Link>
+          {hasBusinessType && (
+            <Link href="/dashboard/products-services">
+              <Button className="w-full justify-start" variant="outline">
+                <Box className="mr-2 h-4 w-4" />
+                Add Products
+              </Button>
+            </Link>
+          )}
+          {hasBusinessType && (
+            <Link href="/dashboard/special-offers">
+              <Button className="w-full justify-start" variant="outline">
+                <Tag className="mr-2 h-4 w-4" />
+                Create Offer
+              </Button>
+            </Link>
+          )}
           <Link href="/badge-scanner">
             <Button className="w-full justify-start" variant="outline">
               <QrCode className="mr-2 h-4 w-4" />

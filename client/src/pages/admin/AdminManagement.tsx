@@ -55,7 +55,20 @@ export default function AdminManagement() {
   const { data: admins, isLoading } = useQuery({
     queryKey: ['/api/admin/users?status=active'],
     queryFn: async () => {
-      const response = await fetch('/api/admin/users?status=active');
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add auth token if available (for Replit environment)
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
+      const response = await fetch('/api/admin/users?status=active', {
+        credentials: 'include',
+        headers,
+      });
       if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
       // Filter to show only admins
