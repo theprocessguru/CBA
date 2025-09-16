@@ -99,8 +99,8 @@ export async function setupLocalAuth(app: Express) {
         personTypeIds = [] 
       } = req.body;
 
-      if (!email || !password || !phone || !homeAddress || !homeCity || !homePostcode) {
-        return res.status(400).json({ message: "Email, password, phone number, and home address are required" });
+      if (!email || !password || !firstName || !lastName || !phone || !homeAddress || !homeCity || !homePostcode) {
+        return res.status(400).json({ message: "Email, password, first name, last name, phone number, and home address are required" });
       }
       
       // Basic email validation

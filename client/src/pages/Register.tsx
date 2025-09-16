@@ -170,6 +170,65 @@ export default function Register() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!formData.firstName?.trim()) {
+      toast({
+        title: "First name required",
+        description: "Please enter your first name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.lastName?.trim()) {
+      toast({
+        title: "Last name required", 
+        description: "Please enter your last name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.phone?.trim()) {
+      toast({
+        title: "Phone number required",
+        description: "Please enter your phone number for event updates and safety notifications.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.email?.trim()) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate phone number format
+    const cleanPhone = formData.phone.replace(/[\s\-\(\)\+]/g, '');
+    if (cleanPhone.length < 10 || !/^\d+$/.test(cleanPhone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Please provide a valid phone number with at least 10 digits.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: "Passwords don't match",
@@ -179,10 +238,10 @@ export default function Register() {
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       toast({
         title: "Password too short",
-        description: "Password must be at least 6 characters long.",
+        description: "Password must be at least 8 characters long.",
         variant: "destructive",
       });
       return;

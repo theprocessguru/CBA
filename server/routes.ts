@@ -8124,7 +8124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email,
           company: company || null,
           jobTitle: jobTitle || null,
-          phoneNumber: phoneNumber || null,
+          phoneNumber: phoneNumber,
           businessType: businessType || null,
           aiInterest: aiInterest || null,
           accessibilityNeeds: accessibilityNeeds || null,

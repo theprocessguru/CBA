@@ -767,6 +767,54 @@ const AISummit = () => {
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required fields
+    if (!registrationData.firstName?.trim()) {
+      toast({
+        title: "First Name Required",
+        description: "Please enter your first name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!registrationData.lastName?.trim()) {
+      toast({
+        title: "Last Name Required", 
+        description: "Please enter your last name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!registrationData.email?.trim()) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!registrationData.mobileNumber?.trim()) {
+      toast({
+        title: "Mobile Number Required",
+        description: "Please enter your mobile number for SMS updates and emergency contact.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate phone number format  
+    const cleanPhone = registrationData.mobileNumber.replace(/[\s\-\(\)\+]/g, '');
+    if (cleanPhone.length < 10 || !/^\d+$/.test(cleanPhone)) {
+      toast({
+        title: "Invalid Mobile Number",
+        description: "Please provide a valid mobile number with at least 10 digits.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Validate passwords match
     if (registrationData.password !== registrationData.confirmPassword) {
       toast({
