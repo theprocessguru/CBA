@@ -889,7 +889,7 @@ export const cbaEvents = pgTable("cba_events", {
   eventName: varchar("event_name").notNull(),
   eventSlug: varchar("event_slug").notNull(), // URL-friendly identifier
   description: text("description"),
-  eventType: varchar("event_type").notNull(), // workshop, networking, summit, webinar, social
+  eventType: varchar("event_type").notNull(), // workshop, networking, summit, webinar, social, meeting, training, meetup, panel, conference
   eventDate: date("event_date").notNull(),
   startTime: time("start_time").notNull(),
   endTime: time("end_time").notNull(),
@@ -2291,3 +2291,79 @@ export const insertOrganizationMembershipSchema = createInsertSchema(organizatio
 
 export type InsertOrganizationMembership = z.infer<typeof insertOrganizationMembershipSchema>;
 export type OrganizationMembership = typeof organizationMemberships.$inferSelect;
+
+// In-app notifications system
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  type: varchar("type").notNull(), // info, warning, success, error, reminder, announcement
+  category: varchar("category").notNull(), // event_reminder, meeting_reminder, general, admin_message, system
+  isRead: boolean("is_read").default(false),
+  isArchived: boolean("is_archived").default(false),
+  priority: varchar("priority").default("normal"), // low, normal, high, urgent
+  actionUrl: varchar("action_url"), // Optional URL for notification action
+  actionText: varchar("action_text"), // Text for action button
+  metadata: jsonb("metadata"), // Additional data like event ID, meeting ID, etc.
+  scheduledFor: timestamp("scheduled_for"), // For scheduled notifications
+  sentAt: timestamp("sent_at"),
+  expiresAt: timestamp("expires_at"), // Auto-archive after this date
+  createdBy: varchar("created_by").references(() => users.id), // Admin who created it
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications, {
+  userId: z.string().min(1, "User ID is required"),
+  title: z.string().min(1, "Title is required"),
+  message: z.string().min(1, "Message is required"),
+  type: z.enum(["info", "warning", "success", "error", "reminder", "announcement"]),
+  category: z.enum(["event_reminder", "meeting_reminder", "general", "admin_message", "system"]),
+  isRead: z.boolean().default(false),
+  isArchived: z.boolean().default(false),
+  priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
+  actionUrl: z.string().url().optional(),
+  actionText: z.string().optional(),
+  metadata: z.any().optional(),
+  scheduledFor: z.date().optional(),
+  sentAt: z.date().optional(),
+  expiresAt: z.date().optional(),
+  createdBy: z.string().optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type Notification = typeof notifications.$inferSelect;
+
+// Notification preferences for users
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  emailNotifications: boolean("email_notifications").default(true),
+  inAppNotifications: boolean("in_app_notifications").default(true),
+  eventReminders: boolean("event_reminders").default(true),
+  meetingReminders: boolean("meeting_reminders").default(true),
+  adminMessages: boolean("admin_messages").default(true),
+  systemNotifications: boolean("system_notifications").default(true),
+  reminderAdvanceTime: integer("reminder_advance_time").default(24), // hours before event
+  dailyDigest: boolean("daily_digest").default(false),
+  weeklyDigest: boolean("weekly_digest").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertNotificationPreferencesSchema = createInsertSchema(notificationPreferences, {
+  userId: z.string().min(1, "User ID is required"),
+  emailNotifications: z.boolean().default(true),
+  inAppNotifications: z.boolean().default(true),
+  eventReminders: z.boolean().default(true),
+  meetingReminders: z.boolean().default(true),
+  adminMessages: z.boolean().default(true),
+  systemNotifications: z.boolean().default(true),
+  reminderAdvanceTime: z.number().min(1).max(168).default(24), // 1 hour to 1 week
+  dailyDigest: z.boolean().default(false),
+  weeklyDigest: z.boolean().default(true),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
+export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
