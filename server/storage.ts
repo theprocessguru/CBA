@@ -124,6 +124,12 @@ import {
   organizationMemberships,
   type OrganizationMembership,
   type InsertOrganizationMembership,
+  notifications,
+  type Notification,
+  type InsertNotification,
+  notificationPreferences,
+  type NotificationPreferences,
+  type InsertNotificationPreferences,
   eventMoodEntries,
   eventMoodAggregations,
   type EventMoodEntry,
@@ -460,6 +466,29 @@ export interface IStorage {
   getMoodAggregationsByEventId(eventId: number): Promise<EventMoodAggregation[]>;
   updateMoodAggregation(eventId: number, sessionName: string | null, moodType: string, count: number, avgIntensity: number): Promise<void>;
   getRealTimeMoodData(eventId: number): Promise<{ entries: EventMoodEntry[]; aggregations: EventMoodAggregation[] }>;
+
+  // Notification operations
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string, options?: { limit?: number; unreadOnly?: boolean; category?: string }): Promise<Notification[]>;
+  markNotificationAsRead(notificationId: number, userId: string): Promise<Notification>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  archiveNotification(notificationId: number, userId: string): Promise<Notification>;
+  deleteNotification(notificationId: number, userId: string): Promise<boolean>;
+  getUnreadNotificationCount(userId: string): Promise<number>;
+  sendBulkNotification(notification: Omit<InsertNotification, 'userId'>, userIds: string[]): Promise<Notification[]>;
+  scheduleNotification(notification: InsertNotification, scheduledFor: Date): Promise<Notification>;
+  processScheduledNotifications(): Promise<void>;
+  cleanupExpiredNotifications(): Promise<void>;
+
+  // Notification preferences
+  getUserNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined>;
+  updateNotificationPreferences(userId: string, preferences: Partial<InsertNotificationPreferences>): Promise<NotificationPreferences>;
+  createDefaultNotificationPreferences(userId: string): Promise<NotificationPreferences>;
+
+  // Automated reminder system
+  createEventReminder(eventId: number, userIds: string[], hoursBeforeEvent: number): Promise<Notification[]>;
+  createMeetingReminder(meetingId: number, userIds: string[], hoursBeforeMeeting: number): Promise<Notification[]>;
+  scheduleAutomaticReminders(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2764,6 +2793,211 @@ export class DatabaseStorage implements IStorage {
     ]);
 
     return { entries, aggregations };
+  }
+
+  // Notification operations
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [newNotification] = await db.insert(notifications).values(notification).returning();
+    return newNotification;
+  }
+
+  async getUserNotifications(userId: string, options?: { limit?: number; unreadOnly?: boolean; category?: string }): Promise<Notification[]> {
+    const { limit = 50, unreadOnly = false, category } = options || {};
+    
+    let query = db.select().from(notifications).where(eq(notifications.userId, userId));
+    
+    if (unreadOnly) {
+      query = query.where(eq(notifications.isRead, false));
+    }
+    
+    if (category) {
+      query = query.where(eq(notifications.category, category));
+    }
+    
+    return query.where(eq(notifications.isArchived, false))
+                .orderBy(desc(notifications.createdAt))
+                .limit(limit);
+  }
+
+  async markNotificationAsRead(notificationId: number, userId: string): Promise<Notification> {
+    const [updatedNotification] = await db
+      .update(notifications)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
+      .returning();
+    return updatedNotification;
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    await db
+      .update(notifications)
+      .set({ isRead: true, updatedAt: new Date() })
+      .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false)));
+  }
+
+  async archiveNotification(notificationId: number, userId: string): Promise<Notification> {
+    const [archivedNotification] = await db
+      .update(notifications)
+      .set({ isArchived: true, updatedAt: new Date() })
+      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)))
+      .returning();
+    return archivedNotification;
+  }
+
+  async deleteNotification(notificationId: number, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(notifications)
+      .where(and(eq(notifications.id, notificationId), eq(notifications.userId, userId)));
+    return result.rowCount > 0;
+  }
+
+  async getUnreadNotificationCount(userId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(notifications)
+      .where(and(
+        eq(notifications.userId, userId),
+        eq(notifications.isRead, false),
+        eq(notifications.isArchived, false)
+      ));
+    return result.count;
+  }
+
+  async sendBulkNotification(notification: Omit<InsertNotification, 'userId'>, userIds: string[]): Promise<Notification[]> {
+    const notificationsToInsert = userIds.map(userId => ({
+      ...notification,
+      userId,
+    }));
+    
+    return db.insert(notifications).values(notificationsToInsert).returning();
+  }
+
+  async scheduleNotification(notification: InsertNotification, scheduledFor: Date): Promise<Notification> {
+    const [scheduledNotification] = await db
+      .insert(notifications)
+      .values({ ...notification, scheduledFor })
+      .returning();
+    return scheduledNotification;
+  }
+
+  async processScheduledNotifications(): Promise<void> {
+    const now = new Date();
+    await db
+      .update(notifications)
+      .set({ sentAt: now, updatedAt: now })
+      .where(and(
+        lte(notifications.scheduledFor, now),
+        isNull(notifications.sentAt)
+      ));
+  }
+
+  async cleanupExpiredNotifications(): Promise<void> {
+    const now = new Date();
+    await db
+      .update(notifications)
+      .set({ isArchived: true, updatedAt: now })
+      .where(and(
+        lte(notifications.expiresAt, now),
+        eq(notifications.isArchived, false)
+      ));
+  }
+
+  // Notification preferences
+  async getUserNotificationPreferences(userId: string): Promise<NotificationPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(notificationPreferences)
+      .where(eq(notificationPreferences.userId, userId));
+    return preferences;
+  }
+
+  async updateNotificationPreferences(userId: string, preferences: Partial<InsertNotificationPreferences>): Promise<NotificationPreferences> {
+    const [updatedPreferences] = await db
+      .update(notificationPreferences)
+      .set({ ...preferences, updatedAt: new Date() })
+      .where(eq(notificationPreferences.userId, userId))
+      .returning();
+    return updatedPreferences;
+  }
+
+  async createDefaultNotificationPreferences(userId: string): Promise<NotificationPreferences> {
+    const defaultPrefs: InsertNotificationPreferences = {
+      userId,
+      emailNotifications: true,
+      inAppNotifications: true,
+      eventReminders: true,
+      meetingReminders: true,
+      adminMessages: true,
+      systemNotifications: true,
+      reminderAdvanceTime: 24,
+      dailyDigest: false,
+      weeklyDigest: true,
+    };
+    
+    const [newPreferences] = await db
+      .insert(notificationPreferences)
+      .values(defaultPrefs)
+      .returning();
+    return newPreferences;
+  }
+
+  // Automated reminder system
+  async createEventReminder(eventId: number, userIds: string[], hoursBeforeEvent: number): Promise<Notification[]> {
+    const notificationsToInsert = userIds.map(userId => ({
+      userId,
+      title: "Event Reminder",
+      message: `Your registered event starts in ${hoursBeforeEvent} hours`,
+      type: "reminder" as const,
+      category: "event_reminder" as const,
+      priority: "normal" as const,
+      metadata: { eventId, hoursBeforeEvent },
+    }));
+    
+    return db.insert(notifications).values(notificationsToInsert).returning();
+  }
+
+  async createMeetingReminder(meetingId: number, userIds: string[], hoursBeforeMeeting: number): Promise<Notification[]> {
+    const notificationsToInsert = userIds.map(userId => ({
+      userId,
+      title: "Meeting Reminder",
+      message: `Your scheduled meeting starts in ${hoursBeforeMeeting} hours`,
+      type: "reminder" as const,
+      category: "meeting_reminder" as const,
+      priority: "normal" as const,
+      metadata: { meetingId, hoursBeforeMeeting },
+    }));
+    
+    return db.insert(notifications).values(notificationsToInsert).returning();
+  }
+
+  async scheduleAutomaticReminders(): Promise<void> {
+    // This method would be called by a cron job or scheduler
+    // to create reminders for upcoming events and meetings
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // Get events happening tomorrow
+    const upcomingEvents = await db
+      .select()
+      .from(cbaEvents)
+      .where(and(
+        eq(cbaEvents.isActive, true),
+        gte(cbaEvents.eventDate, tomorrow.toISOString().split('T')[0]),
+        lte(cbaEvents.eventDate, tomorrow.toISOString().split('T')[0])
+      ));
+    
+    // For each event, create reminders for registered users
+    for (const event of upcomingEvents) {
+      const registrations = await db
+        .select({ userId: cbaEventRegistrations.userId })
+        .from(cbaEventRegistrations)
+        .where(eq(cbaEventRegistrations.eventId, event.id));
+      
+      const userIds = registrations.map(r => r.userId);
+      if (userIds.length > 0) {
+        await this.createEventReminder(event.id, userIds, 24);
+      }
+    }
   }
 
   // CBA Event Management operations
