@@ -281,7 +281,7 @@ function AdminSidebar() {
 
         <div className="pt-2 border-t border-gray-200">
           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Membership</p>
-          <Link href="/admin/membership-management">
+          <Link href="/dashboard/membership-management">
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Heart size={18} />
               <span>Membership</span>
