@@ -42,15 +42,31 @@ const BusinessProfileCompletion = () => {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Check if user has "business" person type
+  const { data: personTypes } = useQuery<any[]>({
+    queryKey: [`/api/users/${user?.id}/person-types`],
+    enabled: !!user?.id,
+  });
+
+  // Only show business profile completion to users with "business" person type
+  const hasBusinessPersonType = personTypes?.some(personType => 
+    personType.personTypeName === 'business' || personType.name === 'business'
+  );
+
   const { data: business } = useQuery<Business>({
     queryKey: ['/api/my/business'],
-    enabled: !!user,
+    enabled: !!user && hasBusinessPersonType,
   });
 
   const { data: products } = useQuery<Product[]>({
     queryKey: ['/api/my/products'],
-    enabled: !!user,
+    enabled: !!user && hasBusinessPersonType,
   });
+
+  // If user doesn't have business person type, don't show business profile prompts
+  if (!hasBusinessPersonType) {
+    return null;
+  }
 
   // Calculate completion items
   const getCompletionItems = (): ProfileCompletionItem[] => {
