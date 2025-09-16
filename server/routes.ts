@@ -73,6 +73,14 @@ import {
   insertEventMoodAggregationSchema,
   type EventMoodEntry,
   type EventMoodAggregation,
+  notifications,
+  notificationPreferences,
+  insertNotificationSchema,
+  insertNotificationPreferencesSchema,
+  type Notification,
+  type NotificationPreferences,
+  type InsertNotification,
+  type InsertNotificationPreferences,
   affiliates,
   affiliateCommissions,
   jobPostings,
@@ -16417,6 +16425,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Bulk sync failed", 
         error: error.message 
       });
+    }
+  });
+
+  // ==================== NOTIFICATION SYSTEM API ROUTES ====================
+
+  // Get user notifications
+  app.get("/api/notifications", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const { limit, unreadOnly, category } = req.query;
+      const options = {
+        limit: limit ? parseInt(limit as string) : 50,
+        unreadOnly: unreadOnly === 'true',
+        category: category as string,
+      };
+
+      const notifications = await storage.getUserNotifications(user.id, options);
+      res.json(notifications);
+    } catch (error: any) {
+      console.error("Get notifications error:", error);
+      res.status(500).json({ message: "Failed to fetch notifications", error: error.message });
+    }
+  });
+
+  // Get unread notification count
+  app.get("/api/notifications/unread-count", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const count = await storage.getUnreadNotificationCount(user.id);
+      res.json({ count });
+    } catch (error: any) {
+      console.error("Get unread count error:", error);
+      res.status(500).json({ message: "Failed to fetch unread count", error: error.message });
+    }
+  });
+
+  // Mark notification as read
+  app.patch("/api/notifications/:id/read", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const notificationId = parseInt(req.params.id);
+      const notification = await storage.markNotificationAsRead(notificationId, user.id);
+      res.json(notification);
+    } catch (error: any) {
+      console.error("Mark notification read error:", error);
+      res.status(500).json({ message: "Failed to mark notification as read", error: error.message });
+    }
+  });
+
+  // Mark all notifications as read
+  app.patch("/api/notifications/mark-all-read", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      await storage.markAllNotificationsAsRead(user.id);
+      res.json({ message: "All notifications marked as read" });
+    } catch (error: any) {
+      console.error("Mark all notifications read error:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read", error: error.message });
+    }
+  });
+
+  // Archive notification
+  app.patch("/api/notifications/:id/archive", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const notificationId = parseInt(req.params.id);
+      const notification = await storage.archiveNotification(notificationId, user.id);
+      res.json(notification);
+    } catch (error: any) {
+      console.error("Archive notification error:", error);
+      res.status(500).json({ message: "Failed to archive notification", error: error.message });
+    }
+  });
+
+  // Delete notification
+  app.delete("/api/notifications/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const notificationId = parseInt(req.params.id);
+      const success = await storage.deleteNotification(notificationId, user.id);
+      
+      if (success) {
+        res.json({ message: "Notification deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Notification not found" });
+      }
+    } catch (error: any) {
+      console.error("Delete notification error:", error);
+      res.status(500).json({ message: "Failed to delete notification", error: error.message });
+    }
+  });
+
+  // Get user notification preferences
+  app.get("/api/notification-preferences", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      let preferences = await storage.getUserNotificationPreferences(user.id);
+      if (!preferences) {
+        preferences = await storage.createDefaultNotificationPreferences(user.id);
+      }
+
+      res.json(preferences);
+    } catch (error: any) {
+      console.error("Get notification preferences error:", error);
+      res.status(500).json({ message: "Failed to fetch notification preferences", error: error.message });
+    }
+  });
+
+  // Update user notification preferences
+  app.patch("/api/notification-preferences", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.id) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const validatedData = insertNotificationPreferencesSchema.partial().parse(req.body);
+      const preferences = await storage.updateNotificationPreferences(user.id, validatedData);
+      res.json(preferences);
+    } catch (error: any) {
+      console.error("Update notification preferences error:", error);
+      res.status(500).json({ message: "Failed to update notification preferences", error: error.message });
+    }
+  });
+
+  // Admin: Send bulk notification
+  app.post("/api/admin/notifications/bulk", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { notification, userIds } = req.body;
+      const validatedNotification = insertNotificationSchema.omit({ userId: true }).parse(notification);
+      
+      const notifications = await storage.sendBulkNotification(validatedNotification, userIds);
+      res.json({ message: `Sent ${notifications.length} notifications`, notifications });
+    } catch (error: any) {
+      console.error("Send bulk notification error:", error);
+      res.status(500).json({ message: "Failed to send bulk notification", error: error.message });
+    }
+  });
+
+  // Admin: Create single notification
+  app.post("/api/admin/notifications", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const validatedData = insertNotificationSchema.parse({
+        ...req.body,
+        createdBy: user.id,
+      });
+      
+      const notification = await storage.createNotification(validatedData);
+      res.json(notification);
+    } catch (error: any) {
+      console.error("Create notification error:", error);
+      res.status(500).json({ message: "Failed to create notification", error: error.message });
+    }
+  });
+
+  // Admin: Schedule notification
+  app.post("/api/admin/notifications/schedule", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { notification, scheduledFor } = req.body;
+      const validatedNotification = insertNotificationSchema.parse({
+        ...notification,
+        createdBy: user.id,
+      });
+      
+      const scheduledNotification = await storage.scheduleNotification(
+        validatedNotification, 
+        new Date(scheduledFor)
+      );
+      res.json(scheduledNotification);
+    } catch (error: any) {
+      console.error("Schedule notification error:", error);
+      res.status(500).json({ message: "Failed to schedule notification", error: error.message });
     }
   });
 
