@@ -3345,26 +3345,10 @@ export class DatabaseStorage implements IStorage {
   // Placeholder implementations for remaining missing methods
   // TODO: Implement these based on actual requirements
 
-  // AI Summit specific stubs
-  async createAISummitRegistration(registration: any): Promise<AISummitRegistration> { throw new Error('Not implemented'); }
-  async createAISummitExhibitorRegistration(registration: any): Promise<AISummitExhibitorRegistration> { throw new Error('Not implemented'); }
-  async updateAISummitBadge(badgeId: string, updates: any): Promise<AISummitBadge> { throw new Error('Not implemented'); }
-  async getBadgesByParticipantType(participantType: string): Promise<AISummitBadge[]> { return []; }
-  async getBadgesByEmail(email: string): Promise<AISummitBadge[]> { return []; }
   async getAISummitRegistrationByUserId(userId: string): Promise<AISummitRegistration | undefined> { return undefined; }
 
-  // Event management stubs  
-  async getAllEvents(): Promise<Event[]> { return []; }
-  async getEventById(id: number): Promise<Event | undefined> { return undefined; }
-  async getPublishedEvents(): Promise<Event[]> { return []; }
-  async createEvent(event: any): Promise<Event> { throw new Error('Not implemented'); }
-  async updateEvent(id: number, event: any): Promise<Event> { throw new Error('Not implemented'); }
-  async deleteEvent(id: number): Promise<void> { }
-  async getEventRegistrations(eventId: number): Promise<EventRegistration[]> { return []; }
-  async getEventRegistrationByTicketId(ticketId: string): Promise<EventRegistration | undefined> { return undefined; }
-  async updateEventRegistration(id: number, registration: any): Promise<EventRegistration> { throw new Error('Not implemented'); }
-  async deleteEventRegistration(id: number): Promise<void> { }
-  async checkInEventRegistration(ticketId: string, checkedInBy: string): Promise<EventRegistration> { throw new Error('Not implemented'); }
+  // Event management methods are implemented above (lines ~2176-2205)
+  // Event registration methods are implemented above (lines ~2217-2260)
 
   // All other missing method stubs - implementing them as minimal placeholders
   async createEventAttendanceAnalytics(analytics: any): Promise<EventAttendanceAnalytics> { throw new Error('Not implemented'); }
@@ -3398,24 +3382,7 @@ export class DatabaseStorage implements IStorage {
   async deleteEventFeedback(id: number): Promise<boolean> { return false; }
   async getEventRatingStats(eventId: number): Promise<any> { return {}; }
   async getEventFeedbackSummary(eventId: number): Promise<any> { return {}; }
-  async createEventScanner(scanner: any): Promise<EventScanner> { throw new Error('Not implemented'); }
-  async getEventScannersByEventId(eventId: number): Promise<EventScanner[]> { return []; }
-  async getEventScannersByUserId(userId: string): Promise<EventScanner[]> { return []; }
-  async updateEventScanner(id: number, scanner: any): Promise<EventScanner> { throw new Error('Not implemented'); }
-  async deactivateEventScanner(id: number): Promise<EventScanner> { throw new Error('Not implemented'); }
-  async createScanRecord(scan: any): Promise<ScanHistory> { throw new Error('Not implemented'); }
-  async getScanHistoryByEventId(eventId: number): Promise<ScanHistory[]> { return []; }
-  async getScanHistoryByScannerId(scannerId: string): Promise<ScanHistory[]> { return []; }
-  async getScanHistoryByScannedUserId(scannedUserId: string): Promise<ScanHistory[]> { return []; }
-  async getDuplicateScans(eventId: number, scannedUserId: string): Promise<ScanHistory[]> { return []; }
-  async getScanHistoryBetweenUsers(scannerId: string, scannedUserId: string): Promise<ScanHistory[]> { return []; }
-  async createScanSession(session: any): Promise<ScanSession> { throw new Error('Not implemented'); }
-  async getScanSessionsByScannerId(scannerId: string): Promise<ScanSession[]> { return []; }
-  async getActiveScanSession(scannerId: string, eventId: number): Promise<ScanSession | undefined> { return undefined; }
-  async endScanSession(sessionId: number, totalScans: number, uniqueScans: number, duplicateScans: number): Promise<ScanSession> { throw new Error('Not implemented'); }
-  async updateScanSession(id: number, session: any): Promise<ScanSession> { throw new Error('Not implemented'); }
-  async getScanAnalyticsByEvent(eventId: number): Promise<any> { return {}; }
-  async getScanAnalyticsByScanner(scannerId: string): Promise<any> { return {}; }
+  // Event scanner and scan history methods are implemented above (lines ~2265-2320)
 }
 
 export const storage = new DatabaseStorage();
