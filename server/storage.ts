@@ -603,15 +603,19 @@ export class DatabaseStorage implements IStorage {
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     
     // Always order by latest signups first (createdAt descending)
+    let result: User[];
     if (whereClause && options?.limit) {
-      return await query.where(whereClause).orderBy(desc(users.createdAt)).limit(options.limit);
+      result = await query.where(whereClause).orderBy(desc(users.createdAt)).limit(options.limit);
     } else if (whereClause) {
-      return await query.where(whereClause).orderBy(desc(users.createdAt));
+      result = await query.where(whereClause).orderBy(desc(users.createdAt));
     } else if (options?.limit) {
-      return await query.orderBy(desc(users.createdAt)).limit(options.limit);
+      result = await query.orderBy(desc(users.createdAt)).limit(options.limit);
     } else {
-      return await query.orderBy(desc(users.createdAt));
+      result = await query.orderBy(desc(users.createdAt));
     }
+    
+    
+    return result;
   }
 
   async suspendUser(userId: string, reason: string, suspendedBy: string): Promise<User> {
