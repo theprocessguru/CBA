@@ -100,24 +100,24 @@ export async function setupLocalAuth(app: Express) {
       } = req.body;
 
       if (!email || !password || !phone || !homeAddress || !homeCity || !homePostcode) {
-        return res.status(400).json({ message: "Email, password, phone number, and home address are required" });
+        return res.status(400).json({ message: "Please fill in all required fields - we need your email, password, phone number, and home address" });
       }
       
       // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: "Invalid email format" });
+        return res.status(400).json({ message: "Oops! Please enter a valid email address" });
       }
       
       // Password strength validation
       if (password.length < 8) {
-        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+        return res.status(400).json({ message: "Your password needs to be at least 8 characters long" });
       }
 
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ message: "User with this email already exists" });
+        return res.status(400).json({ message: "Looks like someone already has an account with this email address" });
       }
 
       // Hash password
@@ -255,13 +255,13 @@ export async function setupLocalAuth(app: Express) {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return res.status(400).json({ message: "Please enter your email address and password" });
       }
       
       // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: "Invalid email format" });
+        return res.status(400).json({ message: "Please enter a valid email address" });
       }
 
       // Find user
@@ -454,7 +454,7 @@ export async function setupLocalAuth(app: Express) {
       }
 
       if (password.length < 6) {
-        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        return res.status(400).json({ message: "Your new password needs to be at least 6 characters long" });
       }
 
       // Verify token
