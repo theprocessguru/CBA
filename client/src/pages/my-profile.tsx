@@ -73,6 +73,22 @@ const MyProfile = () => {
     enabled: isAuthenticated
   });
 
+  // Fill test data function for admin convenience  
+  const fillTestData = () => {
+    if (!user?.isAdmin) return;
+    
+    setProfileData({
+      firstName: "John",
+      lastName: "Tester",
+      email: profile?.email || "admin@test.com",
+      phone: "+44 7700 900123",
+      company: "Test Business Solutions Ltd",
+      jobTitle: "Senior Business Analyst",
+      bio: "Experienced professional specializing in business process optimization and digital transformation. Passionate about helping organizations leverage technology to improve efficiency and drive growth. Expert in project management, stakeholder engagement, and strategic planning.",
+      isProfileHidden: false
+    });
+  };
+
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof profileData) => {
@@ -172,6 +188,18 @@ const MyProfile = () => {
                   Personal Information
                 </CardTitle>
                 <div className="flex gap-2">
+                  {user?.isAdmin && isEditing && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={fillTestData}
+                      className="bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                      title="Fill form with test data for testing purposes"
+                      data-testid="button-fill-profile-data"
+                    >
+                      🧪 Fill Test Data
+                    </Button>
+                  )}
                   {isEditing ? (
                     <>
                       <Button

@@ -9,10 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import { Eye, EyeOff, User, Building, GraduationCap, Home, Users, Mic, Heart, Crown } from "lucide-react";
 
 export default function Register() {
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -385,6 +387,77 @@ export default function Register() {
     return iconMap[typeName] || User;
   };
 
+  // Fill test data function for admin convenience
+  const fillTestData = () => {
+    if (!user?.isAdmin) return;
+    
+    const businessType = personTypes.find((type: any) => type.name === 'business');
+    const volunteerType = personTypes.find((type: any) => type.name === 'volunteer');
+    
+    setFormData({
+      email: "test.user@example.com",
+      password: "TestPassword123",
+      confirmPassword: "TestPassword123",
+      firstName: "Test",
+      lastName: "User",
+      phone: "+44 7700 900123",
+      homeAddress: "123 Test Street",
+      homeCity: "Croydon",
+      homePostcode: "CR0 1AA",
+      businessAddress: "456 Business Park",
+      businessCity: "London",
+      businessPostcode: "SW1A 1AA",
+      businessName: "Test Business Ltd",
+      businessDescription: "A sample business for testing purposes with comprehensive services",
+      businessWebsite: "https://www.testbusiness.co.uk",
+      businessPhone: "+44 20 7946 0958",
+      businessEmail: "info@testbusiness.co.uk",
+      businessCategory: categories[0]?.name || "Technology",
+      employeeCount: "10-50",
+      established: "2020",
+      schoolName: "Test Academy",
+      educatorRole: "Senior Teacher",
+      subjectTaught: "Computer Science",
+      schoolType: "Secondary",
+      trainingSpecialty: "Digital Skills",
+      targetAudience: "Business Professionals",
+      trainingMethods: "Workshops and Online",
+      trainingVenue: "Flexible",
+      certifications: "Microsoft Certified Trainer",
+      mediaOutlet: "Tech Weekly",
+      mediaType: "Online Publication",
+      coverageArea: "Technology & Business",
+      socialMediaHandle: "@techweekly",
+      audienceReach: "10000+",
+      specialtyBeats: "AI, Startups, Tech Policy",
+      studyInstitution: "University of London",
+      courseOfStudy: "Business Administration",
+      studyLevel: "Undergraduate",
+      yearOfStudy: "3",
+      expectedGraduation: "2025",
+      studyMode: "Full-time",
+      volunteerSkills: "Event Management, Marketing",
+      volunteerAreas: "Community Outreach",
+      volunteerAvailability: "Weekends",
+      volunteerFrequency: "Monthly",
+      volunteerExperience: "2 years with local charities",
+      volunteerTimeSlots: "Saturday mornings",
+      dietaryRestrictions: "Vegetarian",
+      allergies: "None",
+      dietaryNotes: "Prefer plant-based options",
+      tshirtSize: "M",
+      gender: "prefer-not-to-say"
+    });
+    
+    // Set some person types
+    const testTypes = [businessType?.id, volunteerType?.id].filter(Boolean);
+    if (testTypes.length > 0) {
+      setSelectedPersonTypes(testTypes);
+      setShowBusinessDetails(businessType ? true : false);
+      setShowVolunteerDetails(volunteerType ? true : false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -397,6 +470,22 @@ export default function Register() {
         </CardHeader>
 
         <CardContent>
+          {/* Admin Fill Data Button */}
+          {user?.isAdmin && (
+            <div className="mb-4">
+              <Button
+                type="button"
+                variant="outline" 
+                onClick={fillTestData}
+                className="w-full bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100"
+                title="Fill form with test data for testing purposes"
+                data-testid="button-fill-data"
+              >
+                🧪 Fill with Test Data (Admin Only)
+              </Button>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Basic Information */}
             <div className="grid grid-cols-2 gap-4">
