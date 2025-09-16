@@ -2849,18 +2849,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Replace variables in subject and content
-      let subject = template.subject;
-      let htmlContent = template.htmlContent;
+      let subject = template.subject ?? '';
+      let htmlContent = template.htmlContent ?? '';
 
       for (const [variable, value] of Object.entries(templateVariables)) {
         const regex = new RegExp(variable.replace(/[{}]/g, '\\$&'), 'g');
-        subject = subject.replace(regex, value);
-        htmlContent = htmlContent.replace(regex, value);
+        subject = subject.replace(regex, value ?? '');
+        htmlContent = htmlContent.replace(regex, value ?? '');
       }
 
       // Send the email
       await emailService.sendEmail(
-        user.email,
+        user.email ?? '',
         subject,
         htmlContent,
         'ai_summit_welcome',

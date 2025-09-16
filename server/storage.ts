@@ -138,7 +138,7 @@ import {
   type InsertEventMoodAggregation,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, ilike, asc } from "drizzle-orm";
+import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, isNotNull, ilike, asc } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -1562,7 +1562,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(aiSummitBadges)
-      .where(eq(aiSummitBadges.participantType, participantType))
+      .where(eq(aiSummitBadges.primaryRole, participantType))
       .orderBy(desc(aiSummitBadges.createdAt));
   }
 
@@ -1980,7 +1980,7 @@ export class DatabaseStorage implements IStorage {
         timestamp: aiSummitCheckIns.checkInTime,
         staffMember: aiSummitCheckIns.staffMember,
         name: aiSummitBadges.name,
-        participantType: aiSummitBadges.participantType,
+        participantType: aiSummitBadges.primaryRole,
       })
       .from(aiSummitCheckIns)
       .innerJoin(aiSummitBadges, eq(aiSummitCheckIns.badgeId, aiSummitBadges.badgeId))
@@ -2021,7 +2021,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         badgeId: aiSummitCheckIns.badgeId,
         name: aiSummitBadges.name,
-        participantType: aiSummitBadges.participantType,
+        participantType: aiSummitBadges.primaryRole,
         checkInType: aiSummitCheckIns.checkInType,
         timestamp: aiSummitCheckIns.checkInTime,
         staffMember: aiSummitCheckIns.staffMember,
@@ -2212,12 +2212,12 @@ export class DatabaseStorage implements IStorage {
   async getEventRegistrations(eventId: number): Promise<EventRegistration[]> {
     return await db.select().from(eventRegistrations)
       .where(eq(eventRegistrations.eventId, eventId))
-      .orderBy(desc(eventRegistrations.registrationDate));
+      .orderBy(desc(eventRegistrations.registeredAt));
   }
 
   async getEventRegistrationByTicketId(ticketId: string): Promise<EventRegistration | undefined> {
     const [registration] = await db.select().from(eventRegistrations)
-      .where(eq(eventRegistrations.ticketId, ticketId));
+      .where(eq(eventRegistrations.id, parseInt(ticketId)));
     return registration;
   }
 
@@ -2243,11 +2243,11 @@ export class DatabaseStorage implements IStorage {
     const [updatedRegistration] = await db
       .update(eventRegistrations)
       .set({ 
-        status: 'checked_in',
+        checkInStatus: true,
         checkedInAt: new Date(),
         checkedInBy 
       })
-      .where(eq(eventRegistrations.ticketId, ticketId))
+      .where(eq(eventRegistrations.id, parseInt(ticketId)))
       .returning();
     return updatedRegistration;
   }
