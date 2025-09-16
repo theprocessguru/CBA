@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Bell, Check, X, Archive, Trash2, Filter } from "lucide-react";
+import { Bell, Check, X, Archive, Trash2, MoreVertical } from "lucide-react";
+import { type Notification } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,26 +13,6 @@ import { formatDistanceToNow } from "date-fns";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-interface Notification {
-  id: number;
-  userId: string;
-  title: string;
-  message: string;
-  type: 'info' | 'warning' | 'success' | 'error' | 'reminder' | 'announcement';
-  category: 'event_reminder' | 'meeting_reminder' | 'general' | 'admin_message' | 'system';
-  isRead: boolean;
-  isArchived: boolean;
-  priority: 'low' | 'normal' | 'high' | 'urgent';
-  actionUrl?: string;
-  actionText?: string;
-  metadata?: any;
-  scheduledFor?: string;
-  sentAt?: string;
-  expiresAt?: string;
-  createdBy?: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface NotificationCenterProps {
   isOpen: boolean;
@@ -70,6 +51,13 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
     },
+    onError: () => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to mark notification as read",
+        variant: "destructive"
+      });
+    },
   });
 
   const markAllAsReadMutation = useMutation({
@@ -79,12 +67,27 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
       toast({ title: "Success", description: "All notifications marked as read" });
     },
+    onError: () => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to mark all notifications as read",
+        variant: "destructive"
+      });
+    },
   });
 
   const archiveMutation = useMutation({
     mutationFn: (id: number) => apiRequest(`/api/notifications/${id}/archive`, 'PATCH'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
+      toast({ title: "Success", description: "Notification archived" });
+    },
+    onError: () => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to archive notification",
+        variant: "destructive"
+      });
     },
   });
 
@@ -93,6 +96,14 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
+      toast({ title: "Success", description: "Notification deleted" });
+    },
+    onError: () => {
+      toast({ 
+        title: "Error", 
+        description: "Failed to delete notification",
+        variant: "destructive"
+      });
     },
   });
 
@@ -207,7 +218,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
               {filteredNotifications.map((notification: Notification) => (
                 <Card
                   key={notification.id}
-                  className={`cursor-pointer transition-all hover:shadow-md border-l-4 ${priorityColors[notification.priority]} ${
+                  className={`cursor-pointer transition-all hover:shadow-md border-l-4 ${priorityColors[notification.priority as keyof typeof priorityColors]} ${
                     !notification.isRead ? 'bg-blue-50 dark:bg-blue-950/20' : ''
                   }`}
                   onClick={() => handleNotificationClick(notification)}
@@ -217,7 +228,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <Badge className={`text-xs ${typeColors[notification.type]}`}>
+                          <Badge className={`text-xs ${typeColors[notification.type as keyof typeof typeColors]}`}>
                             {notification.type}
                           </Badge>
                           {!notification.isRead && (
@@ -241,7 +252,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                         
                         <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                           <span data-testid={`notification-time-${notification.id}`}>
-                            {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            {notification.createdAt ? formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true }) : 'Unknown time'}
                           </span>
                           <Badge variant="outline" className="text-xs">
                             {notification.category.replace('_', ' ')}
@@ -253,6 +264,10 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                             variant="outline" 
                             size="sm" 
                             className="mt-2 text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = notification.actionUrl!;
+                            }}
                             data-testid={`notification-action-${notification.id}`}
                           >
                             {notification.actionText}
@@ -263,7 +278,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" data-testid={`notification-menu-${notification.id}`}>
-                            <Filter className="h-4 w-4" />
+                            <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">

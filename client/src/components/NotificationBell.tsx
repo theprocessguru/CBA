@@ -41,6 +41,8 @@ export function NotificationBell({ className = "" }: NotificationBellProps) {
         size="sm"
         className={`relative ${className}`}
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={`Notifications${hasUnread ? ` (${count} unread)` : ''}`}
+        aria-expanded={isOpen}
         data-testid="button-notification-bell"
       >
         <Bell className={`h-5 w-5 ${hasUnread ? 'text-blue-600' : 'text-gray-600 dark:text-gray-300'}`} />
