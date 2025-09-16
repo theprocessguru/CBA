@@ -602,14 +602,15 @@ export class DatabaseStorage implements IStorage {
     const query = db.select().from(users);
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
     
+    // Always order by latest signups first (createdAt descending)
     if (whereClause && options?.limit) {
-      return await query.where(whereClause).limit(options.limit);
+      return await query.where(whereClause).orderBy(desc(users.createdAt)).limit(options.limit);
     } else if (whereClause) {
-      return await query.where(whereClause);
+      return await query.where(whereClause).orderBy(desc(users.createdAt));
     } else if (options?.limit) {
-      return await query.limit(options.limit);
+      return await query.orderBy(desc(users.createdAt)).limit(options.limit);
     } else {
-      return await query;
+      return await query.orderBy(desc(users.createdAt));
     }
   }
 
