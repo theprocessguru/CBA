@@ -62,7 +62,7 @@ const UserManagement = () => {
   const queryClient = useQueryClient();
 
   const { data: users, isLoading } = useQuery<User[]>({
-    queryKey: ['/api/admin/users', searchTerm, selectedStatus === "all" ? undefined : selectedStatus, 'sorted-desc'],
+    queryKey: ['admin-users-sorted', searchTerm, selectedStatus === "all" ? undefined : selectedStatus, Date.now()],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
@@ -81,7 +81,12 @@ const UserManagement = () => {
 
       const response = await fetch(`/api/admin/users?${params}`, {
         credentials: 'include',
-        headers,
+        headers: {
+          ...headers,
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
       });
       
       if (!response.ok) {
