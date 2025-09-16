@@ -59,26 +59,18 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
         
         const qrScanner = new QrScanner(
           videoRef.current!,
-          (result) => {
-            console.log('QR Code detected:', result.data);
-            handleScanResult(result.data);
+          (res: any) => {
+            const text = typeof res === 'string' ? res : res?.data;
+            if (typeof text === 'string' && text) {
+              console.log('QR Code detected:', text);
+              handleScanResult(text);
+            }
           },
           {
             highlightScanRegion: true,
             highlightCodeOutline: true,
-            preferredCamera: 'environment', // Use back camera on mobile
-            maxScansPerSecond: 25, // Increase scan frequency for better detection
-            calculateScanRegion: (video) => {
-              // Use a larger scan region for better detection
-              const smallestDimension = Math.min(video.videoWidth, video.videoHeight);
-              const scanRegionSize = Math.round(0.7 * smallestDimension);
-              return {
-                x: Math.round((video.videoWidth - scanRegionSize) / 2),
-                y: Math.round((video.videoHeight - scanRegionSize) / 2),
-                width: scanRegionSize,
-                height: scanRegionSize,
-              };
-            },
+            preferredCamera: 'environment',
+            maxScansPerSecond: 5
           }
         );
         
@@ -87,7 +79,15 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
         setIsScanning(true);
       } catch (error: any) {
         console.error('Failed to start QR scanner:', error);
-        setCameraError(error.message || 'Failed to access camera');
+        let errorMessage = 'Failed to access camera';
+        if (error.name === 'NotAllowedError') {
+          errorMessage = 'Camera permission denied. Please allow camera access.';
+        } else if (error.name === 'NotFoundError') {
+          errorMessage = 'No camera found on this device.';
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = 'Camera not supported on this device.';
+        }
+        setCameraError(errorMessage);
         setShowManualInput(true);
         setIsScanning(false);
       }
@@ -143,18 +143,21 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
               <div className="relative">
                 <video
                   ref={videoRef}
-                  className="w-full h-64 bg-black rounded-lg object-cover"
+                  className="w-full aspect-square bg-black rounded-lg"
                   playsInline
                   muted
                 />
                 {isScanning && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-48 h-48 border-2 border-green-500 rounded-lg animate-pulse"></div>
+                  <div className="absolute inset-2 border-2 border-green-500 rounded-lg animate-pulse">
+                    <div className="absolute inset-2 border border-green-300 rounded opacity-50"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-green-500 text-xs font-medium bg-black/50 px-2 py-1 rounded">
+                      Scanning...
+                    </div>
                   </div>
                 )}
               </div>
               <p className="text-sm text-center text-gray-600">
-                Position QR code within the green frame
+                Hold QR code steady in camera view for detection
               </p>
               
               <Button
