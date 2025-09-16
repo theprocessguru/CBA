@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, ArrowLeft, Home, ChevronDown, Users } from "lucide-react";
 import cbaLogo from "@assets/CBA LOGO.png";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -163,6 +164,7 @@ const Navbar = () => {
             </button>
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
+                <NotificationBell />
                 <Link href="/organizer-scanner">
                   <Button size="sm" variant="ghost" className="text-sm px-3 py-2 whitespace-nowrap">
                     📱 Scanner
