@@ -62,11 +62,12 @@ const UserManagement = () => {
   const queryClient = useQueryClient();
 
   const { data: users, isLoading } = useQuery<User[]>({
-    queryKey: ['/api/admin/users', searchTerm, selectedStatus === "all" ? undefined : selectedStatus],
+    queryKey: ['/api/admin/users', searchTerm, selectedStatus === "all" ? undefined : selectedStatus, 'sorted-desc'],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
       if (selectedStatus !== "all") params.append('status', selectedStatus);
+      params.append('sort', 'newest'); // Force cache refresh for new sorting
       
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -89,6 +90,7 @@ const UserManagement = () => {
       
       return response.json();
     },
+    staleTime: 0, // Force fresh data for now to see sorting changes
   });
 
   // Fetch all person types
