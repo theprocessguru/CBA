@@ -255,6 +255,12 @@ function AdminSidebar() {
               <span>Email Templates</span>
             </div>
           </Link>
+          <Link href="/admin/notification-management">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
+              <Send size={18} />
+              <span>Notifications</span>
+            </div>
+          </Link>
           <Link href="/admin/contact-import">
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Upload size={18} />
@@ -443,6 +449,12 @@ function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupan
             <Button variant="outline" size="sm">
               <Mail className="mr-2 h-4 w-4" />
               Email Templates
+            </Button>
+          </Link>
+          <Link href="/admin/notification-management">
+            <Button variant="outline" size="sm">
+              <Send className="mr-2 h-4 w-4" />
+              Notifications
             </Button>
           </Link>
         </div>

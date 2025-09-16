@@ -16643,6 +16643,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Get scheduled notifications
+  app.get("/api/admin/scheduled-notifications", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const scheduledNotifications = await storage.getScheduledNotifications();
+      res.json(scheduledNotifications);
+    } catch (error: any) {
+      console.error("Get scheduled notifications error:", error);
+      res.status(500).json({ message: "Failed to fetch scheduled notifications", error: error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

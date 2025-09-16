@@ -477,6 +477,7 @@ export interface IStorage {
   getUnreadNotificationCount(userId: string): Promise<number>;
   sendBulkNotification(notification: Omit<InsertNotification, 'userId'>, userIds: string[]): Promise<Notification[]>;
   scheduleNotification(notification: InsertNotification, scheduledFor: Date): Promise<Notification>;
+  getScheduledNotifications(): Promise<Notification[]>;
   processScheduledNotifications(): Promise<void>;
   cleanupExpiredNotifications(): Promise<void>;
 
@@ -2878,6 +2879,19 @@ export class DatabaseStorage implements IStorage {
       .values({ ...notification, scheduledFor })
       .returning();
     return scheduledNotification;
+  }
+
+  async getScheduledNotifications(): Promise<Notification[]> {
+    return db.select()
+      .from(notifications)
+      .where(
+        and(
+          isNotNull(notifications.scheduledFor),
+          gte(notifications.scheduledFor, new Date()),
+          isNull(notifications.sentAt)
+        )
+      )
+      .orderBy(asc(notifications.scheduledFor));
   }
 
   async processScheduledNotifications(): Promise<void> {

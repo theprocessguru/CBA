@@ -35,6 +35,7 @@ import UserManagement from "@/pages/admin/UserManagement";
 import Analytics from "@/pages/admin/Analytics";
 import EmailSettings from "@/pages/admin/EmailSettings";
 import EmailLogs from "@/pages/admin/EmailLogs";
+import AdminNotificationManagement from "@/pages/admin/notification-management";
 import UploadMembers from "@/pages/admin/upload-members";
 import MembershipManagement from "@/pages/admin/MembershipManagement";
 import MembershipBenefits from "@/pages/membership-benefits";
@@ -812,6 +813,11 @@ function Router() {
           <MainLayout>
             <EmailTemplates />
           </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/notification-management">
+        <AdminRoute>
+          <AdminNotificationManagement />
         </AdminRoute>
       </Route>
       <Route path="/admin/bulk-sync">
