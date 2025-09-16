@@ -52,7 +52,7 @@ export default function SpeakerRecovery() {
   const queryClient = useQueryClient();
 
   // Get potential speakers (recent attendees)
-  const { data: potentialSpeakers, isLoading } = useQuery({
+  const { data: potentialSpeakers = [], isLoading } = useQuery<PotentialSpeaker[]>({
     queryKey: ['/api/admin/potential-speakers'],
   });
 

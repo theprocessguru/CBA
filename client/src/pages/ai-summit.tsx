@@ -81,6 +81,16 @@ const AISummit = () => {
   // Password visibility for simplified form
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Password visibility for other forms
+  const [showExhibitorPassword, setShowExhibitorPassword] = useState(false);
+  const [showExhibitorConfirmPassword, setShowExhibitorConfirmPassword] = useState(false);
+  const [showSpeakerPassword, setShowSpeakerPassword] = useState(false);
+  const [showSpeakerConfirmPassword, setShowSpeakerConfirmPassword] = useState(false);
+  const [showVolunteerPassword, setShowVolunteerPassword] = useState(false);
+  const [showVolunteerConfirmPassword, setShowVolunteerConfirmPassword] = useState(false);
+  const [showSponsorPassword, setShowSponsorPassword] = useState(false);
+  const [showSponsorConfirmPassword, setShowSponsorConfirmPassword] = useState(false);
   // Simplified registration form with only 7 fields
   const [registrationData, setRegistrationData] = useState({
     firstName: "",
@@ -1038,62 +1048,16 @@ const AISummit = () => {
 
   // Admin test data fill function
   const fillTestData = () => {
-    if (allPersonTypes.length > 0) {
-      // Select all available person types
-      const allPersonTypeIds = allPersonTypes.map((type: any) => type.id);
-      
-      setRegistrationData({
-        firstName: "John",
-        lastName: "Smith",
-        email: "john.smith@test.com",
-        mobileNumber: "+44 7700 900123",
-        postcode: "SW1A 1AA",
-        dateOfBirth: "1985-06-15",
-        selectedPersonTypes: allPersonTypeIds,
-        businessName: "Test Business Ltd",
-        businessCategory: "Technology",
-        businessDescription: "Software development and consulting",
-        password: "TestPassword123",
-        confirmPassword: "TestPassword123",
-        interestAreas: ["AI & Machine Learning", "Digital Marketing", "Business Strategy"],
-        tshirtSize: "M",
-        gender: "prefer-not-to-say",
-        studentInstitution: "University of London",
-        studyLevel: "undergraduate",
-        fieldOfStudy: "Computer Science",
-        graduationYear: "2025",
-        careerInterests: "Technology",
-        workExperience: "internships",
-        learningGoals: "Gain practical AI skills for future career",
-        educatorInstitution: "London Business School",
-        teachingLevel: "higher_education",
-        subjectsAreas: "Business Technology",
-        yearsTeaching: "5",
-        educationInterests: "AI in Education",
-        currentChallenges: "Integrating AI tools into curriculum",
-        trainerOrganization: "Professional Training Solutions",
-        trainerExpertise: "Digital Skills Training",
-        clientTypes: "corporate",
-        yearsTraining: "8",
-        trainingInterests: "AI Training Programs",
-        trainerChallenges: "Keeping up with AI developments",
-        established: "2020",
-        volunteerSkills: "Event management, Customer service",
-        volunteerAreas: "Registration, Technical support",
-        volunteerAvailability: "Weekends and evenings",
-        volunteerFrequency: "weekly",
-        volunteerExperience: "2 years volunteer experience",
-        volunteerTimeSlots: "Morning and afternoon shifts",
-        mediaOutlet: "Tech Today Magazine",
-        mediaType: "print",
-        coverageArea: "Technology and Business",
-        socialMediaHandle: "@techtodaymagazine",
-        audienceReach: "50000",
-        specialtyBeats: "AI, Machine Learning, Startup News"
-      });
-
-      // Organization memberships removed for simplified form
-    }
+    setRegistrationData({
+      firstName: "John",
+      lastName: "Smith",
+      email: "john.smith@test.com",
+      confirmEmail: "john.smith@test.com", 
+      mobileNumber: "+44 7700 900123",
+      password: "TestPassword123",
+      confirmPassword: "TestPassword123",
+      participantType: "resident"
+    });
   };
 
   // Organization membership helpers removed for simplified form

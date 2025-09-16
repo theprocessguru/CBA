@@ -112,7 +112,7 @@ const EmailSettings = () => {
     },
   });
 
-  const { data: emailStatus } = useQuery({
+  const { data: emailStatus } = useQuery<{ configured: boolean }>({
     queryKey: ['/api/admin/email/status'],
     retry: false,
   });
