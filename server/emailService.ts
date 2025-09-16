@@ -1011,7 +1011,7 @@ export class EmailService {
               </div>
 
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${baseUrl}/admin-login" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
+                <a href="${baseUrl}/login" style="display: inline-block; background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; text-decoration: none; padding: 12px 30px; border-radius: 6px; font-weight: 600;">
                   Access Admin Portal
                 </a>
               </div>
@@ -1048,7 +1048,7 @@ Temporary Password: ${temporaryPassword}
 
 IMPORTANT: Please change your password immediately after your first login for security reasons.
 
-Access the admin portal at: ${baseUrl}/admin-login
+Access the admin portal at: ${baseUrl}/login
 
 If you have any questions, please contact support@croydonba.org.uk
 

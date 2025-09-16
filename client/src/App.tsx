@@ -78,8 +78,6 @@ import EventScanner from "@/pages/event-scanner";
 import OrganizerScanner from "@/pages/organizer-scanner";
 import TestQRCodes from "@/pages/test-qr-codes";
 import CreateVolunteer from "@/pages/create-volunteer";
-import AdminLogin from "@/pages/admin-login";
-import QuickLogin from "@/pages/quick-login";
 import ScannerManagement from "@/pages/admin/scanner-management";
 import AdminBadges from "@/pages/admin/badges";
 import AttendanceDashboard from "@/pages/admin/attendance-dashboard";
@@ -492,12 +490,6 @@ function Router() {
         <MainLayout>
           <CreateVolunteer />
         </MainLayout>
-      </Route>
-      <Route path="/admin-login">
-        <AdminLogin />
-      </Route>
-      <Route path="/quick-login">
-        <QuickLogin />
       </Route>
       <Route path="/my-qr-code">
         <MainLayout>

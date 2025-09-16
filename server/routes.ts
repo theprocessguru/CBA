@@ -6935,43 +6935,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin login endpoint for testing
-  app.post('/api/admin-login', async (req, res) => {
-    try {
-      // Create admin user data with all required fields
-      const adminUserData = {
-        id: 'admin-test-user',
-        email: 'admin@croydonba.org.uk',
-        firstName: 'Admin',
-        lastName: 'User',
-        isAdmin: true,
-        membershipTier: 'Partner',
-        membershipStatus: 'active',
-        qrHandle: 'ADMIN-CBA-2025',
-        participantType: 'team'
-      };
-
-      // Create/update user in database
-      await storage.upsertUser(adminUserData);
-
-      // Set session to match the auth middleware structure
-      (req as any).session.userId = adminUserData.id;
-      (req as any).session.user = adminUserData;
-      
-      // Force session save
-      (req as any).session.save((saveErr: any) => {
-        if (saveErr) {
-          console.error('Session save error:', saveErr);
-          return res.status(500).json({ message: 'Session save failed' });
-        }
-        console.log('Admin session saved successfully:', adminUserData.email);
-        res.json({ success: true, user: adminUserData });
-      });
-    } catch (error) {
-      console.error('Error with admin login:', error);
-      res.status(500).json({ message: 'Admin login failed' });
-    }
-  });
 
   // Create volunteer test user
   app.post('/api/create-volunteer-user', isAuthenticated, isAdmin, async (req: any, res) => {
