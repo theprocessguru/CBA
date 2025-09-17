@@ -278,18 +278,33 @@ export class EmailService {
     const participantContent: Record<string, {greeting: string, message: string, benefits: string[]}> = {
       attendee: {
         greeting: "Welcome to the Croydon Business Association!",
-        message: "Thank you for registering as an attendee. Once verified, you'll gain access to event information, networking opportunities, and your personalized QR code for seamless event check-ins.",
-        benefits: ["Access event schedules and updates", "Network with other attendees", "Download your event badges", "Receive important announcements"]
+        message: "Thank you for registering for the AI Summit 2025! Your registration is confirmed for October 1st, 2025 (10 AM-4 PM) at LSBU London South Bank University Croydon. IMPORTANT: You need to set up your QR code for event entry - this is your key to getting into the summit.",
+        benefits: [
+          "🔑 SET UP YOUR QR CODE: Log into your account and download your event badge", 
+          "📱 Print your badge or save the QR code on your phone for scanning at entry",
+          "📧 Watch for your badge email with printing instructions", 
+          "🎯 Present QR code at entrance on October 1st for instant access"
+        ]
       },
       vip: {
         greeting: "Welcome to our VIP Community!",
-        message: "We're honored to have you as a VIP member. Your verification unlocks exclusive access to VIP events, priority seating, and premium networking opportunities.",
-        benefits: ["VIP lounge access at events", "Priority registration for workshops", "Exclusive networking sessions", "Complimentary refreshments"]
+        message: "We're honored to have you as a VIP for the AI Summit 2025! Your registration includes exclusive VIP access on October 1st, 2025 at LSBU. CRITICAL: You must set up your QR code for VIP entry - this unlocks your premium access.",
+        benefits: [
+          "🔑 SET UP YOUR VIP QR CODE: Log in to download your special VIP badge",
+          "👑 VIP lounge access and priority seating at the AI Summit", 
+          "📱 Present your VIP QR code at entrance for instant premium access",
+          "🎯 Watch for your VIP badge email with exclusive entry instructions"
+        ]
       },
       volunteer: {
         greeting: "Welcome to our Volunteer Team!",
-        message: "Thank you for joining our volunteer community! Your dedication helps make our events successful. Once verified, you'll receive your volunteer badge and access to coordinator resources.",
-        benefits: ["Access volunteer schedules", "Coordinator contact information", "Volunteer recognition program", "Training resources and guides"]
+        message: "Thank you for volunteering at the AI Summit 2025! You're essential to making October 1st successful at LSBU. IMPORTANT: Set up your volunteer QR code immediately - this gives you early access and identifies you to coordinators.",
+        benefits: [
+          "🔑 SET UP VOLUNTEER QR CODE: Download your official volunteer badge now",
+          "⏰ Early entry access before 10 AM for setup duties", 
+          "📱 Your QR code identifies you to event coordinators instantly",
+          "🎯 Check email for volunteer schedule and badge printing instructions"
+        ]
       },
       team: {
         greeting: "Welcome to the CBA Team!",
