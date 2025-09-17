@@ -2848,6 +2848,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mass ad hoc email endpoint (admin only)
+  app.post('/api/admin/email/send-mass-adhoc', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      const { templateId = 21 } = req.body;
+
+      console.log(`Admin ${req.user.email} initiated mass ad hoc email send using template ${templateId}`);
+      
+      // Send ad hoc emails to all users
+      const result = await emailService.sendMassAdHocEmails(templateId);
+      
+      if (result.success) {
+        res.json({
+          message: `Mass ad hoc email completed: ${result.totalSent} sent, ${result.totalFailed} failed`,
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      } else {
+        res.status(500).json({
+          message: "Mass ad hoc email failed",
+          totalSent: result.totalSent,
+          totalFailed: result.totalFailed,
+          results: result.results
+        });
+      }
+    } catch (error) {
+      console.error("Error in mass ad hoc email:", error);
+      res.status(500).json({ message: "Failed to send mass ad hoc emails" });
+    }
+  });
+
   // Send AI Summit 2025 welcome email to specific user (admin only)
   app.post('/api/admin/email/send-ai-summit-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

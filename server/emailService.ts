@@ -989,6 +989,167 @@ export class EmailService {
   }
 
   /**
+   * Send ad hoc emails to all users (mass send)
+   */
+  async sendMassAdHocEmails(templateId: number = 21): Promise<{ 
+    success: boolean; 
+    totalSent: number; 
+    totalFailed: number; 
+    results: Array<{ email: string; success: boolean; message: string }> 
+  }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ email: 'system', success: false, message: 'Email service not configured' }]
+      };
+    }
+
+    try {
+      // Import required modules
+      const { users } = await import('@shared/schema');
+      const { eq } = await import('drizzle-orm');
+
+      // Get ALL active users, excluding test accounts to protect Gmail deliverability
+      const allUsers = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          participantType: users.participantType
+        })
+        .from(users)
+        .where(eq(users.accountStatus, 'active'));
+
+      // Filter out test accounts and bounce-prone email domains
+      const testDomains = [
+        'test.com', 'example.com', 'example.org', 'test.org', 
+        'localhost', '10minutemail', 'guerrillamail', 'mailinator',
+        'temp-mail', 'throwaway', 'noreply', 'donotreply',
+        'fake.com', 'dummy.com'
+      ];
+      
+      const filteredUsers = allUsers.filter(user => {
+        if (!user.email) return false;
+        
+        // Check for test patterns in email
+        const email = user.email.toLowerCase();
+        const isTestAccount = testDomains.some(domain => email.includes(domain)) ||
+                            email.includes('test') ||
+                            email.includes('demo') ||
+                            email.includes('sample') ||
+                            email.includes('+test') ||
+                            email.startsWith('noreply@') ||
+                            email.startsWith('donotreply@');
+                            
+        return !isTestAccount;
+      });
+
+      const results: Array<{ email: string; success: boolean; message: string }> = [];
+      let totalSent = 0;
+      let totalFailed = 0;
+
+      console.log(`Starting mass ad hoc email send to ${filteredUsers.length} users (${allUsers.length - filteredUsers.length} test accounts excluded for Gmail protection)`);
+
+      // Send emails in small batches to avoid Gmail rate limits
+      const batchSize = 3; // Reduced from 10 to 3 for Gmail compliance
+      for (let i = 0; i < filteredUsers.length; i += batchSize) {
+        const batch = filteredUsers.slice(i, i + batchSize);
+        console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(filteredUsers.length/batchSize)} (${batch.length} emails)`);
+        
+        // Process batch in parallel
+        const batchPromises = batch.map(async (user) => {
+          try {
+            if (!user.email) {
+              throw new Error('No email address');
+            }
+
+            // Send ad hoc email using existing function
+            const emailResult = await this.sendAdHocEmail(
+              user.email,
+              `${user.firstName || 'Member'} ${user.lastName || ''}`.trim(),
+              user.participantType || 'adhoc'
+            );
+
+            if (emailResult.success) {
+              totalSent++;
+              return { 
+                email: user.email, 
+                success: true, 
+                message: 'Ad hoc email sent successfully' 
+              };
+            } else {
+              totalFailed++;
+              return { 
+                email: user.email, 
+                success: false, 
+                message: emailResult.message 
+              };
+            }
+
+          } catch (error) {
+            totalFailed++;
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error(`Failed to send ad hoc email to ${user.email}:`, errorMessage);
+            return { 
+              email: user.email || 'unknown', 
+              success: false, 
+              message: errorMessage 
+            };
+          }
+        });
+
+        // Wait for batch to complete
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Process results
+        batchResults.forEach((result) => {
+          if (result.status === 'fulfilled') {
+            results.push(result.value);
+          } else {
+            totalFailed++;
+            results.push({ 
+              email: 'unknown', 
+              success: false, 
+              message: result.reason?.message || 'Promise rejected' 
+            });
+          }
+        });
+
+        // Add delay between batches to avoid Gmail rate limits
+        if (i + batchSize < filteredUsers.length) {
+          console.log(`⏳ Waiting 10 seconds before next batch...`);
+          await new Promise(resolve => setTimeout(resolve, 10000)); // 10 second delay
+        }
+      }
+
+      console.log(`Mass ad hoc email complete: ${totalSent} sent, ${totalFailed} failed`);
+
+      return {
+        success: true,
+        totalSent,
+        totalFailed,
+        results
+      };
+
+    } catch (error) {
+      console.error('Error in mass ad hoc email send:', error);
+      return {
+        success: false,
+        totalSent: 0,
+        totalFailed: 0,
+        results: [{ 
+          email: 'system', 
+          success: false, 
+          message: error instanceof Error ? error.message : 'Unknown error' 
+        }]
+      };
+    }
+  }
+
+  /**
    * Send welcome emails to all users (mass send)
    */
   async sendMassWelcomeEmails(): Promise<{ 
