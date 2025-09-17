@@ -199,6 +199,45 @@ export async function setupLocalAuth(app: Express) {
         console.error("Failed to auto-verify user:", verificationError);
       }
 
+      // Send welcome email to new user
+      try {
+        if (emailService) {
+          // Determine participant type for welcome email
+          let welcomeParticipantType = 'attendee'; // default
+          if (personTypeIds && personTypeIds.length > 0) {
+            // Map person type IDs to participant types (you may need to adjust these mappings)
+            const typeMapping: Record<number, string> = {
+              1: 'attendee',
+              2: 'volunteer', 
+              3: 'vip',
+              4: 'speaker',
+              5: 'exhibitor',
+              6: 'sponsor',
+              7: 'team',
+              8: 'student'
+            };
+            welcomeParticipantType = typeMapping[personTypeIds[0]] || 'attendee';
+          }
+          
+          // Send welcome email to user
+          const welcomeResult = await emailService.sendVerificationEmail(
+            email,
+            `${firstName} ${lastName}`,
+            'auto-verified', // Since verification is disabled, use placeholder token
+            welcomeParticipantType
+          );
+          
+          if (welcomeResult.success) {
+            console.log(`Welcome email sent to ${email}`);
+          } else {
+            console.error(`Failed to send welcome email to ${email}:`, welcomeResult.message);
+          }
+        }
+      } catch (welcomeError) {
+        console.error("Failed to send welcome email:", welcomeError);
+        // Don't fail the registration if welcome email fails
+      }
+
       // Send registration notification to admin
       try {
         if (emailService) {
