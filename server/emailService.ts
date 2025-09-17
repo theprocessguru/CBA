@@ -845,7 +845,7 @@ export class EmailService {
       const { users } = await import('@shared/schema');
       const { eq } = await import('drizzle-orm');
 
-      // Get ALL active users
+      // Get ALL active users, excluding test accounts to protect Gmail deliverability
       const allUsers = await db
         .select({
           id: users.id,
@@ -857,17 +857,41 @@ export class EmailService {
         .from(users)
         .where(eq(users.accountStatus, 'active'));
 
+      // Filter out test accounts and bounce-prone email domains
+      const testDomains = [
+        'test.com', 'example.com', 'example.org', 'test.org', 
+        'localhost', '10minutemail', 'guerrillamail', 'mailinator',
+        'temp-mail', 'throwaway', 'noreply', 'donotreply',
+        'fake.com', 'dummy.com'
+      ];
+      
+      const filteredUsers = allUsers.filter(user => {
+        if (!user.email) return false;
+        
+        // Check for test patterns in email
+        const email = user.email.toLowerCase();
+        const isTestAccount = testDomains.some(domain => email.includes(domain)) ||
+                            email.includes('test') ||
+                            email.includes('demo') ||
+                            email.includes('sample') ||
+                            email.includes('+test') ||
+                            email.startsWith('noreply@') ||
+                            email.startsWith('donotreply@');
+                            
+        return !isTestAccount;
+      });
+
       const results: Array<{ email: string; success: boolean; message: string }> = [];
       let totalSent = 0;
       let totalFailed = 0;
 
-      console.log(`Starting mass welcome email send to ${allUsers.length} users`);
+      console.log(`Starting mass welcome email send to ${filteredUsers.length} users (${allUsers.length - filteredUsers.length} test accounts excluded for Gmail protection)`);
 
       // Send emails in small batches to avoid Gmail rate limits
       const batchSize = 3; // Reduced from 10 to 3 for Gmail compliance
-      for (let i = 0; i < allUsers.length; i += batchSize) {
-        const batch = allUsers.slice(i, i + batchSize);
-        console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(allUsers.length/batchSize)} (${batch.length} emails)`);
+      for (let i = 0; i < filteredUsers.length; i += batchSize) {
+        const batch = filteredUsers.slice(i, i + batchSize);
+        console.log(`Processing batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(filteredUsers.length/batchSize)} (${batch.length} emails)`);
         
         // Process batch in parallel
         const batchPromises = batch.map(async (user) => {
@@ -929,7 +953,7 @@ export class EmailService {
         });
 
         // Add delay between batches to avoid Gmail rate limits
-        if (i + batchSize < allUsers.length) {
+        if (i + batchSize < filteredUsers.length) {
           console.log(`⏳ Waiting 10 seconds before next batch...`);
           await new Promise(resolve => setTimeout(resolve, 10000)); // 10 second delay
         }
