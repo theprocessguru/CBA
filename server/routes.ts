@@ -3,6 +3,49 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
 import { analyzeQRCodeImage, analyzeQRCodeImageAdvanced } from "./openaiService";
+
+// QR Code parsing utility
+function parseQrData(qrData: string): { userId?: number; badgeId?: string; email?: string; eventId?: number } {
+  if (!qrData) return {};
+  
+  // Clean and normalize the data
+  const cleaned = qrData.trim();
+  
+  // Check if it's a URL with parameters
+  try {
+    if (cleaned.includes('://') || cleaned.includes('?')) {
+      const url = new URL(cleaned.includes('://') ? cleaned : `https://dummy.com/${cleaned}`);
+      const params = url.searchParams;
+      
+      return {
+        userId: params.get('uid') ? parseInt(params.get('uid')!) : undefined,
+        badgeId: params.get('badge') || params.get('badgeId') || undefined,
+        email: params.get('email')?.toLowerCase() || undefined,
+        eventId: params.get('evt') || params.get('eventId') ? parseInt(params.get('evt') || params.get('eventId')!) : undefined
+      };
+    }
+  } catch (e) {
+    // Not a valid URL, continue with other parsing
+  }
+  
+  // Check if it's a number (possible userId)
+  if (/^\d+$/.test(cleaned)) {
+    return { userId: parseInt(cleaned) };
+  }
+  
+  // Check if it's an email
+  if (cleaned.includes('@')) {
+    return { email: cleaned.toLowerCase() };
+  }
+  
+  // Check if it's a badge format (contains letters and numbers)
+  if (/^[A-Z0-9-]+$/i.test(cleaned)) {
+    return { badgeId: cleaned.toUpperCase() };
+  }
+  
+  // Default: treat as badge ID
+  return { badgeId: cleaned };
+}
 import { db } from "./db";
 import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
@@ -4645,64 +4688,119 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Attendee lookup for organizer scanner with status
+  // Attendee lookup for organizer scanner with status  
   app.get('/api/attendee-lookup/:badgeId', isAuthenticated, async (req: any, res) => {
     try {
       const { badgeId } = req.params;
       const { includeStatus, eventId } = req.query;
       
-      let attendeeData: any = null;
-      let scannedUserId = null;
+      if (!eventId) {
+        return res.status(400).json({ 
+          message: 'Event ID is required for registration lookup',
+          debug: { badgeId, eventId: 'missing' }
+        });
+      }
       
-      // First try AI Summit badges
-      const aiSummitBadge = await storage.getAISummitBadgeById(badgeId);
-      if (aiSummitBadge) {
-        // Get registration to find user and validate registration status
-        let isRegistered = false;
-        let registrationId = null;
-        try {
-          const registration = await storage.getAISummitRegistrationById(parseInt(aiSummitBadge.participantId));
-          if (registration) {
-            scannedUserId = registration.userId;
-            isRegistered = true;
-            registrationId = registration.id;
-          }
-        } catch (e) {
-          console.log('Registration not found for badge - person may not be properly registered');
-          isRegistered = false;
+      console.log(`QR Lookup - Badge: ${badgeId}, Event: ${eventId}`);
+      
+      // Parse the QR code data properly
+      const parsed = parseQrData(badgeId);
+      console.log('Parsed QR data:', parsed);
+      
+      let attendeeData: any = null;
+      let scannedUserId: string | null = null;
+      let isRegistered = false;
+      let registrationId = null;
+      
+      // Strategy 1: Direct user ID from QR
+      if (parsed.userId) {
+        scannedUserId = parsed.userId.toString();
+        console.log(`Checking user ID ${scannedUserId} for event ${eventId}`);
+        
+        // Check CBA event registration
+        const registration = await db.select()
+          .from(cbaEventRegistrations)
+          .where(and(
+            eq(cbaEventRegistrations.userId, scannedUserId),
+            eq(cbaEventRegistrations.eventId, parseInt(eventId as string))
+          ))
+          .limit(1);
+          
+        if (registration.length > 0) {
+          isRegistered = true;
+          registrationId = registration[0].id;
+          console.log(`Found registration: ${registrationId}`);
         }
         
-        attendeeData = {
-          badgeId: aiSummitBadge.badgeId,
-          name: aiSummitBadge.name,
-          email: aiSummitBadge.email,
-          participantType: aiSummitBadge.primaryRole,
-          company: aiSummitBadge.company,
-          jobTitle: aiSummitBadge.jobTitle,
-          customRole: aiSummitBadge.customRole,
-          source: 'ai_summit',
-          isRegistered,
-          registrationId
-        };
-      } else {
-        // Try by QR handle (personal badges) - but check for AI Summit registration
-        const users = await storage.getAllUsers();
-        const userByHandle = users.find(u => u.qrHandle === badgeId);
+        // Get user details
+        const user = await storage.getUserById(scannedUserId);
+        if (user) {
+          attendeeData = {
+            badgeId: badgeId,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Unknown',
+            email: user.email,
+            participantType: user.participantType || 'attendee',
+            company: user.company,
+            jobTitle: user.jobTitle,
+            source: 'user_id',
+            isRegistered,
+            registrationId,
+            userId: scannedUserId
+          };
+        }
+      }
+      
+      // Strategy 2: Badge ID mapping (AI Summit badges)
+      if (!attendeeData && parsed.badgeId) {
+        console.log(`Checking badge ID ${parsed.badgeId}`);
+        
+        const aiSummitBadge = await storage.getAISummitBadgeById(parsed.badgeId);
+        if (aiSummitBadge) {
+          console.log('Found AI Summit badge');
+          const registration = await storage.getAISummitRegistrationById(parseInt(aiSummitBadge.participantId));
+          if (registration && registration.userId) {
+            scannedUserId = registration.userId;
+            
+            // Check CBA event registration for this user
+            const cbaRegistration = await db.select()
+              .from(cbaEventRegistrations)
+              .where(and(
+                eq(cbaEventRegistrations.userId, scannedUserId),
+                eq(cbaEventRegistrations.eventId, parseInt(eventId as string))
+              ))
+              .limit(1);
+              
+            if (cbaRegistration.length > 0) {
+              isRegistered = true;
+              registrationId = cbaRegistration[0].id;
+              console.log(`Found CBA registration: ${registrationId}`);
+            }
+            
+            attendeeData = {
+              badgeId: aiSummitBadge.badgeId,
+              name: aiSummitBadge.name,
+              email: aiSummitBadge.email,
+              participantType: aiSummitBadge.primaryRole,
+              company: aiSummitBadge.company,
+              jobTitle: aiSummitBadge.jobTitle,
+              customRole: aiSummitBadge.customRole,
+              source: 'ai_summit_badge',
+              isRegistered,
+              registrationId,
+              userId: scannedUserId
+            };
+          }
+        }
+      }
+      
+      // Strategy 3: QR Handle lookup  
+      if (!attendeeData && parsed.badgeId) {
+        console.log(`Checking QR handle ${parsed.badgeId}`);
+        
+        const userByHandle = await storage.getUserByQRHandle(parsed.badgeId);
         if (userByHandle) {
           scannedUserId = userByHandle.id;
-          
-          // Check if this user has an AI Summit registration
-          let isRegistered = false;
-          let registrationId = null;
-          try {
-            const registration = await storage.getAISummitRegistrationByUserId(userByHandle.id);
-            if (registration) {
-              isRegistered = true;
-              registrationId = registration.id;
-            }
-          } catch (e) {
-            console.log('No AI Summit registration found for user');
-          }
+          console.log(`Found user by QR handle: ${scannedUserId}`);
           
           attendeeData = {
             badgeId: userByHandle.qrHandle,
@@ -4719,7 +4817,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             volunteerExperience: userByHandle.volunteerExperience,
             source: 'qr_handle',
             isRegistered,
-            registrationId
+            registrationId,
+            userId: scannedUserId
           };
         }
       }
