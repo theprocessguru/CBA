@@ -220,10 +220,9 @@ export async function setupLocalAuth(app: Express) {
           }
           
           // Send welcome email to user
-          const welcomeResult = await emailService.sendVerificationEmail(
+          const welcomeResult = await emailService.sendWelcomeEmail(
             email,
             `${firstName} ${lastName}`,
-            'auto-verified', // Since verification is disabled, use placeholder token
             welcomeParticipantType
           );
           

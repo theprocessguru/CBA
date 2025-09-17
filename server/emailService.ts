@@ -448,6 +448,157 @@ export class EmailService {
   }
 
   /**
+   * Send welcome email to new registered users (no verification required)
+   */
+  async sendWelcomeEmail(
+    recipientEmail: string,
+    recipientName: string,
+    participantType: string = 'attendee'
+  ): Promise<{ success: boolean; message: string }> {
+    if (!this.isConfigured()) {
+      return {
+        success: false,
+        message: 'Email service not configured. Please contact IT support.'
+      };
+    }
+
+    // Define content based on participant type - focused on QR code setup
+    const participantContent: Record<string, {greeting: string, message: string, benefits: string[]}> = {
+      attendee: {
+        greeting: "Welcome to the AI Summit 2025!",
+        message: "Thank you for registering for the AI Summit 2025! Your registration is confirmed for October 1st, 2025 (10 AM-4 PM) at LSBU London South Bank University Croydon. IMPORTANT: You need to set up your QR code for event entry - this is your key to getting into the summit.",
+        benefits: [
+          "🔑 SET UP YOUR QR CODE: Log into your account and download your event badge", 
+          "📱 Print your badge or save the QR code on your phone for scanning at entry",
+          "📧 Watch for your badge email with printing instructions", 
+          "🎯 Present QR code at entrance on October 1st for instant access"
+        ]
+      },
+      vip: {
+        greeting: "Welcome to our VIP Community!",
+        message: "We're honored to have you as a VIP for the AI Summit 2025! Your registration includes exclusive VIP access on October 1st, 2025 at LSBU. CRITICAL: You must set up your QR code for VIP entry - this unlocks your premium access.",
+        benefits: [
+          "🔑 SET UP YOUR VIP QR CODE: Log in to download your special VIP badge",
+          "👑 VIP lounge access and priority seating at the AI Summit", 
+          "📱 Present your VIP QR code at entrance for instant premium access",
+          "🎯 Watch for your VIP badge email with exclusive entry instructions"
+        ]
+      },
+      volunteer: {
+        greeting: "Welcome to our Volunteer Team!",
+        message: "Thank you for volunteering at the AI Summit 2025! You're essential to making October 1st successful at LSBU. IMPORTANT: Set up your volunteer QR code immediately - this gives you early access and identifies you to coordinators.",
+        benefits: [
+          "🔑 SET UP VOLUNTEER QR CODE: Download your official volunteer badge now",
+          "⏰ Early entry access before 10 AM for setup duties", 
+          "📱 Your QR code identifies you to event coordinators instantly",
+          "🎯 Check email for volunteer schedule and badge printing instructions"
+        ]
+      },
+      speaker: {
+        greeting: "Welcome, Distinguished Speaker!",
+        message: "We're thrilled to have you speaking at the AI Summit 2025! Your session is confirmed for October 1st at LSBU. CRITICAL: Set up your speaker QR code now - this gives you backstage access and speaker privileges.",
+        benefits: [
+          "🔑 SET UP SPEAKER QR CODE: Download your speaker badge with backstage access",
+          "🎤 Speaker green room and presentation setup access", 
+          "📱 Present your QR code for instant speaker area entry",
+          "🎯 Watch for session schedule and technical setup instructions"
+        ]
+      },
+      exhibitor: {
+        greeting: "Welcome to the AI Summit Exhibition!",
+        message: "Thank you for exhibiting at the AI Summit 2025! Your exhibition space is confirmed for October 1st at LSBU. ESSENTIAL: Set up your exhibitor QR code immediately - this gives you setup access and stand management.",
+        benefits: [
+          "🔑 SET UP EXHIBITOR QR CODE: Download your exhibitor badge for stand access",
+          "🏗️ Early setup access and exhibition area entry", 
+          "📱 Present your QR code for instant exhibition space access",
+          "🎯 Watch for setup instructions and exhibition guidelines"
+        ]
+      }
+    };
+
+    const content = participantContent[participantType] || participantContent.attendee;
+    const benefitsList = content.benefits.map(b => `<li style="margin: 5px 0;">${b}</li>`).join('');
+
+    try {
+      const subject = `${content.greeting} - Your QR Code Setup Instructions`;
+      const htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(135deg, #3B82F6, #8B5CF6); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 28px;">AI Summit 2025</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Registration Confirmed!</p>
+          </div>
+          
+          <div style="background: white; padding: 30px; border: 1px solid #e5e7eb; border-top: none;">
+            <h2 style="color: #1f2937; margin-top: 0;">${content.greeting}</h2>
+            <p style="color: #374151; font-size: 18px; margin: 10px 0;">Hello ${recipientName}!</p>
+            
+            <p style="color: #4b5563; line-height: 1.6;">${content.message}</p>
+            
+            <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 20px; border-radius: 8px; margin: 25px 0;">
+              <h3 style="margin: 0 0 15px 0; color: #92400e;">🚨 ACTION REQUIRED - QR Code Setup</h3>
+              <ul style="margin: 0; padding-left: 20px; color: #92400e; line-height: 1.8;">
+                ${benefitsList}
+              </ul>
+            </div>
+            
+            <div style="background: #dbeafe; border: 1px solid #3b82f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <p style="margin: 0; color: #1e40af; font-weight: 500;">
+                📅 <strong>Event Details:</strong><br>
+                Date: October 1st, 2025<br>
+                Time: 10:00 AM - 4:00 PM<br>
+                Venue: LSBU London South Bank University Croydon
+              </p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${this.getBaseUrl()}/login" style="display: inline-block; background: linear-gradient(135deg, #10B981, #059669); color: white; text-decoration: none; padding: 15px 35px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                Log In & Download Your QR Badge
+              </a>
+            </div>
+            
+            <p style="color: #6b7280; font-size: 14px; text-align: center;">
+              Questions? Contact us at <a href="mailto:info@croydonba.org.uk" style="color: #3b82f6;">info@croydonba.org.uk</a>
+            </p>
+          </div>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
+        to: recipientEmail,
+        bcc: this.getAdminEmail(), // BCC admin on all emails
+        subject: subject,
+        html: htmlContent,
+      };
+
+      await this.transporter!.sendMail(mailOptions);
+      
+      // Log the email to database
+      await this.logEmail(null, recipientEmail, subject, htmlContent, 'welcome', 'sent', {
+        participantType
+      });
+      
+      return {
+        success: true,
+        message: 'Welcome email sent successfully'
+      };
+    } catch (error: any) {
+      console.error('Error sending welcome email:', error);
+      
+      // Log the failed email
+      await this.logEmail(null, recipientEmail, 'Welcome Email', '', 'welcome', 'failed', {
+        participantType,
+        error: error.message || 'Failed to send welcome email'
+      });
+      
+      return {
+        success: false,
+        message: error.message || 'Failed to send welcome email'
+      };
+    }
+  }
+
+  /**
    * Send verification emails to all unverified users (mass send)
    */
   async sendMassVerificationEmails(): Promise<{ 
@@ -761,7 +912,7 @@ export class EmailService {
   /**
    * Send an ad hoc email using template from database
    */
-  async sendWelcomeEmail(
+  async sendAdHocEmail(
     recipientEmail: string,
     recipientName: string,
     participantType: string = 'adhoc'
