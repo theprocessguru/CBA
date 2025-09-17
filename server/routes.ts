@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupLocalAuth, isAuthenticated } from "./localAuth";
+import { analyzeQRCodeImage, analyzeQRCodeImageAdvanced } from "./openaiService";
 import { db } from "./db";
 import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from "drizzle-orm";
 import multer from "multer";
@@ -4785,6 +4786,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error looking up attendee:', error);
       res.status(500).json({ message: 'Failed to lookup attendee' });
+    }
+  });
+
+  // OpenAI Vision QR Code Analysis
+  app.post('/api/analyze-qr-image', isAuthenticated, async (req: any, res) => {
+    try {
+      const { imageBase64 } = req.body;
+      
+      if (!imageBase64) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'No image data provided' 
+        });
+      }
+
+      // Remove data URL prefix if present
+      const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+      
+      // Analyze QR code using OpenAI Vision
+      const result = await analyzeQRCodeImageAdvanced(base64Data);
+      
+      if (result.success) {
+        res.json({
+          success: true,
+          qrData: result.data,
+          message: 'QR code successfully analyzed'
+        });
+      } else {
+        res.json({
+          success: false,
+          error: result.error || 'Could not detect QR code in image'
+        });
+      }
+      
+    } catch (error: any) {
+      console.error('QR code analysis error:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to analyze QR code: ' + error.message 
+      });
     }
   });
 
