@@ -68,8 +68,15 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
+  const useDevVite = process.env.DISABLE_VITE_DEV !== '1' && app.get("env") === "development";
+  if (useDevVite) {
+    try {
+      await setupVite(app, server);
+      log("Vite dev server started successfully");
+    } catch (err) {
+      log(`Vite dev failed: ${(err as Error).message}. Falling back to static build.`, 'vite');
+      serveStatic(app);
+    }
   } else {
     serveStatic(app);
   }
