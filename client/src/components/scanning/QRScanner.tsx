@@ -24,6 +24,7 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [manualInput, setManualInput] = useState('');
+  const [debugInfo, setDebugInfo] = useState<string>('Ready to scan');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const qrScannerRef = useRef<QrScanner | null>(null);
@@ -54,28 +55,24 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
 
     const initScanner = async () => {
       try {
+        setDebugInfo('Starting scanner...');
         setIsScanning(true);
         setCameraError(null);
         
         const qrScanner = new QrScanner(
           videoRef.current!,
-          (res: any) => {
-            const text = typeof res === 'string' ? res : res?.data;
-            if (typeof text === 'string' && text) {
-              console.log('QR Code detected:', text);
+          (result: any) => {
+            const text = typeof result === 'string' ? result : result?.data || result;
+            setDebugInfo(`Detected: ${text}`);
+            if (text) {
               handleScanResult(text);
             }
-          },
-          {
-            highlightScanRegion: true,
-            highlightCodeOutline: true,
-            preferredCamera: 'environment',
-            maxScansPerSecond: 5
           }
         );
         
         qrScannerRef.current = qrScanner;
         await qrScanner.start();
+        setDebugInfo('Scanner active - point at QR code');
         setIsScanning(true);
       } catch (error: any) {
         console.error('Failed to start QR scanner:', error);
@@ -150,8 +147,8 @@ export function QRScanner({ onScan, isActive, onClose, sessionStats }: QRScanner
                 {isScanning && (
                   <div className="absolute inset-2 border-2 border-green-500 rounded-lg animate-pulse">
                     <div className="absolute inset-2 border border-green-300 rounded opacity-50"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-green-500 text-xs font-medium bg-black/50 px-2 py-1 rounded">
-                      Scanning...
+                    <div className="absolute top-2 left-2 right-2 text-green-500 text-xs font-medium bg-black/70 px-2 py-1 rounded text-center">
+                      {debugInfo}
                     </div>
                   </div>
                 )}
