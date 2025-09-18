@@ -69,6 +69,17 @@ const AISummit = () => {
     staleTime: 0,
   });
 
+  // Fetch live AI Summit data
+  const { data: liveSpeakingSessions = [], isLoading: speakingSessionsLoading } = useQuery<any[]>({
+    queryKey: ['/api/ai-summit/speaking-sessions/active'],
+    retry: false,
+  });
+
+  const { data: liveWorkshops = [], isLoading: workshopsLoading } = useQuery<any[]>({
+    queryKey: ['/api/ai-summit/workshops/active'],
+    retry: false,
+  });
+
   // No longer needed - simplified registration
 
 
@@ -222,32 +233,104 @@ const AISummit = () => {
     registration: "Required - Reserve now, pay later if applicable"
   };
 
-  const speakers = [
+  // Extract speakers from live speaking sessions data
+  const speakers = liveSpeakingSessions.map(session => ({
+    name: session.facilitator || "CBA Team",
+    title: session.facilitatorCompany || "Event Team",
+    topic: session.title,
+    image: session.facilitatorImage || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
+    bio: session.facilitatorBio || "AI Summit speaker"
+  }));
+
+  // Format time from database date objects
+  const formatSessionTime = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    
+    const formatTime = (date: Date) => {
+      return date.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit', 
+        hour12: false 
+      });
+    };
+    
+    return `${formatTime(start)} - ${formatTime(end)}`;
+  };
+
+  // Transform live speaking sessions data into schedule format
+  const auditoriumSchedule = liveSpeakingSessions.map(session => ({
+    time: formatSessionTime(session.startTime, session.endTime),
+    title: session.title,
+    type: session.sessionType?.toLowerCase() || "talk",
+    speaker: session.facilitator || "CBA Team",
+    description: session.description || "AI Summit session",
+    capacity: `${session.maxCapacity} people`
+  }));
+
+  // Transform live workshops data into schedule format
+  const classroomSchedule = liveWorkshops.map(workshop => ({
+    time: formatSessionTime(workshop.startTime, workshop.endTime),
+    title: workshop.title,
+    type: "workshop",
+    speaker: workshop.facilitator || "CBA Team",
+    description: workshop.description || "Interactive workshop session",
+    capacity: `${workshop.maxCapacity} people`,
+    requirements: workshop.prerequisites || "No prerequisites"
+  }));
+
+  // Fallback data if API fails (keeping original structure for now)
+  const fallbackClassroomSchedule = [
     {
-      name: "Dr. Sarah Chen",
-      title: "AI Research Director, Tech Innovation Hub",
-      topic: "The Future of AI in Small Business",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
-      bio: "Leading AI researcher with 15+ years experience in business automation"
+      time: "11:00 - 11:45",
+      title: "Workshop: AI Tools for Content Creation",
+      type: "workshop",
+      speaker: "LSBU Students & Volunteers",
+      description: "Hands-on session with ChatGPT, Midjourney, and business AI tools",
+      capacity: "30 people",
+      requirements: "Bring laptop/tablet"
     },
     {
-      name: "Marcus Johnson",
-      title: "CEO, AI Solutions Ltd",
-      topic: "Implementing AI on a Budget",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
-      bio: "Serial entrepreneur who built three successful AI startups"
+      time: "12:00 - 12:45",
+      title: "Workshop: Building Your First AI Chatbot",
+      type: "workshop",
+      speaker: "CBA AI Experts",
+      description: "Build your first chatbot and automate customer interactions",
+      capacity: "25 people",
+      requirements: "Basic computer skills"
     },
     {
-      name: "Dr. Priya Patel",
-      title: "AI Ethics Consultant",
-      topic: "Responsible AI for Business",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200&q=80",
-      bio: "Expert in AI ethics and compliance frameworks"
+      time: "13:30 - 14:15",
+      title: "Workshop: AI for Data Analysis",
+      type: "workshop",
+      speaker: "Dr. Michael Roberts",
+      description: "Use AI to analyze business data and make informed decisions",
+      capacity: "20 people",
+      requirements: "Excel knowledge helpful"
+    },
+    {
+      time: "14:30 - 15:15",
+      title: "Workshop: AI Marketing Automation",
+      type: "workshop",
+      speaker: "Sarah Thompson",
+      description: "Automate your marketing with AI tools and strategies",
+      capacity: "25 people",
+      requirements: "Bring business ideas"
+    },
+    {
+      time: "15:30 - 16:00",
+      title: "Workshop Showcase & Networking",
+      type: "showcase",
+      speaker: "All Workshop Leaders",
+      description: "Share your workshop creations and connect with participants",
+      capacity: "65 people",
+      requirements: "None"
     }
   ];
 
-  // Second Floor Auditorium - Main speaking opportunities with large presentation screen
-  const auditoriumSchedule = [
+  // Use live data when available, fallback to static data
+  const finalClassroomSchedule = liveWorkshops.length > 0 ? classroomSchedule : fallbackClassroomSchedule;
+  const finalAuditoriumSchedule = liveSpeakingSessions.length > 0 ? auditoriumSchedule : [
     {
       time: "9:30 - 10:00",
       title: "Registration & Welcome Coffee",
@@ -295,55 +378,6 @@ const AISummit = () => {
       speaker: "All Speakers + CBA Team",
       description: "Q&A session and next steps for AI adoption in Croydon",
       capacity: "120 people"
-    }
-  ];
-
-  // Large Classroom - Workshop sessions with two screens, seats ~65 people
-  const classroomSchedule = [
-    {
-      time: "11:00 - 11:45",
-      title: "Workshop: AI Tools for Content Creation",
-      type: "workshop",
-      speaker: "LSBU Students & Volunteers",
-      description: "Hands-on session with ChatGPT, Midjourney, and business AI tools",
-      capacity: "30 people",
-      requirements: "Bring laptop/tablet"
-    },
-    {
-      time: "12:00 - 12:45",
-      title: "Workshop: Building Your First AI Chatbot",
-      type: "workshop",
-      speaker: "CBA AI Experts",
-      description: "Build your first chatbot and automate customer interactions",
-      capacity: "25 people",
-      requirements: "Basic computer skills"
-    },
-    {
-      time: "13:30 - 14:15",
-      title: "Workshop: AI for Data Analysis",
-      type: "workshop",
-      speaker: "Dr. Michael Roberts",
-      description: "Use AI to analyze business data and make informed decisions",
-      capacity: "20 people",
-      requirements: "Excel knowledge helpful"
-    },
-    {
-      time: "14:30 - 15:15",
-      title: "Workshop: AI Marketing Automation",
-      type: "workshop",
-      speaker: "Sarah Thompson",
-      description: "Automate your marketing with AI tools and strategies",
-      capacity: "25 people",
-      requirements: "Bring business ideas"
-    },
-    {
-      time: "15:30 - 16:00",
-      title: "Workshop Showcase & Networking",
-      type: "showcase",
-      speaker: "All Workshop Leaders",
-      description: "Share your workshop creations and connect with participants",
-      capacity: "65 people",
-      requirements: "None"
     }
   ];
 
@@ -1807,7 +1841,7 @@ const AISummit = () => {
                     <h3 className="text-lg font-semibold text-purple-900 mb-2">Second Floor Auditorium</h3>
                     <p className="text-sm text-purple-800">Main speaking opportunities with large presentation screen. Capacity: 120 people</p>
                   </div>
-                  {auditoriumSchedule.map((session, index) => (
+                  {finalAuditoriumSchedule.map((session, index) => (
                     <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
@@ -1843,7 +1877,7 @@ const AISummit = () => {
                     <h3 className="text-lg font-semibold text-green-900 mb-2">Large Classroom</h3>
                     <p className="text-sm text-green-800">Workshop sessions with two screens, seats around 65 people. Hands-on activities.</p>
                   </div>
-                  {classroomSchedule.map((session, index) => (
+                  {finalClassroomSchedule.map((session, index) => (
                     <Card key={index} className={`${getSessionColor(session.type)} hover:shadow-md transition-shadow`}>
                       <CardContent className="p-6">
                         <div className="flex items-start gap-4">
