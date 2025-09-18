@@ -43,12 +43,12 @@ export class EmailService {
       },
       {
         user: 'members.app2.croydonba@gmail.com', 
-        password: process.env.SMTP_PASSWORD_2,
+        password: process.env.SMTP_PASSWORD_2_NEW || process.env.SMTP_PASSWORD_2,
         label: 'Account 2'
       },
       {
         user: 'members.app3.croydonba@gmail.com',
-        password: process.env.GMAIL_ACCOUNT_3_PASSWORD,
+        password: process.env.GMAIL_ACCOUNT_3_PASSWORD_NEW || process.env.GMAIL_ACCOUNT_3_PASSWORD,
         label: 'Account 3'
       }
     ];
