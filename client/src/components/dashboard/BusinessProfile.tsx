@@ -285,7 +285,7 @@ const BusinessProfile = () => {
             <div className="space-y-4">
               <div className="flex gap-2 flex-wrap">
                 {userPersonTypes && userPersonTypes.length > 0 ? (
-                  userPersonTypes.map((personType) => (
+                  userPersonTypes.filter(personType => personType && personType.id).map((personType) => (
                     <Badge
                       key={personType.id}
                       variant="outline"
