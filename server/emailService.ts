@@ -1068,7 +1068,7 @@ export class EmailService {
       const mailOptions = {
         from: `"${this.config!.fromName}" <${this.config!.fromEmail}>`,
         to: recipientEmail,
-        bcc: this.getAdminEmail(), // BCC admin on template-based emails
+        // BCC removed for mass emails to conserve daily Gmail limits
         subject: subject,
         html: htmlContent,
       };
