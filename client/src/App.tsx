@@ -60,7 +60,6 @@ import NetworkBadgeScanner from "@/pages/BadgeScanner";
 import WorkshopManagement from "@/pages/workshop-management";
 import WorkshopRegistration from "@/pages/workshop-registration";
 import WorkshopScanner from "@/pages/workshop-scanner";
-import MyProfile from "@/pages/my-profile";
 import OccupancyDashboardPage from "@/pages/occupancy-dashboard";
 import EventManagement from "@/pages/admin/EventManagement";
 import AISummitSchedule from "@/pages/admin/AISummitSchedule";
@@ -509,9 +508,11 @@ function Router() {
         </MainLayout>
       </Route>
       <Route path="/my-profile">
-        <MainLayout>
-          <MyProfile />
-        </MainLayout>
+        <ProtectedRoute>
+          <MainLayout>
+            <Profile />
+          </MainLayout>
+        </ProtectedRoute>
       </Route>
       <Route path="/profile">
         <ProtectedRoute>
