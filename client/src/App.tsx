@@ -34,6 +34,8 @@ import ContentReports from "@/pages/admin/ContentReports";
 import UserManagement from "@/pages/admin/UserManagement";
 import Analytics from "@/pages/admin/Analytics";
 import EmailSettings from "@/pages/admin/EmailSettings";
+import AdminWorkshopManagement from "@/pages/admin/WorkshopManagement";
+import AdminSpeakingSessionManagement from "@/pages/admin/SpeakingSessionManagement";
 import EmailLogs from "@/pages/admin/EmailLogs";
 import AdminNotificationManagement from "@/pages/admin/notification-management";
 import UploadMembers from "@/pages/admin/upload-members";
@@ -727,6 +729,20 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <CouncillorImport />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/workshops">
+        <AdminRoute>
+          <MainLayout>
+            <AdminWorkshopManagement />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/speaking-sessions">
+        <AdminRoute>
+          <MainLayout>
+            <AdminSpeakingSessionManagement />
           </MainLayout>
         </AdminRoute>
       </Route>
