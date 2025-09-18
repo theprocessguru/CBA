@@ -7340,7 +7340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventsWithParsedFields = publishedEvents.map(event => ({
         ...event,
 
-        tags: event.tags ? JSON.parse(event.tags) : []
+        tags: (event.tags && typeof event.tags === 'string') ? event.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []
       }));
       
       res.json(eventsWithParsedFields);
@@ -7369,7 +7369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const eventWithParsedFields = {
         ...event,
 
-        tags: event.tags ? JSON.parse(event.tags) : []
+        tags: (event.tags && typeof event.tags === 'string') ? event.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : []
       };
       
       res.json(eventWithParsedFields);
