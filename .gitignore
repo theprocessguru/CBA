@@ -4,3 +4,13 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Security: Exclude credential files
+*cookies*.txt
+*session*.txt
+*token*.txt
+*auth*.txt
+*.pem
+*.key
+.env.*
+!.env.example

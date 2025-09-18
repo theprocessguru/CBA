@@ -55,19 +55,19 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.history.back()}
             className="text-white hover:bg-primary/20 p-1"
             title="Home"
           >
             <Home size={18} />
           </Button>
           <Link href="/dashboard">
-            <a className="font-bold text-lg">
+            <span className="font-bold text-lg">
               {user?.isAdmin ? 'Admin Dashboard' : 
                user?.participantType === 'student' ? 'Student Portal' :
                user?.participantType === 'volunteer' ? 'Volunteer Portal' :
                'My Business'}
-            </a>
+            </span>
           </Link>
         </div>
         <Button 
@@ -136,7 +136,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {user?.isAdmin ? (
                 <>
                   <Link href="/dashboard">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -145,11 +145,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Admin Dashboard
-                    </a>
+                    </div>
                   </Link>
 
                   <Link href="/dashboard/analytics">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/analytics' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -158,11 +158,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/analytics' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Analytics
-                    </a>
+                    </div>
                   </Link>
                   
                   <Link href="/dashboard/membership-management">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/membership-management' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -171,11 +171,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/membership-management' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Membership Management
-                    </a>
+                    </div>
                   </Link>
 
                   <Link href="/dashboard/user-management">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/user-management' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -184,11 +184,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/user-management' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       User Management
-                    </a>
+                    </div>
                   </Link>
                   
                   <Link href="/data-import">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/data-import' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -197,11 +197,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/data-import' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Data Import
-                    </a>
+                    </div>
                   </Link>
                   
                   <Link href="/dashboard/content-reports">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/content-reports' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -210,11 +210,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/content-reports' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Content Reports
-                    </a>
+                    </div>
                   </Link>
 
                   <Link href="/dashboard/event-management">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/event-management' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -223,11 +223,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/event-management' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Event Management
-                    </a>
+                    </div>
                   </Link>
 
                   <Link href="/mood-dashboard">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/mood-dashboard' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -236,11 +236,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/mood-dashboard' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Event Mood Dashboard
-                    </a>
+                    </div>
                   </Link>
 
                   <Link href="/admin/affiliates">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/admin/affiliates' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -249,14 +249,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/admin/affiliates' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Affiliate Management
-                    </a>
+                    </div>
                   </Link>
                 </>
               ) : (
                 <>
                   {/* NON-ADMIN USERS */}
                   <Link href="/dashboard">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -265,14 +265,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Dashboard
-                    </a>
+                    </div>
                   </Link>
                   
                   {/* Business features - only for business members, not volunteers or students */}
                   {user?.participantType !== 'volunteer' && user?.participantType !== 'student' && (
                     <>
                       <Link href="/dashboard/business-profile">
-                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                           location === '/dashboard/business-profile' 
                             ? 'bg-primary text-white' 
                             : 'text-neutral-700 hover:bg-neutral-100'
@@ -281,11 +281,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             location === '/dashboard/business-profile' ? 'text-white' : 'text-neutral-500'
                           }`} />
                           Business Profile
-                        </a>
+                        </div>
                       </Link>
                       
                       <Link href="/dashboard/products-services">
-                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                           location === '/dashboard/products-services' 
                             ? 'bg-primary text-white' 
                             : 'text-neutral-700 hover:bg-neutral-100'
@@ -294,11 +294,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             location === '/dashboard/products-services' ? 'text-white' : 'text-neutral-500'
                           }`} />
                           Products & Services
-                        </a>
+                        </div>
                       </Link>
                       
                       <Link href="/dashboard/special-offers">
-                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                           location === '/dashboard/special-offers' 
                             ? 'bg-primary text-white' 
                             : 'text-neutral-700 hover:bg-neutral-100'
@@ -307,14 +307,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             location === '/dashboard/special-offers' ? 'text-white' : 'text-neutral-500'
                           }`} />
                           Special Offers
-                        </a>
+                        </div>
                       </Link>
                     </>
                   )}
                   
                   {/* Common features for all non-admin users */}
                   <Link href="/dashboard/member-directory">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/dashboard/member-directory' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -323,13 +323,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/dashboard/member-directory' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Member Directory
-                    </a>
+                    </div>
                   </Link>
                   
                   {/* Affiliate programme - not for students or volunteers */}
                   {user?.participantType !== 'volunteer' && user?.participantType !== 'student' && (
                     <Link href="/dashboard/affiliate">
-                      <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                      <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                         location === '/dashboard/affiliate' 
                           ? 'bg-primary text-white' 
                           : 'text-neutral-700 hover:bg-neutral-100'
@@ -338,13 +338,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                           location === '/dashboard/affiliate' ? 'text-white' : 'text-neutral-500'
                         }`} />
                         Affiliate Programme
-                      </a>
+                      </div>
                     </Link>
                   )}
                   
                   {/* Event and badge features - for all non-admin users */}
                   <Link href="/my-personal-badge">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/my-personal-badge' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -353,11 +353,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/my-personal-badge' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       My Personal Badge
-                    </a>
+                    </div>
                   </Link>
                   
                   <Link href="/enhanced-personal-badge">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/enhanced-personal-badge' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -366,11 +366,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/enhanced-personal-badge' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       Enhanced Event Badges
-                    </a>
+                    </div>
                   </Link>
                   
                   <Link href="/my-qr-code">
-                    <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                    <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                       location === '/my-qr-code' 
                         ? 'bg-primary text-white' 
                         : 'text-neutral-700 hover:bg-neutral-100'
@@ -379,14 +379,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         location === '/my-qr-code' ? 'text-white' : 'text-neutral-500'
                       }`} />
                       My Events & Badges
-                    </a>
+                    </div>
                   </Link>
 
                   {/* Exhibitor-specific features */}
                   {user?.participantType === 'exhibitor' && (
                     <>
                       <Link href="/exhibitor-scanner">
-                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                           location === '/exhibitor-scanner' 
                             ? 'bg-primary text-white' 
                             : 'text-neutral-700 hover:bg-neutral-100'
@@ -395,10 +395,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             location === '/exhibitor-scanner' ? 'text-white' : 'text-neutral-500'
                           }`} />
                           Scan Visitors
-                        </a>
+                        </div>
                       </Link>
                       <Link href="/exhibitor-visitors">
-                        <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+                        <div className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
                           location === '/exhibitor-visitors' 
                             ? 'bg-primary text-white' 
                             : 'text-neutral-700 hover:bg-neutral-100'
@@ -407,7 +407,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                             location === '/exhibitor-visitors' ? 'text-white' : 'text-neutral-500'
                           }`} />
                           Exhibition Visitors
-                        </a>
+                        </div>
                       </Link>
                     </>
                   )}
@@ -422,10 +422,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div className="pt-2">
               <button 
                 onClick={() => {
-                  // Clear auth token
-                  localStorage.removeItem('authToken');
-                  
-                  // Make logout request with auth header
+                  // Get auth token BEFORE clearing it
                   const authToken = localStorage.getItem('authToken');
                   const headers: HeadersInit = {
                     'Content-Type': 'application/json'

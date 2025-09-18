@@ -76,16 +76,15 @@ const Navbar = () => {
                   <ArrowLeft size={20} />
                 </Button>
               )}
-              <Link href="/">
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-neutral-600 hover:text-neutral-800 lg:hidden"
-                  title="Home"
-                >
-                  <Home size={20} />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="text-neutral-600 hover:text-neutral-800 lg:hidden"
+                title="Home"
+                onClick={() => window.location.href = '/'}
+              >
+                <Home size={20} />
+              </Button>
               <Link href="/">
                 <div className="flex items-center space-x-2 cursor-pointer">
                   <img 
