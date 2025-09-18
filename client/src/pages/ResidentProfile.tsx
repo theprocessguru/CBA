@@ -24,8 +24,10 @@ import {
   CheckCircle,
   AlertCircle,
   Star,
-  Building
+  Building,
+  Calendar
 } from "lucide-react";
+import { EventBookingTab } from "@/components/profile/EventBookingTab";
 
 interface PersonType {
   id: number;
@@ -626,6 +628,19 @@ export default function ResidentProfile() {
 
         {/* Sidebar */}
         <div className="space-y-6">
+          
+          {/* Event Booking Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Event Booking
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <EventBookingTab />
+            </CardContent>
+          </Card>
           
           {/* Organization Memberships */}
           <Card>
