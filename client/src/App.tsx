@@ -510,7 +510,7 @@ function Router() {
       </Route>
       <Route path="/my-profile">
         <MainLayout>
-          <Profile />
+          <MyProfile />
         </MainLayout>
       </Route>
       <Route path="/profile">
