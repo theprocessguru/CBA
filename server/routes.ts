@@ -2651,6 +2651,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Register for a session (used by MyRegistrations component)
+  app.post('/api/register-session', isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      const userId = req.user.id;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID is required" });
+      }
+      
+      // Get user's badge
+      const userBadges = await storage.getBadgesByEmail(req.user.email);
+      if (!userBadges || userBadges.length === 0) {
+        return res.status(400).json({ message: "No badge found for user. Please complete your profile first." });
+      }
+      
+      const badgeId = userBadges[0].badgeId;
+      
+      // Check if workshop exists
+      const workshop = await storage.getAISummitWorkshopById(sessionId);
+      if (!workshop) {
+        return res.status(404).json({ message: "Session not found" });
+      }
+      
+      // Check if user is already registered
+      const existingRegistration = await storage.getAISummitWorkshopRegistrationByBadgeAndWorkshop(badgeId, sessionId);
+      if (existingRegistration) {
+        return res.status(409).json({ message: "You are already registered for this session" });
+      }
+      
+      // Register user for the workshop
+      const registration = await storage.createAISummitWorkshopRegistration({
+        badgeId: badgeId,
+        workshopId: sessionId,
+        attendeeName: req.user.firstName || 'Attendee',
+        attendeeEmail: req.user.email,
+        registeredAt: new Date()
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Successfully registered for session",
+        registration: registration
+      });
+    } catch (error: any) {
+      console.error("Error registering for session:", error);
+      res.status(500).json({ message: "Failed to register for session" });
+    }
+  });
+
+  // Cancel a registration (alternative endpoint used by MyRegistrations component)
+  app.delete('/api/cancel-registration', isAuthenticated, async (req: any, res) => {
+    try {
+      const { sessionId } = req.body;
+      const userId = req.user.id;
+      
+      if (!sessionId) {
+        return res.status(400).json({ message: "Session ID is required" });
+      }
+      
+      // Get user's badge
+      const userBadges = await storage.getBadgesByEmail(req.user.email);
+      if (!userBadges || userBadges.length === 0) {
+        return res.status(400).json({ message: "No badge found for user" });
+      }
+      
+      const badgeId = userBadges[0].badgeId;
+      
+      // Find and delete the registration
+      const registration = await storage.getAISummitWorkshopRegistrationByBadgeAndWorkshop(badgeId, sessionId);
+      if (!registration) {
+        return res.status(404).json({ message: "Registration not found" });
+      }
+      
+      await storage.deleteAISummitWorkshopRegistration(registration.id);
+      
+      res.json({ success: true, message: "Registration cancelled successfully" });
+    } catch (error: any) {
+      console.error("Error cancelling registration:", error);
+      res.status(500).json({ message: "Failed to cancel registration" });
+    }
+  });
+
   // Email configuration routes (admin only)
   app.get('/api/admin/email/status', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

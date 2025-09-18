@@ -1837,6 +1837,19 @@ export class DatabaseStorage implements IStorage {
     return registration;
   }
 
+  async getAISummitWorkshopRegistrationByBadgeAndWorkshop(badgeId: string, workshopId: number): Promise<AISummitWorkshopRegistration | undefined> {
+    const [registration] = await db
+      .select()
+      .from(aiSummitWorkshopRegistrations)
+      .where(
+        and(
+          eq(aiSummitWorkshopRegistrations.badgeId, badgeId),
+          eq(aiSummitWorkshopRegistrations.workshopId, workshopId)
+        )
+      );
+    return registration;
+  }
+
   async getWorkshopRegistrationsByWorkshopId(workshopId: number): Promise<AISummitWorkshopRegistration[]> {
     return await db
       .select()
