@@ -12,11 +12,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { Business, Category } from "@shared/schema";
-import { Plus, Upload, X } from "lucide-react";
+import { Business, Category, PersonType } from "@shared/schema";
+import { Plus, Upload, X, Users, Settings } from "lucide-react";
+import { Link } from "wouter";
 
 // Extended validation schema for business profile
 const businessProfileSchema = z.object({
@@ -37,6 +39,25 @@ const businessProfileSchema = z.object({
 
 type BusinessProfileFormValues = z.infer<typeof businessProfileSchema>;
 
+// PersonType interface is now imported from @shared/schema
+
+// Utility function to get person type color classes
+const getPersonTypeColor = (color: string): string => {
+  const colorMap: Record<string, string> = {
+    blue: "bg-blue-100 text-blue-800 border-blue-200",
+    green: "bg-green-100 text-green-800 border-green-200",
+    purple: "bg-purple-100 text-purple-800 border-purple-200",
+    orange: "bg-orange-100 text-orange-800 border-orange-200",
+    red: "bg-red-100 text-red-800 border-red-200",
+    yellow: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    pink: "bg-pink-100 text-pink-800 border-pink-200",
+    indigo: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    teal: "bg-teal-100 text-teal-800 border-teal-200",
+    cyan: "bg-cyan-100 text-cyan-800 border-cyan-200",
+  };
+  return colorMap[color] || "bg-gray-100 text-gray-800 border-gray-200";
+};
+
 const BusinessProfile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -54,6 +75,13 @@ const BusinessProfile = () => {
   
   const { data: categories, isLoading: isLoadingCategories } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+  });
+  
+  // Fetch user's person types for the Roles & Interests section
+  const { data: userPersonTypes, isLoading: isLoadingPersonTypes } = useQuery({
+    queryKey: ['/api/profile'],
+    enabled: !!user,
+    select: (data: any) => (data?.personTypes || []) as PersonType[],
   });
   
   // Convert business data for form defaults
@@ -228,6 +256,68 @@ const BusinessProfile = () => {
       <p className="text-neutral-600 mb-6">
         Complete your business profile to be visible in the directory and marketplace.
       </p>
+      
+      {/* Roles & Interests Summary Section */}
+      <Card className="mb-6" data-testid="card-roles-summary">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Roles & Interests
+          </CardTitle>
+          <CardDescription>
+            Your current roles and interests within the community. Manage these settings to customize your experience.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoadingPersonTypes ? (
+            <div className="space-y-3">
+              <div className="flex gap-2 flex-wrap">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-18" />
+              </div>
+              <Skeleton className="h-10 w-32" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex gap-2 flex-wrap">
+                {userPersonTypes && userPersonTypes.length > 0 ? (
+                  userPersonTypes.map((personType) => (
+                    <Badge
+                      key={personType.id}
+                      variant="outline"
+                      className={`${getPersonTypeColor(personType.color || "gray")} flex items-center gap-1`}
+                      data-testid={`badge-person-type-${personType.name}`}
+                    >
+                      {personType.icon && (
+                        <span className="text-xs">{personType.icon}</span>
+                      )}
+                      {personType.displayName}
+                    </Badge>
+                  ))
+                ) : (
+                  <div className="text-sm text-neutral-500 py-2">
+                    No roles assigned yet. Visit your profile to select your interests and roles.
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-start">
+                <Link href="/my-profile#roles">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center gap-2"
+                    data-testid="button-manage-roles"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Manage Roles
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
       
       <Card>
         <CardHeader>
