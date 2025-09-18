@@ -1,17 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GraduationCap, Users, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { GraduationCap, Users, Clock, CheckCircle, AlertCircle, MapPin } from "lucide-react";
 
 interface Workshop {
   id: number;
-  title: string;
+  eventName: string;
   description: string;
+  eventDate: string;
   startTime: string;
   endTime: string;
   maxCapacity: number;
   currentRegistrations: number;
   isActive: boolean;
+  venue: string;
 }
 
 interface WorkshopStats {
@@ -21,8 +23,9 @@ interface WorkshopStats {
 }
 
 export default function WorkshopManagement() {
-  const { data: workshops, isLoading: workshopsLoading } = useQuery<Workshop[]>({
-    queryKey: ['/api/ai-summit/workshops']
+  const { data: workshopsData, isLoading: workshopsLoading } = useQuery<any[]>({
+    queryKey: ['/api/admin/events'],
+    select: (events) => events?.filter(event => event.eventType === 'workshop') || []
   });
 
   const { data: stats, isLoading: statsLoading } = useQuery<WorkshopStats>({
@@ -76,7 +79,7 @@ export default function WorkshopManagement() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold" data-testid="total-workshops">
-                {stats?.totalWorkshops || 0}
+                {workshopsData?.length || 0}
               </div>
             </CardContent>
           </Card>
@@ -115,14 +118,14 @@ export default function WorkshopManagement() {
             <CardTitle>All Workshops</CardTitle>
           </CardHeader>
           <CardContent>
-            {!workshops || workshops.length === 0 ? (
+            {!workshopsData || workshopsData.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <AlertCircle className="h-12 w-12 mx-auto mb-4" />
                 <p>No workshops found</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {workshops.map((workshop) => (
+                {workshopsData.map((workshop) => (
                   <div
                     key={workshop.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
@@ -130,7 +133,7 @@ export default function WorkshopManagement() {
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold">{workshop.title}</h3>
+                        <h3 className="font-semibold">{workshop.eventName}</h3>
                         <Badge variant={workshop.isActive ? "default" : "secondary"}>
                           {workshop.isActive ? "Active" : "Inactive"}
                         </Badge>
@@ -141,23 +144,29 @@ export default function WorkshopManagement() {
                       <div className="flex items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          {new Date(workshop.startTime).toLocaleTimeString()} - {new Date(workshop.endTime).toLocaleTimeString()}
+                          {workshop.eventDate} • {workshop.startTime} - {workshop.endTime}
                         </div>
                         <div className="flex items-center gap-1">
                           <Users className="h-4 w-4" />
-                          {workshop.currentRegistrations}/{workshop.maxCapacity} registered
+                          {workshop.currentRegistrations || 0}/{workshop.maxCapacity || 0} registered
                         </div>
+                        {workshop.venue && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {workshop.venue}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="text-sm font-medium">
-                        Capacity: {Math.round((workshop.currentRegistrations / workshop.maxCapacity) * 100)}%
+                        Capacity: {workshop.maxCapacity ? Math.round(((workshop.currentRegistrations || 0) / workshop.maxCapacity) * 100) : 0}%
                       </div>
                       <div className="w-20 bg-gray-200 rounded-full h-2 mt-1">
                         <div
                           className="bg-blue-600 h-2 rounded-full"
                           style={{
-                            width: `${Math.min((workshop.currentRegistrations / workshop.maxCapacity) * 100, 100)}%`
+                            width: `${workshop.maxCapacity ? Math.min(((workshop.currentRegistrations || 0) / workshop.maxCapacity) * 100, 100) : 0}%`
                           }}
                         ></div>
                       </div>
