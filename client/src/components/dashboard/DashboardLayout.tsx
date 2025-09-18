@@ -55,11 +55,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           <Button 
             variant="ghost" 
             size="icon" 
-            onClick={() => window.history.back()}
             className="text-white hover:bg-primary/20 p-1"
             title="Home"
+            asChild
           >
-            <Home size={18} />
+            <Link href="/">
+              <Home size={18} />
+            </Link>
           </Button>
           <Link href="/dashboard">
             <span className="font-bold text-lg">

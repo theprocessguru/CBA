@@ -81,9 +81,11 @@ const Navbar = () => {
                 size="icon"
                 className="text-neutral-600 hover:text-neutral-800 lg:hidden"
                 title="Home"
-                onClick={() => window.location.href = '/'}
+                asChild
               >
-                <Home size={20} />
+                <Link href="/">
+                  <Home size={20} />
+                </Link>
               </Button>
               <Link href="/">
                 <div className="flex items-center space-x-2 cursor-pointer">
@@ -164,41 +166,59 @@ const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
                 <NotificationBell />
-                <Link href="/organizer-scanner">
-                  <Button size="sm" variant="ghost" className="text-sm px-3 py-2 whitespace-nowrap">
+                <Button size="sm" variant="ghost" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                  <Link href="/organizer-scanner">
                     📱 Scanner
-                  </Button>
-                </Link>
-                <Link href="/mobile-badge">
-                  <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
+                  </Link>
+                </Button>
+                <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                  <Link href="/mobile-badge">
                     Mobile Badge
-                  </Button>
-                </Link>
-                <Link href="/connections">
-                  <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
+                  </Link>
+                </Button>
+                <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                  <Link href="/connections">
                     <Users className="h-4 w-4 mr-1" />
                     Connections
-                  </Button>
-                </Link>
-                {(user as any)?.isAdmin && (
-                  <Link href="/admin/dashboard">
-                    <Button size="sm" variant="secondary" className="text-sm px-3 py-2 whitespace-nowrap">
-                      Admin
-                    </Button>
                   </Link>
-                )}
-                <Link href="/dashboard">
-                  <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
-                    Dashboard
+                </Button>
+                {(user as any)?.isAdmin && (
+                  <Button size="sm" variant="secondary" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                    <Link href="/admin/dashboard">
+                      Admin
+                    </Link>
                   </Button>
-                </Link>
+                )}
+                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                  <Link href="/dashboard">
+                    Dashboard
+                  </Link>
+                </Button>
                 <Button 
                   size="sm" 
                   variant="destructive" 
                   className="text-sm px-3 py-2 whitespace-nowrap"
-                  onClick={() => {
-                    // Use window.location.href for logout to ensure proper redirect
-                    window.location.href = '/api/logout';
+                  onClick={async () => {
+                    try {
+                      // Try POST first, fallback to GET if needed
+                      let response = await fetch('/api/auth/logout', { 
+                        method: 'POST',
+                        credentials: 'include'
+                      });
+                      
+                      if (!response.ok) {
+                        // Fallback to GET endpoint
+                        response = await fetch('/api/logout', { 
+                          method: 'GET',
+                          credentials: 'include'
+                        });
+                      }
+                    } catch (error) {
+                      console.error('Logout error:', error);
+                    } finally {
+                      localStorage.removeItem('authToken');
+                      window.location.href = '/';
+                    }
                   }}
                 >
                   Logout
@@ -206,16 +226,16 @@ const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center space-x-2">
-                <Link href="/trial-membership">
-                  <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap">
+                <Button size="sm" variant="outline" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                  <Link href="/trial-membership">
                     Join CBA
-                  </Button>
-                </Link>
-                <Link href="/login">
-                  <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap">
+                  </Link>
+                </Button>
+                <Button size="sm" className="text-sm px-3 py-2 whitespace-nowrap" asChild>
+                  <Link href="/login">
                     Login
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             )}
           </div>
