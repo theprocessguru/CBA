@@ -1251,33 +1251,33 @@ const AISummit = () => {
                   {(registrationStatus as any)?.isRegistered ? (
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Link href="/my-qr-code">
-                        <a className="bg-purple-600 text-white hover:bg-purple-700 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        <div className="bg-purple-600 text-white hover:bg-purple-700 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
                           <Star className="h-5 w-5" />
                           My QR Code
-                        </a>
+                        </div>
                       </Link>
                       <Link href="/my-registrations">
-                        <a className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                        <div className="bg-orange-500 text-white hover:bg-orange-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
                           <Calendar className="h-5 w-5" />
                           My Schedule
-                        </a>
+                        </div>
                       </Link>
                     </div>
                   ) : (
                     <Link href="/workshop-registration">
-                      <a className="bg-green-500 text-white hover:bg-green-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+                      <div className="bg-green-500 text-white hover:bg-green-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
                         <BookOpen className="h-5 w-5" />
                         Workshop Registration
-                      </a>
+                      </div>
                     </Link>
                   )}
                 </div>
                 <div className="pt-4">
                   <Link href="/my-registrations">
-                    <a className="bg-blue-500 text-white hover:bg-blue-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mb-4">
+                    <div className="bg-blue-500 text-white hover:bg-blue-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mb-4 cursor-pointer">
                       <Calendar className="h-5 w-5" />
                       My Schedule & Calendar
-                    </a>
+                    </div>
                   </Link>
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 justify-center max-w-4xl mx-auto">
                     <button 
@@ -2320,12 +2320,12 @@ const AISummit = () => {
                   <UserPlus className="mr-2 h-5 w-5" />
                   <span>Volunteer with Us</span>
                 </Button>
-                <Link to="/membership-benefits">
-                  <Button size="lg" className="bg-white/20 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold transition-all duration-200 shadow-lg">
+                <Button size="lg" className="bg-white/20 backdrop-blur-sm border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold transition-all duration-200 shadow-lg" asChild>
+                  <Link href="/membership-benefits">
                     <Users className="mr-2 h-5 w-5" />
                     <span>Join CBA Membership</span>
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </CardContent>
           </Card>
