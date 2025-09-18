@@ -5984,6 +5984,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Volunteer welcome email endpoint (no auth required for testing)
+  app.post('/api/volunteer-welcome-emails', async (req, res) => {
+    try {
+      const { userIds } = req.body;
+      
+      if (!userIds || !Array.isArray(userIds)) {
+        return res.status(400).json({ message: 'User IDs array is required' });
+      }
+      
+      const { onboardingService } = await import("./onboardingService");
+      
+      // Send onboarding to each volunteer
+      for (const userId of userIds) {
+        try {
+          await onboardingService.sendOnboarding(userId);
+          console.log(`Volunteer welcome email sent to user ${userId}`);
+        } catch (error) {
+          console.error(`Failed to send welcome email to user ${userId}:`, error);
+        }
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Welcome emails sent to ${userIds.length} volunteers` 
+      });
+    } catch (error) {
+      console.error('Error sending volunteer welcome emails:', error);
+      res.status(500).json({ message: 'Failed to send welcome emails' });
+    }
+  });
+
   // Admin email template management routes
   app.get('/api/admin/email-templates', isAuthenticated, isAdmin, async (req, res) => {
     try {
