@@ -799,27 +799,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/exit-impersonation', isAuthenticated, async (req: any, res) => {
     try {
       const authToken = req.headers['authorization']?.replace('Bearer ', '');
-      if (!authToken) {
-        return res.status(400).json({ message: "Auth token required" });
-      }
+      const session = req.session as any;
 
       const { impersonationData } = await import('./localAuth');
-      const impersonation = impersonationData.get(authToken);
+      const tokenImpersonation = authToken ? impersonationData.get(authToken) : null;
+      const sessionImpersonation = session?.impersonating && session?.originalAdmin;
       
-      if (!impersonation) {
+      // Check if we're impersonating via either token or session
+      if (!tokenImpersonation && !sessionImpersonation) {
         return res.status(400).json({ message: "Not currently impersonating" });
       }
 
-      // Clear impersonation data
-      impersonationData.delete(authToken);
+      let originalAdmin;
 
-      // Also clear session impersonation data
-      const session = req.session as any;
-      session.impersonating = false;
-      delete session.impersonatedUserId;
-      delete session.originalAdmin;
+      // Clear token-based impersonation if it exists
+      if (tokenImpersonation && authToken) {
+        impersonationData.delete(authToken);
+        originalAdmin = tokenImpersonation.originalAdmin;
+      }
+
+      // Clear session-based impersonation if it exists
+      if (sessionImpersonation) {
+        originalAdmin = session.originalAdmin;
+        session.impersonating = false;
+        delete session.impersonatedUserId;
+        delete session.originalAdmin;
+      }
       
-      console.log(`Exited impersonation, returning to admin: ${impersonation.originalAdmin.email}`);
+      console.log(`Exited impersonation, returning to admin: ${originalAdmin?.email || 'unknown'}`);
       
       res.json({
         success: true,

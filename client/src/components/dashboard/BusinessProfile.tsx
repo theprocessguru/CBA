@@ -42,7 +42,9 @@ type BusinessProfileFormValues = z.infer<typeof businessProfileSchema>;
 // PersonType interface is now imported from @shared/schema
 
 // Utility function to get person type color classes
-const getPersonTypeColor = (color: string): string => {
+const getPersonTypeColor = (color: string | null): string => {
+  if (!color) return "bg-gray-100 text-gray-800 border-gray-200";
+  
   const colorMap: Record<string, string> = {
     blue: "bg-blue-100 text-blue-800 border-blue-200",
     green: "bg-green-100 text-green-800 border-green-200",
@@ -54,6 +56,7 @@ const getPersonTypeColor = (color: string): string => {
     indigo: "bg-indigo-100 text-indigo-800 border-indigo-200",
     teal: "bg-teal-100 text-teal-800 border-teal-200",
     cyan: "bg-cyan-100 text-cyan-800 border-cyan-200",
+    gray: "bg-gray-100 text-gray-800 border-gray-200",
   };
   return colorMap[color] || "bg-gray-100 text-gray-800 border-gray-200";
 };
