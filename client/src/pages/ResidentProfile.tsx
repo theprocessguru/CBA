@@ -144,36 +144,9 @@ export default function ResidentProfile() {
   const selfAssignPersonTypeMutation = useMutation({
     mutationFn: async ({ typeId, action }: { typeId: number; action: 'add' | 'remove' }) => {
       if (action === 'add') {
-        const response = await fetch('/api/users/me/person-types', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ personTypeId: typeId }),
-        });
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || 'Failed to assign person type');
-        }
-        return response.json();
+        return apiRequest('POST', '/api/users/me/person-types', { personTypeId: typeId });
       } else if (action === 'remove') {
-        const response = await fetch(`/api/users/me/person-types/${typeId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) {
-          // For DELETE, check if there's content before parsing JSON
-          const contentLength = response.headers.get('content-length');
-          let error;
-          if (response.status === 204 || contentLength === '0') {
-            error = { message: 'Failed to remove person type' };
-          } else {
-            error = await response.json();
-          }
-          throw new Error(error.message || 'Failed to remove person type');
-        }
-        // Handle successful DELETE response
-        if (response.status === 204 || response.headers.get('content-length') === '0') {
-          return null; // No content for 204 responses
-        }
-        return response.json();
+        return apiRequest('DELETE', `/api/users/me/person-types/${typeId}`);
       }
     },
     onSuccess: () => {
@@ -204,29 +177,14 @@ export default function ResidentProfile() {
   const adminAssignPersonTypeMutation = useMutation({
     mutationFn: async ({ typeId, action, isPrimary }: { typeId: number; action: 'add' | 'remove' | 'setPrimary'; isPrimary?: boolean }) => {
       if (action === 'add') {
-        const response = await fetch(`/api/admin/users/${user?.id}/person-types`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ personTypeId: typeId, isPrimary: isPrimary || false }),
+        return apiRequest('POST', `/api/admin/users/${user?.id}/person-types`, { 
+          personTypeId: typeId, 
+          isPrimary: isPrimary || false 
         });
-        if (!response.ok) throw new Error('Failed to assign person type');
-        return response.json();
       } else if (action === 'remove') {
-        const response = await fetch(`/api/admin/users/${user?.id}/person-types/${typeId}`, {
-          method: 'DELETE',
-        });
-        if (!response.ok) throw new Error('Failed to remove person type');
-        // Handle successful DELETE response
-        if (response.status === 204 || response.headers.get('content-length') === '0') {
-          return null; // No content for 204 responses
-        }
-        return response.json();
+        return apiRequest('DELETE', `/api/admin/users/${user?.id}/person-types/${typeId}`);
       } else if (action === 'setPrimary') {
-        const response = await fetch(`/api/admin/users/${user?.id}/person-types/${typeId}/primary`, {
-          method: 'PUT',
-        });
-        if (!response.ok) throw new Error('Failed to set primary person type');
-        return response.json();
+        return apiRequest('PUT', `/api/admin/users/${user?.id}/person-types/${typeId}/primary`);
       }
     },
     onSuccess: () => {
