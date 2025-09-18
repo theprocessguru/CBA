@@ -4,7 +4,9 @@ import { storage } from './storage';
 import type { 
   InsertAISummitBadge, 
   AISummitBadge,
-  InsertAISummitCheckIn 
+  InsertAISummitCheckIn,
+  AISummitSessionAttendance,
+  InsertAISummitSessionAttendance
 } from '@shared/schema';
 
 export interface BadgeInfo {
@@ -29,6 +31,17 @@ export interface CheckInResult {
   success: boolean;
   badge?: AISummitBadge;
   checkInType: 'check_in' | 'check_out';
+  message: string;
+  isFirstCheckIn?: boolean;
+}
+
+export interface SessionCheckInResult {
+  success: boolean;
+  badge?: AISummitBadge;
+  checkInType: 'check_in' | 'check_out';
+  sessionType: 'workshop' | 'speaking_session';
+  sessionId: number;
+  sessionTitle?: string;
   message: string;
   isFirstCheckIn?: boolean;
 }
@@ -769,6 +782,120 @@ export class BadgeService {
         success: false,
         checkInType,
         message: 'Check-in processing failed. Please try again or contact support.'
+      };
+    }
+  }
+
+  /**
+   * Process session check-in/check-out for a badge
+   */
+  async processSessionCheckIn(
+    badgeId: string, 
+    sessionId: number, 
+    sessionType: 'workshop' | 'speaking_session',
+    checkInType: 'check_in' | 'check_out' = 'check_in',
+    staffMember?: string
+  ): Promise<SessionCheckInResult> {
+    try {
+      const badge = await storage.getAISummitBadgeById(badgeId);
+      
+      if (!badge) {
+        return {
+          success: false,
+          checkInType,
+          sessionType,
+          sessionId,
+          message: 'Badge not found. Please verify the badge ID and try again.'
+        };
+      }
+
+      if (!badge.isActive) {
+        return {
+          success: false,
+          checkInType,
+          sessionType,
+          sessionId,
+          message: 'This badge has been deactivated. Please contact support.'
+        };
+      }
+
+      // Get previous session attendance for this badge and session
+      const previousAttendance = await storage.getSessionAttendanceBySessionId(sessionId, sessionType);
+      const badgeAttendance = previousAttendance.filter(a => a.badgeId === badgeId);
+      // Since getSessionAttendanceBySessionId returns records ordered DESC by time (newest first),
+      // the first item [0] is the most recent attendance record for this badge
+      const lastAttendance = badgeAttendance[0];
+      
+      // Determine if this is a valid check-in/out sequence for this session
+      if (checkInType === 'check_in' && lastAttendance?.checkInType === 'check_in') {
+        return {
+          success: false,
+          checkInType,
+          sessionType,
+          sessionId,
+          message: 'Already checked into this session. Please check out first before checking in again.'
+        };
+      }
+      
+      if (checkInType === 'check_out' && (!lastAttendance || lastAttendance.checkInType === 'check_out')) {
+        return {
+          success: false,
+          checkInType,
+          sessionType,
+          sessionId,
+          message: 'Not currently checked into this session. Please check in first.'
+        };
+      }
+
+      // Get session details for user-friendly messaging
+      let sessionTitle = 'Session';
+      try {
+        if (sessionType === 'workshop') {
+          const workshop = await storage.getAISummitWorkshopById(sessionId);
+          sessionTitle = workshop?.title || 'Workshop';
+        } else if (sessionType === 'speaking_session') {
+          const session = await storage.getAISummitSpeakingSessionById(sessionId);
+          sessionTitle = session?.title || 'Speaking Session';
+        }
+      } catch (error) {
+        console.error('Error fetching session details:', error);
+      }
+
+      // Record the session attendance
+      const attendanceData: InsertAISummitSessionAttendance = {
+        badgeId,
+        sessionType,
+        sessionId,
+        checkInType,
+        checkInMethod: 'qr_scan',
+        staffMember: staffMember || 'System'
+      };
+
+      await storage.createAISummitSessionAttendance(attendanceData);
+
+      const isFirstCheckIn = checkInType === 'check_in' && badgeAttendance.filter(a => a.checkInType === 'check_in').length === 0;
+
+      return {
+        success: true,
+        badge,
+        checkInType,
+        sessionType,
+        sessionId,
+        sessionTitle,
+        message: checkInType === 'check_in' 
+          ? `Welcome${isFirstCheckIn ? ' to your first time in' : ' back to'} "${sessionTitle}", ${badge.name}!`
+          : `Thanks for attending "${sessionTitle}", ${badge.name}!`,
+        isFirstCheckIn
+      };
+
+    } catch (error) {
+      console.error('Session check-in processing error:', error);
+      return {
+        success: false,
+        checkInType,
+        sessionType,
+        sessionId,
+        message: 'Session check-in processing failed. Please try again or contact support.'
       };
     }
   }

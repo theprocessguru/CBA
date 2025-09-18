@@ -834,6 +834,26 @@ export const aiSummitSessionRegistrations = pgTable("ai_summit_session_registrat
   primaryKey(table.sessionId, table.badgeId)
 ]);
 
+// AI Summit session attendance table - tracks QR scan in/out for specific sessions
+export const aiSummitSessionAttendance = pgTable("ai_summit_session_attendance", {
+  id: serial("id").primaryKey(),
+  badgeId: varchar("badge_id").notNull().references(() => aiSummitBadges.badgeId),
+  sessionType: varchar("session_type").notNull(), // workshop, speaking_session
+  sessionId: integer("session_id").notNull(), // References either workshop.id or speaking_session.id
+  checkInType: varchar("check_in_type").notNull(), // check_in, check_out
+  checkInTime: timestamp("check_in_time").defaultNow(),
+  checkInMethod: varchar("check_in_method").default("qr_scan"), // qr_scan, manual_entry
+  staffMember: varchar("staff_member"), // Who processed the check-in
+  notes: text("notes"),
+});
+
+export const insertAISummitSessionAttendanceSchema = createInsertSchema(aiSummitSessionAttendance).omit({
+  id: true,
+  checkInTime: true,
+});
+export type InsertAISummitSessionAttendance = z.infer<typeof insertAISummitSessionAttendanceSchema>;
+export type AISummitSessionAttendance = typeof aiSummitSessionAttendance.$inferSelect;
+
 // Membership Tiers table
 export const membershipTiers = pgTable("membership_tiers", {
   id: text("id").primaryKey(),

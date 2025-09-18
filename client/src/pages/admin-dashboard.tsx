@@ -32,6 +32,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { WorkshopAttendanceCount } from "@/components/admin/WorkshopAttendanceCount";
+import { SpeakingSessionAttendanceCount } from "@/components/admin/SpeakingSessionAttendanceCount";
 
 interface ImpactMetrics {
   // Member metrics
@@ -251,6 +253,28 @@ function AdminSidebar() {
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-700">
               <QrCode size={18} />
               <span>Test QR Codes</span>
+            </div>
+          </Link>
+        </div>
+
+        <div className="pt-2 border-t border-gray-200">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Session Management</p>
+          <Link href="/admin/workshops">
+            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-purple-50 text-gray-700 hover:text-purple-700">
+              <div className="flex items-center space-x-2">
+                <GraduationCap size={18} />
+                <span>Workshops</span>
+              </div>
+              <WorkshopAttendanceCount />
+            </div>
+          </Link>
+          <Link href="/admin/speaking-sessions">
+            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-indigo-50 text-gray-700 hover:text-indigo-700">
+              <div className="flex items-center space-x-2">
+                <Users size={18} />
+                <span>Speaking Sessions</span>
+              </div>
+              <SpeakingSessionAttendanceCount />
             </div>
           </Link>
         </div>

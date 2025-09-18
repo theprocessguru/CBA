@@ -4970,6 +4970,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Process session scan (workshop/speaking session check-in/check-out)
+  app.post('/api/process-session-scan', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Validate request body with Zod schema
+      const sessionScanSchema = z.object({
+        badgeId: z.string().min(1, "Badge ID is required"),
+        sessionId: z.number().positive("Session ID must be a positive number"),
+        sessionType: z.enum(["workshop", "speaking_session"], {
+          errorMap: () => ({ message: "Session type must be 'workshop' or 'speaking_session'" })
+        }),
+        checkInType: z.enum(["check_in", "check_out"], {
+          errorMap: () => ({ message: "Check-in type must be 'check_in' or 'check_out'" })
+        }),
+        staffMember: z.string().optional(),
+        notes: z.string().optional()
+      });
+
+      const validatedData = validateRequest(sessionScanSchema, req.body);
+      const { badgeId, sessionId, sessionType, checkInType, staffMember, notes } = validatedData;
+
+      // Process the session scan using badgeService
+      const result = await badgeService.processSessionCheckIn(
+        badgeId,
+        parseInt(sessionId),
+        sessionType as 'workshop' | 'speaking_session',
+        checkInType as 'check_in' | 'check_out',
+        staffMember || req.user.email
+      );
+
+      if (result.success) {
+        res.json({
+          success: true,
+          message: result.message,
+          badge: result.badge,
+          sessionType: result.sessionType,
+          sessionId: result.sessionId,
+          sessionTitle: result.sessionTitle,
+          checkInType: result.checkInType,
+          isFirstCheckIn: result.isFirstCheckIn
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.message,
+          sessionType: result.sessionType,
+          sessionId: result.sessionId,
+          checkInType: result.checkInType
+        });
+      }
+
+    } catch (error: any) {
+      console.error('Session scan processing error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Session scan processing failed: ' + error.message 
+      });
+    }
+  });
+
   // Process scan (check-in/check-out/verification)
   app.post('/api/process-scan', isAuthenticated, async (req: any, res) => {
     try {
@@ -5951,6 +6010,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching user emails:', error);
       res.status(500).json({ message: 'Failed to fetch email communications' });
+    }
+  });
+
+  // Get workshop statistics for admin dashboard
+  app.get('/api/admin/workshop-stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const workshopStats = await storage.getWorkshopStatistics();
+      res.json(workshopStats);
+    } catch (error) {
+      console.error('Error fetching workshop statistics:', error);
+      res.status(500).json({ message: 'Failed to fetch workshop statistics' });
+    }
+  });
+
+  // Get speaking session statistics for admin dashboard
+  app.get('/api/admin/speaking-session-stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const sessionStats = await storage.getSpeakingSessionStatistics();
+      res.json(sessionStats);
+    } catch (error) {
+      console.error('Error fetching speaking session statistics:', error);
+      res.status(500).json({ message: 'Failed to fetch speaking session statistics' });
     }
   });
 

@@ -21,6 +21,7 @@ import {
   aiSummitWorkshopRegistrations,
   aiSummitSpeakingSessions,
   aiSummitSessionRegistrations,
+  aiSummitSessionAttendance,
   aiSummitVenues,
   type User,
   type UpsertUser,
@@ -65,6 +66,8 @@ import {
   type InsertAISummitSpeakingSession,
   type AISummitSpeakingSessionRegistration,
   type InsertAISummitSpeakingSessionRegistration,
+  type AISummitSessionAttendance,
+  type InsertAISummitSessionAttendance,
   type AISummitVenue,
   type InsertAISummitVenue,
   contentReports,
@@ -266,6 +269,12 @@ export interface IStorage {
   createAISummitCheckIn(checkIn: InsertAISummitCheckIn): Promise<AISummitCheckIn>;
   getCheckInsByBadgeId(badgeId: string): Promise<AISummitCheckIn[]>;
   getAllAISummitCheckIns(): Promise<AISummitCheckIn[]>;
+  
+  // Session attendance operations
+  createAISummitSessionAttendance(attendance: InsertAISummitSessionAttendance): Promise<AISummitSessionAttendance>;
+  getSessionAttendanceByBadgeId(badgeId: string): Promise<AISummitSessionAttendance[]>;
+  getSessionAttendanceBySessionId(sessionId: number, sessionType: string): Promise<AISummitSessionAttendance[]>;
+  getActiveSessionAttendance(sessionId: number, sessionType: string): Promise<AISummitSessionAttendance[]>;
   
   // Volunteer operations
   createAISummitVolunteer(volunteer: InsertAISummitVolunteer): Promise<AISummitVolunteer>;
@@ -490,6 +499,10 @@ export interface IStorage {
   createEventReminder(eventId: number, userIds: string[], hoursBeforeEvent: number): Promise<Notification[]>;
   createMeetingReminder(meetingId: number, userIds: string[], hoursBeforeMeeting: number): Promise<Notification[]>;
   scheduleAutomaticReminders(): Promise<void>;
+
+  // Session attendance statistics
+  getWorkshopStatistics(): Promise<{ totalWorkshops: number; totalRegistrations: number; activeAttendance: number }>;
+  getSpeakingSessionStatistics(): Promise<{ totalSessions: number; totalRegistrations: number; activeAttendance: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1606,6 +1619,62 @@ export class DatabaseStorage implements IStorage {
 
   async getAllAISummitCheckIns(): Promise<AISummitCheckIn[]> {
     return await db.select().from(aiSummitCheckIns).orderBy(desc(aiSummitCheckIns.checkInTime));
+  }
+
+  async getAISummitCheckInsByBadgeId(badgeId: string): Promise<AISummitCheckIn[]> {
+    return await db
+      .select()
+      .from(aiSummitCheckIns)
+      .where(eq(aiSummitCheckIns.badgeId, badgeId))
+      .orderBy(desc(aiSummitCheckIns.checkInTime));
+  }
+
+  // Session attendance operations
+  async createAISummitSessionAttendance(attendanceData: InsertAISummitSessionAttendance): Promise<AISummitSessionAttendance> {
+    const [attendance] = await db
+      .insert(aiSummitSessionAttendance)
+      .values(attendanceData)
+      .returning();
+    return attendance;
+  }
+
+  async getSessionAttendanceByBadgeId(badgeId: string): Promise<AISummitSessionAttendance[]> {
+    return await db
+      .select()
+      .from(aiSummitSessionAttendance)
+      .where(eq(aiSummitSessionAttendance.badgeId, badgeId))
+      .orderBy(desc(aiSummitSessionAttendance.checkInTime));
+  }
+
+  async getSessionAttendanceBySessionId(sessionId: number, sessionType: string): Promise<AISummitSessionAttendance[]> {
+    return await db
+      .select()
+      .from(aiSummitSessionAttendance)
+      .where(
+        and(
+          eq(aiSummitSessionAttendance.sessionId, sessionId),
+          eq(aiSummitSessionAttendance.sessionType, sessionType)
+        )
+      )
+      .orderBy(desc(aiSummitSessionAttendance.checkInTime));
+  }
+
+  async getActiveSessionAttendance(sessionId: number, sessionType: string): Promise<AISummitSessionAttendance[]> {
+    // Get attendance records for this session
+    const allAttendance = await this.getSessionAttendanceBySessionId(sessionId, sessionType);
+    
+    // Group by badge ID and find current status (last check-in type for each badge)
+    const badgeStatus = new Map<string, AISummitSessionAttendance>();
+    
+    allAttendance.forEach(record => {
+      const existing = badgeStatus.get(record.badgeId);
+      if (!existing || record.checkInTime > existing.checkInTime) {
+        badgeStatus.set(record.badgeId, record);
+      }
+    });
+    
+    // Return only those who are currently checked in (last action was check_in)
+    return Array.from(badgeStatus.values()).filter(record => record.checkInType === 'check_in');
   }
 
   // Volunteer operations
@@ -3383,6 +3452,103 @@ export class DatabaseStorage implements IStorage {
   async getEventRatingStats(eventId: number): Promise<any> { return {}; }
   async getEventFeedbackSummary(eventId: number): Promise<any> { return {}; }
   // Event scanner and scan history methods are implemented above (lines ~2265-2320)
+
+  // Session attendance statistics implementations
+  async getWorkshopStatistics(): Promise<{ totalWorkshops: number; totalRegistrations: number; activeAttendance: number }> {
+    try {
+      // Get total number of workshops
+      const [workshopCountResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(aiSummitWorkshops);
+      const totalWorkshops = workshopCountResult?.count || 0;
+
+      // Get total number of workshop registrations
+      const [registrationCountResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(aiSummitWorkshopRegistrations);
+      const totalRegistrations = registrationCountResult?.count || 0;
+
+      // Get current active attendance (checked in but not checked out)
+      const [activeAttendanceResult] = await db
+        .select({ count: sql<number>`cast(count(DISTINCT badge_id) as int)` })
+        .from(aiSummitSessionAttendance)
+        .where(and(
+          eq(aiSummitSessionAttendance.sessionType, 'workshop'),
+          eq(aiSummitSessionAttendance.checkInType, 'check_in'),
+          // Only count if they're still checked in (no corresponding check_out after their last check_in)
+          sql`NOT EXISTS (
+            SELECT 1 FROM ai_summit_session_attendance sa2 
+            WHERE sa2.badge_id = ai_summit_session_attendance.badge_id 
+            AND sa2.session_id = ai_summit_session_attendance.session_id
+            AND sa2.session_type = 'workshop'
+            AND sa2.check_in_type = 'check_out'
+            AND sa2.check_in_time > ai_summit_session_attendance.check_in_time
+          )`
+        ));
+      const activeAttendance = activeAttendanceResult?.count || 0;
+
+      return {
+        totalWorkshops,
+        totalRegistrations,
+        activeAttendance
+      };
+    } catch (error) {
+      console.error('Error getting workshop statistics:', error);
+      return {
+        totalWorkshops: 0,
+        totalRegistrations: 0,
+        activeAttendance: 0
+      };
+    }
+  }
+
+  async getSpeakingSessionStatistics(): Promise<{ totalSessions: number; totalRegistrations: number; activeAttendance: number }> {
+    try {
+      // Get total number of speaking sessions
+      const [sessionCountResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(aiSummitSpeakingSessions);
+      const totalSessions = sessionCountResult?.count || 0;
+
+      // Get total number of speaking session registrations
+      const [registrationCountResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(aiSummitSpeakingSessionRegistrations);
+      const totalRegistrations = registrationCountResult?.count || 0;
+
+      // Get current active attendance (checked in but not checked out)
+      const [activeAttendanceResult] = await db
+        .select({ count: sql<number>`cast(count(DISTINCT badge_id) as int)` })
+        .from(aiSummitSessionAttendance)
+        .where(and(
+          eq(aiSummitSessionAttendance.sessionType, 'speaking_session'),
+          eq(aiSummitSessionAttendance.checkInType, 'check_in'),
+          // Only count if they're still checked in (no corresponding check_out after their last check_in)
+          sql`NOT EXISTS (
+            SELECT 1 FROM ai_summit_session_attendance sa2 
+            WHERE sa2.badge_id = ai_summit_session_attendance.badge_id 
+            AND sa2.session_id = ai_summit_session_attendance.session_id
+            AND sa2.session_type = 'speaking_session'
+            AND sa2.check_in_type = 'check_out'
+            AND sa2.check_in_time > ai_summit_session_attendance.check_in_time
+          )`
+        ));
+      const activeAttendance = activeAttendanceResult?.count || 0;
+
+      return {
+        totalSessions,
+        totalRegistrations,
+        activeAttendance
+      };
+    } catch (error) {
+      console.error('Error getting speaking session statistics:', error);
+      return {
+        totalSessions: 0,
+        totalRegistrations: 0,
+        activeAttendance: 0
+      };
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
