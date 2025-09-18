@@ -122,6 +122,7 @@ import { EventMoodDemo } from "@/pages/EventMoodDemo";
 import BusinessEventManagement from "@/pages/BusinessEventManagement";
 import BusinessEvents from "@/pages/BusinessEvents";
 import EconomicGrowth from "@/pages/EconomicGrowth";
+import EventBooking from "@/pages/EventBooking";
 import VolunteerEvents from "@/pages/VolunteerEvents";
 import PhoneRecovery from "@/pages/PhoneRecovery";
 
@@ -302,6 +303,13 @@ function Router() {
         <ProtectedRoute>
           <MainLayout>
             <AttendeeBooking />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/event-booking">
+        <ProtectedRoute>
+          <MainLayout>
+            <EventBooking />
           </MainLayout>
         </ProtectedRoute>
       </Route>
