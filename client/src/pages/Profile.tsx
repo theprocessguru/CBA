@@ -25,7 +25,6 @@ import { PersonType, UserPersonType, User as DbUser } from "@shared/schema";
 
 interface UserWithPersonTypes extends DbUser {
   personTypes?: PersonType[];
-  rolesData?: Record<string, any>;
 }
 
 export default function Profile() {
@@ -627,7 +626,7 @@ export default function Profile() {
                         <div className="flex items-center space-x-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <Badge className={getTypeColor(type.color)}>
+                              <Badge className={getTypeColor(type.color || 'blue')}>
                                 {type.displayName}
                               </Badge>
                               {type.isAdminOnly && (
@@ -714,7 +713,7 @@ export default function Profile() {
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <Badge className={getTypeColor(type.color)}>
+                            <Badge className={getTypeColor(type.color || 'blue')}>
                               {type.displayName}
                             </Badge>
                           </div>
@@ -759,7 +758,7 @@ export default function Profile() {
                           />
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <Badge className={getTypeColor(type.color)}>
+                              <Badge className={getTypeColor(type.color || 'blue')}>
                                 {type.displayName}
                               </Badge>
                               <Badge variant="destructive" className="text-xs">
