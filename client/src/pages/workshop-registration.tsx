@@ -193,7 +193,7 @@ export default function WorkshopRegistration() {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-4 max-w-4xl mx-auto">
           {workshops.map((workshop) => {
             const capacity = workshopCapacities.data?.[workshop.id];
             const isFull = isWorkshopFull(workshop.id);
@@ -201,81 +201,82 @@ export default function WorkshopRegistration() {
             const canRegister = !isFull && !isDeadlinePassed;
 
             return (
-              <Card key={workshop.id} className="flex flex-col hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-2">
-                    <CardTitle className="text-lg leading-tight">{workshop.title}</CardTitle>
-                    <Badge className={getCategoryColor(workshop.category)}>
-                      {workshop.category}
-                    </Badge>
-                  </div>
-                  <CardDescription className="line-clamp-3">
-                    {workshop.description}
-                  </CardDescription>
-                </CardHeader>
-                
-                <CardContent className="flex-1 space-y-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <User className="h-4 w-4" />
-                      <span>
-                        <strong>{workshop.facilitator}</strong>
-                        {workshop.facilitatorCompany && ` - ${workshop.facilitatorCompany}`}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Clock className="h-4 w-4" />
-                      <span>{formatDateTime(workshop.startTime)} - {formatDateTime(workshop.endTime)}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <MapPin className="h-4 w-4" />
-                      <span>{workshop.room}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm">
-                      <Users className="h-4 w-4" />
-                      <span className={`${isFull ? 'text-red-600' : 'text-gray-600'}`}>
-                        {capacity ? `${capacity.current}/${capacity.max}` : `0/${workshop.maxCapacity}`} registered
-                        {isFull && <span className="text-red-600 font-medium ml-1">(Full)</span>}
-                      </span>
-                    </div>
-
-                    {workshop.prerequisites && (
-                      <div className="flex items-start gap-2 text-sm text-gray-600">
-                        <BookOpen className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <span><strong>Prerequisites:</strong> {workshop.prerequisites}</span>
+              <Card key={workshop.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <CardTitle className="text-lg leading-tight">{workshop.title}</CardTitle>
+                        <Badge className={getCategoryColor(workshop.category)}>
+                          {workshop.category}
+                        </Badge>
                       </div>
-                    )}
-                  </div>
+                      <CardDescription className="line-clamp-2">
+                        {workshop.description}
+                      </CardDescription>
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <User className="h-4 w-4" />
+                          <span>
+                            <strong>{workshop.facilitator}</strong>
+                            {workshop.facilitatorCompany && ` - ${workshop.facilitatorCompany}`}
+                          </span>
+                        </div>
 
-                  <div className="pt-4 border-t">
-                    {!canRegister && (
-                      <div className="mb-3">
-                        {isFull && (
-                          <div className="flex items-center gap-2 text-red-600 text-sm">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>Workshop is full</span>
-                          </div>
-                        )}
-                        {isDeadlinePassed && (
-                          <div className="flex items-center gap-2 text-red-600 text-sm">
-                            <AlertCircle className="h-4 w-4" />
-                            <span>Registration deadline passed</span>
-                          </div>
-                        )}
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <Clock className="h-4 w-4" />
+                          <span>{formatDateTime(workshop.startTime)} - {formatDateTime(workshop.endTime)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-gray-600">
+                          <MapPin className="h-4 w-4" />
+                          <span>{workshop.room}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          <span className={`${isFull ? 'text-red-600' : 'text-gray-600'}`}>
+                            {capacity ? `${capacity.current}/${capacity.max}` : `0/${workshop.maxCapacity}`} registered
+                            {isFull && <span className="text-red-600 font-medium ml-1">(Full)</span>}
+                          </span>
+                        </div>
                       </div>
-                    )}
+
+                      {workshop.prerequisites && (
+                        <div className="flex items-start gap-2 text-sm text-gray-600">
+                          <BookOpen className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                          <span><strong>Prerequisites:</strong> {workshop.prerequisites}</span>
+                        </div>
+                      )}
+                    </div>
                     
-                    <Button 
-                      onClick={() => handleRegister(workshop)}
-                      disabled={!canRegister}
-                      className="w-full"
-                      variant={canRegister ? "default" : "secondary"}
-                    >
-                      {canRegister ? "Register Now" : "Registration Closed"}
-                    </Button>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                      {!canRegister && (
+                        <div className="flex items-center gap-4 text-sm">
+                          {isFull && (
+                            <div className="flex items-center gap-2 text-red-600">
+                              <AlertCircle className="h-4 w-4" />
+                              <span>Workshop is full</span>
+                            </div>
+                          )}
+                          {isDeadlinePassed && (
+                            <div className="flex items-center gap-2 text-red-600">
+                              <AlertCircle className="h-4 w-4" />
+                              <span>Registration deadline passed</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <Button 
+                        onClick={() => handleRegister(workshop)}
+                        disabled={!canRegister}
+                        className="w-full sm:w-auto min-w-32"
+                        variant={canRegister ? "default" : "secondary"}
+                      >
+                        {canRegister ? "Register Now" : "Registration Closed"}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
