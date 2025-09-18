@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown, Calendar } from "lucide-react";
+import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -20,7 +20,6 @@ import {
   ROLE_METADATA,
   type RoleComponentType
 } from "@/components/profile/roles";
-import { EventBookingTab } from "@/components/profile/EventBookingTab";
 import { apiRequest } from "@/lib/queryClient";
 import { PersonType, UserPersonType, User as DbUser } from "@shared/schema";
 
@@ -603,20 +602,8 @@ export default function Profile() {
           )}
         </div>
 
-        {/* Right Sidebar - Event Booking & Person Types Management */}
+        {/* Right Sidebar - Person Types Management */}
         <div className="space-y-6">
-          {/* Event Booking Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-                Event Booking
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <EventBookingTab />
-            </CardContent>
-          </Card>
           {/* Current Assigned Types */}
           <Card>
             <CardHeader>
