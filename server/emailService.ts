@@ -16,6 +16,10 @@ export interface EmailConfig {
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null;
   private config: EmailConfig | null = null;
+  private transporters: nodemailer.Transporter[] = [];
+  private configs: EmailConfig[] = [];
+  private currentConfigIndex: number = 0;
+  private failedConfigs: Set<number> = new Set();
 
   constructor() {
     this.initializeFromEnv();
@@ -30,42 +34,69 @@ export class EmailService {
   }
 
   private initializeFromEnv() {
-    // Force Gmail SMTP configuration - ignore old environment variables
-    let host = 'smtp.gmail.com';
-    let port = '587';
-    let user = 'members.app.croydonba@gmail.com';
-    let password = process.env.SMTP_PASSWORD; // This is the new app password
-    let fromEmail = 'members.app.croydonba@gmail.com';
-    let fromName = 'Croydon Business Association';
+    // Set up multiple Gmail accounts for rotation
+    const accounts = [
+      {
+        user: 'members.app.croydonba@gmail.com',
+        password: process.env.SMTP_PASSWORD,
+        label: 'Account 1'
+      },
+      {
+        user: 'members.app2.croydonba@gmail.com', 
+        password: process.env.SMTP_PASSWORD_2,
+        label: 'Account 2'
+      }
+    ];
 
-    if (password) {
-      console.log(`Email service initialized with Gmail SMTP`);
-      console.log(`Using Gmail account: ${user}`);
-      this.config = {
-        host,
-        port: parseInt(port),
-        secure: false, // Use STARTTLS for Gmail
-        user,
-        password,
-        fromEmail,
-        fromName,
-      };
-      this.createTransporter();
+    const host = 'smtp.gmail.com';
+    const port = 587;
+    const fromName = 'Croydon Business Association';
+
+    let configuredCount = 0;
+
+    accounts.forEach((account, index) => {
+      if (account.password) {
+        const config: EmailConfig = {
+          host,
+          port,
+          secure: false,
+          user: account.user,
+          password: account.password,
+          fromEmail: account.user,
+          fromName,
+        };
+        
+        this.configs.push(config);
+        this.transporters.push(this.createTransporterFromConfig(config));
+        configuredCount++;
+        
+        console.log(`Email service initialized ${account.label}: ${account.user}`);
+      }
+    });
+
+    if (configuredCount > 0) {
+      // Set the first config as primary for backward compatibility
+      this.config = this.configs[0];
+      this.transporter = this.transporters[0];
+      console.log(`Email service ready with ${configuredCount} Gmail accounts`);
     } else {
-      console.warn('Email service not properly configured - SMTP_PASSWORD not set');
+      console.warn('Email service not properly configured - no SMTP passwords set');
     }
   }
 
   private createTransporter() {
     if (!this.config) return;
+    this.transporter = this.createTransporterFromConfig(this.config);
+  }
 
-    this.transporter = nodemailer.createTransport({
-      host: this.config.host,
-      port: this.config.port,
-      secure: this.config.secure,
+  private createTransporterFromConfig(config: EmailConfig): nodemailer.Transporter {
+    return nodemailer.createTransport({
+      host: config.host,
+      port: config.port,
+      secure: config.secure,
       auth: {
-        user: this.config.user,
-        pass: this.config.password,
+        user: config.user,
+        pass: config.password,
       },
       tls: {
         rejectUnauthorized: false
@@ -75,6 +106,82 @@ export class EmailService {
       debug: true,
       logger: false
     });
+  }
+
+  // Get next available transporter for rotation
+  private getNextTransporter(): { transporter: nodemailer.Transporter; config: EmailConfig; index: number } | null {
+    const maxTries = this.transporters.length;
+    let tries = 0;
+    
+    while (tries < maxTries) {
+      const currentIndex = this.currentConfigIndex;
+      
+      if (!this.failedConfigs.has(currentIndex)) {
+        const transporter = this.transporters[currentIndex];
+        const config = this.configs[currentIndex];
+        
+        // Move to next for rotation
+        this.currentConfigIndex = (this.currentConfigIndex + 1) % this.transporters.length;
+        
+        return { transporter, config, index: currentIndex };
+      }
+      
+      // Move to next account
+      this.currentConfigIndex = (this.currentConfigIndex + 1) % this.transporters.length;
+      tries++;
+    }
+    
+    return null; // All accounts failed
+  }
+
+  // Mark account as failed (daily limit reached)
+  private markAccountFailed(index: number, reason: string) {
+    this.failedConfigs.add(index);
+    console.log(`🚫 Gmail account ${index + 1} marked as failed: ${reason}`);
+  }
+
+  // Send email with rotation between accounts
+  private async sendWithRotation(mailOptions: any): Promise<any> {
+    const maxTries = this.transporters.length;
+    let lastError: any;
+    
+    for (let attempt = 0; attempt < maxTries; attempt++) {
+      const transporterData = this.getNextTransporter();
+      
+      if (!transporterData) {
+        throw new Error('All Gmail accounts have reached daily limits');
+      }
+      
+      try {
+        console.log(`📧 Sending email using Gmail account ${transporterData.index + 1}: ${transporterData.config.user}`);
+        
+        // Update the from address to match the current account
+        const updatedMailOptions = {
+          ...mailOptions,
+          from: `"${transporterData.config.fromName}" <${transporterData.config.fromEmail}>`
+        };
+        
+        const result = await transporterData.transporter.sendMail(updatedMailOptions);
+        return result;
+        
+      } catch (error: any) {
+        lastError = error;
+        console.error(`❌ Error with Gmail account ${transporterData.index + 1}:`, error.message);
+        
+        // Check if this is a daily limit error
+        if (error.message && error.message.includes('Daily user sending limit exceeded')) {
+          this.markAccountFailed(transporterData.index, 'Daily sending limit exceeded');
+          console.log(`🔄 Switching to next Gmail account...`);
+          continue; // Try next account
+        } else {
+          // For other errors, don't mark as failed, just throw
+          throw error;
+        }
+      }
+    }
+    
+    // If we get here, all accounts failed
+    throw lastError || new Error('All Gmail accounts unavailable');
   }
 
   public configure(config: EmailConfig) {
@@ -961,7 +1068,7 @@ export class EmailService {
         html: htmlContent,
       };
 
-      await this.transporter!.sendMail(mailOptions);
+      await this.sendWithRotation(mailOptions);
       
       // Log the email to database
       await this.logEmail(null, recipientEmail, subject, htmlContent, 'welcome', 'sent', {
