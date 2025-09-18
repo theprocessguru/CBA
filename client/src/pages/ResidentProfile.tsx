@@ -36,6 +36,8 @@ interface PersonType {
   icon: string;
   priority: number;
   isActive: boolean;
+  isAdminOnly: boolean;
+  category: string;
 }
 
 interface OrganizationMembership {
@@ -116,7 +118,7 @@ export default function ResidentProfile() {
     enabled: isAuthenticated,
   });
 
-  // Update profile mutation
+  // Update profile mutation (for basic profile data only)
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
       return apiRequest('PATCH', '/api/profile', data);
@@ -133,6 +135,119 @@ export default function ResidentProfile() {
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Self-assign person types mutation (for regular users)
+  const selfAssignPersonTypeMutation = useMutation({
+    mutationFn: async ({ typeId, action }: { typeId: number; action: 'add' | 'remove' }) => {
+      if (action === 'add') {
+        const response = await fetch('/api/users/me/person-types', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ personTypeId: typeId }),
+        });
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to assign person type');
+        }
+        return response.json();
+      } else if (action === 'remove') {
+        const response = await fetch(`/api/users/me/person-types/${typeId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          // For DELETE, check if there's content before parsing JSON
+          const contentLength = response.headers.get('content-length');
+          let error;
+          if (response.status === 204 || contentLength === '0') {
+            error = { message: 'Failed to remove person type' };
+          } else {
+            error = await response.json();
+          }
+          throw new Error(error.message || 'Failed to remove person type');
+        }
+        // Handle successful DELETE response
+        if (response.status === 204 || response.headers.get('content-length') === '0') {
+          return null; // No content for 204 responses
+        }
+        return response.json();
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Role Updated",
+        description: "Your role has been updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+    },
+    onError: (error, { typeId, action }) => {
+      // Rollback optimistic update on error
+      if (action === 'add') {
+        setSelectedPersonTypes(prev => prev.filter(id => id !== typeId));
+      } else if (action === 'remove') {
+        setSelectedPersonTypes(prev => [...prev, typeId]);
+      }
+      
+      toast({
+        title: "Update Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Admin-only person types mutation (for admin users)
+  const adminAssignPersonTypeMutation = useMutation({
+    mutationFn: async ({ typeId, action, isPrimary }: { typeId: number; action: 'add' | 'remove' | 'setPrimary'; isPrimary?: boolean }) => {
+      if (action === 'add') {
+        const response = await fetch(`/api/admin/users/${user?.id}/person-types`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ personTypeId: typeId, isPrimary: isPrimary || false }),
+        });
+        if (!response.ok) throw new Error('Failed to assign person type');
+        return response.json();
+      } else if (action === 'remove') {
+        const response = await fetch(`/api/admin/users/${user?.id}/person-types/${typeId}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Failed to remove person type');
+        // Handle successful DELETE response
+        if (response.status === 204 || response.headers.get('content-length') === '0') {
+          return null; // No content for 204 responses
+        }
+        return response.json();
+      } else if (action === 'setPrimary') {
+        const response = await fetch(`/api/admin/users/${user?.id}/person-types/${typeId}/primary`, {
+          method: 'PUT',
+        });
+        if (!response.ok) throw new Error('Failed to set primary person type');
+        return response.json();
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Person Types Updated",
+        description: "Your person types have been updated",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
+    },
+    onError: (error, { typeId, action }) => {
+      // Rollback optimistic update on error
+      if (action === 'add') {
+        setSelectedPersonTypes(prev => prev.filter(id => id !== typeId));
+      } else if (action === 'remove') {
+        setSelectedPersonTypes(prev => [...prev, typeId]);
+      }
+      
+      toast({
+        title: "Update Failed",
+        description: error.message,
         variant: "destructive",
       });
     },
@@ -199,13 +314,62 @@ export default function ResidentProfile() {
   };
 
   const handlePersonTypeToggle = (typeId: number) => {
-    setSelectedPersonTypes(prev => {
-      if (prev.includes(typeId)) {
-        return prev.filter(id => id !== typeId);
-      } else {
-        return [...prev, typeId];
+    const isCurrentlyAssigned = selectedPersonTypes.includes(typeId);
+    
+    // Find the person type to check if it's admin-only
+    const personType = allPersonTypes.find(pt => pt.id === typeId);
+    
+    if (!personType) {
+      toast({
+        title: "Error",
+        description: "Person type not found",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (isCurrentlyAssigned) {
+      // Remove person type
+      if (personType.isAdminOnly && !user?.isAdmin) {
+        toast({
+          title: "Permission Denied",
+          description: "Admin-only roles can only be removed by administrators",
+          variant: "destructive",
+        });
+        return;
       }
-    });
+      
+      // Update local state immediately for UI feedback
+      setSelectedPersonTypes(prev => prev.filter(id => id !== typeId));
+      
+      // Call appropriate mutation
+      if (personType.isAdminOnly || user?.isAdmin) {
+        adminAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+      } else {
+        selfAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+      }
+    } else {
+      // Add person type
+      if (personType.isAdminOnly && !user?.isAdmin) {
+        toast({
+          title: "Permission Denied",
+          description: "This role can only be assigned by administrators",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Update local state immediately for UI feedback
+      setSelectedPersonTypes(prev => [...prev, typeId]);
+      
+      // Call appropriate mutation
+      if (personType.isAdminOnly || user?.isAdmin) {
+        const isPrimary = selectedPersonTypes.length === 0; // First type becomes primary
+        adminAssignPersonTypeMutation.mutate({ typeId, action: 'add', isPrimary });
+      } else {
+        selfAssignPersonTypeMutation.mutate({ typeId, action: 'add' });
+      }
+    }
   };
 
   const handleOrganizationToggle = (orgName: string, orgType: string, isJoining: boolean) => {
@@ -228,9 +392,9 @@ export default function ResidentProfile() {
   };
 
   const handleSaveProfile = () => {
+    // Person types are now handled immediately by mutations, so we only save basic profile data
     const updateData = {
       ...profileData,
-      personTypeIds: selectedPersonTypes,
       organizationMemberships: userOrganizations
     };
     
