@@ -87,10 +87,47 @@ export const EventBookingTab = () => {
   };
 
   const formatTime = (timeString: string) => {
-    return new Date(timeString).toLocaleTimeString('en-US', {
+    if (!timeString) return 'TBD';
+    
+    // Handle different time formats
+    let date: Date;
+    
+    // If it's just a time string (HH:MM or HH:MM:SS), assume today's date
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(timeString)) {
+      const today = new Date();
+      const [hours, minutes] = timeString.split(':');
+      date = new Date(today.getFullYear(), today.getMonth(), today.getDate(), parseInt(hours), parseInt(minutes));
+    } else {
+      // Try to parse as a full date/time string
+      date = new Date(timeString);
+    }
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return timeString; // Return original string if can't parse
+    }
+    
+    return date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'TBD';
+    
+    const date = new Date(dateString);
+    
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if can't parse
+    }
+    
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
     });
   };
 
@@ -191,6 +228,10 @@ export const EventBookingTab = () => {
                         
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {formatDate(slot.date || slot.startTime)}
+                          </div>
+                          <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
                             {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                           </div>
@@ -272,6 +313,10 @@ export const EventBookingTab = () => {
                     <div>
                       <h4 className="font-medium text-gray-900">{slot.title}</h4>
                       <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" />
+                          {formatDate(slot.date || slot.startTime)}
+                        </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
