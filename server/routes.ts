@@ -2973,6 +2973,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send AI Summit welcome emails to today's registrants (admin only)
+  app.post('/api/admin/email/send-todays-ai-summit-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated AI Summit welcome emails for today's registrants`);
+
+      // Get today's AI Summit registrants
+      const todayRegistrants = await db
+        .select({
+          name: aiSummitRegistrations.name,
+          email: aiSummitRegistrations.email,
+          registeredAt: aiSummitRegistrations.registeredAt
+        })
+        .from(aiSummitRegistrations)
+        .where(sql`DATE(${aiSummitRegistrations.registeredAt}) = CURRENT_DATE`)
+        .orderBy(desc(aiSummitRegistrations.registeredAt));
+
+      if (!todayRegistrants || todayRegistrants.length === 0) {
+        return res.status(404).json({ 
+          message: "No AI Summit registrations found for today" 
+        });
+      }
+
+      console.log(`Found ${todayRegistrants.length} registrants from today`);
+
+      const results: Array<{ email: string; name: string; success: boolean; message: string }> = [];
+      
+      // Send welcome email to each registrant
+      for (const registrant of todayRegistrants) {
+        try {
+          const result = await emailService.sendWelcomeEmail(
+            registrant.email,
+            registrant.name,
+            'attendee'
+          );
+          
+          results.push({
+            email: registrant.email,
+            name: registrant.name,
+            success: result.success,
+            message: result.message
+          });
+          
+          console.log(`Welcome email ${result.success ? 'sent' : 'failed'} for ${registrant.name} (${registrant.email})`);
+          
+          // Small delay between emails to avoid overwhelming the email service
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        } catch (error: any) {
+          results.push({
+            email: registrant.email,
+            name: registrant.name,
+            success: false,
+            message: error.message || 'Failed to send email'
+          });
+          console.error(`Failed to send welcome email to ${registrant.email}:`, error);
+        }
+      }
+
+      const successful = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+
+      console.log(`AI Summit welcome email batch complete: ${successful} sent, ${failed} failed`);
+
+      res.json({
+        success: true,
+        totalRegistrants: todayRegistrants.length,
+        successful,
+        failed,
+        registrants: todayRegistrants.map(r => ({ name: r.name, email: r.email, registeredAt: r.registeredAt })),
+        results
+      });
+    } catch (error: any) {
+      console.error("Error sending today's AI Summit welcome emails:", error);
+      res.status(500).json({ message: error.message || "Failed to send welcome emails" });
+    }
+  });
+
   // Send AI Summit 2025 welcome email to specific user (admin only)
   app.post('/api/admin/email/send-ai-summit-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
@@ -8724,6 +8804,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (badgeError) {
         console.error("Failed to create attendee badge:", badgeError);
         // Don't fail the registration if badge creation fails
+      }
+
+      // Send AI Summit welcome email
+      try {
+        const actualParticipantType = participantType === 'resident' || participantType === 'business_owner' ? 'attendee' : (participantType || 'attendee');
+        
+        const welcomeResult = await emailService.sendWelcomeEmail(
+          email,
+          name,
+          actualParticipantType
+        );
+        
+        if (welcomeResult.success) {
+          console.log(`AI Summit welcome email sent successfully to ${email}`);
+        } else {
+          console.error(`Failed to send AI Summit welcome email to ${email}: ${welcomeResult.message}`);
+        }
+      } catch (welcomeEmailError) {
+        console.error('Failed to send AI Summit welcome email:', welcomeEmailError);
+        // Don't fail registration if welcome email fails
       }
 
       // Send onboarding welcome message based on participant type
