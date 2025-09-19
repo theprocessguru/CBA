@@ -7095,6 +7095,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint for workshops (accessible to regular authenticated users)
+  app.get('/api/workshops', isAuthenticated, async (req: any, res) => {
+    try {
+      const workshops = await db.select().from(cbaEvents).where(eq(cbaEvents.eventType, 'workshop'));
+      
+      // Parse tags field for frontend consumption
+      const workshopsWithParsedFields = workshops.map(workshop => ({
+        ...workshop,
+        tags: workshop.tags ? 
+          (workshop.tags.startsWith('[') ? JSON.parse(workshop.tags) : workshop.tags.split(',').map(tag => tag.trim())) 
+          : []
+      }));
+      
+      res.json(workshopsWithParsedFields);
+    } catch (error) {
+      console.error('Error fetching workshops:', error);
+      res.status(500).json({ message: 'Failed to fetch workshops' });
+    }
+  });
+
   // Create new event
   app.post('/api/admin/events', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

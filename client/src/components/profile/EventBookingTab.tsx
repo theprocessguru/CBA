@@ -23,10 +23,9 @@ export const EventBookingTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch available workshops for booking from real events data
+  // Fetch available workshops for booking 
   const { data: timeSlots, isLoading: slotsLoading } = useQuery<any[]>({
-    queryKey: ['/api/events'],
-    select: (events) => events?.filter(event => event.eventType === 'workshop') || [],
+    queryKey: ['/api/workshops'],
     enabled: isAuthenticated
   });
 
@@ -46,7 +45,7 @@ export const EventBookingTab = () => {
         title: "Registration Successful",
         description: "You've been registered for the workshop!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
       queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
@@ -68,7 +67,7 @@ export const EventBookingTab = () => {
         title: "Registration Cancelled",
         description: "Your registration has been cancelled.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
       queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
