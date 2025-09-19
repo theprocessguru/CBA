@@ -6,19 +6,52 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MoodTracker } from "@/components/MoodTracker";
 import { MoodVisualization } from "@/components/MoodVisualization";
 import { Brain, Presentation, Users, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 export function EventMoodDemo() {
   const [selectedEvent, setSelectedEvent] = useState<string>("");
   const [selectedSession, setSelectedSession] = useState<string>("");
 
-  // Demo event data
-  const demoEvents = [
-    { id: 1, name: "First AI Summit Croydon 2025", date: "October 1, 2025" },
-    { id: 2, name: "CBA Monthly Networking", date: "September 15, 2025" },
-    { id: 3, name: "Business Growth Workshop", date: "August 30, 2025" },
+  // Fetch live events data
+  const { data: liveEvents = [], isLoading: eventsLoading } = useQuery<any[]>({
+    queryKey: ['/api/events'],
+    retry: false,
+  });
+
+  // Fetch AI Summit speaking sessions for session data
+  const { data: liveSpeakingSessions = [], isLoading: sessionsLoading } = useQuery<any[]>({
+    queryKey: ['/api/ai-summit/speaking-sessions/active'],
+    retry: false,
+  });
+
+  // Transform live events to match expected format, with corrected AI Summit date
+  const events = liveEvents.map(event => {
+    if (event.eventName?.includes('AI Summit')) {
+      return {
+        id: event.id,
+        name: event.eventName,
+        date: "January 27, 2025" // Use correct date for AI Summit
+      };
+    }
+    return {
+      id: event.id,
+      name: event.eventName || event.title,
+      date: new Date(event.eventDate || event.startDate).toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      })
+    };
+  });
+
+  // Default to AI Summit if no live events
+  const finalEvents = events.length > 0 ? events : [
+    { id: 1, name: "First AI Summit Croydon 2025", date: "January 27, 2025" },
   ];
 
-  const demoSessions = [
+  // Transform speaking sessions to session names
+  const sessions = liveSpeakingSessions.map(session => session.title || session.name).filter(Boolean);
+  const finalSessions = sessions.length > 0 ? sessions : [
     "Opening Keynote",
     "AI in Business Workshop",
     "Panel Discussion",
@@ -27,7 +60,7 @@ export function EventMoodDemo() {
   ];
 
   const selectedEventId = selectedEvent ? parseInt(selectedEvent) : 1;
-  const selectedEventData = demoEvents.find(e => e.id === selectedEventId);
+  const selectedEventData = finalEvents.find(e => e.id === selectedEventId);
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -53,7 +86,7 @@ export function EventMoodDemo() {
                 <SelectValue placeholder="Select an event" />
               </SelectTrigger>
               <SelectContent>
-                {demoEvents.map(event => (
+                {finalEvents.map(event => (
                   <SelectItem key={event.id} value={event.id.toString()}>
                     {event.name}
                   </SelectItem>
@@ -70,7 +103,7 @@ export function EventMoodDemo() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Sessions</SelectItem>
-                {demoSessions.map(session => (
+                {finalSessions.map(session => (
                   <SelectItem key={session} value={session}>
                     {session}
                   </SelectItem>

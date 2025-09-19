@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { 
   Users, 
   Store, 
@@ -25,7 +26,36 @@ export interface ParticipantRole {
   isPrimary?: boolean;
 }
 
-export const availableRoles: ParticipantRole[] = [
+// Helper function to get icon for role type
+const getIconForRole = (roleType: string) => {
+  switch (roleType.toLowerCase()) {
+    case 'attendee': return Users;
+    case 'exhibitor': return Store;
+    case 'speaker': return Mic;
+    case 'organizer': return Settings;
+    case 'volunteer': return Heart;
+    case 'team': case 'team_member': return Shield;
+    case 'special_guest': case 'vip': return Crown;
+    default: return Users;
+  }
+};
+
+// Helper function to get color for role type
+const getColorForRole = (roleType: string) => {
+  switch (roleType.toLowerCase()) {
+    case 'attendee': return "bg-blue-100 text-blue-800";
+    case 'exhibitor': return "bg-green-100 text-green-800";
+    case 'speaker': return "bg-purple-100 text-purple-800";
+    case 'organizer': return "bg-orange-100 text-orange-800";
+    case 'volunteer': return "bg-pink-100 text-pink-800";
+    case 'team': case 'team_member': return "bg-gray-100 text-gray-800";
+    case 'special_guest': case 'vip': return "bg-yellow-100 text-yellow-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+};
+
+// Fallback static roles (used when API is unavailable)
+const fallbackRoles: ParticipantRole[] = [
   {
     value: "attendee",
     label: "Attendee",

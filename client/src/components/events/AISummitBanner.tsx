@@ -38,7 +38,7 @@ const AISummitBanner = () => {
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm md:text-base py-4">
             <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
               <Calendar className="h-4 w-4" />
-              <span className="font-medium">October 1st, 2025</span>
+              <span className="font-medium">January 27, 2025</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
               <Clock className="h-4 w-4" />
