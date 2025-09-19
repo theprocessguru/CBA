@@ -118,7 +118,7 @@ const AISummit = () => {
 
   const eventDetails = {
     title: "First AI Summit Croydon 2025",
-    date: "October 1st, 2025",
+    date: "January 27, 2025",
     time: "10:00 AM - 4:00 PM",
     venue: "LSBU London South Bank University Croydon",
     price: "Reserve your spot - No payment required",
@@ -828,26 +828,47 @@ const AISummit = () => {
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-4 text-center">2nd Floor Auditorium Schedule</h3>
                       <div className="space-y-4">
-                        <div className="border-l-4 border-blue-600 pl-4">
-                          <div className="font-semibold">10:00 AM - Opening Keynote</div>
-                          <div className="text-sm text-gray-600">Kanishka Narayan, AI Minister</div>
-                          <div className="text-sm text-gray-500">Welcome & AI Future Vision</div>
-                        </div>
-                        <div className="border-l-4 border-green-600 pl-4">
-                          <div className="font-semibold">11:00 AM - AI in Business</div>
-                          <div className="text-sm text-gray-600">Industry Panel</div>
-                          <div className="text-sm text-gray-500">How AI transforms operations</div>
-                        </div>
-                        <div className="border-l-4 border-purple-600 pl-4">
-                          <div className="font-semibold">1:00 PM - Lunch & Networking</div>
-                          <div className="text-sm text-gray-600">All Attendees</div>
-                          <div className="text-sm text-gray-500">Food, drinks, connections</div>
-                        </div>
-                        <div className="border-l-4 border-orange-600 pl-4">
-                          <div className="font-semibold">2:30 PM - Future of AI</div>
-                          <div className="text-sm text-gray-600">Tech Leaders</div>
-                          <div className="text-sm text-gray-500">Emerging technologies & trends</div>
-                        </div>
+                        {liveWorkshops.length > 0 ? (
+                          liveWorkshops.map((workshop, index) => {
+                            const colors = ['blue', 'green', 'purple', 'orange', 'red'];
+                            const color = colors[index % colors.length];
+                            const startTime = new Date(workshop.startTime).toLocaleTimeString('en-US', { 
+                              hour: 'numeric', 
+                              minute: '2-digit', 
+                              hour12: true 
+                            });
+                            return (
+                              <div key={workshop.id} className={`border-l-4 border-${color}-600 pl-4`}>
+                                <div className="font-semibold">{startTime} - {workshop.title}</div>
+                                <div className="text-sm text-gray-600">{workshop.facilitator}</div>
+                                <div className="text-sm text-gray-500">{workshop.description}</div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <>
+                            <div className="border-l-4 border-blue-600 pl-4">
+                              <div className="font-semibold">11:00 AM - AI Tools for Content Creation</div>
+                              <div className="text-sm text-gray-600">LSBU Students & Volunteers</div>
+                              <div className="text-sm text-gray-500">Hands-on session with ChatGPT, Midjourney, and business AI tools</div>
+                            </div>
+                            <div className="border-l-4 border-green-600 pl-4">
+                              <div className="font-semibold">12:00 PM - Building Your First AI Chatbot</div>
+                              <div className="text-sm text-gray-600">CBA AI Experts</div>
+                              <div className="text-sm text-gray-500">Build your first chatbot and automate customer interactions</div>
+                            </div>
+                            <div className="border-l-4 border-purple-600 pl-4">
+                              <div className="font-semibold">1:30 PM - AI for Data Analysis</div>
+                              <div className="text-sm text-gray-600">Dr. Michael Roberts</div>
+                              <div className="text-sm text-gray-500">Use AI to analyze business data and make informed decisions</div>
+                            </div>
+                            <div className="border-l-4 border-orange-600 pl-4">
+                              <div className="font-semibold">2:30 PM - AI Marketing Automation</div>
+                              <div className="text-sm text-gray-600">Sarah Thompson</div>
+                              <div className="text-sm text-gray-500">Automate your marketing with AI tools and strategies</div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
