@@ -147,12 +147,8 @@ export default function WorkshopRegistration() {
   };
 
   const handleRegister = (workshop: Workshop) => {
-    setSelectedWorkshop(workshop);
-    setRegistrationData(prev => ({
-      ...prev,
-      workshopId: workshop.id
-    }));
-    setShowRegistrationForm(true);
+    // Redirect to login page for registration
+    window.location.href = '/login';
   };
 
   const isWorkshopFull = (workshopId: number) => {
@@ -189,7 +185,7 @@ export default function WorkshopRegistration() {
           </p>
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-blue-600">
             <Calendar className="h-4 w-4" />
-            <span>October 1st, 2025 | LSBU London South Bank University Croydon</span>
+            <span>January 27, 2025 | LSBU London South Bank University Croydon</span>
           </div>
         </div>
 
@@ -292,134 +288,6 @@ export default function WorkshopRegistration() {
           </div>
         )}
 
-        {/* Registration Form Dialog */}
-        <Dialog open={showRegistrationForm} onOpenChange={setShowRegistrationForm}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Register for Workshop</DialogTitle>
-              <DialogDescription>
-                {selectedWorkshop && (
-                  <>
-                    <strong>{selectedWorkshop.title}</strong> - {formatDateTime(selectedWorkshop.startTime)}
-                  </>
-                )}
-              </DialogDescription>
-            </DialogHeader>
-
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              registrationMutation.mutate(registrationData);
-            }} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="attendeeName">Full Name *</Label>
-                  <Input
-                    id="attendeeName"
-                    value={registrationData.attendeeName}
-                    onChange={(e) => setRegistrationData(prev => ({ ...prev, attendeeName: e.target.value }))}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="attendeeEmail">Email Address *</Label>
-                  <Input
-                    id="attendeeEmail"
-                    type="email"
-                    value={registrationData.attendeeEmail}
-                    onChange={(e) => setRegistrationData(prev => ({ ...prev, attendeeEmail: e.target.value }))}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="attendeeCompany">Company/Organization</Label>
-                  <Input
-                    id="attendeeCompany"
-                    value={registrationData.attendeeCompany}
-                    onChange={(e) => setRegistrationData(prev => ({ ...prev, attendeeCompany: e.target.value }))}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="attendeeJobTitle">Job Title</Label>
-                  <Input
-                    id="attendeeJobTitle"
-                    value={registrationData.attendeeJobTitle}
-                    onChange={(e) => setRegistrationData(prev => ({ ...prev, attendeeJobTitle: e.target.value }))}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="experienceLevel">Experience Level</Label>
-                <Select
-                  value={registrationData.experienceLevel}
-                  onValueChange={(value) => setRegistrationData(prev => ({ ...prev, experienceLevel: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="beginner">Beginner</SelectItem>
-                    <SelectItem value="intermediate">Intermediate</SelectItem>
-                    <SelectItem value="advanced">Advanced</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="specificInterests">What do you hope to learn from this workshop?</Label>
-                <Textarea
-                  id="specificInterests"
-                  value={registrationData.specificInterests}
-                  onChange={(e) => setRegistrationData(prev => ({ ...prev, specificInterests: e.target.value }))}
-                  rows={3}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="dietaryRequirements">Dietary Requirements</Label>
-                <Input
-                  id="dietaryRequirements"
-                  value={registrationData.dietaryRequirements}
-                  onChange={(e) => setRegistrationData(prev => ({ ...prev, dietaryRequirements: e.target.value }))}
-                  placeholder="e.g. Vegetarian, Gluten-free, None"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="accessibilityNeeds">Accessibility Needs</Label>
-                <Input
-                  id="accessibilityNeeds"
-                  value={registrationData.accessibilityNeeds}
-                  onChange={(e) => setRegistrationData(prev => ({ ...prev, accessibilityNeeds: e.target.value }))}
-                  placeholder="Any special requirements or accommodations needed"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowRegistrationForm(false)}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={registrationMutation.isPending}
-                  className="flex-1"
-                >
-                  {registrationMutation.isPending ? "Registering..." : "Register"}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
