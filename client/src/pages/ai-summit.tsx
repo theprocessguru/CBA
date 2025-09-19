@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -41,7 +42,8 @@ import {
   User,
   Plus,
   Shield,
-  MessageCircle
+  MessageCircle,
+  Briefcase
 } from "lucide-react";
 import { Link } from "wouter";
 import { SponsorSpotlight } from "@/components/SponsorSpotlight";
@@ -84,7 +86,8 @@ const AISummit = () => {
     confirmEmail: "",
     password: "",
     confirmPassword: "",
-    mobileNumber: ""
+    mobileNumber: "",
+    memberSegment: "resident" // Default to resident
   });
 
   // State for form validation and password visibility
@@ -400,7 +403,8 @@ const AISummit = () => {
           homeAddress: "Croydon", // Default for AI Summit registrants
           homeCity: "Croydon",
           homePostcode: "CR0 1AA", // Default postcode
-          personTypeIds: [1] // Default person type (1 = attendee)
+          personTypeIds: [1], // Default person type (1 = attendee)
+          memberSegment: data.memberSegment // Save resident vs business_owner selection
         };
 
         const accountResponse = await apiRequest("POST", "/api/auth/register", accountData);
@@ -414,7 +418,8 @@ const AISummit = () => {
           email: data.email.trim(),
           name: `${data.firstName.trim()} ${data.lastName.trim()}`,
           phoneNumber: data.mobileNumber.trim(),
-          participantType: "attendee"
+          participantType: "attendee",
+          memberSegment: data.memberSegment // Include resident vs business_owner selection
         };
 
         const summitResponse = await apiRequest("POST", "/api/ai-summit-registration", summitData);
@@ -438,7 +443,8 @@ const AISummit = () => {
               email: data.email.trim(),
               name: `${data.firstName.trim()} ${data.lastName.trim()}`,
               phoneNumber: data.mobileNumber.trim(),
-              participantType: "attendee"
+              participantType: "attendee",
+              memberSegment: data.memberSegment // Include resident vs business_owner selection
             };
 
             const summitResponse = await apiRequest("POST", "/api/ai-summit-registration", summitData);
@@ -535,7 +541,8 @@ const AISummit = () => {
       confirmEmail: "",
       password: "",
       confirmPassword: "",
-      mobileNumber: ""
+      mobileNumber: "",
+      memberSegment: "resident"
     });
   };
 
@@ -629,7 +636,8 @@ const AISummit = () => {
       confirmEmail: "john.smith@test.com",
       password: "TestPass123",
       confirmPassword: "TestPass123",
-      mobileNumber: "+44 7700 900123"
+      mobileNumber: "+44 7700 900123",
+      memberSegment: "resident"
     });
   };
 
@@ -1774,6 +1782,38 @@ const AISummit = () => {
                     <p className="text-xs text-gray-500 mt-1">
                       Required for event updates and emergency contact
                     </p>
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-medium">Are you a resident or business owner? *</Label>
+                    <RadioGroup
+                      value={registrationData.memberSegment}
+                      onValueChange={(value: 'resident' | 'business_owner') => 
+                        handleInputChange("memberSegment", value)
+                      }
+                      className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3"
+                    >
+                      <div className="flex items-center space-x-3 border rounded-lg p-4">
+                        <RadioGroupItem value="resident" id="resident" data-testid="radio-resident" />
+                        <div className="flex-1">
+                          <Label htmlFor="resident" className="flex items-center gap-2 font-medium">
+                            <Home className="h-4 w-4" />
+                            Resident
+                          </Label>
+                          <p className="text-sm text-gray-600">Community member and local resident</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3 border rounded-lg p-4">
+                        <RadioGroupItem value="business_owner" id="business_owner" data-testid="radio-business-owner" />
+                        <div className="flex-1">
+                          <Label htmlFor="business_owner" className="flex items-center gap-2 font-medium">
+                            <Briefcase className="h-4 w-4" />
+                            Business Owner
+                          </Label>
+                          <p className="text-sm text-gray-600">Business owner or entrepreneur</p>
+                        </div>
+                      </div>
+                    </RadioGroup>
                   </div>
                   
                   <Button
