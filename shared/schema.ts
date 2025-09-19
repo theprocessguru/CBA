@@ -2518,38 +2518,40 @@ export type EmailCampaign = typeof emailCampaigns.$inferSelect;
 export type InsertEmailCampaignRecipient = z.infer<typeof insertEmailCampaignRecipientSchema>;
 export type EmailCampaignRecipient = typeof emailCampaignRecipients.$inferSelect;
 
-// Email Targeting Filter Types
-export interface EmailTargetFilters {
-  personTypes?: {
-    mode: 'any' | 'all';
-    values: string[];
-  };
-  membershipTiers?: {
-    mode: 'any' | 'all';
-    values: string[];
-  };
-  participantRoles?: {
-    mode: 'any' | 'all';
-    values: string[];
-  };
-  aiInterests?: {
-    mode: 'any' | 'all';
-    values: string[];
-  };
-  businessTypes?: {
-    mode: 'any' | 'all';
-    values: string[];
-  };
-  districts?: {
-    mode: 'any' | 'all';
-    values: string[];
-  };
-  registrationDateRange?: {
-    start?: string;
-    end?: string;
-  };
-  globalOperator?: 'AND' | 'OR';
-}
+// Email Targeting Filter Schemas and Types
+const filterGroupSchema = z.object({
+  mode: z.enum(['any', 'all']).default('any'),
+  values: z.array(z.string()).max(50, 'Too many filter values'), // Limit to prevent expensive queries
+}).optional();
+
+const dateRangeSchema = z.object({
+  start: z.string().datetime().optional(),
+  end: z.string().datetime().optional(),
+}).optional();
+
+export const emailTargetFiltersSchema = z.object({
+  personTypes: filterGroupSchema,
+  membershipTiers: filterGroupSchema,
+  participantRoles: filterGroupSchema,
+  aiInterests: filterGroupSchema,
+  businessTypes: filterGroupSchema,
+  districts: filterGroupSchema,
+  registrationDateRange: dateRangeSchema,
+  globalOperator: z.enum(['AND', 'OR']).default('AND'),
+  limit: z.number().min(1).max(1000).default(100), // Add pagination limit
+  offset: z.number().min(0).default(0),
+});
+
+export type EmailTargetFilters = z.infer<typeof emailTargetFiltersSchema>;
+
+// Update email campaign schema for better validation
+export const updateEmailCampaignSchema = insertEmailCampaignSchema.partial().omit({
+  id: true,
+  createdAt: true,
+  createdBy: true, // Don't allow changing creator
+});
+
+export type UpdateEmailCampaign = z.infer<typeof updateEmailCampaignSchema>;
 
 // Unified Contact for Email Targeting
 export interface UnifiedContact {

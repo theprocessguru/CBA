@@ -65,6 +65,10 @@ import {
   insertAISummitSpeakingSessionSchema,
   insertMarketplaceListingSchema,
   insertBarterListingSchema,
+  insertEmailCampaignSchema,
+  emailTargetFiltersSchema,
+  updateEmailCampaignSchema,
+  type EmailTargetFilters,
   aiSummitRegistrations,
   aiSummitBadges,
   personalBadges,
@@ -3366,6 +3370,209 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching email statistics:", error);
       res.status(500).json({ message: "Failed to fetch email statistics" });
+    }
+  });
+
+  // Email Targeting and Campaign Management Endpoints
+  
+  // Get filter options for email targeting
+  app.get('/api/admin/email-targets/filter-options', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const filterOptions = await storage.getFilterOptions();
+      res.json(filterOptions);
+    } catch (error) {
+      console.error("Error getting filter options:", error);
+      res.status(500).json({ message: "Failed to get filter options" });
+    }
+  });
+
+  // Preview email targets with filters
+  app.post('/api/admin/email-targets/preview', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const parseResult = emailTargetFiltersSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid filter parameters", 
+          errors: parseResult.error.issues 
+        });
+      }
+      
+      const filters = parseResult.data;
+      const preview = await storage.previewEmailTargets(filters);
+      res.json(preview);
+    } catch (error) {
+      console.error("Error previewing email targets:", error);
+      res.status(500).json({ message: "Failed to preview email targets" });
+    }
+  });
+
+  // Get unified contacts with optional filters
+  app.post('/api/admin/email-targets/contacts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const parseResult = emailTargetFiltersSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid filter parameters", 
+          errors: parseResult.error.issues 
+        });
+      }
+      
+      const filters = parseResult.data;
+      const contacts = await storage.getUnifiedContacts(filters);
+      res.json({
+        contacts: contacts.slice(filters.offset, filters.offset + filters.limit),
+        total: contacts.length,
+        limit: filters.limit,
+        offset: filters.offset
+      });
+    } catch (error) {
+      console.error("Error getting contacts:", error);
+      res.status(500).json({ message: "Failed to get contacts" });
+    }
+  });
+
+  // Create new email campaign
+  app.post('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignData = insertEmailCampaignSchema.parse({
+        ...req.body,
+        createdBy: req.user.id,
+        status: 'draft',
+      });
+      
+      const campaign = await storage.createEmailCampaign(campaignData);
+      res.status(201).json(campaign);
+    } catch (error) {
+      console.error("Error creating email campaign:", error);
+      res.status(500).json({ message: "Failed to create email campaign" });
+    }
+  });
+
+  // List email campaigns
+  app.get('/api/admin/email-campaigns', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { status, createdBy, limit } = req.query;
+      const campaigns = await storage.listEmailCampaigns({
+        status: status as string,
+        createdBy: createdBy as string,
+        limit: limit ? parseInt(limit as string) : undefined,
+      });
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error listing email campaigns:", error);
+      res.status(500).json({ message: "Failed to list email campaigns" });
+    }
+  });
+
+  // Get email campaign by ID
+  app.get('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const campaign = await storage.getEmailCampaignById(campaignId);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error getting email campaign:", error);
+      res.status(500).json({ message: "Failed to get email campaign" });
+    }
+  });
+
+  // Update email campaign
+  app.put('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      if (isNaN(campaignId)) {
+        return res.status(400).json({ message: "Invalid campaign ID" });
+      }
+      
+      const parseResult = updateEmailCampaignSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid campaign data", 
+          errors: parseResult.error.issues 
+        });
+      }
+      
+      const updateData = parseResult.data;
+      const updatedCampaign = await storage.updateEmailCampaign(campaignId, updateData);
+      res.json(updatedCampaign);
+    } catch (error) {
+      console.error("Error updating email campaign:", error);
+      res.status(500).json({ message: "Failed to update email campaign" });
+    }
+  });
+
+  // Delete email campaign
+  app.delete('/api/admin/email-campaigns/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const deleted = await storage.deleteEmailCampaign(campaignId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json({ message: "Campaign deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting email campaign:", error);
+      res.status(500).json({ message: "Failed to delete email campaign" });
+    }
+  });
+
+  // Get campaign recipients
+  app.get('/api/admin/email-campaigns/:id/recipients', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const { status, limit, offset } = req.query;
+      
+      const recipients = await storage.getEmailCampaignRecipients(campaignId, {
+        status: status as string,
+        limit: limit ? parseInt(limit as string) : undefined,
+        offset: offset ? parseInt(offset as string) : undefined,
+      });
+      
+      res.json(recipients);
+    } catch (error) {
+      console.error("Error getting campaign recipients:", error);
+      res.status(500).json({ message: "Failed to get campaign recipients" });
+    }
+  });
+
+  // Get campaign delivery statistics
+  app.get('/api/admin/email-campaigns/:id/stats', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      const stats = await storage.getCampaignDeliveryStats(campaignId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting campaign stats:", error);
+      res.status(500).json({ message: "Failed to get campaign stats" });
+    }
+  });
+
+  // Send email campaign (this will be implemented later with the queue system)
+  app.post('/api/admin/email-campaigns/:id/send', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const campaignId = parseInt(req.params.id);
+      
+      // For now, just mark the campaign as "sending"
+      await storage.updateEmailCampaign(campaignId, { 
+        status: 'sending',
+        sentAt: new Date(),
+      });
+      
+      res.json({ 
+        message: "Campaign queued for sending",
+        campaignId,
+        note: "Email queue system implementation pending"
+      });
+    } catch (error) {
+      console.error("Error sending email campaign:", error);
+      res.status(500).json({ message: "Failed to send email campaign" });
     }
   });
 

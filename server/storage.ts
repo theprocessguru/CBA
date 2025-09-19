@@ -3604,7 +3604,7 @@ export class DatabaseStorage implements IStorage {
     try {
       const contacts: UnifiedContact[] = [];
 
-      // Get contacts from users table
+      // Get contacts from users table (excluding opted-out users)
       const userQuery = db.select({
         email: users.email,
         firstName: users.firstName,
@@ -3617,7 +3617,13 @@ export class DatabaseStorage implements IStorage {
         businessCity: users.businessCity,
         createdAt: users.createdAt,
         emailVerified: users.emailVerified,
-      }).from(users);
+      }).from(users)
+        .where(and(
+          isNotNull(users.email), // Only users with valid emails
+          // Add email format validation
+          sql`${users.email} ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`
+          // TODO: Add emailOptOut checking when field is added to schema
+        ));
 
       const userResults = await userQuery;
       
@@ -3639,7 +3645,7 @@ export class DatabaseStorage implements IStorage {
         contacts.push(contact);
       }
 
-      // Get contacts from AI Summit registrations
+      // Get contacts from AI Summit registrations (with valid emails only)
       const aiSummitQuery = db.select({
         email: aiSummitRegistrations.email,
         name: aiSummitRegistrations.name,
@@ -3649,17 +3655,31 @@ export class DatabaseStorage implements IStorage {
         businessType: aiSummitRegistrations.businessType,
         registeredAt: aiSummitRegistrations.registeredAt,
         emailVerified: aiSummitRegistrations.emailVerified,
-      }).from(aiSummitRegistrations);
+      }).from(aiSummitRegistrations)
+        .where(and(
+          isNotNull(aiSummitRegistrations.email),
+          // Add email format validation
+          sql`${aiSummitRegistrations.email} ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'`
+        ));
 
       const aiSummitResults = await aiSummitQuery;
       
+      // Track emails to prevent duplicates (case-insensitive)
+      const emailSet = new Set<string>();
+      for (const user of userResults) {
+        emailSet.add(user.email.toLowerCase());
+      }
+      
       for (const registration of aiSummitResults) {
-        // Skip if already added from users table
-        if (contacts.some(c => c.email === registration.email)) continue;
+        // Skip if already added from users table (case-insensitive check)
+        if (emailSet.has(registration.email.toLowerCase())) continue;
 
         const participantRoles = typeof registration.participantRoles === 'string' 
           ? JSON.parse(registration.participantRoles) 
           : registration.participantRoles || ['attendee'];
+
+        // Add to email tracking set
+        emailSet.add(registration.email.toLowerCase());
 
         const contact: UnifiedContact = {
           email: registration.email,
