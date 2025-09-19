@@ -392,10 +392,10 @@ export class EmailService {
         greeting: "Welcome to the Croydon Business Association!",
         message: "Thank you for registering for the AI Summit 2025! Your registration is confirmed for October 1st, 2025 (10 AM-4 PM) at LSBU London South Bank University Croydon. IMPORTANT: You need to set up your QR code for event entry - this is your key to getting into the summit.",
         benefits: [
-          "🔑 SET UP YOUR QR CODE: Log into your account and download your event badge", 
-          "📱 Print your badge or save the QR code on your phone for scanning at entry",
-          "📧 Watch for your badge email with printing instructions", 
-          "🎯 Present QR code at entrance on October 1st for instant access"
+          "🔑 SET UP YOUR QR CODE: Log in to your account and download your event badge",
+          "📱 Print your badge or save the QR code on your phone for scanning at entry (recommended)",
+          "📧 Our app is mobile-friendly, you can even download your code to your homescreen",
+          "🎯 Present the QR code at the entrance on October 1st for instant access, and your only access.  You also need your QR Code to get into the sessions, so remember to book your sessions in the app."
         ]
       },
       vip: {
