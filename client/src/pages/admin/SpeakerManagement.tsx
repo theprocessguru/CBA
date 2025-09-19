@@ -245,343 +245,360 @@ export default function SpeakerManagement() {
               </DialogHeader>
 
               <Form {...createSpeakerForm}>
-                <form onSubmit={createSpeakerForm.handleSubmit((data) => createSpeakerMutation.mutate(data))} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Personal Information */}
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Full Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter full name" {...field} data-testid="input-speaker-name" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter email address" {...field} data-testid="input-speaker-email" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter phone number" {...field} data-testid="input-speaker-phone" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="company"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Company</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter company name" {...field} data-testid="input-speaker-company" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="jobTitle"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Job Title</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter job title" {...field} data-testid="input-speaker-job-title" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="website"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Website</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter website URL" {...field} data-testid="input-speaker-website" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="linkedIn"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>LinkedIn</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter LinkedIn URL" {...field} data-testid="input-speaker-linkedin" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Password Fields */}
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password *</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input
-                                type={showPassword ? "text" : "password"}
-                                placeholder="Enter password (min 8 chars)"
-                                {...field}
-                                data-testid="input-speaker-password"
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowPassword(!showPassword)}
-                              >
-                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password *</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input
-                                type={showConfirmPassword ? "text" : "password"}
-                                placeholder="Confirm password"
-                                {...field}
-                                data-testid="input-speaker-confirm-password"
-                              />
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              >
-                                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="bio"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Speaker Bio *</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Enter speaker biography" {...field} data-testid="textarea-speaker-bio" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Session Information */}
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="sessionType"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Session Type *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <form onSubmit={createSpeakerForm.handleSubmit((data) => createSpeakerMutation.mutate(data))} className="space-y-6">
+                  
+                  {/* Speaker Information Section */}
+                  <div className="space-y-4">
+                    <div className="border-b pb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">Speaker Information</h3>
+                      <p className="text-sm text-gray-600">Personal details and contact information</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name *</FormLabel>
                             <FormControl>
-                              <SelectTrigger data-testid="select-session-type">
-                                <SelectValue placeholder="Select session type" />
-                              </SelectTrigger>
+                              <Input placeholder="Enter full name" {...field} data-testid="input-speaker-name" />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="keynote">Keynote</SelectItem>
-                              <SelectItem value="talk">Talk/Presentation</SelectItem>
-                              <SelectItem value="panel">Panel Discussion</SelectItem>
-                              <SelectItem value="workshop">Workshop</SelectItem>
-                              <SelectItem value="demo">Demo</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="audienceLevel"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Audience Level *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email *</FormLabel>
                             <FormControl>
-                              <SelectTrigger data-testid="select-audience-level">
-                                <SelectValue placeholder="Select audience level" />
-                              </SelectTrigger>
+                              <Input placeholder="Enter email address" {...field} data-testid="input-speaker-email" />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="all">All Levels</SelectItem>
-                              <SelectItem value="beginner">Beginner</SelectItem>
-                              <SelectItem value="intermediate">Intermediate</SelectItem>
-                              <SelectItem value="advanced">Advanced</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="talkTitle"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Talk Title *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter talk/presentation title" {...field} data-testid="input-talk-title" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Phone *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter phone number" {...field} data-testid="input-speaker-phone" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="talkDescription"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Talk Description *</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Describe your talk/presentation" {...field} data-testid="textarea-talk-description" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="company"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Company</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter company name" {...field} data-testid="input-speaker-company" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="keyTakeaways"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Key Takeaways *</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="What will attendees learn from your session?" {...field} data-testid="textarea-key-takeaways" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="jobTitle"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Job Title</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter job title" {...field} data-testid="input-speaker-job-title" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="talkDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Duration (minutes) *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., 30, 45, 60" {...field} data-testid="input-talk-duration" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="website"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Website</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter website URL" {...field} data-testid="input-speaker-website" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="availableSlots"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Available Time Slots</FormLabel>
-                          <FormControl>
-                            <Input placeholder="e.g., Morning, Afternoon, Any" {...field} data-testid="input-available-slots" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="linkedIn"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>LinkedIn</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter LinkedIn URL" {...field} data-testid="input-speaker-linkedin" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="techRequirements"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Technical Requirements</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Any special tech setup needed?" {...field} data-testid="textarea-tech-requirements" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="speakingExperience"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Speaking Experience</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Years of speaking experience" {...field} data-testid="input-speaking-experience" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="speakingExperience"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Speaking Experience</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Previous speaking experience or credentials" {...field} data-testid="textarea-speaking-experience" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="bio"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Speaker Bio *</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Enter speaker biography and credentials" {...field} data-testid="textarea-speaker-bio" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-                    <FormField
-                      control={createSpeakerForm.control}
-                      name="motivationToSpeak"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Motivation to Speak</FormLabel>
-                          <FormControl>
-                            <Textarea placeholder="Why do you want to speak at this event?" {...field} data-testid="textarea-motivation" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                      {/* Password Fields */}
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Account Password *</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input
+                                  type={showPassword ? "text" : "password"}
+                                  placeholder="Enter password (min 8 chars)"
+                                  {...field}
+                                  data-testid="input-speaker-password"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => setShowPassword(!showPassword)}
+                                >
+                                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm Password *</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input
+                                  type={showConfirmPassword ? "text" : "password"}
+                                  placeholder="Confirm password"
+                                  {...field}
+                                  data-testid="input-speaker-confirm-password"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Session Information Section */}
+                  <div className="space-y-4">
+                    <div className="border-b pb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">Session Information</h3>
+                      <p className="text-sm text-gray-600">Details about what they will be presenting</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="sessionType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Session Type *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-session-type">
+                                  <SelectValue placeholder="Select session type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="keynote">Keynote</SelectItem>
+                                <SelectItem value="talk">Talk/Presentation</SelectItem>
+                                <SelectItem value="panel">Panel Discussion</SelectItem>
+                                <SelectItem value="workshop">Workshop</SelectItem>
+                                <SelectItem value="demo">Demo</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="audienceLevel"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Audience Level *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger data-testid="select-audience-level">
+                                  <SelectValue placeholder="Select audience level" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="all">All Levels</SelectItem>
+                                <SelectItem value="beginner">Beginner</SelectItem>
+                                <SelectItem value="intermediate">Intermediate</SelectItem>
+                                <SelectItem value="advanced">Advanced</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="talkDuration"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Session Duration *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., 30, 45, 60 minutes" {...field} data-testid="input-talk-duration" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="availableSlots"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Available Time Slots</FormLabel>
+                            <FormControl>
+                              <Input placeholder="e.g., Morning, Afternoon, Any" {...field} data-testid="input-available-slots" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="talkTitle"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Session Title *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter session/presentation title" {...field} data-testid="input-talk-title" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="talkDescription"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Session Description *</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Describe what the session will cover" {...field} data-testid="textarea-talk-description" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="keyTakeaways"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Key Takeaways *</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="What will attendees learn from this session?" {...field} data-testid="textarea-key-takeaways" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="techRequirements"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Technical Requirements</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Any special tech setup needed for the session?" {...field} data-testid="textarea-tech-requirements" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="motivationToSpeak"
+                        render={({ field }) => (
+                          <FormItem className="col-span-2">
+                            <FormLabel>Why This Session?</FormLabel>
+                            <FormControl>
+                              <Textarea placeholder="Why is this session important for the AI Summit?" {...field} data-testid="textarea-motivation" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
 
                   <div className="flex gap-2 justify-end pt-4">
