@@ -1,7 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mic, Users, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Mic, Users, Clock, CheckCircle, AlertCircle, Plus } from "lucide-react";
 
 interface SpeakingSession {
   id: number;
@@ -20,7 +33,31 @@ interface SessionStats {
   activeAttendance: number;
 }
 
+const createSessionSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().min(1, "Description is required"),
+  speakerName: z.string().min(1, "Speaker name is required"),
+  speakerBio: z.string().optional(),
+  speakerCompany: z.string().optional(),
+  speakerJobTitle: z.string().optional(),
+  sessionType: z.enum(["keynote", "panel", "presentation", "demo", "fireside_chat"]),
+  duration: z.number().min(15, "Duration must be at least 15 minutes"),
+  startTime: z.string().min(1, "Start time is required"),
+  endTime: z.string().min(1, "End time is required"),
+  venue: z.string().min(1, "Venue is required"),
+  maxCapacity: z.number().min(1, "Capacity must be at least 1"),
+  audienceLevel: z.enum(["all", "beginner", "intermediate", "advanced", "business_leaders"]),
+  keyTakeaways: z.string().optional(),
+  isActive: z.boolean().default(true),
+});
+
+type CreateSessionFormData = z.infer<typeof createSessionSchema>;
+
 export default function SpeakingSessionManagement() {
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: sessions, isLoading: sessionsLoading } = useQuery<SpeakingSession[]>({
     queryKey: ['/api/ai-summit/speaking-sessions']
   });
@@ -28,6 +65,39 @@ export default function SpeakingSessionManagement() {
   const { data: stats, isLoading: statsLoading } = useQuery<SessionStats>({
     queryKey: ['/api/admin/speaking-session-stats'],
     refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  const createSessionForm = useForm<CreateSessionFormData>({
+    resolver: zodResolver(createSessionSchema),
+    defaultValues: {
+      sessionType: "presentation",
+      audienceLevel: "all",
+      duration: 45,
+      maxCapacity: 50,
+      isActive: true,
+    },
+  });
+
+  const createSessionMutation = useMutation({
+    mutationFn: (data: CreateSessionFormData) =>
+      apiRequest('/api/ai-summit/speaking-sessions', 'POST', data),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Speaking session created successfully!",
+      });
+      createSessionForm.reset();
+      setCreateDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/speaking-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/speaking-session-stats'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create speaking session",
+        variant: "destructive",
+      });
+    },
   });
 
   if (sessionsLoading || statsLoading) {
@@ -112,7 +182,291 @@ export default function SpeakingSessionManagement() {
         {/* Session List */}
         <Card>
           <CardHeader>
-            <CardTitle>All Speaking Sessions</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>All Speaking Sessions</CardTitle>
+              <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="gap-2" data-testid="button-add-session">
+                    <Plus className="h-4 w-4" />
+                    Add Session
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create New Speaking Session</DialogTitle>
+                    <DialogDescription>
+                      Add a new speaking session for the AI Summit 2025
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <Form {...createSessionForm}>
+                    <form onSubmit={createSessionForm.handleSubmit((data) => createSessionMutation.mutate(data))} className="space-y-4">
+                      {/* Basic Information */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={createSessionForm.control}
+                          name="title"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Session Title *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter session title" {...field} data-testid="input-session-title" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="description"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Description *</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Enter session description" {...field} data-testid="textarea-session-description" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Speaker Information */}
+                        <FormField
+                          control={createSessionForm.control}
+                          name="speakerName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Speaker Name *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter speaker name" {...field} data-testid="input-speaker-name" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="speakerCompany"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Speaker Company</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter company name" {...field} data-testid="input-speaker-company" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="speakerJobTitle"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Speaker Job Title</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter job title" {...field} data-testid="input-speaker-job-title" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="sessionType"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Session Type *</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-session-type">
+                                    <SelectValue placeholder="Select session type" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="keynote">Keynote</SelectItem>
+                                  <SelectItem value="presentation">Presentation</SelectItem>
+                                  <SelectItem value="panel">Panel Discussion</SelectItem>
+                                  <SelectItem value="demo">Live Demo</SelectItem>
+                                  <SelectItem value="fireside_chat">Fireside Chat</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="audienceLevel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Audience Level *</FormLabel>
+                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                  <SelectTrigger data-testid="select-audience-level">
+                                    <SelectValue placeholder="Select audience level" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="all">All Levels</SelectItem>
+                                  <SelectItem value="beginner">Beginner</SelectItem>
+                                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                                  <SelectItem value="advanced">Advanced</SelectItem>
+                                  <SelectItem value="business_leaders">Business Leaders</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Schedule & Venue */}
+                        <FormField
+                          control={createSessionForm.control}
+                          name="startTime"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Start Date & Time *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="datetime-local" 
+                                  {...field} 
+                                  data-testid="input-start-time"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="endTime"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>End Date & Time *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="datetime-local" 
+                                  {...field} 
+                                  data-testid="input-end-time"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="venue"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Venue *</FormLabel>
+                              <FormControl>
+                                <Input placeholder="e.g., Main Auditorium" {...field} data-testid="input-venue" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="maxCapacity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Max Capacity *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="1"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  data-testid="input-max-capacity"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="duration"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Duration (minutes) *</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  type="number" 
+                                  min="15"
+                                  {...field}
+                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                  data-testid="input-duration"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Optional Fields */}
+                        <FormField
+                          control={createSessionForm.control}
+                          name="speakerBio"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Speaker Bio</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="Enter speaker biography" {...field} data-testid="textarea-speaker-bio" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createSessionForm.control}
+                          name="keyTakeaways"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>Key Takeaways</FormLabel>
+                              <FormControl>
+                                <Textarea placeholder="What will attendees learn from this session?" {...field} data-testid="textarea-key-takeaways" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className="flex gap-2 justify-end pt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setCreateDialogOpen(false)}
+                          data-testid="button-cancel-session"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="submit"
+                          disabled={createSessionMutation.isPending}
+                          data-testid="button-create-session"
+                        >
+                          {createSessionMutation.isPending ? "Creating..." : "Create Session"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
           </CardHeader>
           <CardContent>
             {!sessions || sessions.length === 0 ? (
