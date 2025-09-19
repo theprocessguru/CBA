@@ -538,28 +538,11 @@ export async function setupLocalAuth(app: Express) {
 
 }
 
-// Persistent token store for Replit environment using database
-import { db } from './db';
-
-// Simple in-memory token store for Replit environment (with database backup)
+// Simple in-memory token store for Replit environment (ephemeral fallback only)
 const authTokens = new Map<string, { userId: string; expiresAt: Date }>();
 
-// Load existing tokens from database on startup
-(async () => {
-  try {
-    console.log('Loading auth tokens from database...');
-    const query = `
-      SELECT sess::text as session_data 
-      FROM sessions 
-      WHERE expire > NOW() 
-      AND sess::text LIKE '%authToken%'
-    `;
-    const result = await db.execute(query);
-    console.log(`Found ${result.length} sessions with potential auth tokens`);
-  } catch (error) {
-    console.warn('Could not load auth tokens from database:', error);
-  }
-})();
+// On startup, log that auth tokens are volatile and sessions are primary
+console.log('🔐 Auth system initialized - Session cookies primary, volatile tokens as fallback');
 
 // In-memory impersonation store for Replit environment
 export const impersonationData = new Map<string, {
@@ -584,7 +567,38 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  // First check for auth token in header (for Replit environment)
+  // PRIORITY 1: Check session-based auth first (more reliable, survives restarts)
+  const session = req.session as any;
+  
+  if (session?.userId) {
+    // Check if session has impersonation data
+    if (session.impersonating && session.impersonatedUserId) {
+      // We're impersonating - use impersonated user instead of session user
+      const impersonatedUser = await storage.getUser(session.impersonatedUserId);
+      if (impersonatedUser) {
+        req.user = {
+          ...impersonatedUser,
+          isImpersonating: true,
+          originalAdmin: session.originalAdmin
+        };
+        console.log("Authenticated via session but impersonating:", impersonatedUser.email);
+        return next();
+      }
+    }
+
+    // Fetch fresh user data from database to ensure we have current admin status
+    const user = await storage.getUser(session.userId);
+    if (user) {
+      // Normal session auth - no impersonation
+      req.user = user;
+      console.log("Authenticated via session:", user.id, user.email);
+      return next();
+    } else {
+      console.log("User not found for session userId:", session.userId);
+    }
+  }
+
+  // PRIORITY 2: Fallback to auth token in header (volatile, for Replit environment only)
   const authToken = req.headers['authorization']?.replace('Bearer ', '');
   
   if (authToken) {
@@ -613,41 +627,11 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         console.log("Authenticated via token:", user.id, user.email);
         return next();
       }
+    } else if (authToken) {
+      console.log("Auth token expired or invalid (likely server restart)");
     }
   }
   
-  // Fall back to session-based auth
-  const session = req.session as any;
-  
-  if (!session?.userId) {
-    console.log("No session userId found");
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  // Check if session has impersonation data
-  if (session.impersonating && session.impersonatedUserId) {
-    // We're impersonating - use impersonated user instead of session user
-    const impersonatedUser = await storage.getUser(session.impersonatedUserId);
-    if (impersonatedUser) {
-      req.user = {
-        ...impersonatedUser,
-        isImpersonating: true,
-        originalAdmin: session.originalAdmin
-      };
-      console.log("Authenticated via session but impersonating:", impersonatedUser.email);
-      return next();
-    }
-  }
-
-  // Fetch fresh user data from database to ensure we have current admin status
-  const user = await storage.getUser(session.userId);
-  if (!user) {
-    console.log("User not found for session userId:", session.userId);
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  // Normal session auth - no impersonation
-  req.user = user;
-  console.log("Authenticated via session:", user.id, user.email);
-  next();
+  console.log("No valid session or auth token found");
+  return res.status(401).json({ message: "Unauthorized" });
 };
