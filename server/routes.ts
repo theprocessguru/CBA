@@ -96,6 +96,8 @@ import {
   aiSummitSpeakerInterests,
   aiSummitExhibitorRegistrations,
   aiSummitVolunteers,
+  aiSummitWorkshops,
+  aiSummitWorkshopRegistrations,
   users,
   businesses,
   membershipTiers,
@@ -10127,6 +10129,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Get workshop capacity error:", error);
       res.status(500).json({ message: "Failed to get workshop capacity: " + error.message });
+    }
+  });
+
+  // Get user's workshop registrations
+  app.get("/api/my-workshop-registrations", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's badge IDs to match registrations that might have null email
+      let userBadgeIds: string[] = [];
+      try {
+        const userBadges = await storage.getBadgesByEmail(user.email);
+        userBadgeIds = userBadges?.map(badge => badge.badgeId) || [];
+      } catch (error) {
+        // No badges found, continue with email-only search
+      }
+
+      // Get all workshop registrations for this user by email OR by any of their badge IDs
+      let whereCondition;
+      if (userBadgeIds.length > 0) {
+        // If user has badge IDs, search by email OR badge IDs
+        whereCondition = or(
+          eq(aiSummitWorkshopRegistrations.attendeeEmail, user.email),
+          inArray(aiSummitWorkshopRegistrations.badgeId, userBadgeIds)
+        );
+      } else {
+        // If no badge IDs, search only by email
+        whereCondition = eq(aiSummitWorkshopRegistrations.attendeeEmail, user.email);
+      }
+
+      const registrations = await db
+        .select({
+          id: aiSummitWorkshopRegistrations.id,
+          workshopId: aiSummitWorkshopRegistrations.workshopId,
+          badgeId: aiSummitWorkshopRegistrations.badgeId,
+          attendeeName: aiSummitWorkshopRegistrations.attendeeName,
+          attendeeEmail: aiSummitWorkshopRegistrations.attendeeEmail,
+          attendeeCompany: aiSummitWorkshopRegistrations.attendeeCompany,
+          registeredAt: aiSummitWorkshopRegistrations.registeredAt,
+          checkedIn: aiSummitWorkshopRegistrations.checkedIn,
+          experienceLevel: aiSummitWorkshopRegistrations.experienceLevel,
+          specificInterests: aiSummitWorkshopRegistrations.specificInterests,
+          workshopTitle: aiSummitWorkshops.title,
+          workshopDescription: aiSummitWorkshops.description,
+          startTime: aiSummitWorkshops.startTime,
+          endTime: aiSummitWorkshops.endTime,
+          capacity: aiSummitWorkshops.capacity,
+          venue: aiSummitWorkshops.venue
+        })
+        .from(aiSummitWorkshopRegistrations)
+        .leftJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
+        .where(whereCondition)
+        .orderBy(desc(aiSummitWorkshopRegistrations.registeredAt));
+
+      res.json(registrations);
+    } catch (error: any) {
+      console.error("Get my workshop registrations error:", error);
+      res.status(500).json({ message: "Failed to get workshop registrations: " + error.message });
     }
   });
 

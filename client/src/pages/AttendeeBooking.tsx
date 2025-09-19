@@ -251,7 +251,7 @@ export default function AttendeeBooking() {
                 <div className="flex justify-between items-center">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-1 text-gray-500" />
-                    <span className="text-sm text-gray-600">October 1, 2025</span>
+                    <span className="text-sm text-gray-600">January 27, 2025</span>
                   </div>
 
                   <div className="flex gap-2">
