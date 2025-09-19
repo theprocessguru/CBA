@@ -23,37 +23,37 @@ export const EventBookingTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch available time slots for booking
+  // Fetch available AI Summit workshops for booking
   const { data: timeSlots, isLoading: slotsLoading } = useQuery<any[]>({
-    queryKey: ['/api/events/1/time-slots'],
+    queryKey: ['/api/ai-summit/workshops/active'],
     enabled: isAuthenticated
   });
 
-  // Fetch user's current session registrations
+  // Fetch user's current workshop registrations
   const { data: sessionRegistrations, isLoading: sessionRegistrationsLoading } = useQuery<any[]>({
-    queryKey: ['/api/my-time-slot-registrations'],
+    queryKey: ['/api/my-workshop-registrations'],
     enabled: isAuthenticated
   });
 
-  // Register for time slot mutation
+  // Register for workshop mutation
   const registerMutation = useMutation({
-    mutationFn: async (slotId: number) => {
-      return apiRequest('POST', `/api/events/1/time-slots/${slotId}/register`, {
+    mutationFn: async (workshopId: number) => {
+      return apiRequest('POST', `/api/ai-summit/workshops/${workshopId}/register`, {
         badgeId: (user as any)?.qrHandle || `USER-${user?.id}`
       });
     },
     onSuccess: () => {
       toast({
         title: "Registration Successful",
-        description: "You've been registered for the session!",
+        description: "You've been registered for the workshop!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/events/1/time-slots'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/my-time-slot-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/workshops/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-workshop-registrations'] });
     },
     onError: (error: any) => {
       toast({
         title: "Registration Failed",
-        description: error.message || "Failed to register for session",
+        description: error.message || "Failed to register for workshop",
         variant: "destructive",
       });
     }
@@ -61,16 +61,16 @@ export const EventBookingTab = () => {
 
   // Cancel registration mutation
   const cancelMutation = useMutation({
-    mutationFn: async (slotId: number) => {
-      return apiRequest('DELETE', `/api/events/1/time-slots/${slotId}/cancel`);
+    mutationFn: async (workshopId: number) => {
+      return apiRequest('DELETE', `/api/ai-summit/workshops/${workshopId}/cancel`);
     },
     onSuccess: () => {
       toast({
         title: "Registration Cancelled",
         description: "Your registration has been cancelled.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/events/1/time-slots'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/my-time-slot-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/workshops/active'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-workshop-registrations'] });
     },
     onError: (error: any) => {
       toast({
@@ -82,8 +82,8 @@ export const EventBookingTab = () => {
   });
 
   // Helper functions for booking
-  const isRegistered = (slotId: number) => {
-    return sessionRegistrations?.some(reg => reg.timeSlotId === slotId);
+  const isRegistered = (workshopId: number) => {
+    return sessionRegistrations?.some(reg => reg.workshopId === workshopId);
   };
 
   const formatTime = (timeString: string) => {
@@ -194,28 +194,28 @@ export const EventBookingTab = () => {
             </div>
           ) : (
             <div className="space-y-4 max-h-96 overflow-y-auto">
-              {timeSlots.filter(slot => slot.slotType !== 'break').map((slot) => {
-                const registered = isRegistered(slot.id);
-                const maxAllowed = slot.room === 'Auditorium' ? Math.min(slot.maxCapacity, 80) : Math.min(slot.maxCapacity, 65);
-                const isFull = slot.currentAttendees >= maxAllowed;
-                const availableSeats = maxAllowed - slot.currentAttendees;
+              {timeSlots.map((workshop) => {
+                const registered = isRegistered(workshop.id);
+                const maxAllowed = workshop.maxCapacity || 30;
+                const isFull = (workshop.currentRegistrations || 0) >= maxAllowed;
+                const availableSeats = maxAllowed - (workshop.currentRegistrations || 0);
 
                 return (
                   <div
-                    key={slot.id}
+                    key={workshop.id}
                     className={`border rounded-lg p-4 ${
                       registered ? 'ring-2 ring-green-500 bg-green-50' : 
                       isFull ? 'opacity-75 bg-gray-50' :
                       availableSeats <= 5 ? 'ring-2 ring-red-400' : ''
                     }`}
-                    data-testid={`session-${slot.id}`}
+                    data-testid={`session-${workshop.id}`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900">{slot.title}</h3>
-                          <Badge className={getSlotTypeColor(slot.slotType)}>
-                            {slot.slotType}
+                          <h3 className="font-semibold text-gray-900">{workshop.title}</h3>
+                          <Badge className="bg-green-100 text-green-800">
+                            workshop
                           </Badge>
                           {registered && (
                             <Badge className="bg-green-100 text-green-800">
