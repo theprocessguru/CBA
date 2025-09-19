@@ -2446,3 +2446,74 @@ export const insertNotificationPreferencesSchema = createInsertSchema(notificati
 
 export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
 export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
+
+// Email Campaign System - For bulk email targeting and delivery tracking
+export const emailCampaigns = pgTable("email_campaigns", {
+  id: serial("id").primaryKey(),
+  name: varchar("name").notNull(), // Campaign name for admin reference
+  subject: varchar("subject").notNull(), // Email subject line
+  body: text("body").notNull(), // Email body content
+  emailType: varchar("email_type").notNull(), // welcome, announcement, newsletter, etc.
+  filters: jsonb("filters").notNull(), // Filter criteria used to select recipients
+  status: varchar("status").default("draft"), // draft, sending, sent, paused, cancelled
+  totalRecipients: integer("total_recipients").default(0), // Total number of recipients
+  sentCount: integer("sent_count").default(0), // Number of emails sent successfully
+  failedCount: integer("failed_count").default(0), // Number of failed deliveries
+  createdBy: varchar("created_by").notNull().references(() => users.id), // Admin who created the campaign
+  scheduledFor: timestamp("scheduled_for"), // For scheduled campaigns
+  startedAt: timestamp("started_at"), // When sending started
+  completedAt: timestamp("completed_at"), // When sending completed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailCampaignRecipients = pgTable("email_campaign_recipients", {
+  id: serial("id").primaryKey(),
+  campaignId: integer("campaign_id").notNull().references(() => emailCampaigns.id, { onDelete: "cascade" }),
+  email: varchar("email").notNull(),
+  name: varchar("name"),
+  userId: varchar("user_id"), // May be null for AI Summit registrants without user accounts
+  status: varchar("status").default("pending"), // pending, sending, sent, failed, bounced
+  attempts: integer("attempts").default(0), // Number of delivery attempts
+  lastError: text("last_error"), // Last error message if delivery failed
+  providerAccount: varchar("provider_account"), // Which Gmail account was used (account1, account2, account3)
+  sentAt: timestamp("sent_at"), // When email was successfully sent
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  unique("unique_campaign_recipient").on(table.campaignId, table.email),
+]);
+
+// Zod schemas for email campaigns
+export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns, {
+  name: z.string().min(1, "Campaign name is required"),
+  subject: z.string().min(1, "Subject is required"),
+  body: z.string().min(1, "Email body is required"),
+  emailType: z.string().min(1, "Email type is required"),
+  filters: z.any(), // JSON filter criteria
+  status: z.enum(["draft", "sending", "sent", "paused", "cancelled"]).default("draft"),
+  totalRecipients: z.number().min(0).default(0),
+  sentCount: z.number().min(0).default(0),
+  failedCount: z.number().min(0).default(0),
+  createdBy: z.string().min(1, "Created by is required"),
+  scheduledFor: z.date().optional(),
+  startedAt: z.date().optional(),
+  completedAt: z.date().optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export const insertEmailCampaignRecipientSchema = createInsertSchema(emailCampaignRecipients, {
+  campaignId: z.number().min(1, "Campaign ID is required"),
+  email: z.string().email("Valid email is required"),
+  name: z.string().optional(),
+  userId: z.string().optional(),
+  status: z.enum(["pending", "sending", "sent", "failed", "bounced"]).default("pending"),
+  attempts: z.number().min(0).default(0),
+  lastError: z.string().optional(),
+  providerAccount: z.string().optional(),
+  sentAt: z.date().optional(),
+}).omit({ id: true, createdAt: true, updatedAt: true });
+
+export type InsertEmailCampaign = z.infer<typeof insertEmailCampaignSchema>;
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+export type InsertEmailCampaignRecipient = z.infer<typeof insertEmailCampaignRecipientSchema>;
+export type EmailCampaignRecipient = typeof emailCampaignRecipients.$inferSelect;
