@@ -11,6 +11,8 @@ import {
   transactions,
   barterExchanges,
   aiSummitRegistrations,
+  emailCampaigns,
+  emailCampaignRecipients,
   aiSummitExhibitorRegistrations,
   aiSummitSpeakerInterests,
   aiSummitBadges,
@@ -139,6 +141,12 @@ import {
   type InsertEventMoodEntry,
   type EventMoodAggregation,
   type InsertEventMoodAggregation,
+  type EmailCampaign,
+  type InsertEmailCampaign,
+  type EmailCampaignRecipient,
+  type InsertEmailCampaignRecipient,
+  type EmailTargetFilters,
+  type UnifiedContact,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, or, gte, lte, sql, gt, isNull, isNotNull, ilike, asc } from "drizzle-orm";
@@ -503,6 +511,31 @@ export interface IStorage {
   // Session attendance statistics
   getWorkshopStatistics(): Promise<{ totalWorkshops: number; totalRegistrations: number; activeAttendance: number }>;
   getSpeakingSessionStatistics(): Promise<{ totalSessions: number; totalRegistrations: number; activeAttendance: number }>;
+
+  // Email Targeting and Campaign operations
+  getUnifiedContacts(filters?: EmailTargetFilters): Promise<UnifiedContact[]>;
+  previewEmailTargets(filters: EmailTargetFilters): Promise<{ count: number; sample: UnifiedContact[] }>;
+  getFilterOptions(): Promise<{ 
+    personTypes: string[]; 
+    membershipTiers: string[]; 
+    participantRoles: string[]; 
+    aiInterests: string[]; 
+    businessTypes: string[]; 
+    districts: string[]; 
+  }>;
+  
+  // Email Campaign operations
+  createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign>;
+  getEmailCampaignById(id: number): Promise<EmailCampaign | undefined>;
+  listEmailCampaigns(options?: { status?: string; createdBy?: string; limit?: number }): Promise<EmailCampaign[]>;
+  updateEmailCampaign(id: number, campaign: Partial<InsertEmailCampaign>): Promise<EmailCampaign>;
+  deleteEmailCampaign(id: number): Promise<boolean>;
+  
+  // Email Campaign Recipients operations
+  createEmailCampaignRecipients(recipients: InsertEmailCampaignRecipient[]): Promise<EmailCampaignRecipient[]>;
+  getEmailCampaignRecipients(campaignId: number, options?: { status?: string; limit?: number; offset?: number }): Promise<EmailCampaignRecipient[]>;
+  updateEmailCampaignRecipient(id: number, recipient: Partial<InsertEmailCampaignRecipient>): Promise<EmailCampaignRecipient>;
+  getCampaignDeliveryStats(campaignId: number): Promise<{ total: number; sent: number; failed: number; pending: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3563,6 +3596,402 @@ export class DatabaseStorage implements IStorage {
         totalRegistrations: 0,
         activeAttendance: 0
       };
+    }
+  }
+
+  // Email Targeting and Campaign operations
+  async getUnifiedContacts(filters?: EmailTargetFilters): Promise<UnifiedContact[]> {
+    try {
+      const contacts: UnifiedContact[] = [];
+
+      // Get contacts from users table
+      const userQuery = db.select({
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        userId: users.id,
+        membershipTier: users.membershipTier,
+        memberSegment: users.memberSegment,
+        participantType: users.participantType,
+        homeCity: users.homeCity,
+        businessCity: users.businessCity,
+        createdAt: users.createdAt,
+        emailVerified: users.emailVerified,
+      }).from(users);
+
+      const userResults = await userQuery;
+      
+      for (const user of userResults) {
+        const contact: UnifiedContact = {
+          email: user.email,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+          userId: user.userId,
+          source: 'users',
+          personTypes: [user.memberSegment || 'resident'],
+          membershipTier: user.membershipTier || undefined,
+          participantRoles: [user.participantType || 'attendee'],
+          aiInterests: [],
+          businessType: undefined,
+          districts: [user.homeCity, user.businessCity].filter(Boolean),
+          registrationDate: user.createdAt,
+          isEmailVerified: user.emailVerified || false,
+        };
+        contacts.push(contact);
+      }
+
+      // Get contacts from AI Summit registrations
+      const aiSummitQuery = db.select({
+        email: aiSummitRegistrations.email,
+        name: aiSummitRegistrations.name,
+        userId: aiSummitRegistrations.userId,
+        participantRoles: aiSummitRegistrations.participantRoles,
+        aiInterest: aiSummitRegistrations.aiInterest,
+        businessType: aiSummitRegistrations.businessType,
+        registeredAt: aiSummitRegistrations.registeredAt,
+        emailVerified: aiSummitRegistrations.emailVerified,
+      }).from(aiSummitRegistrations);
+
+      const aiSummitResults = await aiSummitQuery;
+      
+      for (const registration of aiSummitResults) {
+        // Skip if already added from users table
+        if (contacts.some(c => c.email === registration.email)) continue;
+
+        const participantRoles = typeof registration.participantRoles === 'string' 
+          ? JSON.parse(registration.participantRoles) 
+          : registration.participantRoles || ['attendee'];
+
+        const contact: UnifiedContact = {
+          email: registration.email,
+          name: registration.name || registration.email,
+          userId: registration.userId || undefined,
+          source: 'ai_summit_registrations',
+          personTypes: ['ai_summit_attendee'],
+          membershipTier: undefined,
+          participantRoles: Array.isArray(participantRoles) ? participantRoles : ['attendee'],
+          aiInterests: registration.aiInterest ? [registration.aiInterest] : [],
+          businessType: registration.businessType || undefined,
+          districts: [],
+          registrationDate: registration.registeredAt,
+          isEmailVerified: registration.emailVerified || false,
+        };
+        contacts.push(contact);
+      }
+
+      // Apply filters if provided
+      if (filters) {
+        return this.applyContactFilters(contacts, filters);
+      }
+
+      return contacts;
+    } catch (error) {
+      console.error('Error getting unified contacts:', error);
+      return [];
+    }
+  }
+
+  private applyContactFilters(contacts: UnifiedContact[], filters: EmailTargetFilters): UnifiedContact[] {
+    return contacts.filter(contact => {
+      let matches = true;
+
+      // Apply person types filter
+      if (filters.personTypes?.values.length) {
+        const personTypeMatch = filters.personTypes.mode === 'all'
+          ? filters.personTypes.values.every(type => contact.personTypes.includes(type))
+          : filters.personTypes.values.some(type => contact.personTypes.includes(type));
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || personTypeMatch;
+        } else {
+          matches = matches && personTypeMatch;
+        }
+      }
+
+      // Apply membership tiers filter
+      if (filters.membershipTiers?.values.length && contact.membershipTier) {
+        const tierMatch = filters.membershipTiers.values.includes(contact.membershipTier);
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || tierMatch;
+        } else {
+          matches = matches && tierMatch;
+        }
+      }
+
+      // Apply participant roles filter
+      if (filters.participantRoles?.values.length) {
+        const roleMatch = filters.participantRoles.mode === 'all'
+          ? filters.participantRoles.values.every(role => contact.participantRoles.includes(role))
+          : filters.participantRoles.values.some(role => contact.participantRoles.includes(role));
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || roleMatch;
+        } else {
+          matches = matches && roleMatch;
+        }
+      }
+
+      // Apply AI interests filter
+      if (filters.aiInterests?.values.length) {
+        const interestMatch = filters.aiInterests.mode === 'all'
+          ? filters.aiInterests.values.every(interest => contact.aiInterests.includes(interest))
+          : filters.aiInterests.values.some(interest => contact.aiInterests.includes(interest));
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || interestMatch;
+        } else {
+          matches = matches && interestMatch;
+        }
+      }
+
+      // Apply business types filter
+      if (filters.businessTypes?.values.length && contact.businessType) {
+        const businessMatch = filters.businessTypes.values.includes(contact.businessType);
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || businessMatch;
+        } else {
+          matches = matches && businessMatch;
+        }
+      }
+
+      // Apply districts filter
+      if (filters.districts?.values.length) {
+        const districtMatch = filters.districts.mode === 'all'
+          ? filters.districts.values.every(district => contact.districts.includes(district))
+          : filters.districts.values.some(district => contact.districts.includes(district));
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || districtMatch;
+        } else {
+          matches = matches && districtMatch;
+        }
+      }
+
+      // Apply registration date range filter
+      if (filters.registrationDateRange && contact.registrationDate) {
+        const regDate = new Date(contact.registrationDate);
+        let dateMatch = true;
+        
+        if (filters.registrationDateRange.start) {
+          dateMatch = dateMatch && regDate >= new Date(filters.registrationDateRange.start);
+        }
+        if (filters.registrationDateRange.end) {
+          dateMatch = dateMatch && regDate <= new Date(filters.registrationDateRange.end);
+        }
+        
+        if (filters.globalOperator === 'OR') {
+          matches = matches || dateMatch;
+        } else {
+          matches = matches && dateMatch;
+        }
+      }
+
+      return matches;
+    });
+  }
+
+  async previewEmailTargets(filters: EmailTargetFilters): Promise<{ count: number; sample: UnifiedContact[] }> {
+    try {
+      const filteredContacts = await this.getUnifiedContacts(filters);
+      return {
+        count: filteredContacts.length,
+        sample: filteredContacts.slice(0, 10), // Return first 10 as sample
+      };
+    } catch (error) {
+      console.error('Error previewing email targets:', error);
+      return { count: 0, sample: [] };
+    }
+  }
+
+  async getFilterOptions(): Promise<{ 
+    personTypes: string[]; 
+    membershipTiers: string[]; 
+    participantRoles: string[]; 
+    aiInterests: string[]; 
+    businessTypes: string[]; 
+    districts: string[]; 
+  }> {
+    try {
+      // Get distinct values from users table
+      const userTiers = await db.selectDistinct({ value: users.membershipTier }).from(users).where(isNotNull(users.membershipTier));
+      const userSegments = await db.selectDistinct({ value: users.memberSegment }).from(users).where(isNotNull(users.memberSegment));
+      const userParticipantTypes = await db.selectDistinct({ value: users.participantType }).from(users).where(isNotNull(users.participantType));
+      const userHomeCities = await db.selectDistinct({ value: users.homeCity }).from(users).where(isNotNull(users.homeCity));
+      const userBusinessCities = await db.selectDistinct({ value: users.businessCity }).from(users).where(isNotNull(users.businessCity));
+
+      // Get distinct values from AI Summit registrations
+      const aiInterests = await db.selectDistinct({ value: aiSummitRegistrations.aiInterest }).from(aiSummitRegistrations).where(isNotNull(aiSummitRegistrations.aiInterest));
+      const businessTypes = await db.selectDistinct({ value: aiSummitRegistrations.businessType }).from(aiSummitRegistrations).where(isNotNull(aiSummitRegistrations.businessType));
+
+      // Get participant roles from AI Summit (JSON array field)
+      const rolesResults = await db.select({ roles: aiSummitRegistrations.participantRoles }).from(aiSummitRegistrations).where(isNotNull(aiSummitRegistrations.participantRoles));
+      const allRoles = new Set<string>();
+      for (const result of rolesResults) {
+        try {
+          const roles = typeof result.roles === 'string' ? JSON.parse(result.roles) : result.roles;
+          if (Array.isArray(roles)) {
+            roles.forEach(role => allRoles.add(role));
+          }
+        } catch (e) {
+          // Ignore parse errors
+        }
+      }
+
+      return {
+        personTypes: [...new Set([
+          ...userSegments.map(s => s.value).filter(Boolean),
+          'ai_summit_attendee'
+        ])],
+        membershipTiers: userTiers.map(t => t.value).filter(Boolean),
+        participantRoles: [...new Set([
+          ...userParticipantTypes.map(p => p.value).filter(Boolean),
+          ...Array.from(allRoles)
+        ])],
+        aiInterests: aiInterests.map(i => i.value).filter(Boolean),
+        businessTypes: businessTypes.map(b => b.value).filter(Boolean),
+        districts: [...new Set([
+          ...userHomeCities.map(c => c.value).filter(Boolean),
+          ...userBusinessCities.map(c => c.value).filter(Boolean)
+        ])],
+      };
+    } catch (error) {
+      console.error('Error getting filter options:', error);
+      return {
+        personTypes: [],
+        membershipTiers: [],
+        participantRoles: [],
+        aiInterests: [],
+        businessTypes: [],
+        districts: [],
+      };
+    }
+  }
+
+  // Email Campaign operations
+  async createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign> {
+    const [newCampaign] = await db.insert(emailCampaigns).values(campaign).returning();
+    return newCampaign;
+  }
+
+  async getEmailCampaignById(id: number): Promise<EmailCampaign | undefined> {
+    const [campaign] = await db.select().from(emailCampaigns).where(eq(emailCampaigns.id, id));
+    return campaign;
+  }
+
+  async listEmailCampaigns(options?: { status?: string; createdBy?: string; limit?: number }): Promise<EmailCampaign[]> {
+    const conditions: any[] = [];
+    
+    if (options?.status) {
+      conditions.push(eq(emailCampaigns.status, options.status));
+    }
+    
+    if (options?.createdBy) {
+      conditions.push(eq(emailCampaigns.createdBy, options.createdBy));
+    }
+    
+    const query = db.select().from(emailCampaigns).orderBy(desc(emailCampaigns.createdAt));
+    
+    if (conditions.length > 0 && options?.limit) {
+      return await query.where(and(...conditions)).limit(options.limit);
+    } else if (conditions.length > 0) {
+      return await query.where(and(...conditions));
+    } else if (options?.limit) {
+      return await query.limit(options.limit);
+    } else {
+      return await query;
+    }
+  }
+
+  async updateEmailCampaign(id: number, campaign: Partial<InsertEmailCampaign>): Promise<EmailCampaign> {
+    const [updatedCampaign] = await db
+      .update(emailCampaigns)
+      .set({ ...campaign, updatedAt: new Date() })
+      .where(eq(emailCampaigns.id, id))
+      .returning();
+    return updatedCampaign;
+  }
+
+  async deleteEmailCampaign(id: number): Promise<boolean> {
+    const result = await db.delete(emailCampaigns).where(eq(emailCampaigns.id, id)).returning({ id: emailCampaigns.id });
+    return result.length > 0;
+  }
+
+  // Email Campaign Recipients operations
+  async createEmailCampaignRecipients(recipients: InsertEmailCampaignRecipient[]): Promise<EmailCampaignRecipient[]> {
+    const newRecipients = await db.insert(emailCampaignRecipients).values(recipients).returning();
+    return newRecipients;
+  }
+
+  async getEmailCampaignRecipients(campaignId: number, options?: { status?: string; limit?: number; offset?: number }): Promise<EmailCampaignRecipient[]> {
+    const conditions: any[] = [eq(emailCampaignRecipients.campaignId, campaignId)];
+    
+    if (options?.status) {
+      conditions.push(eq(emailCampaignRecipients.status, options.status));
+    }
+    
+    let query = db.select().from(emailCampaignRecipients).where(and(...conditions)).orderBy(emailCampaignRecipients.createdAt);
+    
+    if (options?.offset) {
+      query = query.offset(options.offset);
+    }
+    
+    if (options?.limit) {
+      query = query.limit(options.limit);
+    }
+    
+    return await query;
+  }
+
+  async updateEmailCampaignRecipient(id: number, recipient: Partial<InsertEmailCampaignRecipient>): Promise<EmailCampaignRecipient> {
+    const [updatedRecipient] = await db
+      .update(emailCampaignRecipients)
+      .set({ ...recipient, updatedAt: new Date() })
+      .where(eq(emailCampaignRecipients.id, id))
+      .returning();
+    return updatedRecipient;
+  }
+
+  async getCampaignDeliveryStats(campaignId: number): Promise<{ total: number; sent: number; failed: number; pending: number }> {
+    try {
+      const [totalResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(emailCampaignRecipients)
+        .where(eq(emailCampaignRecipients.campaignId, campaignId));
+
+      const [sentResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(emailCampaignRecipients)
+        .where(and(
+          eq(emailCampaignRecipients.campaignId, campaignId),
+          eq(emailCampaignRecipients.status, 'sent')
+        ));
+
+      const [failedResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(emailCampaignRecipients)
+        .where(and(
+          eq(emailCampaignRecipients.campaignId, campaignId),
+          eq(emailCampaignRecipients.status, 'failed')
+        ));
+
+      const [pendingResult] = await db
+        .select({ count: sql<number>`cast(count(*) as int)` })
+        .from(emailCampaignRecipients)
+        .where(and(
+          eq(emailCampaignRecipients.campaignId, campaignId),
+          eq(emailCampaignRecipients.status, 'pending')
+        ));
+
+      return {
+        total: totalResult?.count || 0,
+        sent: sentResult?.count || 0,
+        failed: failedResult?.count || 0,
+        pending: pendingResult?.count || 0,
+      };
+    } catch (error) {
+      console.error('Error getting campaign delivery stats:', error);
+      return { total: 0, sent: 0, failed: 0, pending: 0 };
     }
   }
 }

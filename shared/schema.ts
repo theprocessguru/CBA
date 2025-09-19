@@ -2517,3 +2517,52 @@ export type InsertEmailCampaign = z.infer<typeof insertEmailCampaignSchema>;
 export type EmailCampaign = typeof emailCampaigns.$inferSelect;
 export type InsertEmailCampaignRecipient = z.infer<typeof insertEmailCampaignRecipientSchema>;
 export type EmailCampaignRecipient = typeof emailCampaignRecipients.$inferSelect;
+
+// Email Targeting Filter Types
+export interface EmailTargetFilters {
+  personTypes?: {
+    mode: 'any' | 'all';
+    values: string[];
+  };
+  membershipTiers?: {
+    mode: 'any' | 'all';
+    values: string[];
+  };
+  participantRoles?: {
+    mode: 'any' | 'all';
+    values: string[];
+  };
+  aiInterests?: {
+    mode: 'any' | 'all';
+    values: string[];
+  };
+  businessTypes?: {
+    mode: 'any' | 'all';
+    values: string[];
+  };
+  districts?: {
+    mode: 'any' | 'all';
+    values: string[];
+  };
+  registrationDateRange?: {
+    start?: string;
+    end?: string;
+  };
+  globalOperator?: 'AND' | 'OR';
+}
+
+// Unified Contact for Email Targeting
+export interface UnifiedContact {
+  email: string;
+  name: string;
+  userId?: string; // May be null for AI Summit registrants without user accounts
+  source: 'users' | 'ai_summit_registrations';
+  personTypes: string[];
+  membershipTier?: string;
+  participantRoles: string[];
+  aiInterests: string[];
+  businessType?: string;
+  districts: string[];
+  registrationDate?: Date;
+  isEmailVerified?: boolean;
+}
