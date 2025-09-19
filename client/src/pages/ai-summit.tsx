@@ -2224,7 +2224,7 @@ const AISummit = () => {
                 <ParticipantTypeSelector 
                   personTypes={allPersonTypes}
                   onRegistrationSubmit={handleRegistration}
-                  isSubmitting={registrationMutation.isPending}
+                  isSubmitting={registerMutation.isPending}
                   eventSlug="first-ai-summit-croydon-2025"
                 />
               </div>
