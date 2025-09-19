@@ -47,6 +47,8 @@ interface ImpactMetrics {
   };
   newMembersThisMonth: number;
   memberGrowthRate: number;
+  qrCodeSetupCount: number;
+  qrCodeSetupRate: number;
   
   // Event metrics
   totalEventsHeld: number;
@@ -160,7 +162,7 @@ export default function AdminDashboard() {
         <div className="flex-1 p-6">
           <div className="animate-pulse space-y-4">
             <div className="h-8 bg-gray-200 rounded w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               {[...Array(8)].map((_, i) => (
                 <div key={i} className="h-32 bg-gray-200 rounded"></div>
               ))}
@@ -499,7 +501,7 @@ function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupan
       </div>
 
       {/* Key Impact Metrics - Top Row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Members</CardTitle>
@@ -561,6 +563,22 @@ function AdminContent({ metrics, occupancy }: { metrics?: ImpactMetrics; occupan
             </p>
             <p className="text-xs text-gray-500">
               £{metrics?.averageSalary?.toLocaleString() || 0} avg salary
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">QR Codes Set Up</CardTitle>
+            <QrCode className="h-4 w-4 text-cyan-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold" data-testid="text-qr-setup-count">{metrics?.qrCodeSetupCount || 0}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              {metrics?.totalMembers ? Math.round((metrics.qrCodeSetupCount / metrics.totalMembers) * 100) : 0}% of members
+            </p>
+            <p className="text-xs text-gray-500">
+              Universal Access Keys
             </p>
           </CardContent>
         </Card>

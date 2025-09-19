@@ -5705,6 +5705,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `);
       const newMembersThisMonth = Number(newMembersResult.rows[0]?.count || 0);
 
+      // QR Code setup count - users with qrHandle set
+      const qrCodeSetupResult = await db.execute(sql`
+        SELECT COUNT(*) as count 
+        FROM users 
+        WHERE qr_handle IS NOT NULL AND btrim(qr_handle) <> ''
+      `);
+      const qrCodeSetupCount = Number(qrCodeSetupResult.rows[0]?.count || 0);
+      
+      // Calculate QR Code setup rate percentage
+      const qrCodeSetupRate = totalMembers > 0 ? Math.round((qrCodeSetupCount / totalMembers) * 100) : 0;
+
       // Event metrics - comprehensive calculation across all event types
       const totalEventsResult = await db.execute(sql`
         SELECT COUNT(*) as count 
@@ -5883,6 +5894,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         membersByTier: tierCounts,
         newMembersThisMonth,
         memberGrowthRate,
+        qrCodeSetupCount,
+        qrCodeSetupRate,
         
         // Event metrics
         totalEventsHeld,
