@@ -34,7 +34,7 @@ export function getSession() {
     store: sessionStore,
     resave: true, // Force session save
     saveUninitialized: true, // Create sessions immediately
-    rolling: false, // Don't reset expiry
+    rolling: true, // Reset expiry on activity
     name: 'cba.sid', // Custom name to avoid conflicts
     cookie: {
       httpOnly: true,
