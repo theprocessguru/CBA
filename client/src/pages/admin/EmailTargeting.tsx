@@ -97,6 +97,139 @@ interface PreviewResult {
   sample: UnifiedContact[];
 }
 
+// FilterGroup Component
+interface FilterGroupProps {
+  title: string;
+  options: string[];
+  onChange: (mode: 'any' | 'all', values: string[]) => void;
+  testId: string;
+  mode?: 'any' | 'all';
+  selectedValues?: string[];
+}
+
+function FilterGroup({ title, options, onChange, testId, mode = 'any', selectedValues = [] }: FilterGroupProps) {
+  const [localMode, setLocalMode] = useState<'any' | 'all'>(mode);
+  const [localValues, setLocalValues] = useState<string[]>(selectedValues);
+
+  const handleModeChange = (newMode: 'any' | 'all') => {
+    setLocalMode(newMode);
+    onChange(newMode, localValues);
+  };
+
+  const handleValueToggle = (value: string) => {
+    const newValues = localValues.includes(value)
+      ? localValues.filter(v => v !== value)
+      : [...localValues, value];
+    
+    setLocalValues(newValues);
+    onChange(localMode, newValues);
+  };
+
+  const handleSelectAll = () => {
+    setLocalValues(options);
+    onChange(localMode, options);
+  };
+
+  const handleClearAll = () => {
+    setLocalValues([]);
+    onChange(localMode, []);
+  };
+
+  return (
+    <div className="space-y-3 border rounded-lg p-4 bg-gray-50">
+      <div className="flex items-center justify-between">
+        <Label className="font-medium">{title}</Label>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleSelectAll}
+            className="text-xs h-6 px-2"
+            data-testid={`${testId}-select-all`}
+          >
+            All
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleClearAll}
+            className="text-xs h-6 px-2"
+            data-testid={`${testId}-clear-all`}
+          >
+            Clear
+          </Button>
+        </div>
+      </div>
+
+      {/* Mode Selection */}
+      <div className="space-y-2">
+        <Label className="text-sm text-gray-600">Match Mode</Label>
+        <Select value={localMode} onValueChange={handleModeChange}>
+          <SelectTrigger className="h-8" data-testid={`${testId}-mode-select`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="any">Any of selected (OR)</SelectItem>
+            <SelectItem value="all">All of selected (AND)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Options */}
+      <div className="space-y-2">
+        <Label className="text-sm text-gray-600">
+          Options ({localValues.length} of {options.length} selected)
+        </Label>
+        <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto" data-testid={`${testId}-options`}>
+          {options.map((option) => (
+            <div key={option} className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id={`${testId}-${option}`}
+                checked={localValues.includes(option)}
+                onChange={() => handleValueToggle(option)}
+                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                data-testid={`${testId}-option-${option}`}
+              />
+              <Label
+                htmlFor={`${testId}-${option}`}
+                className="text-sm cursor-pointer flex-1"
+              >
+                {option}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Selected Summary */}
+      {localValues.length > 0 && (
+        <div className="mt-2">
+          <div className="flex flex-wrap gap-1">
+            {localValues.map((value) => (
+              <Badge
+                key={value}
+                variant="secondary"
+                className="text-xs px-2 py-1"
+                data-testid={`${testId}-selected-${value}`}
+              >
+                {value}
+                <button
+                  onClick={() => handleValueToggle(value)}
+                  className="ml-1 hover:text-red-500"
+                  data-testid={`${testId}-remove-${value}`}
+                >
+                  <X size={12} />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function EmailTargeting() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
@@ -142,8 +275,10 @@ export default function EmailTargeting() {
 
   // Preview email targets
   const previewMutation = useMutation<PreviewResult, Error, EmailTargetFilters>({
-    mutationFn: (filters: EmailTargetFilters) => 
-      apiRequest('/api/admin/email-targets/preview', { method: 'POST', body: filters }),
+    mutationFn: async (filters: EmailTargetFilters) => {
+      const response = await apiRequest('POST', '/api/admin/email-targets/preview', filters);
+      return response.json();
+    },
     onError: (error) => {
       toast({
         title: "Preview Error",
@@ -162,8 +297,10 @@ export default function EmailTargeting() {
 
   // Create campaign mutation
   const createCampaignMutation = useMutation<EmailCampaign, Error, any>({
-    mutationFn: (campaignData: any) => 
-      apiRequest('/api/admin/email-campaigns', { method: 'POST', body: campaignData }),
+    mutationFn: async (campaignData: any) => {
+      const response = await apiRequest('POST', '/api/admin/email-campaigns', campaignData);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/email-campaigns'] });
       handleCloseModal();
@@ -183,8 +320,10 @@ export default function EmailTargeting() {
 
   // Update campaign mutation  
   const updateCampaignMutation = useMutation<EmailCampaign, Error, { id: number; data: any }>({
-    mutationFn: ({ id, data }) => 
-      apiRequest(`/api/admin/email-campaigns/${id}`, { method: 'PUT', body: data }),
+    mutationFn: async ({ id, data }) => {
+      const response = await apiRequest('PUT', `/api/admin/email-campaigns/${id}`, data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/email-campaigns'] });
       handleCloseModal();
@@ -204,8 +343,10 @@ export default function EmailTargeting() {
 
   // Send campaign mutation
   const sendCampaignMutation = useMutation<any, Error, number>({
-    mutationFn: (campaignId: number) => 
-      apiRequest(`/api/admin/email-campaigns/${campaignId}/send`, { method: 'POST' }),
+    mutationFn: async (campaignId: number) => {
+      const response = await apiRequest('POST', `/api/admin/email-campaigns/${campaignId}/send`);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/email-campaigns'] });
       toast({
@@ -370,7 +511,7 @@ export default function EmailTargeting() {
                 </div>
 
                 {/* Person Types Filter */}
-                {filterOptions?.personTypes && (
+                {filterOptions?.personTypes && filterOptions.personTypes.length > 0 && (
                   <FilterGroup
                     title="Person Types"
                     options={filterOptions.personTypes}
@@ -382,7 +523,7 @@ export default function EmailTargeting() {
                 )}
 
                 {/* Membership Tiers Filter */}
-                {filterOptions?.membershipTiers && (
+                {filterOptions?.membershipTiers && filterOptions.membershipTiers.length > 0 && (
                   <FilterGroup
                     title="Membership Tiers"
                     options={filterOptions.membershipTiers}
@@ -394,7 +535,7 @@ export default function EmailTargeting() {
                 )}
 
                 {/* Participant Roles Filter */}
-                {filterOptions?.participantRoles && (
+                {filterOptions?.participantRoles && filterOptions.participantRoles.length > 0 && (
                   <FilterGroup
                     title="Participant Roles"
                     options={filterOptions.participantRoles}
@@ -406,7 +547,7 @@ export default function EmailTargeting() {
                 )}
 
                 {/* AI Interests Filter */}
-                {filterOptions?.aiInterests && (
+                {filterOptions?.aiInterests && filterOptions.aiInterests.length > 0 && (
                   <FilterGroup
                     title="AI Interests"
                     options={filterOptions.aiInterests}
@@ -418,7 +559,7 @@ export default function EmailTargeting() {
                 )}
 
                 {/* Business Types Filter */}
-                {filterOptions?.businessTypes && (
+                {filterOptions?.businessTypes && filterOptions.businessTypes.length > 0 && (
                   <FilterGroup
                     title="Business Types"
                     options={filterOptions.businessTypes}
@@ -430,7 +571,7 @@ export default function EmailTargeting() {
                 )}
 
                 {/* Districts Filter */}
-                {filterOptions?.districts && (
+                {filterOptions?.districts && filterOptions.districts.length > 0 && (
                   <FilterGroup
                     title="Districts"
                     options={filterOptions.districts}
@@ -618,50 +759,60 @@ export default function EmailTargeting() {
                 <X size={16} />
               </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="campaign-name">Campaign Name</Label>
-                <Input
-                  id="campaign-name"
-                  value={newCampaign.name}
-                  onChange={(e) => setNewCampaign(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., AI Summit Welcome Email"
-                  data-testid="input-campaign-name"
-                />
+            <CardContent className="space-y-6">
+              {/* Campaign Details */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-name">Campaign Name</Label>
+                  <Input
+                    id="campaign-name"
+                    value={newCampaign.name}
+                    onChange={(e) => setNewCampaign(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter campaign name"
+                    data-testid="input-campaign-name"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-subject">Email Subject</Label>
+                  <Input
+                    id="campaign-subject"
+                    value={newCampaign.subject}
+                    onChange={(e) => setNewCampaign(prev => ({ ...prev, subject: e.target.value }))}
+                    placeholder="Enter email subject"
+                    data-testid="input-campaign-subject"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="campaign-content">Email Content (HTML)</Label>
+                  <Textarea
+                    id="campaign-content"
+                    value={newCampaign.htmlContent}
+                    onChange={(e) => setNewCampaign(prev => ({ ...prev, htmlContent: e.target.value }))}
+                    placeholder="Enter HTML email content"
+                    rows={10}
+                    className="font-mono text-sm"
+                    data-testid="textarea-campaign-content"
+                  />
+                  <p className="text-xs text-gray-500">
+                    You can use HTML tags for formatting. Variables like {`{{firstName}}`} will be replaced automatically.
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="campaign-subject">Email Subject</Label>
-                <Input
-                  id="campaign-subject"
-                  value={newCampaign.subject}
-                  onChange={(e) => setNewCampaign(prev => ({ ...prev, subject: e.target.value }))}
-                  placeholder="e.g., Welcome to the AI Summit!"
-                  data-testid="input-campaign-subject"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="campaign-content">Email Content (HTML)</Label>
-                <Textarea
-                  id="campaign-content"
-                  value={newCampaign.htmlContent}
-                  onChange={(e) => setNewCampaign(prev => ({ ...prev, htmlContent: e.target.value }))}
-                  placeholder="Enter your email HTML content here..."
-                  rows={10}
-                  data-testid="textarea-campaign-content"
-                />
-              </div>
-
+              {/* Target Summary */}
               {previewMutation.data && (
                 <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-900">
-                    This campaign will be sent to <strong>{previewMutation.data?.count || 0}</strong> recipients based on your current filters.
+                  <h4 className="font-medium text-blue-900 mb-2">Target Summary</h4>
+                  <p className="text-sm text-blue-700">
+                    This campaign will be sent to <strong>{previewMutation.data.count}</strong> recipients based on your selected filters.
                   </p>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-2 pt-4">
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 pt-4 border-t">
                 <Button 
                   variant="outline" 
                   onClick={handleCloseModal}
@@ -674,13 +825,16 @@ export default function EmailTargeting() {
                   disabled={createCampaignMutation.isPending || updateCampaignMutation.isPending}
                   data-testid="button-save-campaign"
                 >
-                  {(createCampaignMutation.isPending || updateCampaignMutation.isPending) ? (
+                  {createCampaignMutation.isPending || updateCampaignMutation.isPending ? (
                     <>
                       <RefreshCw size={16} className="animate-spin mr-2" />
                       {editingCampaignId ? 'Updating...' : 'Creating...'}
                     </>
                   ) : (
-                    editingCampaignId ? 'Update Campaign' : 'Create Campaign'
+                    <>
+                      <CheckCircle size={16} className="mr-2" />
+                      {editingCampaignId ? 'Update Campaign' : 'Create Campaign'}
+                    </>
                   )}
                 </Button>
               </div>
@@ -688,68 +842,6 @@ export default function EmailTargeting() {
           </Card>
         </div>
       )}
-    </div>
-  );
-}
-
-// Filter Group Component
-interface FilterGroupProps {
-  title: string;
-  options: string[];
-  onChange: (mode: 'any' | 'all', values: string[]) => void;
-  testId: string;
-  mode?: 'any' | 'all';
-  selectedValues?: string[];
-}
-
-function FilterGroup({ title, options, onChange, testId, mode = 'any', selectedValues = [] }: FilterGroupProps) {
-  const handleModeChange = (newMode: 'any' | 'all') => {
-    onChange(newMode, selectedValues);
-  };
-
-  const handleValueToggle = (value: string) => {
-    const newValues = selectedValues.includes(value)
-      ? selectedValues.filter(v => v !== value)
-      : [...selectedValues, value];
-    onChange(mode, newValues);
-  };
-
-  return (
-    <div className="space-y-2">
-      <Label>{title}</Label>
-      <div className="space-y-2">
-        <div className="flex space-x-2">
-          <Button
-            size="sm"
-            variant={mode === 'any' ? 'default' : 'outline'}
-            onClick={() => handleModeChange('any')}
-            data-testid={`${testId}-mode-any`}
-          >
-            Any
-          </Button>
-          <Button
-            size="sm"
-            variant={mode === 'all' ? 'default' : 'outline'}
-            onClick={() => handleModeChange('all')}
-            data-testid={`${testId}-mode-all`}
-          >
-            All
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-1" data-testid={`${testId}-options`}>
-          {options.map((option) => (
-            <Badge
-              key={option}
-              variant={selectedValues.includes(option) ? 'default' : 'outline'}
-              className="cursor-pointer hover:bg-blue-100"
-              onClick={() => handleValueToggle(option)}
-              data-testid={`${testId}-option-${option}`}
-            >
-              {option}
-            </Badge>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

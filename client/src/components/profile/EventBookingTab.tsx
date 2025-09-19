@@ -224,24 +224,24 @@ export const EventBookingTab = () => {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{slot.description}</p>
+                        <p className="text-sm text-gray-600 mb-2">{workshop.description}</p>
                         
                         <div className="flex items-center gap-4 text-sm text-gray-500">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {formatDate(slot.date || slot.startTime)}
+                            {formatDate(workshop.date || workshop.startTime)}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
-                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                            {formatTime(workshop.startTime)} ({workshop.duration} min)
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin className="h-4 w-4" />
-                            {slot.room}
+                            {workshop.room}
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
-                            {slot.currentAttendees}/{maxAllowed}
+                            {workshop.currentRegistrations || 0}/{maxAllowed}
                           </div>
                         </div>
                       </div>
@@ -251,9 +251,9 @@ export const EventBookingTab = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => cancelMutation.mutate(slot.id)}
+                            onClick={() => cancelMutation.mutate(workshop.id)}
                             disabled={cancelMutation.isPending}
-                            data-testid={`button-cancel-${slot.id}`}
+                            data-testid={`button-cancel-${workshop.id}`}
                           >
                             Cancel
                           </Button>
@@ -264,9 +264,9 @@ export const EventBookingTab = () => {
                         ) : (
                           <Button
                             size="sm"
-                            onClick={() => registerMutation.mutate(slot.id)}
+                            onClick={() => registerMutation.mutate(workshop.id)}
                             disabled={registerMutation.isPending}
-                            data-testid={`button-register-${slot.id}`}
+                            data-testid={`button-register-${workshop.id}`}
                           >
                             <Plus className="w-4 h-4 mr-1" />
                             Register
