@@ -1871,33 +1871,33 @@ const AISummit = () => {
                     </div>
                     
                     <div className="space-y-4 text-left">
+                      <div className="flex items-start gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                          ✓
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-green-800">Account Created & Verified!</h4>
+                          <p className="text-green-700 text-sm">
+                            Your account is ready to use immediately. No email verification required - you can log in right away!
+                          </p>
+                        </div>
+                      </div>
+                      
                       <div className="flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
                           1
                         </div>
                         <div>
-                          <h4 className="font-bold text-blue-800">Check Your Email & Verify Your Account</h4>
+                          <h4 className="font-bold text-blue-800">Log In to Your Account</h4>
                           <p className="text-blue-700 text-sm">
-                            We've sent a verification email to your inbox. Click the link to verify your account and activate all features.
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                        <div className="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
-                          2
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-purple-800">Log In to Your Account</h4>
-                          <p className="text-purple-700 text-sm">
-                            Use your email and password to log in and access your personalized dashboard.
+                            Use your email and password to log in and access your personalized dashboard right now.
                           </p>
                         </div>
                       </div>
                       
                       <div className="flex items-start gap-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
                         <div className="bg-orange-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
-                          3
+                          2
                         </div>
                         <div>
                           <h4 className="font-bold text-orange-800">Access Your QR Code & Badge</h4>
