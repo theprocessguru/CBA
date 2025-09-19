@@ -23,32 +23,31 @@ export const EventBookingTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch available AI Summit workshops for booking
+  // Fetch available workshops for booking from real events data
   const { data: timeSlots, isLoading: slotsLoading } = useQuery<any[]>({
-    queryKey: ['/api/ai-summit/workshops/active'],
+    queryKey: ['/api/events'],
+    select: (events) => events?.filter(event => event.eventType === 'workshop') || [],
     enabled: isAuthenticated
   });
 
-  // Fetch user's current workshop registrations
+  // Fetch user's current event registrations
   const { data: sessionRegistrations, isLoading: sessionRegistrationsLoading } = useQuery<any[]>({
-    queryKey: ['/api/my-workshop-registrations'],
+    queryKey: ['/api/my-registrations'],
     enabled: isAuthenticated
   });
 
   // Register for workshop mutation
   const registerMutation = useMutation({
-    mutationFn: async (workshopId: number) => {
-      return apiRequest('POST', `/api/ai-summit/workshops/${workshopId}/register`, {
-        badgeId: (user as any)?.qrHandle || `USER-${user?.id}`
-      });
+    mutationFn: async (eventId: number) => {
+      return apiRequest('POST', `/api/events/${eventId}/register`);
     },
     onSuccess: () => {
       toast({
         title: "Registration Successful",
         description: "You've been registered for the workshop!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/workshops/active'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/my-workshop-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
       toast({
@@ -61,16 +60,16 @@ export const EventBookingTab = () => {
 
   // Cancel registration mutation
   const cancelMutation = useMutation({
-    mutationFn: async (workshopId: number) => {
-      return apiRequest('DELETE', `/api/ai-summit/workshops/${workshopId}/cancel`);
+    mutationFn: async (eventId: number) => {
+      return apiRequest('DELETE', `/api/events/${eventId}/unregister`);
     },
     onSuccess: () => {
       toast({
         title: "Registration Cancelled",
         description: "Your registration has been cancelled.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/workshops/active'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/my-workshop-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
       toast({
@@ -82,8 +81,8 @@ export const EventBookingTab = () => {
   });
 
   // Helper functions for booking
-  const isRegistered = (workshopId: number) => {
-    return sessionRegistrations?.some(reg => reg.workshopId === workshopId);
+  const isRegistered = (eventId: number) => {
+    return sessionRegistrations?.some(reg => reg.eventId === eventId);
   };
 
   const formatTime = (timeString: string) => {
@@ -305,11 +304,11 @@ export const EventBookingTab = () => {
             </div>
             <div className="space-y-3">
               {sessionRegistrations.map((registration) => {
-                const slot = timeSlots?.find(s => s.id === registration.timeSlotId);
+                const slot = timeSlots?.find(s => s.id === registration.eventId);
                 if (!slot) return null;
                 
                 return (
-                  <div key={registration.timeSlotId} className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
+                  <div key={registration.eventId} className="flex items-center justify-between p-3 border rounded-lg bg-green-50">
                     <div>
                       <h4 className="font-medium text-gray-900">{slot.title}</h4>
                       <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
