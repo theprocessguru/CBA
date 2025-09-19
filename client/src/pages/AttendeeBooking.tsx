@@ -124,8 +124,15 @@ export default function AttendeeBooking() {
     return registrations?.some(r => r.timeSlotId === slotId);
   };
 
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), "h:mm a");
+  const formatTime = (dateString: string | null | undefined) => {
+    if (!dateString) return "TBD";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "TBD";
+      return format(date, "h:mm a");
+    } catch (error) {
+      return "TBD";
+    }
   };
 
   const getSlotTypeColor = (slotType: string) => {
