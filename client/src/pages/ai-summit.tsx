@@ -76,13 +76,21 @@ const AISummit = () => {
     retry: false,
   });
 
-  // Simple registration form with only basic fields
+  // Full registration form with all required fields for account creation + AI Summit registration
   const [registrationData, setRegistrationData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    confirmEmail: "",
+    password: "",
+    confirmPassword: "",
     mobileNumber: ""
   });
+
+  // State for form validation and password visibility
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [isRegistrationSuccess, setIsRegistrationSuccess] = useState(false);
 
   // Auto-populate form when user data is available
   useEffect(() => {
@@ -94,7 +102,8 @@ const AISummit = () => {
         ...prev,
         firstName: userFirstName,
         lastName: userLastName,
-        email: userEmail
+        email: userEmail,
+        confirmEmail: userEmail // Auto-populate confirm email
       }));
     }
   }, [user, showRegistrationForm]);
@@ -374,51 +383,82 @@ const AISummit = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: typeof registrationData) => {
-      // Validate required fields on client-side
-      if (!data.firstName?.trim() || !data.lastName?.trim()) {
-        throw new Error("First name and last name are required");
-      }
-      if (!data.email?.trim()) {
-        throw new Error("Email address is required");
-      }
-      if (!data.mobileNumber?.trim()) {
-        throw new Error("Phone number is required for event updates and safety notifications");
-      }
-      
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(data.email.trim())) {
-        throw new Error("Please provide a valid email address");
-      }
-      
-      // Phone validation - basic check for minimum length
-      const cleanPhone = data.mobileNumber.trim().replace(/[\s\-\(\)]/g, '');
-      if (cleanPhone.length < 10) {
-        throw new Error("Please provide a valid phone number with at least 10 digits");
+      // Client-side validation using our validation function
+      const validation = validateForm();
+      if (!validation.isValid) {
+        throw new Error(validation.errors[0]); // Show first error
       }
 
-      const submissionData = {
-        ...data,
-        name: `${data.firstName.trim()} ${data.lastName.trim()}`,
-        phoneNumber: data.mobileNumber || "",
-      };
-      const response = await apiRequest("POST", "/api/ai-summit-registration", submissionData);
-      return response.json();
+      try {
+        // Step 1: Create user account via /api/auth/register
+        const accountData = {
+          email: data.email.trim(),
+          password: data.password,
+          firstName: data.firstName.trim(),
+          lastName: data.lastName.trim(),
+          phone: data.mobileNumber.trim(),
+          homeAddress: "Croydon", // Default for AI Summit registrants
+          homeCity: "Croydon",
+          homePostcode: "CR0 1AA", // Default postcode
+          personTypeIds: [1] // Default person type (1 = attendee)
+        };
+
+        const accountResponse = await apiRequest("POST", "/api/auth/register", accountData);
+        const accountResult = await accountResponse.json();
+
+        // If account creation successful, proceed to AI Summit registration
+        // Step 2: Register for AI Summit via /api/ai-summit-registration
+        const summitData = {
+          firstName: data.firstName.trim(),
+          lastName: data.lastName.trim(),
+          email: data.email.trim(),
+          name: `${data.firstName.trim()} ${data.lastName.trim()}`,
+          phoneNumber: data.mobileNumber.trim(),
+          participantType: "attendee"
+        };
+
+        const summitResponse = await apiRequest("POST", "/api/ai-summit-registration", summitData);
+        const summitResult = await summitResponse.json();
+
+        return {
+          accountCreated: true,
+          summitRegistered: true,
+          requiresVerification: accountResult.requiresVerification,
+          user: accountResult.user,
+          registration: summitResult
+        };
+      } catch (error: any) {
+        // If account creation fails because user exists, try to register for summit anyway
+        if (error?.response?.status === 400 && error?.response?.data?.message?.includes("already exists")) {
+          try {
+            // User exists, just register for AI Summit
+            const summitData = {
+              firstName: data.firstName.trim(),
+              lastName: data.lastName.trim(),
+              email: data.email.trim(),
+              name: `${data.firstName.trim()} ${data.lastName.trim()}`,
+              phoneNumber: data.mobileNumber.trim(),
+              participantType: "attendee"
+            };
+
+            const summitResponse = await apiRequest("POST", "/api/ai-summit-registration", summitData);
+            const summitResult = await summitResponse.json();
+
+            return {
+              accountCreated: false,
+              summitRegistered: true,
+              existingUser: true,
+              registration: summitResult
+            };
+          } catch (summitError: any) {
+            throw summitError;
+          }
+        }
+        throw error;
+      }
     },
     onSuccess: (data) => {
-      toast({
-        title: "Spot Reserved Successfully!",
-        description: data.requiresVerification 
-          ? "Your spot is reserved! Please check your email to verify your account and access your reservation details."
-          : "Your spot is reserved for the AI Summit! You'll receive a confirmation email with all the details.",
-      });
-      setShowRegistrationForm(false);
-      setRegistrationData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        mobileNumber: ""
-      });
+      setIsRegistrationSuccess(true); // Show success state instead of closing form
       // Refresh registration status
       refetchStatus();
     },
@@ -428,14 +468,11 @@ const AISummit = () => {
       // Check if this is a duplicate registration error
       if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
         toast({
-          title: "Spot Already Reserved!",
-          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
+          title: "Already Registered!",
+          description: "You're already registered for the AI Summit. Please login to access your account and badge details.",
           variant: "default",
         });
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
+        setShowRegistrationForm(false);
       } else if (error?.response?.status === 400) {
         // Handle validation errors
         toast({
@@ -468,56 +505,38 @@ const AISummit = () => {
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields
-    if (!registrationData.firstName?.trim()) {
-      toast({
-        title: "First Name Required",
-        description: "Please enter your first name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!registrationData.lastName?.trim()) {
-      toast({
-        title: "Last Name Required", 
-        description: "Please enter your last name.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!registrationData.email?.trim()) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email address.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!registrationData.mobileNumber?.trim()) {
-      toast({
-        title: "Mobile Number Required",
-        description: "Please enter your mobile number for SMS updates and emergency contact.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate phone number format  
-    const cleanPhone = registrationData.mobileNumber.replace(/[\s\-\(\)\+]/g, '');
-    if (cleanPhone.length < 10 || !/^\d+$/.test(cleanPhone)) {
-      toast({
-        title: "Invalid Mobile Number",
-        description: "Please provide a valid mobile number with at least 10 digits.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Use our comprehensive validation function
+    const validation = validateForm();
     
+    if (!validation.isValid) {
+      // Show all validation errors
+      validation.errors.forEach((error, index) => {
+        setTimeout(() => {
+          toast({
+            title: "Validation Error",
+            description: error,
+            variant: "destructive",
+          });
+        }, index * 100); // Stagger error messages
+      });
+      return;
+    }
     
     registerMutation.mutate(registrationData);
+  };
+
+  const handleSuccessClose = () => {
+    setIsRegistrationSuccess(false);
+    setShowRegistrationForm(false);
+    setRegistrationData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      confirmEmail: "",
+      password: "",
+      confirmPassword: "",
+      mobileNumber: ""
+    });
   };
 
 
@@ -531,15 +550,91 @@ const AISummit = () => {
     }));
   };
 
-  // Admin test data fill function
+  // Client-side validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email.trim());
+  };
+
+  const validatePasswordStrength = (password: string): { isValid: boolean; message: string } => {
+    if (password.length < 8) {
+      return { isValid: false, message: "Password must be at least 8 characters long" };
+    }
+    if (!/(?=.*[a-z])/.test(password)) {
+      return { isValid: false, message: "Password must contain at least one lowercase letter" };
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      return { isValid: false, message: "Password must contain at least one uppercase letter" };
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      return { isValid: false, message: "Password must contain at least one number" };
+    }
+    return { isValid: true, message: "" };
+  };
+
+  const validateForm = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    // Check required fields
+    if (!registrationData.firstName.trim()) errors.push("First name is required");
+    if (!registrationData.lastName.trim()) errors.push("Last name is required");
+    if (!registrationData.email.trim()) errors.push("Email is required");
+    if (!registrationData.confirmEmail.trim()) errors.push("Email confirmation is required");
+    if (!registrationData.password) errors.push("Password is required");
+    if (!registrationData.confirmPassword) errors.push("Password confirmation is required");
+    if (!registrationData.mobileNumber.trim()) errors.push("Mobile number is required");
+
+    // Validate email format
+    if (registrationData.email && !validateEmail(registrationData.email)) {
+      errors.push("Please enter a valid email address");
+    }
+
+    // Validate email confirmation
+    if (registrationData.email && registrationData.confirmEmail && 
+        registrationData.email.trim().toLowerCase() !== registrationData.confirmEmail.trim().toLowerCase()) {
+      errors.push("Email addresses do not match");
+    }
+
+    // Validate password strength
+    if (registrationData.password) {
+      const passwordValidation = validatePasswordStrength(registrationData.password);
+      if (!passwordValidation.isValid) {
+        errors.push(passwordValidation.message);
+      }
+    }
+
+    // Validate password confirmation
+    if (registrationData.password && registrationData.confirmPassword && 
+        registrationData.password !== registrationData.confirmPassword) {
+      errors.push("Passwords do not match");
+    }
+
+    // Validate mobile number
+    if (registrationData.mobileNumber) {
+      const cleanPhone = registrationData.mobileNumber.replace(/[\s\-\(\)\+]/g, '');
+      if (cleanPhone.length < 10 || !/^\d+$/.test(cleanPhone)) {
+        errors.push("Please provide a valid mobile number with at least 10 digits");
+      }
+    }
+
+    return { isValid: errors.length === 0, errors };
+  };
+
+  // Admin test data fill function (updated with all fields)
   const fillTestData = () => {
     setRegistrationData({
       firstName: "John",
-      lastName: "Smith",
+      lastName: "Smith", 
       email: "john.smith@test.com",
+      confirmEmail: "john.smith@test.com",
+      password: "TestPass123",
+      confirmPassword: "TestPass123",
       mobileNumber: "+44 7700 900123"
     });
   };
+
+  // Add a test button for development (only visible in development)
+  const showTestButton = import.meta.env.MODE === 'development';
 
   // Organization membership helpers removed for simplified form
 
@@ -1520,21 +1615,23 @@ const AISummit = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] flex flex-col">
               <div className="flex-1 overflow-y-auto p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-neutral-900">Attend the AI Summit by registering</h2>
-                  <Button 
-                    variant="ghost" 
-                    className="h-6 w-6 p-0"
-                    onClick={() => setShowRegistrationForm(false)}
-                  >
-                    <span className="sr-only">Close</span>
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <p className="text-neutral-600 mb-6">
-                  Join us for Croydon's first AI Summit on January 25, 2025. Network with entrepreneurs, learn from experts, and explore the future of AI.
-                </p>
+                {!isRegistrationSuccess ? (
+                  <>
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-neutral-900">Create Account & Register for AI Summit</h2>
+                      <Button 
+                        variant="ghost" 
+                        className="h-6 w-6 p-0"
+                        onClick={() => setShowRegistrationForm(false)}
+                      >
+                        <span className="sr-only">Close</span>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <p className="text-neutral-600 mb-6">
+                      Create your account and register for Croydon's first AI Summit. This will give you access to your personal QR code and event details.
+                    </p>
                 
                 <form onSubmit={handleRegistration} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1575,6 +1672,95 @@ const AISummit = () => {
                   </div>
                   
                   <div>
+                    <Label htmlFor="confirmEmail">Confirm Email Address *</Label>
+                    <Input
+                      id="confirmEmail"
+                      type="email"
+                      value={registrationData.confirmEmail}
+                      onChange={(e) => handleInputChange("confirmEmail", e.target.value)}
+                      required
+                      data-testid="input-confirm-email"
+                    />
+                    {registrationData.email && registrationData.confirmEmail && 
+                     registrationData.email.trim().toLowerCase() !== registrationData.confirmEmail.trim().toLowerCase() && (
+                      <p className="text-xs text-red-500 mt-1">Email addresses do not match</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="password">Password *</Label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        type={passwordVisible ? "text" : "password"}
+                        value={registrationData.password}
+                        onChange={(e) => handleInputChange("password", e.target.value)}
+                        required
+                        data-testid="input-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setPasswordVisible(!passwordVisible)}
+                      >
+                        {passwordVisible ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {registrationData.password && (
+                      <div className="text-xs mt-1">
+                        {(() => {
+                          const validation = validatePasswordStrength(registrationData.password);
+                          return (
+                            <p className={validation.isValid ? "text-green-600" : "text-red-500"}>
+                              {validation.isValid ? "✓ Password meets requirements" : validation.message}
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Must be at least 8 characters with uppercase, lowercase, and number
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        value={registrationData.confirmPassword}
+                        onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                        required
+                        data-testid="input-confirm-password"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
+                      >
+                        {confirmPasswordVisible ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {registrationData.password && registrationData.confirmPassword && 
+                     registrationData.password !== registrationData.confirmPassword && (
+                      <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
+                    )}
+                  </div>
+                  
+                  <div>
                     <Label htmlFor="mobileNumber">Mobile Number *</Label>
                     <Input
                       id="mobileNumber"
@@ -1597,16 +1783,116 @@ const AISummit = () => {
                     data-testid="button-register-submit"
                   >
                     {registerMutation.isPending ? (
-                      <span>Reserving Your Spot...</span>
+                      <span>Creating Account & Registering...</span>
                     ) : (
-                      <span>Reserve My Free Spot</span>
+                      <span>Create Account & Register for AI Summit</span>
                     )}
                   </Button>
                   
-                  <p className="text-xs text-gray-500 text-center">
-                    Free to attend • No payment required • Limited spaces
-                  </p>
-                </form>
+                    <p className="text-xs text-gray-500 text-center">
+                      This will create your account and register you for the AI Summit
+                    </p>
+                    
+                    {showTestButton && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={fillTestData}
+                        className="w-full mt-2 text-xs"
+                      >
+                        Fill Test Data (Dev Only)
+                      </Button>
+                    )}
+                  </form>
+                </>
+                ) : (
+                  // Success State with Post-Registration Instructions
+                  <div className="text-center space-y-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-2xl font-bold text-green-600">Registration Successful! 🎉</h2>
+                      <Button 
+                        variant="ghost" 
+                        className="h-6 w-6 p-0"
+                        onClick={handleSuccessClose}
+                      >
+                        <span className="sr-only">Close</span>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                      <h3 className="text-xl font-bold text-green-800 mb-4">
+                        Welcome to the First AI Summit Croydon 2025!
+                      </h3>
+                      <p className="text-green-700">
+                        Your account has been created and you're now registered for the AI Summit. 
+                        Follow these simple steps to complete your setup:
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-4 text-left">
+                      <div className="flex items-start gap-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                          1
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-blue-800">Check Your Email & Verify Your Account</h4>
+                          <p className="text-blue-700 text-sm">
+                            We've sent a verification email to your inbox. Click the link to verify your account and activate all features.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                        <div className="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                          2
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-purple-800">Log In to Your Account</h4>
+                          <p className="text-purple-700 text-sm">
+                            Use your email and password to log in and access your personalized dashboard.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                        <div className="bg-orange-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">
+                          3
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-orange-800">Access Your QR Code & Badge</h4>
+                          <p className="text-orange-700 text-sm">
+                            Go to "My QR Code" to view your digital summit badge and QR code for easy check-in.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                      <Link href="/login" className="flex-1">
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                          <User className="mr-2 h-4 w-4" />
+                          Go to Login Page
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="outline" 
+                        onClick={handleSuccessClose}
+                        className="flex-1"
+                      >
+                        <Home className="mr-2 h-4 w-4" />
+                        Continue Browsing
+                      </Button>
+                    </div>
+                    
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-6">
+                      <p className="text-sm text-gray-600">
+                        <strong>What's Next?</strong> Once you're logged in, you can book workshop sessions, 
+                        view the full event schedule, and customize your attendee profile.
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
