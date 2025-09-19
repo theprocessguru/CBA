@@ -3526,7 +3526,7 @@ export class DatabaseStorage implements IStorage {
       // Get total number of speaking session registrations
       const [registrationCountResult] = await db
         .select({ count: sql<number>`cast(count(*) as int)` })
-        .from(aiSummitSpeakingSessionRegistrations);
+        .from(aiSummitSessionRegistrations);
       const totalRegistrations = registrationCountResult?.count || 0;
 
       // Get current active attendance (checked in but not checked out)
