@@ -10039,10 +10039,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/ai-summit/workshops/:workshopId/register", isAuthenticated, async (req, res) => {
     try {
       const { workshopId } = req.params;
-      const { badgeId } = req.body;
+      const { badgeId, experienceLevel, specificInterests, dietaryRequirements, accessibilityNeeds } = req.body;
       
       if (!badgeId) {
         return res.status(400).json({ message: "Badge ID is required" });
+      }
+
+      // Get user information from session
+      const userId = req.session?.userId || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
 
       // Check workshop capacity
@@ -10059,9 +10070,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Already registered for this workshop" });
       }
 
+      // Get user's business profile for company name if available
+      let attendeeCompany = null;
+      try {
+        const businessProfile = await storage.getBusinessByUserId(userId);
+        if (businessProfile) {
+          attendeeCompany = businessProfile.businessName;
+        }
+      } catch (error) {
+        // Business profile not found, continue without company name
+      }
+
       const registration = await storage.createAISummitWorkshopRegistration({
         workshopId: parseInt(workshopId),
-        badgeId
+        badgeId,
+        attendeeName: `${user.firstName} ${user.lastName}`.trim(),
+        attendeeEmail: user.email,
+        attendeeCompany,
+        attendeeJobTitle: null, // Could be added to user profile later
+        experienceLevel: experienceLevel || null,
+        specificInterests: specificInterests || null,
+        dietaryRequirements: dietaryRequirements || null,
+        accessibilityNeeds: accessibilityNeeds || null,
+        registrationSource: "direct"
       });
       
       res.json({
