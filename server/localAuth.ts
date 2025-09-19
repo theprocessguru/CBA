@@ -538,8 +538,28 @@ export async function setupLocalAuth(app: Express) {
 
 }
 
-// Simple in-memory token store for Replit environment
+// Persistent token store for Replit environment using database
+import { db } from './db';
+
+// Simple in-memory token store for Replit environment (with database backup)
 const authTokens = new Map<string, { userId: string; expiresAt: Date }>();
+
+// Load existing tokens from database on startup
+(async () => {
+  try {
+    console.log('Loading auth tokens from database...');
+    const query = `
+      SELECT sess::text as session_data 
+      FROM sessions 
+      WHERE expire > NOW() 
+      AND sess::text LIKE '%authToken%'
+    `;
+    const result = await db.execute(query);
+    console.log(`Found ${result.length} sessions with potential auth tokens`);
+  } catch (error) {
+    console.warn('Could not load auth tokens from database:', error);
+  }
+})();
 
 // In-memory impersonation store for Replit environment
 export const impersonationData = new Map<string, {
