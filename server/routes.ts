@@ -2973,6 +2973,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send AI Summit welcome emails to registrants since Monday 14th (admin only)
+  app.post('/api/admin/email/send-weekly-ai-summit-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      if (!emailService.isConfigured()) {
+        return res.status(400).json({ message: "Email service is not configured" });
+      }
+
+      console.log(`Admin ${req.user.email} initiated AI Summit welcome emails for all registrants since Monday 14th`);
+
+      // Get all AI Summit registrants since Monday September 14th, 2025
+      const weeklyRegistrants = await db
+        .select({
+          name: aiSummitRegistrations.name,
+          email: aiSummitRegistrations.email,
+          registeredAt: aiSummitRegistrations.registeredAt
+        })
+        .from(aiSummitRegistrations)
+        .where(sql`DATE(${aiSummitRegistrations.registeredAt}) >= '2025-09-14'`)
+        .orderBy(desc(aiSummitRegistrations.registeredAt));
+
+      if (!weeklyRegistrants || weeklyRegistrants.length === 0) {
+        return res.status(404).json({ 
+          message: "No AI Summit registrations found since Monday 14th" 
+        });
+      }
+
+      console.log(`Found ${weeklyRegistrants.length} registrants since Monday September 14th`);
+
+      const results: Array<{ email: string; name: string; success: boolean; message: string; registeredAt: any }> = [];
+      
+      // Send welcome email to each registrant
+      for (const registrant of weeklyRegistrants) {
+        try {
+          const result = await emailService.sendWelcomeEmail(
+            registrant.email,
+            registrant.name,
+            'attendee'
+          );
+          
+          results.push({
+            email: registrant.email,
+            name: registrant.name,
+            registeredAt: registrant.registeredAt,
+            success: result.success,
+            message: result.message
+          });
+          
+          console.log(`Welcome email ${result.success ? 'sent' : 'failed'} for ${registrant.name} (${registrant.email}) - registered ${registrant.registeredAt}`);
+          
+          // Small delay between emails to avoid overwhelming Gmail limits
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (error: any) {
+          results.push({
+            email: registrant.email,
+            name: registrant.name,
+            registeredAt: registrant.registeredAt,
+            success: false,
+            message: error.message || 'Failed to send email'
+          });
+          console.error(`Failed to send welcome email to ${registrant.email}:`, error);
+        }
+      }
+
+      const successful = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+
+      console.log(`AI Summit welcome email batch complete: ${successful} sent, ${failed} failed`);
+
+      res.json({
+        success: true,
+        totalRegistrants: weeklyRegistrants.length,
+        successful,
+        failed,
+        dateRange: "Since Monday September 14th, 2025",
+        registrants: weeklyRegistrants.map(r => ({ 
+          name: r.name, 
+          email: r.email, 
+          registeredAt: r.registeredAt 
+        })),
+        results
+      });
+    } catch (error: any) {
+      console.error("Error sending weekly AI Summit welcome emails:", error);
+      res.status(500).json({ message: error.message || "Failed to send welcome emails" });
+    }
+  });
+
   // Send AI Summit welcome emails to today's registrants (admin only)
   app.post('/api/admin/email/send-todays-ai-summit-welcome', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

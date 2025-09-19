@@ -726,6 +726,9 @@ export class DatabaseStorage implements IStorage {
       await db.execute(sql`DELETE FROM scan_sessions WHERE scanner_id = ${userId}`);
       await db.execute(sql`DELETE FROM content_reports WHERE reporter_user_id = ${userId}`);
       
+      // Delete email communications
+      await db.execute(sql`DELETE FROM email_communications WHERE user_id = ${userId}`);
+      
       // Delete user's business if exists
       const userBusiness = await this.getBusinessByUserId(userId);
       if (userBusiness) {
