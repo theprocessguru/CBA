@@ -5909,8 +5909,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin Speaker Management API
+  // Normalized Speaker Management API - Get all speakers
   app.get('/api/admin/speakers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitSpeakers, aiSummitSpeakerTopics } = await import("@shared/schema");
+      
+      const speakers = await db
+        .select({
+          id: aiSummitSpeakers.id,
+          userId: aiSummitSpeakers.userId,
+          name: aiSummitSpeakers.name,
+          email: aiSummitSpeakers.email,
+          phone: aiSummitSpeakers.phone,
+          company: aiSummitSpeakers.company,
+          jobTitle: aiSummitSpeakers.jobTitle,
+          website: aiSummitSpeakers.website,
+          linkedIn: aiSummitSpeakers.linkedIn,
+          bio: aiSummitSpeakers.bio,
+          speakingExperience: aiSummitSpeakers.speakingExperience,
+          previousSpeaking: aiSummitSpeakers.previousSpeaking,
+          availableSlots: aiSummitSpeakers.availableSlots,
+          status: aiSummitSpeakers.status,
+          createdAt: aiSummitSpeakers.createdAt,
+          // Count topics for each speaker
+          topicCount: sql<number>`(
+            SELECT COUNT(*) 
+            FROM ${aiSummitSpeakerTopics} 
+            WHERE ${aiSummitSpeakerTopics.speakerId} = ${aiSummitSpeakers.id}
+          )`
+        })
+        .from(aiSummitSpeakers)
+        .orderBy(desc(aiSummitSpeakers.createdAt));
+      
+      res.json(speakers);
+    } catch (error) {
+      console.error('Error fetching speakers:', error);
+      res.status(500).json({ message: 'Failed to fetch speakers' });
+    }
+  });
+
+  // Create new speaker (profile only)
+  app.post('/api/admin/speakers', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitSpeakers, insertAISummitSpeakerSchema } = await import("@shared/schema");
+      
+      const validatedData = insertAISummitSpeakerSchema.parse(req.body);
+      
+      const [newSpeaker] = await db
+        .insert(aiSummitSpeakers)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json(newSpeaker);
+    } catch (error: any) {
+      console.error('Error creating speaker:', error);
+      if (error?.code === '23505') { // Unique constraint violation
+        return res.status(409).json({ message: 'Speaker with this email already exists' });
+      }
+      res.status(400).json({ message: 'Failed to create speaker' });
+    }
+  });
+
+  // Get speaker topics
+  app.get('/api/admin/speakers/:id/topics', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitSpeakerTopics } = await import("@shared/schema");
+      const speakerId = parseInt(req.params.id);
+      
+      const topics = await db
+        .select()
+        .from(aiSummitSpeakerTopics)
+        .where(eq(aiSummitSpeakerTopics.speakerId, speakerId))
+        .orderBy(desc(aiSummitSpeakerTopics.createdAt));
+      
+      res.json(topics);
+    } catch (error) {
+      console.error('Error fetching speaker topics:', error);
+      res.status(500).json({ message: 'Failed to fetch speaker topics' });
+    }
+  });
+
+  // Create new topic for a speaker
+  app.post('/api/admin/speakers/:id/topics', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitSpeakerTopics, insertAISummitSpeakerTopicSchema } = await import("@shared/schema");
+      const speakerId = parseInt(req.params.id);
+      
+      const topicData = {
+        ...req.body,
+        speakerId
+      };
+      
+      const validatedData = insertAISummitSpeakerTopicSchema.parse(topicData);
+      
+      const [newTopic] = await db
+        .insert(aiSummitSpeakerTopics)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json(newTopic);
+    } catch (error: any) {
+      console.error('Error creating speaker topic:', error);
+      if (error?.code === '23505') { // Unique constraint violation
+        return res.status(409).json({ message: 'This speaker already has a topic with this title' });
+      }
+      res.status(400).json({ message: 'Failed to create speaker topic' });
+    }
+  });
+
+  // Legacy API - For backward compatibility (maps to new normalized structure)
+  app.get('/api/admin/speakers-legacy', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { aiSummitSpeakerInterests } = await import("@shared/schema");
       const speakers = await db
@@ -5949,7 +6057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(mappedSpeakers);
     } catch (error) {
-      console.error('Error fetching speakers:', error);
+      console.error('Error fetching legacy speakers:', error);
       res.status(500).json({ message: 'Failed to fetch speakers' });
     }
   });

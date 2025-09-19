@@ -561,7 +561,51 @@ export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_regis
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
-// AI Summit speaker interests table
+// AI Summit speakers table - normalized personal/professional info
+export const aiSummitSpeakers = pgTable("ai_summit_speakers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id), // Link to user account
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull().unique(), // Ensure one speaker per email
+  phone: varchar("phone"),
+  company: varchar("company"),
+  jobTitle: varchar("job_title"),
+  website: varchar("website"),
+  linkedIn: varchar("linked_in"),
+  bio: text("bio"),
+  speakingExperience: text("speaking_experience"),
+  previousSpeaking: boolean("previous_speaking").default(false),
+  availableSlots: text("available_slots").array(), // e.g., ["morning", "afternoon"]
+  preferredSlots: text("preferred_slots").array(), // speaker preferences
+  status: varchar("status").default("active"), // active, inactive, pending
+  source: varchar("source").default("form"), // form, admin, import
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// AI Summit speaker topics/sessions - what they can present on
+export const aiSummitSpeakerTopics = pgTable("ai_summit_speaker_topics", {
+  id: serial("id").primaryKey(),
+  speakerId: integer("speaker_id").notNull().references(() => aiSummitSpeakers.id, { onDelete: 'cascade' }),
+  title: varchar("title").notNull(), // Session/talk title
+  description: text("description").notNull(),
+  sessionType: varchar("session_type").default("talk"), // keynote, talk, panel, workshop, demo
+  audienceLevel: varchar("audience_level").default("all"), // beginner, intermediate, advanced, all
+  durationMinutes: integer("duration_minutes").default(30), // Duration in minutes
+  keyTakeaways: text("key_takeaways").array(), // What attendees will learn
+  techRequirements: text("tech_requirements"),
+  interactiveElements: boolean("interactive_elements").default(false),
+  handoutsProvided: boolean("handouts_provided").default(false),
+  motivationToSpeak: text("motivation_to_speak"),
+  status: varchar("status").default("proposed"), // proposed, approved, scheduled, rejected
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  // Ensure unique titles per speaker to prevent duplicates
+  uniqueSpeakerTitle: unique("unique_speaker_title").on(table.speakerId, table.title)
+}));
+
+// Legacy table - kept for backward compatibility during migration
 export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id), // Link to user account
@@ -589,6 +633,8 @@ export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
   agreesToTerms: boolean("agrees_to_terms").default(false),
   source: varchar("source"), // Track source of registration (direct, exhibitor_registration, etc.)
   registeredAt: timestamp("registered_at").defaultNow(),
+  // AI Summit 2025 specific fields - added for venue association compatibility
+  venueId: integer("venue_id").references(() => aiSummitVenues.id),
 });
 
 // Personal Badges - Reusable across all events with role-based styling
@@ -1482,6 +1528,11 @@ export const insertInteractionSchema = createInsertSchema(interactions).omit({ i
 export const insertPasswordResetTokenSchema = createInsertSchema(passwordResetTokens).omit({ id: true });
 export const insertAISummitRegistrationSchema = createInsertSchema(aiSummitRegistrations).omit({ id: true });
 export const insertAISummitExhibitorRegistrationSchema = createInsertSchema(aiSummitExhibitorRegistrations).omit({ id: true });
+// New normalized schemas
+export const insertAISummitSpeakerSchema = createInsertSchema(aiSummitSpeakers).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertAISummitSpeakerTopicSchema = createInsertSchema(aiSummitSpeakerTopics).omit({ id: true, createdAt: true, updatedAt: true });
+
+// Legacy schema - kept for backward compatibility
 export const insertAISummitSpeakerInterestSchema = createInsertSchema(aiSummitSpeakerInterests).omit({ id: true });
 export const insertAISummitBadgeSchema = createInsertSchema(aiSummitBadges).omit({ id: true });
 export const insertAISummitCheckInSchema = createInsertSchema(aiSummitCheckIns).omit({ id: true });
@@ -1609,6 +1660,14 @@ export type AISummitRegistration = typeof aiSummitRegistrations.$inferSelect;
 export type InsertAISummitExhibitorRegistration = z.infer<typeof insertAISummitExhibitorRegistrationSchema>;
 export type AISummitExhibitorRegistration = typeof aiSummitExhibitorRegistrations.$inferSelect;
 
+// New normalized types
+export type InsertAISummitSpeaker = z.infer<typeof insertAISummitSpeakerSchema>;
+export type AISummitSpeaker = typeof aiSummitSpeakers.$inferSelect;
+
+export type InsertAISummitSpeakerTopic = z.infer<typeof insertAISummitSpeakerTopicSchema>;
+export type AISummitSpeakerTopic = typeof aiSummitSpeakerTopics.$inferSelect;
+
+// Legacy types - kept for backward compatibility  
 export type InsertAISummitSpeakerInterest = z.infer<typeof insertAISummitSpeakerInterestSchema>;
 export type AISummitSpeakerInterest = typeof aiSummitSpeakerInterests.$inferSelect;
 
