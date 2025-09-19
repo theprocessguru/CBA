@@ -44,7 +44,7 @@ export default function WorkshopManagement() {
 
   // Fetch workshops
   const { data: workshops = [], isLoading: workshopsLoading } = useQuery({
-    queryKey: ['/api/ai-summit/workshops'],
+    queryKey: ['/api/workshops'],
     enabled: true,
   });
 

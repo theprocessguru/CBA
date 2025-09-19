@@ -75,7 +75,7 @@ export default function WorkshopScanner() {
 
   // Get active workshops
   const { data: workshops = [], isLoading: workshopsLoading } = useQuery({
-    queryKey: ["/api/ai-summit/workshops/active"],
+    queryKey: ["/api/workshops"],
     select: (data) => data as Workshop[],
     enabled: isAuthorized,
   });

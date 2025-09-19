@@ -35,7 +35,7 @@ const RegistrationCalendar = ({
 
   // Fetch live workshops from database
   const { data: liveWorkshops = [] } = useQuery({
-    queryKey: ['/api/ai-summit/workshops/active'],
+    queryKey: ['/api/workshops'],
     select: (data) => data || []
   });
 

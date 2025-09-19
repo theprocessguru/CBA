@@ -74,7 +74,7 @@ const AISummit = () => {
   });
 
   const { data: liveWorkshops = [], isLoading: workshopsLoading } = useQuery<any[]>({
-    queryKey: ['/api/ai-summit/workshops/active'],
+    queryKey: ['/api/workshops'],
     retry: false,
   });
 
@@ -127,7 +127,7 @@ const AISummit = () => {
   };
 
   // Extract speakers from live speaking sessions data
-  const speakers = liveSpeakingSessions.map(session => ({
+  const speakers = (liveSpeakingSessions || []).map(session => ({
     name: session.facilitator || "CBA Team",
     title: session.facilitatorCompany || "Event Team",
     topic: session.title,
@@ -152,7 +152,7 @@ const AISummit = () => {
   };
 
   // Transform live speaking sessions data into schedule format
-  const auditoriumSchedule = liveSpeakingSessions.map(session => ({
+  const auditoriumSchedule = (liveSpeakingSessions || []).map(session => ({
     time: formatSessionTime(session.startTime, session.endTime),
     title: session.title,
     type: session.sessionType?.toLowerCase() || "talk",
@@ -162,7 +162,7 @@ const AISummit = () => {
   }));
 
   // Transform live workshops data into schedule format
-  const classroomSchedule = liveWorkshops.map(workshop => ({
+  const classroomSchedule = (liveWorkshops || []).map(workshop => ({
     time: formatSessionTime(workshop.startTime, workshop.endTime),
     title: workshop.title,
     type: "workshop",
@@ -222,8 +222,8 @@ const AISummit = () => {
   ];
 
   // Use live data when available, fallback to static data
-  const finalClassroomSchedule = liveWorkshops.length > 0 ? classroomSchedule : fallbackClassroomSchedule;
-  const finalAuditoriumSchedule = liveSpeakingSessions.length > 0 ? auditoriumSchedule : [
+  const finalClassroomSchedule = (liveWorkshops || []).length > 0 ? classroomSchedule : fallbackClassroomSchedule;
+  const finalAuditoriumSchedule = (liveSpeakingSessions || []).length > 0 ? auditoriumSchedule : [
     {
       time: "9:30 - 10:00",
       title: "Registration & Welcome Coffee",
@@ -828,8 +828,8 @@ const AISummit = () => {
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-4 text-center">2nd Floor Auditorium Schedule</h3>
                       <div className="space-y-4">
-                        {liveWorkshops.length > 0 ? (
-                          liveWorkshops.map((workshop, index) => {
+                        {(liveWorkshops || []).length > 0 ? (
+                          (liveWorkshops || []).map((workshop, index) => {
                             const colors = ['blue', 'green', 'purple', 'orange', 'red'];
                             const color = colors[index % colors.length];
                             const startTime = new Date(workshop.startTime).toLocaleTimeString('en-US', { 
