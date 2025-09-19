@@ -368,7 +368,7 @@ const Navbar = () => {
                     : 'text-red-600 hover:text-red-700 font-semibold'
                   } transition-colors duration-200 cursor-pointer`}
                   onClick={() => setIsAiMenuOpen(false)}>
-                  🚀 AI Summit Oct 1st
+                  🚀 AI Summit Jan 27th
                 </span>
               </Link>
               <Link href="/ai-services">
@@ -512,7 +512,7 @@ const Navbar = () => {
               {/* For non-logged-in users, show full navigation */}
               <Link href="/ai-summit">
                 <span className="block pl-3 pr-4 py-2 border-l-4 border-red-500 text-red-600 bg-red-50 font-bold text-sm cursor-pointer">
-                  🚀 First AI Summit - Oct 1st FREE
+                  🚀 First AI Summit - Jan 27th FREE
                 </span>
               </Link>
               
@@ -610,7 +610,7 @@ const Navbar = () => {
                     ? 'border-red-500 text-red-600 bg-red-100' 
                     : 'border-red-300 text-red-600 hover:text-red-800 hover:bg-red-50 hover:border-red-500'
                   } font-bold text-sm cursor-pointer`}>
-                  🚀 AI Summit Oct 1st
+                  🚀 AI Summit Jan 27th
                 </span>
               </Link>
               <Link href="/ai-services">
