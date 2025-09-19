@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Users, AlertTriangle, CheckCircle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 interface Registration {
   id: string;
@@ -31,8 +33,42 @@ const RegistrationCalendar = ({
   // Ensure userRegistrations is always an array to prevent runtime errors
   const safeUserRegistrations = Array.isArray(userRegistrations) ? userRegistrations : [];
 
-  // AI Summit schedule with all available sessions
-  const allSessions: Registration[] = [
+  // Fetch live workshops from database
+  const { data: liveWorkshops = [] } = useQuery({
+    queryKey: ['/api/ai-summit/workshops/active'],
+    select: (data) => data || []
+  });
+
+  // Convert live workshops to Registration format
+  const formatSessionTime = (startTime: string, endTime: string) => {
+    const start = format(new Date(startTime), 'H:mm');
+    const end = format(new Date(endTime), 'H:mm');
+    return `${start} - ${end}`;
+  };
+
+  const calculateDuration = (startTime: string, endTime: string) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    const diffMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+    return `${diffMinutes}min`;
+  };
+
+  const convertWorkshopsToSessions = (workshops: any[]): Registration[] => {
+    return workshops.map(workshop => ({
+      id: `workshop-${workshop.id}`,
+      type: 'workshop' as const,
+      title: workshop.title,
+      time: formatSessionTime(workshop.startTime, workshop.endTime),
+      duration: calculateDuration(workshop.startTime, workshop.endTime),
+      location: workshop.room || 'Second Floor Classroom',
+      capacity: workshop.maxCapacity || 30
+    }));
+  };
+
+  const allSessions: Registration[] = convertWorkshopsToSessions(liveWorkshops);
+
+  // Static fallback sessions (kept as backup if needed)
+  const staticSessions: Registration[] = [
     {
       id: 'reg-930',
       type: 'networking',
