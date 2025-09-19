@@ -44,7 +44,6 @@ import {
   MessageCircle
 } from "lucide-react";
 import { Link } from "wouter";
-import { ParticipantTypeSelector } from "@/components/forms/ParticipantTypeSelector";
 import { SponsorSpotlight } from "@/components/SponsorSpotlight";
 
 const AISummit = () => {
@@ -65,11 +64,6 @@ const AISummit = () => {
     retry: false,
   });
 
-  // Fetch person types and categories for the form
-  const { data: allPersonTypes = [] } = useQuery<any[]>({
-    queryKey: ['/api/person-types'],
-    staleTime: 0,
-  });
 
   // Fetch live AI Summit data
   const { data: liveSpeakingSessions = [], isLoading: speakingSessionsLoading } = useQuery<any[]>({
@@ -82,41 +76,15 @@ const AISummit = () => {
     retry: false,
   });
 
-  // No longer needed - simplified registration
-
-
-  // Simplified form state
-  const [showExhibitorForm, setShowExhibitorForm] = useState(false);
-  const [showSpeakerForm, setShowSpeakerForm] = useState(false);
-  const [showVolunteerForm, setShowVolunteerForm] = useState(false);
-  const [showSponsorForm, setShowSponsorForm] = useState(false);
-  
-  // Password visibility for simplified form
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Password visibility for other forms
-  const [showExhibitorPassword, setShowExhibitorPassword] = useState(false);
-  const [showExhibitorConfirmPassword, setShowExhibitorConfirmPassword] = useState(false);
-  const [showSpeakerPassword, setShowSpeakerPassword] = useState(false);
-  const [showSpeakerConfirmPassword, setShowSpeakerConfirmPassword] = useState(false);
-  const [showVolunteerPassword, setShowVolunteerPassword] = useState(false);
-  const [showVolunteerConfirmPassword, setShowVolunteerConfirmPassword] = useState(false);
-  const [showSponsorPassword, setShowSponsorPassword] = useState(false);
-  const [showSponsorConfirmPassword, setShowSponsorConfirmPassword] = useState(false);
-  // Simplified registration form with only 7 fields
+  // Simple registration form with only basic fields
   const [registrationData, setRegistrationData] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    confirmEmail: "",
-    mobileNumber: "",
-    password: "",
-    confirmPassword: "",
-    participantType: "resident" // "resident" or "business_owner"
+    mobileNumber: ""
   });
 
-  // Auto-populate form when user data is available (simplified)
+  // Auto-populate form when user data is available
   useEffect(() => {
     if (user && showRegistrationForm) {
       const userFirstName = (user as any).firstName || "";
@@ -126,102 +94,13 @@ const AISummit = () => {
         ...prev,
         firstName: userFirstName,
         lastName: userLastName,
-        email: userEmail,
-        confirmEmail: userEmail
+        email: userEmail
       }));
     }
   }, [user, showRegistrationForm]);
-  const [exhibitorData, setExhibitorData] = useState({
-    companyName: "",
-    contactName: "",
-    email: "",
-    phone: "",
-    website: "",
-    businessDescription: "",
-    productsServices: "",
-    exhibitionGoals: "",
-    boothRequirements: "",
-    electricalNeeds: false,
-    internetNeeds: false,
-    specialRequirements: "",
-    marketingMaterials: "",
-    numberOfAttendees: 2,
-    previousExhibitor: false,
-    referralSource: "",
-    agreesToTerms: false,
-    password: "",
-    confirmPassword: "",
-    attendees: [{
-      name: "",
-      email: "",
-      jobTitle: "",
-      participantType: "exhibitor",
-      customRole: "",
-      isSpeaker: false,
-      speakerBio: "",
-      presentationTitle: "",
-      presentationDescription: ""
-    }]
-  });
 
-  const [speakerData, setSpeakerData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    jobTitle: "",
-    website: "",
-    linkedIn: "",
-    bio: "",
-    password: "",
-    confirmPassword: "",
-    sessionType: "talk",
-    talkTitle: "",
-    talkDescription: "",
-    topicOutline: "",
-    preferredDuration: "",
-    talkDuration: "15",
-    audienceLevel: "Beginner",
-    speakingExperience: "",
-    previousSpeaking: false,
-    techRequirements: "",
-    availableSlots: [] as string[],
-    motivationToSpeak: "",
-    keyTakeaways: "",
-    interactiveElements: false,
-    handoutsProvided: false,
-    agreesToTerms: false
-  });
 
-  const [volunteerData, setVolunteerData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    role: "",
-    shift: "",
-    experience: "",
-    availability: "",
-    emergencyContact: "",
-    tShirtSize: "",
-    dietaryRequirements: "",
-    agreesToTerms: false,
-    password: "",
-    confirmPassword: ""
-  });
 
-  const [sponsorData, setSponsorData] = useState({
-    companyName: "",
-    contactName: "",
-    contactEmail: "",
-    contactPhone: "",
-    password: "",
-    confirmPassword: "",
-    companyWebsite: "",
-    companyDescription: "",
-    packageName: "",
-    specialRequests: "",
-    agreesToTerms: false
-  });
   
   const { toast } = useToast();
 
@@ -538,11 +417,7 @@ const AISummit = () => {
         firstName: "",
         lastName: "",
         email: "",
-        confirmEmail: "",
-        mobileNumber: "",
-        password: "",
-        confirmPassword: "",
-        participantType: "resident"
+        mobileNumber: ""
       });
       // Refresh registration status
       refetchStatus();
@@ -586,229 +461,9 @@ const AISummit = () => {
     },
   });
 
-  const exhibitorMutation = useMutation({
-    mutationFn: async (data: typeof exhibitorData) => {
-      const response = await apiRequest("POST", "/api/ai-summit-exhibitor-registration", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Exhibitor Registration Successful!",
-        description: "Thank you for registering as an exhibitor. We'll contact you shortly with booth details.",
-      });
-      setShowExhibitorForm(false);
-      setExhibitorData({
-        companyName: "",
-        contactName: "",
-        email: "",
-        phone: "",
-        website: "",
-        businessDescription: "",
-        productsServices: "",
-        exhibitionGoals: "",
-        boothRequirements: "",
-        electricalNeeds: false,
-        internetNeeds: false,
-        specialRequirements: "",
-        marketingMaterials: "",
-        numberOfAttendees: 2,
-        previousExhibitor: false,
-        referralSource: "",
-        agreesToTerms: false,
-        password: "",
-        confirmPassword: "",
-        attendees: [{
-          name: "",
-          email: "",
-          jobTitle: "",
-          participantType: "exhibitor",
-          customRole: "",
-          isSpeaker: false,
-          speakerBio: "",
-          presentationTitle: "",
-          presentationDescription: ""
-        }]
-      });
-    },
-    onError: (error: any) => {
-      // Check if this is a duplicate registration error
-      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
-        toast({
-          title: "Spot Already Reserved!",
-          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
-          variant: "default",
-        });
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        toast({
-          title: "Exhibitor Registration Failed",
-          description: error instanceof Error ? error.message : "Failed to register as exhibitor. Please try again.",
-          variant: "destructive",
-        });
-      }
-    },
-  });
 
-  const speakerMutation = useMutation({
-    mutationFn: async (data: typeof speakerData) => {
-      const response = await apiRequest("POST", "/api/ai-summit-speaker-interest", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Speaker Account Created!",
-        description: "Your speaker account has been created successfully. You can now log in with your email and password. Our program committee will review your submission and contact you soon.",
-      });
-      setShowSpeakerForm(false);
-      setSpeakerData({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        jobTitle: "",
-        website: "",
-        linkedIn: "",
-        bio: "",
-        password: "",
-        confirmPassword: "",
-        sessionType: "talk",
-        talkTitle: "",
-        talkDescription: "",
-        topicOutline: "",
-        preferredDuration: "",
-        talkDuration: "15",
-        audienceLevel: "Beginner",
-        speakingExperience: "",
-        previousSpeaking: false,
-        techRequirements: "",
-        availableSlots: [],
-        motivationToSpeak: "",
-        keyTakeaways: "",
-        interactiveElements: false,
-        handoutsProvided: false,
-        agreesToTerms: false
-      });
-    },
-    onError: (error: any) => {
-      // Check if this is a duplicate registration error
-      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
-        toast({
-          title: "Spot Already Reserved!",
-          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
-          variant: "default",
-        });
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        toast({
-          title: "Submission Failed",
-          description: error instanceof Error ? error.message : "Failed to submit speaker interest. Please try again.",
-          variant: "destructive",
-        });
-      }
-    },
-  });
 
-  const volunteerMutation = useMutation({
-    mutationFn: async (data: typeof volunteerData) => {
-      const response = await apiRequest("POST", "/api/ai-summit/volunteer-registration", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Volunteer Registration Successful!",
-        description: "Thank you for volunteering! We'll contact you with more details about your role and schedule.",
-      });
-      setShowVolunteerForm(false);
-      setVolunteerData({
-        name: "",
-        email: "",
-        phone: "",
-        role: "",
-        shift: "",
-        experience: "",
-        availability: "",
-        emergencyContact: "",
-        tShirtSize: "",
-        dietaryRequirements: "",
-        agreesToTerms: false,
-        password: "",
-        confirmPassword: ""
-      });
-    },
-    onError: (error: any) => {
-      // Check if this is a duplicate registration error
-      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
-        toast({
-          title: "Spot Already Reserved!",
-          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
-          variant: "default",
-        });
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        toast({
-          title: "Volunteer Registration Failed",
-          description: error instanceof Error ? error.message : "Failed to register as volunteer. Please try again.",
-          variant: "destructive",
-        });
-      }
-    },
-  });
 
-  const sponsorMutation = useMutation({
-    mutationFn: async (data: typeof sponsorData) => {
-      const response = await apiRequest("POST", "/api/ai-summit-sponsor-registration", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Sponsor Account Created!",
-        description: "Your sponsor account has been created successfully. You can now log in with your email and password. Our sponsorship team will contact you soon to discuss your package.",
-      });
-      setShowSponsorForm(false);
-      setSponsorData({
-        companyName: "",
-        contactName: "",
-        contactEmail: "",
-        contactPhone: "",
-        password: "",
-        confirmPassword: "",
-        companyWebsite: "",
-        companyDescription: "",
-        packageName: "",
-        specialRequests: "",
-        agreesToTerms: false
-      });
-    },
-    onError: (error: any) => {
-      // Check if this is a duplicate registration error
-      if (error?.response?.status === 409 || error?.message?.includes("already registered")) {
-        toast({
-          title: "Spot Already Reserved!",
-          description: "You're spot is already reserved for the AI Summit. Please login to access your account and badge details.",
-          variant: "default",
-        });
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 2000);
-      } else {
-        toast({
-          title: "Sponsor Registration Failed",
-          description: error instanceof Error ? error.message : "Failed to register as sponsor. Please try again.",
-          variant: "destructive",
-        });
-      }
-    },
-  });
 
   const handleRegistration = (e: React.FormEvent) => {
     e.preventDefault();
@@ -861,219 +516,13 @@ const AISummit = () => {
       return;
     }
     
-    // Validate passwords match
-    if (registrationData.password !== registrationData.confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your password and confirm password fields match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate password length
-    if (registrationData.password && registrationData.password.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
     
     registerMutation.mutate(registrationData);
   };
 
-  const handleExhibitorRegistration = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate passwords match
-    if (exhibitorData.password !== exhibitorData.confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your password and confirm password fields match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate password length
-    if (exhibitorData.password && exhibitorData.password.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!exhibitorData.agreesToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please agree to the exhibitor terms and conditions.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate attendee numbers against space/table selection
-    const numberOfAttendees = exhibitorData.attendees.length;
-    
-    if (exhibitorData.boothRequirements === 'table-2' && numberOfAttendees !== 2) {
-      toast({
-        title: "Registration Error",
-        description: "You selected a table for 2 people but have " + numberOfAttendees + " attendees. Please match your space selection with attendee count.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (exhibitorData.boothRequirements === 'table-4' && numberOfAttendees !== 4) {
-      toast({
-        title: "Registration Error", 
-        description: "You selected a table for 4 people but have " + numberOfAttendees + " attendees. Please match your space selection with attendee count.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (numberOfAttendees < 2 || numberOfAttendees > 4) {
-      toast({
-        title: "Registration Error",
-        description: "Number of attendees must be between 2-4 people due to venue capacity constraints.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    // Validate that all attendees have required information
-    const incompleteAttendees = exhibitorData.attendees.filter(attendee => !attendee.name.trim() || !attendee.email.trim());
-    if (incompleteAttendees.length > 0) {
-      toast({
-        title: "Registration Error",
-        description: "Please provide name and email for all attendees.",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (!exhibitorData.boothRequirements) {
-      toast({
-        title: "Registration Error",
-        description: "Please select an exhibition space option.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    exhibitorMutation.mutate({
-      ...exhibitorData,
-      numberOfAttendees: exhibitorData.attendees.length
-    });
-  };
-
-  const handleSpeakerSubmission = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate passwords match
-    if (speakerData.password !== speakerData.confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your password and confirm password fields match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate password length
-    if (speakerData.password && speakerData.password.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!speakerData.agreesToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please agree to the speaker terms and conditions.",
-        variant: "destructive",
-      });
-      return;
-    }
-    speakerMutation.mutate(speakerData);
-  };
-
-  const handleSponsorRegistration = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate passwords match
-    if (sponsorData.password !== sponsorData.confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate password length
-    if (sponsorData.password.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!sponsorData.agreesToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please agree to the sponsorship terms and conditions.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    sponsorMutation.mutate(sponsorData);
-  };
-
-  const handleVolunteerRegistration = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate passwords match
-    if (volunteerData.password !== volunteerData.confirmPassword) {
-      toast({
-        title: "Passwords Don't Match",
-        description: "Please make sure your password and confirm password fields match.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Validate password length
-    if (volunteerData.password && volunteerData.password.length < 8) {
-      toast({
-        title: "Password Too Short",
-        description: "Password must be at least 8 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!volunteerData.agreesToTerms) {
-      toast({
-        title: "Terms Required",
-        description: "Please agree to the volunteer terms and conditions.",
-        variant: "destructive",
-      });
-      return;
-    }
-    volunteerMutation.mutate(volunteerData);
-  };
 
   const handleInputChange = (field: string, value: string | number[] | string[]) => {
     setRegistrationData(prev => ({
@@ -1088,11 +537,7 @@ const AISummit = () => {
       firstName: "John",
       lastName: "Smith",
       email: "john.smith@test.com",
-      confirmEmail: "john.smith@test.com", 
-      mobileNumber: "+44 7700 900123",
-      password: "TestPassword123",
-      confirmPassword: "TestPassword123",
-      participantType: "resident"
+      mobileNumber: "+44 7700 900123"
     });
   };
 
@@ -1100,70 +545,12 @@ const AISummit = () => {
 
   // Organization functions removed for simplified form
 
-  const handleExhibitorInputChange = (field: string, value: string | number | boolean) => {
-    setExhibitorData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
-  const handleAttendeeChange = (index: number, field: string, value: any) => {
-    setExhibitorData(prev => ({
-      ...prev,
-      attendees: prev.attendees.map((attendee, i) => 
-        i === index ? { ...attendee, [field]: value } : attendee
-      )
-    }));
-  };
 
-  const addAttendee = () => {
-    if (exhibitorData.attendees.length < 4) {
-      setExhibitorData(prev => ({
-        ...prev,
-        attendees: [...prev.attendees, {
-          name: "",
-          email: "",
-          jobTitle: "",
-          participantType: "exhibitor",
-          customRole: "",
-          isSpeaker: false,
-          speakerBio: "",
-          presentationTitle: "",
-          presentationDescription: ""
-        }]
-      }));
-    }
-  };
 
-  const removeAttendee = (index: number) => {
-    if (exhibitorData.attendees.length > 1) {
-      setExhibitorData(prev => ({
-        ...prev,
-        attendees: prev.attendees.filter((_, i) => i !== index)
-      }));
-    }
-  };
 
-  const handleSpeakerInputChange = (field: string, value: string | boolean | string[]) => {
-    setSpeakerData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
-  const handleVolunteerInputChange = (field: string, value: string | boolean) => {
-    setVolunteerData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
-  const handleSponsorInputChange = (field: string, value: string | boolean) => {
-    setSponsorData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
 
   const getSessionColor = (type: string) => {
     switch (type) {
@@ -1281,39 +668,6 @@ const AISummit = () => {
                       My Schedule & Calendar
                     </div>
                   </Link>
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 justify-center max-w-4xl mx-auto">
-                    <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
-                      onClick={() => setShowExhibitorForm(true)}
-                    >
-                      <Building className="h-4 w-4 shrink-0" />
-                      <div className="flex flex-col text-center">
-                        <span className="text-xs leading-tight">Exhibit Your Business</span>
-                        <span className="text-xs text-blue-200">From £588</span>
-                      </div>
-                    </button>
-                    <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
-                      onClick={() => setShowSpeakerForm(true)}
-                    >
-                      <Mic className="h-4 w-4 shrink-0" />
-                      <span className="text-xs leading-tight">Speak at Summit</span>
-                    </button>
-                    <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-blue-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
-                      onClick={() => setShowVolunteerForm(true)}
-                    >
-                      <UserPlus className="h-4 w-4 shrink-0" />
-                      <span className="text-xs leading-tight">Volunteer with Us</span>
-                    </button>
-                    <button 
-                      className="border-2 border-white text-white hover:bg-white hover:text-purple-600 text-sm px-4 py-3 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 min-h-[70px]"
-                      onClick={() => setShowSponsorForm(true)}
-                    >
-                      <Trophy className="h-4 w-4 shrink-0" />
-                      <span className="text-xs leading-tight">Become a Sponsor</span>
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -1636,13 +990,6 @@ const AISummit = () => {
                       <p className="text-xs text-gray-500 mt-2">£147 per square metre base rate</p>
                     </div>
                   </div>
-                  <Button 
-                    className="w-full mt-6 bg-purple-600 hover:bg-purple-700 font-semibold text-white"
-                    onClick={() => setShowExhibitorForm(true)}
-                  >
-                    <Building className="mr-2 h-5 w-5" />
-                    <span>Apply for Exhibition Space</span>
-                  </Button>
                 </CardContent>
               </Card>
 
@@ -1671,12 +1018,6 @@ const AISummit = () => {
                       <p className="text-xs text-gray-600">Space from £588 (2x2m) • Tables from £882 (2 people)</p>
                       <p className="text-xs text-gray-600">£147 per square metre base rate</p>
                     </div>
-                    <Button 
-                      className="w-full mt-4 bg-green-600 hover:bg-green-700 font-semibold text-white"
-                      onClick={() => setShowExhibitorForm(true)}
-                    >
-                      <span>Apply for Exhibition Space</span>
-                    </Button>
                   </CardContent>
                 </Card>
               </div>
@@ -1740,16 +1081,6 @@ const AISummit = () => {
               </div>
             </div>
 
-            <div className="text-center">
-              <button 
-                className="bg-white text-purple-600 hover:bg-purple-50 text-xl px-8 py-4 font-bold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mx-auto"
-                onClick={() => setShowExhibitorForm(true)}
-              >
-                <Building className="h-6 w-6" />
-                Reserve Your Exhibition Space
-              </button>
-              <p className="text-blue-100 mt-2">Limited spaces available • Early bird pricing</p>
-            </div>
           </div>
         </div>
 
@@ -2179,22 +1510,6 @@ const AISummit = () => {
                   <UserPlus className="mr-2 h-5 w-5" />
                   <span>{(registrationStatus as any)?.isRegistered ? "✓ Registered for FREE" : "Register for FREE"}</span>
                 </Button>
-                <Button 
-                  size="lg" 
-                  className="bg-purple-600 text-white hover:bg-purple-700 font-semibold"
-                  onClick={() => setShowExhibitorForm(true)}
-                >
-                  <Building className="mr-2 h-5 w-5" />
-                  <span>Become an Exhibitor</span>
-                </Button>
-                <Button 
-                  size="lg" 
-                  className="bg-green-600 text-white hover:bg-green-700 font-semibold"
-                  onClick={() => setShowSpeakerForm(true)}
-                >
-                  <Mic className="mr-2 h-5 w-5" />
-                  <span>Apply to Speak</span>
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -2221,12 +1536,77 @@ const AISummit = () => {
                   Join us for Croydon's first AI Summit on January 25, 2025. Network with entrepreneurs, learn from experts, and explore the future of AI.
                 </p>
                 
-                <ParticipantTypeSelector 
-                  personTypes={allPersonTypes}
-                  onRegistrationSubmit={handleRegistration}
-                  isSubmitting={registerMutation.isPending}
-                  eventSlug="first-ai-summit-croydon-2025"
-                />
+                <form onSubmit={handleRegistration} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        value={registrationData.firstName}
+                        onChange={(e) => handleInputChange("firstName", e.target.value)}
+                        required
+                        data-testid="input-first-name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        value={registrationData.lastName}
+                        onChange={(e) => handleInputChange("lastName", e.target.value)}
+                        required
+                        data-testid="input-last-name"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="email">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={registrationData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      required
+                      data-testid="input-email"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="mobileNumber">Mobile Number *</Label>
+                    <Input
+                      id="mobileNumber"
+                      type="tel"
+                      value={registrationData.mobileNumber}
+                      onChange={(e) => handleInputChange("mobileNumber", e.target.value)}
+                      placeholder="+44 7700 900123"
+                      required
+                      data-testid="input-mobile"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Required for event updates and emergency contact
+                    </p>
+                  </div>
+                  
+                  <Button
+                    type="submit"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    disabled={registerMutation.isPending}
+                    data-testid="button-register-submit"
+                  >
+                    {registerMutation.isPending ? (
+                      <span>Reserving Your Spot...</span>
+                    ) : (
+                      <span>Reserve My Free Spot</span>
+                    )}
+                  </Button>
+                  
+                  <p className="text-xs text-gray-500 text-center">
+                    Free to attend • No payment required • Limited spaces
+                  </p>
+                </form>
               </div>
             </div>
           </div>
