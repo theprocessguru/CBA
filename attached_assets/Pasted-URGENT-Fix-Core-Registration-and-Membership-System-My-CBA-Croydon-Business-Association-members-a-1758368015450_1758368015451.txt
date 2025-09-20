@@ -1,0 +1,303 @@
+URGENT: Fix Core Registration and Membership System
+
+My CBA (Croydon Business Association) members application has critical system failures that need immediate fixing. Based on comprehensive backend analysis, here are the specific issues and required solutions:
+
+🚨 CRITICAL PROBLEMS TO FIX
+
+1. QR Code Generation Failure
+
+•
+Issue: Only 6% of members have QR codes (24 out of 432 members)
+
+•
+Root Cause: QR code generation not triggering during registration
+
+•
+Required Fix: Ensure QR codes are automatically generated for ALL new registrations
+
+2. Membership Tier Assignment Broken
+
+•
+Issue: All membership tiers show 0 members despite having 432 total members
+
+•
+Root Cause: Membership tier assignment logic not working
+
+•
+Required Fix: Implement automatic tier assignment during registration
+
+3. Event Registration System Failure
+
+•
+Issue: All events show "No registrations yet" - members cannot register for events
+
+•
+Root Cause: Event booking workflow broken
+
+•
+Required Fix: Enable member event registration functionality
+
+🎯 SPECIFIC FIXES REQUIRED
+
+A. Registration Workflow Fixes
+
+1. Default Membership Tier Assignment:
+
+Plain Text
+
+
+- Residents who register → Automatically assign "Community" tier (FREE)
+- Business Owners who register → Automatically assign "Business Starter" tier (FREE)
+- Ensure tier assignment happens during registration process
+- Update existing 432 members to have appropriate tiers
+
+
+2. QR Code Generation:
+
+Plain Text
+
+
+- Generate unique QR code for EVERY new registration
+- QR Handle should be customizable (one-time change only)
+- Bulk generate QR codes for existing 408 members without codes
+- Ensure QR codes work with event scanner system
+
+
+3. District Selection for Residents:
+
+Plain Text
+
+
+Add dropdown field for residents to select their Croydon district from these 28 options:
+1. Addiscombe East
+2. Addiscombe West  
+3. Bensham Manor
+4. Broad Green
+5. Coulsdon Town
+6. Crystal Palace and Upper Norwood
+7. Fairfield
+8. Kenley
+9. New Addington North
+10. New Addington South
+11. Norbury and Pollards Hill
+12. Norbury Park
+13. Old Coulsdon
+14. Park Hill and Whitgift
+15. Purley and Woodcote
+16. Purley Oaks and Riddlesdown
+17. Sanderstead
+18. Selhurst
+19. Selsdon and Addington Village
+20. Selsdon Vale and Forestdale
+21. Shirley North
+22. Shirley South
+23. South Croydon
+24. South Norwood
+25. Thornton Heath
+26. Waddon
+27. West Thornton
+28. Woodside
+
+
+B. Registration Form Enhancements
+
+4. Add Missing Fields:
+
+Plain Text
+
+
+- Email confirmation field (email must be typed twice)
+- District selection dropdown for residents
+- Ensure all stakeholder checkboxes work correctly
+
+
+5. Fix Event Registration:
+
+Plain Text
+
+
+- Enable members to register for events
+- Connect event registration to QR code system
+- Ensure capacity management works (reduces available spots when booked)
+- Test with existing events: AI Summit 2025, Free Networking Breakfast, Digital Marketing Masterclass
+
+
+🔧 TECHNICAL IMPLEMENTATION
+
+Database Updates Needed:
+
+SQL
+
+
+-- Add membership tier to existing users
+UPDATE users SET membership_tier = 'Community' WHERE member_type = 'resident' AND membership_tier IS NULL;
+UPDATE users SET membership_tier = 'Business Starter' WHERE member_type = 'business_owner' AND membership_tier IS NULL;
+
+-- Add district field for residents
+ALTER TABLE users ADD COLUMN district VARCHAR(255);
+
+
+QR Code System:
+
+Plain Text
+
+
+- Ensure QR generation service is called during registration
+- QR codes should contain unique member identifier
+- QR scanner should successfully lookup members
+- Fix "Attendee Not Found" errors in scanner
+
+
+Event System:
+
+Plain Text
+
+
+- Fix event registration API endpoints
+- Enable member event booking
+- Connect bookings to QR-based check-in system
+- Test complete flow: Register → Book Event → QR Check-in
+
+
+✅ VERIFICATION CHECKLIST
+
+After implementing fixes, verify:
+
+1.
+New Registration Test:
+
+
+
+
+Register new resident → Gets "Community" tier + QR code + District selection
+
+
+
+
+Register new business owner → Gets "Business Starter" tier + QR code
+
+
+
+
+Email confirmation field works
+
+
+
+
+QR code appears in member dashboard
+
+
+
+2.
+Existing Members Fix:
+
+
+
+
+All 432 members have membership tiers assigned
+
+
+
+
+All 432 members have QR codes generated
+
+
+
+
+QR scanner can find all members
+
+
+
+3.
+Event Registration Test:
+
+
+
+
+Members can register for AI Summit 2025
+
+
+
+
+Event capacity reduces when bookings made
+
+
+
+
+QR check-in works for registered members
+
+
+
+4.
+Admin Dashboard Verification:
+
+
+
+
+Membership tier distribution shows actual numbers (not all 0s)
+
+
+
+
+QR Codes Set Up shows 100% (not 6%)
+
+
+
+
+Events show actual registrations (not "No registrations yet")
+
+
+
+🎯 SUCCESS METRICS
+
+When fixed, you should see:
+
+•
+QR Codes Set Up: 432 (100% of members)
+
+•
+Membership Distribution: Actual numbers in Community/Business Starter tiers
+
+•
+Event Registrations: Active bookings for upcoming events
+
+•
+Paid Membership Rate: Can increase from 0.0% as system now works
+
+💡 CURRENT WORKING SYSTEMS
+
+These systems are working well (don't break them):
+
+•
+MYT Automation integration (ACTIVE)
+
+•
+Admin dashboard metrics
+
+•
+User account creation (432 members)
+
+•
+Stakeholder management system
+
+•
+Economic impact tracking (£890k)
+
+🚀 PRIORITY ORDER
+
+1.
+URGENT: Fix membership tier assignment for all users
+
+2.
+URGENT: Generate QR codes for all users
+
+3.
+HIGH: Enable event registration system
+
+4.
+MEDIUM: Add district selection and email confirmation fields
+
+This is a focused fix for a working application that just needs the core registration workflow repaired. The infrastructure is solid - just need these specific processes to work correctly.
+
+Please implement these fixes and test the complete user journey: Registration → QR Generation → Event Booking → Check-in.
+
