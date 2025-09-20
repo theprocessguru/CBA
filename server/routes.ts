@@ -10639,39 +10639,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register for a speaking session
-  app.post("/api/ai-summit/speaking-sessions/:sessionId/register", isAuthenticated, async (req, res) => {
+  // Register for a speaking session (unified with workshop registration)
+  app.post("/api/ai-summit/speaking-sessions/:sessionId/register", isAuthenticated, async (req: any, res) => {
     try {
       const { sessionId } = req.params;
-      const { badgeId } = req.body;
-      
-      if (!badgeId) {
-        return res.status(400).json({ message: "Badge ID is required" });
+      const userId = req.user.id;
+
+      // Get speaking session details
+      const session = await storage.getAISummitSpeakingSessionById(parseInt(sessionId));
+      if (!session || !session.isActive) {
+        return res.status(404).json({ message: "Speaking session not found or inactive" });
       }
 
-      // Check session capacity
-      const capacity = await storage.checkSessionCapacity(parseInt(sessionId));
-      if (capacity.available <= 0) {
-        return res.status(400).json({ message: "Speaking session is full" });
+      // Get user's badge for this event
+      const userBadge = await db.select().from(aiSummitBadges)
+        .where(eq(aiSummitBadges.participantId, userId))
+        .limit(1);
+
+      if (userBadge.length === 0) {
+        return res.status(400).json({ message: "You need a badge to register for speaking sessions. Please register for the AI Summit first." });
       }
+
+      const badgeId = userBadge[0].badgeId;
 
       // Check if already registered
-      const existingRegistrations = await storage.getSessionRegistrationsBySessionId(parseInt(sessionId));
-      const alreadyRegistered = existingRegistrations.some(reg => reg.badgeId === badgeId);
-      
-      if (alreadyRegistered) {
+      const existingRegistration = await db.select().from(aiSummitSessionRegistrations)
+        .where(and(
+          eq(aiSummitSessionRegistrations.sessionId, parseInt(sessionId)),
+          eq(aiSummitSessionRegistrations.badgeId, badgeId)
+        ))
+        .limit(1);
+
+      if (existingRegistration.length > 0) {
         return res.status(400).json({ message: "Already registered for this speaking session" });
       }
 
-      const registration = await storage.createAISummitSpeakingSessionRegistration({
-        sessionId: parseInt(sessionId),
-        badgeId
-      });
+      // Check current capacity (unified logic like workshops)
+      const currentRegistrationCount = await db.select({ count: sql<number>`count(*)` })
+        .from(aiSummitSessionRegistrations)
+        .where(eq(aiSummitSessionRegistrations.sessionId, parseInt(sessionId)));
       
+      const currentCount = currentRegistrationCount[0]?.count || 0;
+      const maxCapacity = session.maxCapacity || 0;
+      
+      if (maxCapacity > 0 && currentCount >= maxCapacity) {
+        return res.status(400).json({ 
+          message: "Speaking session is at full capacity", 
+          availableSpaces: 0,
+          maxCapacity: maxCapacity,
+          currentRegistrations: currentCount
+        });
+      }
+
+      // Get user details for registration
+      const user = await storage.getUserById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create speaking session registration using badge details
+      const [registration] = await db.insert(aiSummitSessionRegistrations).values({
+        sessionId: parseInt(sessionId),
+        badgeId: badgeId,
+        attendeeName: `${user.firstName} ${user.lastName}`,
+        attendeeEmail: user.email,
+        attendeeCompany: user.company || '',
+        attendeeJobTitle: user.jobTitle || '',
+        registrationSource: 'direct'
+      }).returning();
+      
+      const availableSpaces = Math.max(0, maxCapacity - (currentCount + 1));
+
       res.json({
         success: true,
         message: "Registered for speaking session successfully!",
-        registration
+        registration,
+        availableSpaces,
+        maxCapacity,
+        currentRegistrations: currentCount + 1
       });
     } catch (error: any) {
       console.error("Speaking session registration error:", error);
