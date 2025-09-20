@@ -109,7 +109,7 @@ const RegistrationCalendar = ({
     }));
   };
 
-  const allSessions: Registration[] = convertWorkshopsToSessions(liveWorkshops);
+  const allSessions: Registration[] = convertWorkshopsToSessions(liveWorkshops || []);
 
   // Static fallback sessions (kept as backup if needed)
   const staticSessions: Registration[] = [
