@@ -761,7 +761,9 @@ export const aiSummitWorkshops = pgTable("ai_summit_workshops", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description"),
-  speakerName: varchar("speaker_name").notNull(), // Speaker/facilitator name
+  speakerName: varchar("speaker_name").notNull(), // Legacy field - being deprecated
+  speakerFirstName: varchar("speaker_first_name"), // New consistent format
+  speakerLastName: varchar("speaker_last_name"), // New consistent format
   duration: integer("duration").notNull(), // Duration in minutes
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),

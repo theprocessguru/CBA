@@ -2612,7 +2612,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         workshopDescription: aiSummitWorkshops.description,
         startTime: aiSummitWorkshops.startTime,
         endTime: aiSummitWorkshops.endTime,
-        facilitator: aiSummitWorkshops.speakerName
+        facilitator: aiSummitWorkshops.speakerName,
+        speakerFirstName: aiSummitWorkshops.speakerFirstName,
+        speakerLastName: aiSummitWorkshops.speakerLastName
       })
       .from(aiSummitWorkshopRegistrations)
       .innerJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
@@ -2648,6 +2650,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const startDateTime = reg.startTime instanceof Date ? reg.startTime.toISOString() : reg.startTime;
         const endDateTime = reg.endTime instanceof Date ? reg.endTime.toISOString() : reg.endTime;
         
+        // Use new separate name fields if available, fallback to legacy combined field
+        const facilitatorName = reg.speakerFirstName && reg.speakerLastName 
+          ? `${reg.speakerFirstName} ${reg.speakerLastName}`.trim()
+          : reg.facilitator || 'TBD';
+        
         return {
           id: reg.registrationId,
           eventId: reg.workshopId,
@@ -2655,7 +2662,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionType: 'workshop',
           title: reg.workshopTitle,
           description: reg.workshopDescription || 'AI Summit Workshop',
-          facilitator: reg.facilitator,
+          facilitator: facilitatorName,
+          speakerFirstName: reg.speakerFirstName,
+          speakerLastName: reg.speakerLastName,
           startTime: startDateTime,
           endTime: endDateTime,
           location: 'AI Summit Venue',
