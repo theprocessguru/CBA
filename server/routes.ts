@@ -2591,30 +2591,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         checkedIn: cbaEventRegistrations.checkedIn,
         checkedInAt: cbaEventRegistrations.checkedInAt,
         eventName: cbaEvents.eventName,
-        eventDescription: cbaEvents.eventDescription,
+        description: cbaEvents.description,
+        eventDate: cbaEvents.eventDate,
         startTime: cbaEvents.startTime,
         endTime: cbaEvents.endTime,
-        location: cbaEvents.location,
-        facilitator: cbaEvents.facilitator
+        venue: cbaEvents.venue
       })
       .from(cbaEventRegistrations)
       .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
       .where(eq(cbaEventRegistrations.userId, userId));
       
-      // Format registrations for calendar
-      const registrations = cbaRegistrations.map(reg => ({
-        id: reg.registrationId,
-        type: 'workshop',
-        title: reg.eventName,
-        description: reg.eventDescription,
-        startTime: reg.startTime,
-        endTime: reg.endTime,
-        location: reg.location,
-        facilitator: reg.facilitator,
-        registeredAt: reg.registeredAt,
-        checkedIn: reg.checkedIn,
-        checkedInAt: reg.checkedInAt
-      }));
+      // Format registrations for calendar (matching RegistrationCalendar expected format)
+      const registrations = cbaRegistrations.map(reg => {
+        // Combine event date with time to create proper datetime strings
+        const eventDateStr = reg.eventDate instanceof Date ? reg.eventDate.toISOString().split('T')[0] : reg.eventDate;
+        const startDateTime = `${eventDateStr}T${reg.startTime}`;
+        const endDateTime = `${eventDateStr}T${reg.endTime}`;
+        
+        return {
+          id: reg.registrationId,
+          type: 'workshop',
+          title: reg.eventName,
+          description: reg.description,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          location: reg.venue || 'TBD',
+          registeredAt: reg.registeredAt,
+          checkedIn: reg.checkedIn,
+          checkedInAt: reg.checkedInAt
+        };
+      });
       
       res.json(registrations);
     } catch (error: any) {
