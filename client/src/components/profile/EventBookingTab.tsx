@@ -24,10 +24,24 @@ export const EventBookingTab = () => {
   const queryClient = useQueryClient();
 
   // Fetch available workshops for booking 
-  const { data: timeSlots, isLoading: slotsLoading } = useQuery<any[]>({
+  const { data: workshops, isLoading: workshopsLoading } = useQuery<any[]>({
     queryKey: ['/api/workshops'],
     enabled: isAuthenticated
   });
+
+  // Fetch available speaking sessions for booking 
+  const { data: speakingSessions, isLoading: speakingSessionsLoading } = useQuery<any[]>({
+    queryKey: ['/api/ai-summit/speaking-sessions/active'],
+    enabled: isAuthenticated
+  });
+
+  // Combine workshops and speaking sessions into a unified list
+  const timeSlots = [
+    ...(workshops || []).map(workshop => ({ ...workshop, sessionType: 'workshop' })),
+    ...(speakingSessions || []).map(session => ({ ...session, sessionType: 'speaking_session' }))
+  ];
+  
+  const slotsLoading = workshopsLoading || speakingSessionsLoading;
 
   // Fetch user's current event registrations
   const { data: sessionRegistrations, isLoading: sessionRegistrationsLoading } = useQuery<any[]>({
@@ -35,32 +49,43 @@ export const EventBookingTab = () => {
     enabled: isAuthenticated
   });
 
-  // Register for workshop mutation
+  // Register for session mutation (handles both workshops and speaking sessions)
   const registerMutation = useMutation({
-    mutationFn: async (eventId: number) => {
-      return apiRequest('POST', `/api/events/${eventId}/register`);
+    mutationFn: async ({ eventId, sessionType }: { eventId: number; sessionType: string }) => {
+      if (sessionType === 'speaking_session') {
+        return apiRequest('POST', `/api/ai-summit/speaking-sessions/${eventId}/register`);
+      } else {
+        return apiRequest('POST', `/api/events/${eventId}/register`);
+      }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      const sessionName = variables.sessionType === 'speaking_session' ? 'speaking session' : 'workshop';
       toast({
         title: "Registration Successful",
-        description: "You've been registered for the workshop!",
+        description: `You've been registered for the ${sessionName}!`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/speaking-sessions/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
       toast({
         title: "Registration Failed",
-        description: error.message || "Failed to register for workshop",
+        description: error.message || "Failed to register for session",
         variant: "destructive",
       });
     }
   });
 
-  // Cancel registration mutation
+  // Cancel registration mutation (handles both workshops and speaking sessions)
   const cancelMutation = useMutation({
-    mutationFn: async (eventId: number) => {
-      return apiRequest('DELETE', `/api/events/${eventId}/unregister`);
+    mutationFn: async ({ eventId, sessionType }: { eventId: number; sessionType: string }) => {
+      if (sessionType === 'speaking_session') {
+        // Note: We need to add this endpoint to the backend if it doesn't exist
+        return apiRequest('DELETE', `/api/ai-summit/speaking-sessions/${eventId}/unregister`);
+      } else {
+        return apiRequest('DELETE', `/api/events/${eventId}/unregister`);
+      }
     },
     onSuccess: () => {
       toast({
@@ -68,6 +93,7 @@ export const EventBookingTab = () => {
         description: "Your registration has been cancelled.",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/speaking-sessions/active'] });
       queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
@@ -129,12 +155,23 @@ export const EventBookingTab = () => {
     });
   };
 
-  const getSlotTypeColor = (slotType: string) => {
-    switch (slotType) {
+  const getSlotTypeColor = (sessionType: string) => {
+    switch (sessionType) {
       case 'workshop': return 'bg-green-100 text-green-800';
+      case 'speaking_session': return 'bg-purple-100 text-purple-800';
       case 'keynote': return 'bg-blue-100 text-blue-800';
       case 'talk': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getSlotTypeName = (sessionType: string) => {
+    switch (sessionType) {
+      case 'workshop': return 'Workshop';
+      case 'speaking_session': return 'Speaking Session';
+      case 'keynote': return 'Keynote';
+      case 'talk': return 'Talk';
+      default: return 'Session';
     }
   };
 
@@ -192,28 +229,35 @@ export const EventBookingTab = () => {
             </div>
           ) : (
             <div className="space-y-4 max-h-96 overflow-y-auto">
-              {timeSlots.map((workshop) => {
-                const registered = isRegistered(workshop.id);
-                const maxAllowed = workshop.maxCapacity || 30;
-                const isFull = (workshop.currentRegistrations || 0) >= maxAllowed;
-                const availableSeats = maxAllowed - (workshop.currentRegistrations || 0);
+              {timeSlots.map((session) => {
+                const registered = isRegistered(session.id);
+                // Handle different data structures for workshops vs speaking sessions
+                const maxCapacity = session.maxCapacity || session.max_capacity || 30;
+                const currentRegistrations = session.currentRegistrations || session.current_registrations || 0;
+                const isFull = currentRegistrations >= maxCapacity;
+                const availableSeats = maxCapacity - currentRegistrations;
+                
+                // Get session title from different possible fields
+                const sessionTitle = session.title || session.event_name || session.eventName || 'Untitled Session';
+                const sessionDescription = session.description || 'No description available';
+                const sessionVenue = session.room || session.venue || 'TBD';
 
                 return (
                   <div
-                    key={workshop.id}
+                    key={session.id}
                     className={`border rounded-lg p-4 ${
                       registered ? 'ring-2 ring-green-500 bg-green-50' : 
                       isFull ? 'opacity-75 bg-gray-50' :
                       availableSeats <= 5 ? 'ring-2 ring-red-400' : ''
                     }`}
-                    data-testid={`session-${workshop.id}`}
+                    data-testid={`session-${session.id}`}
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold text-gray-900">{workshop.title}</h3>
-                          <Badge className="bg-green-100 text-green-800">
-                            workshop
+                          <h3 className="font-semibold text-gray-900 leading-tight">{sessionTitle}</h3>
+                          <Badge className={getSlotTypeColor(session.sessionType)}>
+                            {getSlotTypeName(session.sessionType)}
                           </Badge>
                           {registered && (
                             <Badge className="bg-green-100 text-green-800">
@@ -222,24 +266,29 @@ export const EventBookingTab = () => {
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{workshop.description}</p>
+                        <p className="text-sm text-gray-600 mb-2">{sessionDescription}</p>
                         
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {formatDate(workshop.date || workshop.startTime)}
+                            {formatDate(session.date || session.startTime || session.start_time)}
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
-                            {formatTime(workshop.startTime)} ({workshop.duration} min)
+                            {formatTime(session.startTime || session.start_time)} - {formatTime(session.endTime || session.end_time)}
                           </div>
                           <div className="flex items-center gap-1">
                             <MapPin className="h-4 w-4" />
-                            {workshop.room}
+                            {sessionVenue}
                           </div>
                           <div className="flex items-center gap-1">
                             <Users className="h-4 w-4" />
-                            {workshop.currentRegistrations || 0}/{maxAllowed}
+                            <span className="font-medium">
+                              {currentRegistrations}/{maxCapacity}
+                              <span className="text-green-600 ml-1">
+                                ({availableSeats} left)
+                              </span>
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -249,9 +298,9 @@ export const EventBookingTab = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => cancelMutation.mutate(workshop.id)}
+                            onClick={() => cancelMutation.mutate({ eventId: session.id, sessionType: session.sessionType })}
                             disabled={cancelMutation.isPending}
-                            data-testid={`button-cancel-${workshop.id}`}
+                            data-testid={`button-cancel-${session.id}`}
                           >
                             Cancel
                           </Button>
@@ -262,9 +311,9 @@ export const EventBookingTab = () => {
                         ) : (
                           <Button
                             size="sm"
-                            onClick={() => registerMutation.mutate(workshop.id)}
+                            onClick={() => registerMutation.mutate({ eventId: session.id, sessionType: session.sessionType })}
                             disabled={registerMutation.isPending}
-                            data-testid={`button-register-${workshop.id}`}
+                            data-testid={`button-register-${session.id}`}
                           >
                             <Plus className="w-4 h-4 mr-1" />
                             Register

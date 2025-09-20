@@ -2600,9 +2600,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(cbaEventRegistrations)
       .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
       .where(eq(cbaEventRegistrations.userId, userId));
+
+      // Get AI Summit speaking session registrations for this user
+      const speakingSessionRegistrations = await db.select({
+        registrationId: aiSummitSpeakingSessionRegistrations.id,
+        sessionId: aiSummitSpeakingSessionRegistrations.sessionId,
+        registeredAt: aiSummitSpeakingSessionRegistrations.registeredAt,
+        sessionTitle: aiSummitSpeakingSessions.title,
+        sessionDescription: aiSummitSpeakingSessions.description,
+        startTime: aiSummitSpeakingSessions.startTime,
+        endTime: aiSummitSpeakingSessions.endTime,
+        room: aiSummitSpeakingSessions.room
+      })
+      .from(aiSummitSpeakingSessionRegistrations)
+      .innerJoin(aiSummitSpeakingSessions, eq(aiSummitSpeakingSessionRegistrations.sessionId, aiSummitSpeakingSessions.id))
+      .where(eq(aiSummitSpeakingSessionRegistrations.userId, userId));
       
-      // Format registrations for calendar (matching RegistrationCalendar expected format)
-      const registrations = cbaRegistrations.map(reg => {
+      // Format CBA registrations for calendar (matching RegistrationCalendar expected format)
+      const cbaFormattedRegistrations = cbaRegistrations.map(reg => {
         // Combine event date with time to create proper datetime strings
         const eventDateStr = reg.eventDate instanceof Date ? reg.eventDate.toISOString().split('T')[0] : reg.eventDate;
         const startDateTime = `${eventDateStr}T${reg.startTime}`;
@@ -2610,7 +2625,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         return {
           id: reg.registrationId,
+          eventId: reg.eventId,
           type: 'workshop',
+          sessionType: 'workshop',
           title: reg.eventName,
           description: reg.description,
           startTime: startDateTime,
@@ -2621,8 +2638,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
           checkedInAt: reg.checkedInAt
         };
       });
+
+      // Format speaking session registrations 
+      const speakingFormattedRegistrations = speakingSessionRegistrations.map(reg => {
+        // For speaking sessions, times should already include date
+        const startDateTime = reg.startTime instanceof Date ? reg.startTime.toISOString() : reg.startTime;
+        const endDateTime = reg.endTime instanceof Date ? reg.endTime.toISOString() : reg.endTime;
+        
+        return {
+          id: reg.registrationId,
+          eventId: reg.sessionId,
+          type: 'speaking_session',
+          sessionType: 'speaking_session',
+          title: reg.sessionTitle,
+          description: reg.sessionDescription || 'AI Summit Speaking Session',
+          startTime: startDateTime,
+          endTime: endDateTime,
+          location: reg.room || 'Main Auditorium',
+          registeredAt: reg.registeredAt,
+          checkedIn: false, // Speaking sessions may not have check-in tracking yet
+          checkedInAt: null
+        };
+      });
       
-      res.json(registrations);
+      // Combine all registrations
+      const allRegistrations = [...cbaFormattedRegistrations, ...speakingFormattedRegistrations];
+      
+      res.json(allRegistrations);
     } catch (error: any) {
       console.error("Error fetching user registrations:", error);
       res.status(500).json({ message: "Failed to fetch registrations" });
@@ -10654,6 +10696,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Get speaking session capacity error:", error);
       res.status(500).json({ message: "Failed to get speaking session capacity: " + error.message });
+    }
+  });
+
+  // Cancel speaking session registration
+  app.delete("/api/ai-summit/speaking-sessions/:sessionId/unregister", isAuthenticated, async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const sessionId = parseInt(req.params.sessionId);
+      
+      await storage.cancelAISummitSpeakingSessionRegistration(userId, sessionId);
+      
+      res.json({ 
+        message: "Speaking session registration cancelled successfully!"
+      });
+    } catch (error: any) {
+      console.error("Speaking session cancellation error:", error);
+      res.status(500).json({ message: "Failed to cancel speaking session registration: " + error.message });
     }
   });
 
