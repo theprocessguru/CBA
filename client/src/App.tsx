@@ -39,6 +39,7 @@ import AdminSpeakingSessionManagement from "@/pages/admin/SpeakingSessionManagem
 import EmailLogs from "@/pages/admin/EmailLogs";
 import AdminNotificationManagement from "@/pages/admin/notification-management";
 import UploadMembers from "@/pages/admin/upload-members";
+import AdminInterestContacts from "@/pages/admin/AdminInterestContacts";
 import MembershipManagement from "@/pages/admin/MembershipManagement";
 import MembershipBenefits from "@/pages/membership-benefits";
 import AIServices from "@/pages/ai-services";

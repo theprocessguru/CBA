@@ -715,6 +715,56 @@ export default function Profile() {
             </CardContent>
           </Card>
 
+          {/* Show assigned admin-only roles as read-only badges */}
+          {userPersonTypes.filter(upt => {
+            const personType = allPersonTypes.find(pt => pt.id === upt.personTypeId);
+            return personType?.isAdminOnly && !user?.isAdmin;
+          }).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Special Roles
+                </CardTitle>
+                <CardDescription>
+                  These roles have been assigned to you by administrators.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {userPersonTypes.filter(upt => {
+                  const personType = allPersonTypes.find(pt => pt.id === upt.personTypeId);
+                  return personType?.isAdminOnly && !user?.isAdmin;
+                }).map((upt) => {
+                  const personType = allPersonTypes.find(pt => pt.id === upt.personTypeId);
+                  if (!personType) return null;
+                  
+                  return (
+                    <div key={upt.id} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <Badge className={getTypeColor(personType.color || 'blue')}>
+                              {personType.displayName}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Assigned by Admin
+                            </Badge>
+                            {upt.isPrimary && (
+                              <Badge variant="outline" className="text-xs">
+                                Primary
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1">{personType.description}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Self-Selectable Interests */}
           <Card>
             <CardHeader>

@@ -558,6 +558,9 @@ export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_regis
   referralSource: varchar("referral_source"),
   agreesToTerms: boolean("agrees_to_terms").default(false),
   attendees: text("attendees"), // JSON string containing attendee details
+  paymentStatus: varchar("payment_status").default("pending"), // pending, paid, refunded
+  paymentAmount: decimal("payment_amount", { precision: 10, scale: 2 }), // Exhibition fee amount
+  paidAt: timestamp("paid_at"), // When payment was completed
   registeredAt: timestamp("registered_at").defaultNow(),
 });
 
