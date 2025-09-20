@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown } from "lucide-react";
+import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown, Award } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -191,6 +191,7 @@ export default function Profile() {
     },
   });
 
+
   useEffect(() => {
     if (user) {
       setProfileData(user);
@@ -225,38 +226,75 @@ export default function Profile() {
       return;
     }
     
-    if (isCurrentlyAssigned) {
-      // Remove person type
-      if (personType.isAdminOnly && !user?.isAdmin) {
+    // Handle roles differently from interests
+    if (personType.category === 'role') {
+      if (isCurrentlyAssigned) {
+        // For roles, users cannot directly uncheck - show guidance message
         toast({
-          title: "Permission Denied",
-          description: "Admin-only roles can only be removed by administrators",
-          variant: "destructive",
+          title: "Use Role Form to Deactivate",
+          description: "To deactivate this role, please use the deactivation option in the role form below.",
+          variant: "default",
         });
         return;
-      }
-      
-      if (personType.isAdminOnly || user?.isAdmin) {
-        adminAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
       } else {
-        selfAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+        // For now, assign role normally - will add proper activation later
+        selfAssignPersonTypeMutation.mutate({ typeId, action: 'add' });
+        
+        // Auto-open the role section 
+        const roleMap: Record<string, string> = {
+          'educator': 'educator',
+          'volunteer': 'volunteer', 
+          'student': 'student',
+          'startup_founder': 'startup_founder',
+          'job_seeker': 'job_seeker',
+          'speaker': 'speaker',
+          'workshop_provider': 'workshop_provider'
+        };
+        
+        const roleName = roleMap[personType.name];
+        if (roleName) {
+          setOpenRoles(prev => {
+            const newSet = new Set(prev);
+            newSet.add(roleName);
+            return newSet;
+          });
+        }
       }
     } else {
-      // Add person type
-      if (personType.isAdminOnly && !user?.isAdmin) {
-        toast({
-          title: "Permission Denied",
-          description: "This role can only be assigned by administrators",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (personType.isAdminOnly || user?.isAdmin) {
-        const isPrimary = assignedPersonTypes.length === 0; // First type becomes primary
-        adminAssignPersonTypeMutation.mutate({ typeId, action: 'add', isPrimary });
+      // Handle interests with normal toggle behavior
+      if (isCurrentlyAssigned) {
+        // Remove person type
+        if (personType.isAdminOnly && !user?.isAdmin) {
+          toast({
+            title: "Permission Denied",
+            description: "Admin-only roles can only be removed by administrators",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (personType.isAdminOnly || user?.isAdmin) {
+          adminAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+        } else {
+          selfAssignPersonTypeMutation.mutate({ typeId, action: 'remove' });
+        }
       } else {
-        selfAssignPersonTypeMutation.mutate({ typeId, action: 'add' });
+        // Add person type
+        if (personType.isAdminOnly && !user?.isAdmin) {
+          toast({
+            title: "Permission Denied",
+            description: "This role can only be assigned by administrators",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (personType.isAdminOnly || user?.isAdmin) {
+          const isPrimary = assignedPersonTypes.length === 0; // First type becomes primary
+          adminAssignPersonTypeMutation.mutate({ typeId, action: 'add', isPrimary });
+        } else {
+          selfAssignPersonTypeMutation.mutate({ typeId, action: 'add' });
+        }
       }
     }
   };
@@ -303,19 +341,27 @@ export default function Profile() {
       'volunteer': 'volunteer', 
       'student': 'student',
       'startup_founder': 'startup_founder',
-      'job_seeker': 'job_seeker'
+      'job_seeker': 'job_seeker',
+      'speaker': 'speaker',
+      'workshop_provider': 'workshop_provider'
     };
     
     const assignedRoles: RoleComponentType[] = [];
     assignedPersonTypes.forEach(typeId => {
       const personType = allPersonTypes.find(t => t.id === typeId);
       if (personType && roleMap[personType.name]) {
-        assignedRoles.push(roleMap[personType.name]);
+        const roleName = roleMap[personType.name];
+        // Only include role if it's active in rolesData or if rolesData doesn't exist (backward compatibility)
+        const roleData = rolesData[roleName];
+        if (!roleData || roleData.active !== false) {
+          assignedRoles.push(roleName);
+        }
       }
     });
     
     return assignedRoles;
   };
+
 
   const calculateProfileCompletion = (): number => {
     if (!profileData) return 0;
@@ -548,87 +594,98 @@ export default function Profile() {
                 const roleData = rolesData[roleName] || {};
                 const isOpen = openRoles.has(roleName);
                 
-                switch (roleName) {
-                  case 'educator':
-                    return (
-                      <EducatorSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  case 'volunteer':
-                    return (
-                      <VolunteerSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  case 'student':
-                    return (
-                      <StudentSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  case 'startup_founder':
-                    return (
-                      <StartupFounderSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  case 'job_seeker':
-                    return (
-                      <JobSeekerSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  case 'speaker':
-                    return (
-                      <SpeakerSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  case 'workshop_provider':
-                    return (
-                      <WorkshopProviderSection
-                        key={roleName}
-                        roleData={roleData}
-                        onSave={handleSaveRoleData}
-                        isSaving={updateRoleDataMutation.isPending}
-                        isOpen={isOpen}
-                        onToggle={() => toggleRoleSection(roleName)}
-                      />
-                    );
-                  default:
-                    return null;
+                if (roleName === 'educator') {
+                  return (
+                    <EducatorSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
                 }
+                
+                if (roleName === 'volunteer') {
+                  return (
+                    <VolunteerSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
+                }
+                
+                if (roleName === 'student') {
+                  return (
+                    <StudentSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
+                }
+                
+                if (roleName === 'startup_founder') {
+                  return (
+                    <StartupFounderSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
+                }
+                
+                if (roleName === 'job_seeker') {
+                  return (
+                    <JobSeekerSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
+                }
+                
+                if (roleName === 'speaker') {
+                  return (
+                    <SpeakerSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
+                }
+                
+                if (roleName === 'workshop_provider') {
+                  return (
+                    <WorkshopProviderSection
+                      key={roleName}
+                      roleData={roleData}
+                      onSave={handleSaveRoleData}
+                      isSaving={updateRoleDataMutation.isPending}
+                      isOpen={isOpen}
+                      onToggle={() => toggleRoleSection(roleName)}
+                    />
+                  );
+                }
+                
+                return null;
               })}
             </div>
           )}
