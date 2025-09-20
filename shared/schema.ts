@@ -761,9 +761,7 @@ export const aiSummitWorkshops = pgTable("ai_summit_workshops", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
   description: text("description"),
-  facilitator: varchar("facilitator").notNull(), // Speaker/facilitator name
-  facilitatorBio: text("facilitator_bio"),
-  facilitatorCompany: varchar("facilitator_company"),
+  speakerName: varchar("speaker_name").notNull(), // Speaker/facilitator name
   duration: integer("duration").notNull(), // Duration in minutes
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
