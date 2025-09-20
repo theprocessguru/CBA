@@ -3502,16 +3502,22 @@ export class DatabaseStorage implements IStorage {
   // Session attendance statistics implementations
   async getWorkshopStatistics(): Promise<{ totalWorkshops: number; totalRegistrations: number; activeAttendance: number }> {
     try {
-      // Get total number of workshops
+      // Get total number of workshops from cba_events table
       const [workshopCountResult] = await db
         .select({ count: sql<number>`cast(count(*) as int)` })
-        .from(aiSummitWorkshops);
+        .from(cbaEvents)
+        .where(and(
+          eq(cbaEvents.eventType, 'workshop'),
+          eq(cbaEvents.isActive, true)
+        ));
       const totalWorkshops = workshopCountResult?.count || 0;
 
-      // Get total number of workshop registrations
+      // Get total number of workshop registrations from cba_event_registrations
       const [registrationCountResult] = await db
         .select({ count: sql<number>`cast(count(*) as int)` })
-        .from(aiSummitWorkshopRegistrations);
+        .from(cbaEventRegistrations)
+        .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
+        .where(eq(cbaEvents.eventType, 'workshop'));
       const totalRegistrations = registrationCountResult?.count || 0;
 
       // Get current active attendance (checked in but not checked out)
