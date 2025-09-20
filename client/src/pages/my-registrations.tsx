@@ -30,10 +30,52 @@ const MyRegistrations = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Helper functions to format data (matching RegistrationCalendar logic)
+  const formatTime = (startTime: string, endTime: string) => {
+    try {
+      if (!startTime || !endTime) return 'TBD';
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return 'TBD';
+      
+      const startHour = start.getHours().toString().padStart(2, '0');
+      const startMin = start.getMinutes().toString().padStart(2, '0');
+      const endHour = end.getHours().toString().padStart(2, '0');
+      const endMin = end.getMinutes().toString().padStart(2, '0');
+      
+      return `${startHour}:${startMin} - ${endHour}:${endMin}`;
+    } catch {
+      return 'TBD';
+    }
+  };
+
+  const calculateDuration = (startTime: string, endTime: string) => {
+    try {
+      if (!startTime || !endTime) return '30min';
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return '30min';
+      
+      const diffMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+      return `${diffMinutes}min`;
+    } catch {
+      return '30min';
+    }
+  };
+
   // Fetch user's current registrations
   const { data: userRegistrations = [], isLoading, error } = useQuery<Registration[]>({
     queryKey: ['/api/my-registrations'],
     retry: false,
+    select: (data) => {
+      // Adapt API data format to match RegistrationCalendar expectations
+      return (data || []).map((reg: any) => ({
+        ...reg,
+        // Add missing fields that RegistrationCalendar expects
+        time: reg.startTime && reg.endTime ? formatTime(reg.startTime, reg.endTime) : 'TBD',
+        duration: reg.startTime && reg.endTime ? calculateDuration(reg.startTime, reg.endTime) : '30min'
+      }));
+    }
   });
 
   // Ensure userRegistrations is always an array to prevent runtime errors
