@@ -16,6 +16,9 @@ interface Registration {
   capacity?: number;
   registered?: boolean;
   description?: string;
+  eventId?: string | number; // For matching with user registrations
+  startTime?: string; // For better overlap detection
+  endTime?: string; // For better overlap detection
 }
 
 interface RegistrationCalendarProps {
@@ -57,8 +60,9 @@ const RegistrationCalendar = ({
         return 'TBD';
       }
       
-      const start = format(startDate, 'H:mm');
-      const end = format(endDate, 'H:mm');
+      // Use consistent HH:mm format for reliable comparison
+      const start = format(startDate, 'HH:mm');
+      const end = format(endDate, 'HH:mm');
       return `${start} - ${end}`;
     } catch (error) {
       console.warn('Error formatting session time:', { startTime, endTime, error });
@@ -98,7 +102,10 @@ const RegistrationCalendar = ({
       duration: calculateDuration(workshop.startTime, workshop.endTime),
       location: workshop.venue || workshop.room || 'Second Floor Classroom',
       capacity: workshop.maxCapacity || 30,
-      description: workshop.description
+      description: workshop.description,
+      eventId: workshop.id,
+      startTime: workshop.startTime,
+      endTime: workshop.endTime
     }));
   };
 
@@ -224,14 +231,42 @@ const RegistrationCalendar = ({
   };
 
   const isRegistered = (sessionId: string) => {
-    return safeUserRegistrations.some(reg => reg.id === sessionId);
+    // Extract workshop ID from session ID format (workshop-10 -> 10)
+    const workshopId = sessionId.replace('workshop-', '');
+    return safeUserRegistrations.some(reg => 
+      reg.id === sessionId || 
+      reg.id === workshopId || 
+      reg.eventId?.toString() === workshopId
+    );
   };
 
-  const hasTimeConflict = (sessionTime: string) => {
-    const [startTime] = sessionTime.split(' - ');
+  const hasTimeConflict = (session: Registration) => {
+    if (!session.startTime || !session.endTime) return false;
+    
+    const sessionStart = new Date(session.startTime);
+    const sessionEnd = new Date(session.endTime);
+    
+    if (isNaN(sessionStart.getTime()) || isNaN(sessionEnd.getTime())) return false;
+    
     return safeUserRegistrations.some(reg => {
-      const [regStartTime] = reg.time.split(' - ');
-      return regStartTime === startTime && reg.id !== selectedTimeSlot;
+      // Don't conflict with self
+      if (isRegistered(session.id)) return false;
+      
+      // Check for time overlap using proper interval comparison
+      if (reg.startTime && reg.endTime) {
+        const regStart = new Date(reg.startTime);
+        const regEnd = new Date(reg.endTime);
+        
+        if (!isNaN(regStart.getTime()) && !isNaN(regEnd.getTime())) {
+          // Overlap if: sessionStart < regEnd AND regStart < sessionEnd
+          return sessionStart < regEnd && regStart < sessionEnd;
+        }
+      }
+      
+      // Fallback to time string comparison for consistency
+      const [sessionTimeStart] = session.time.split(' - ');
+      const [regTimeStart] = reg.time.split(' - ');
+      return sessionTimeStart === regTimeStart;
     });
   };
 
@@ -296,7 +331,7 @@ const RegistrationCalendar = ({
             <h3 className="font-medium">All Available Sessions</h3>
             {sortedSessions.map((session) => {
               const registered = isRegistered(session.id);
-              const conflict = hasTimeConflict(session.time);
+              const conflict = !registered && hasTimeConflict(session);
               
               return (
                 <div
@@ -374,13 +409,21 @@ const RegistrationCalendar = ({
                         </Button>
                       ) : (
                         <Button
-                          variant={conflict ? "secondary" : "default"}
+                          variant="default"
                           size="sm"
-                          onClick={() => onRegister?.(session.id)}
+                          onClick={() => {
+                            if (conflict) {
+                              // Prevent registration with clear warning
+                              alert("⚠️ Cannot register: This session conflicts with one of your existing registrations. Please cancel your conflicting registration first or choose a different session.");
+                              return;
+                            }
+                            onRegister?.(session.id);
+                          }}
                           disabled={conflict}
                           className={conflict ? "opacity-50 cursor-not-allowed" : ""}
+                          title={conflict ? "This session conflicts with your existing registrations" : ""}
                         >
-                          {conflict ? "Time Conflict" : "Register"}
+                          {conflict ? "⚠️ Time Conflict" : "Register"}
                         </Button>
                       )}
                     </div>
