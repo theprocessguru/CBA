@@ -161,6 +161,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return (
@@ -171,7 +172,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    window.location.href = "/login";
+    setLocation("/login");
     return <div>Redirecting to login...</div>;
   }
 
@@ -180,6 +181,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading, error } = useAuth();
+  const [, setLocation] = useLocation();
 
   if (isLoading) {
     return (
@@ -194,9 +196,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (!user || !(user as any).isAdmin) {
     // For admin routes, redirect to login if not authenticated/admin
-    setTimeout(() => {
-      window.location.href = "/login";
-    }, 100);
+    setLocation("/login");
     
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-red-50 to-orange-100">
