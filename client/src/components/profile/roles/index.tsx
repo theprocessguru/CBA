@@ -3,6 +3,8 @@ export { VolunteerSection } from './VolunteerSection';
 export { StudentSection } from './StudentSection';
 export { StartupFounderSection } from './StartupFounderSection';
 export { JobSeekerSection } from './JobSeekerSection';
+export { SpeakerSection } from './SpeakerSection';
+export { WorkshopProviderSection } from './WorkshopProviderSection';
 
 // Role configuration mapping
 export const ROLE_COMPONENTS = {
@@ -10,7 +12,9 @@ export const ROLE_COMPONENTS = {
   volunteer: 'VolunteerSection',
   student: 'StudentSection',
   startup_founder: 'StartupFounderSection',
-  job_seeker: 'JobSeekerSection'
+  job_seeker: 'JobSeekerSection',
+  speaker: 'SpeakerSection',
+  workshop_provider: 'WorkshopProviderSection'
 } as const;
 
 export type RoleComponentType = keyof typeof ROLE_COMPONENTS;
@@ -51,5 +55,19 @@ export const ROLE_METADATA = {
     icon: '💼',
     color: 'bg-orange-100 text-orange-800',
     description: 'Highlight your skills and career objectives'
+  },
+  speaker: {
+    name: 'speaker',
+    displayName: 'Speaker Profile',
+    icon: '🎤',
+    color: 'bg-red-100 text-red-800',
+    description: 'Share your speaking expertise and manage your topics'
+  },
+  workshop_provider: {
+    name: 'workshop_provider',
+    displayName: 'Workshop Provider',
+    icon: '🎯',
+    color: 'bg-purple-100 text-purple-800',
+    description: 'Offer training workshops and manage your content'
   }
 } as const;

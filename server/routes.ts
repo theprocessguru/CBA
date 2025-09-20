@@ -6412,6 +6412,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all speaker profiles with comprehensive data for admin search
+  app.get('/api/admin/speakers/profiles', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Get all users who have speaker role in person types
+      const speakerUsers = await db
+        .select({
+          userId: userPersonTypes.userId,
+          personTypeId: userPersonTypes.personTypeId,
+          user: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            phone: users.phone,
+            company: users.company,
+            jobTitle: users.jobTitle,
+            bio: users.bio,
+            rolesData: users.rolesData
+          }
+        })
+        .from(userPersonTypes)
+        .leftJoin(users, eq(userPersonTypes.userId, users.id))
+        .leftJoin(personTypes, eq(userPersonTypes.personTypeId, personTypes.id))
+        .where(eq(personTypes.name, 'speaker'));
+
+      // Format the speaker profiles with their roles data
+      const speakerProfiles = speakerUsers
+        .filter(su => su.user && su.user.rolesData?.speaker)
+        .map(su => {
+          const speaker = su.user.rolesData?.speaker || {};
+          return {
+            id: `speaker-${su.userId}`,
+            userId: su.userId,
+            name: `${su.user.firstName || ''} ${su.user.lastName || ''}`.trim(),
+            email: su.user.email,
+            company: su.user.company || speaker.company,
+            jobTitle: su.user.jobTitle || speaker.jobTitle,
+            bio: su.user.bio || speaker.bio || '',
+            expertise: speaker.expertise || [],
+            talks: speaker.talks || [],
+            speakingExperience: speaker.speakingExperience || '',
+            websiteUrl: speaker.websiteUrl,
+            linkedinUrl: speaker.linkedinUrl,
+            phone: su.user.phone || speaker.phone,
+            presentationFormats: speaker.presentationFormats || [],
+            audienceSize: speaker.audienceSize || [],
+            availabilityType: speaker.availabilityType || '',
+            travelWillingness: speaker.travelWillingness || ''
+          };
+        });
+
+      res.json(speakerProfiles);
+    } catch (error) {
+      console.error('Error fetching speaker profiles:', error);
+      res.status(500).json({ message: 'Failed to fetch speaker profiles' });
+    }
+  });
+
+  // Get all workshop provider profiles with comprehensive data for admin search  
+  app.get('/api/admin/workshop-providers/profiles', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      // Get all users who have workshop_provider role in person types
+      const providerUsers = await db
+        .select({
+          userId: userPersonTypes.userId,
+          personTypeId: userPersonTypes.personTypeId,
+          user: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email,
+            phone: users.phone,
+            company: users.company,
+            jobTitle: users.jobTitle,
+            bio: users.bio,
+            rolesData: users.rolesData
+          }
+        })
+        .from(userPersonTypes)
+        .leftJoin(users, eq(userPersonTypes.userId, users.id))
+        .leftJoin(personTypes, eq(userPersonTypes.personTypeId, personTypes.id))
+        .where(eq(personTypes.name, 'workshop_provider'));
+
+      // Format the workshop provider profiles with their roles data
+      const providerProfiles = providerUsers
+        .filter(pu => pu.user && pu.user.rolesData?.workshop_provider)
+        .map(pu => {
+          const provider = pu.user.rolesData?.workshop_provider || {};
+          return {
+            id: `provider-${pu.userId}`,
+            userId: pu.userId,
+            name: `${pu.user.firstName || ''} ${pu.user.lastName || ''}`.trim(),
+            email: pu.user.email,
+            company: pu.user.company || provider.company,
+            jobTitle: pu.user.jobTitle || provider.jobTitle,
+            bio: pu.user.bio || provider.bio || '',
+            workshopTopics: provider.workshopTopics || [],
+            workshops: provider.workshops || [],
+            trainingExperience: provider.trainingExperience || '',
+            qualifications: provider.qualifications,
+            workshopFormats: provider.workshopFormats || [],
+            targetAudience: provider.targetAudience || [],
+            groupSizePreference: provider.groupSizePreference || '',
+            pricingStructure: provider.pricingStructure || '',
+            onlineCapability: provider.onlineCapability || ''
+          };
+        });
+
+      res.json(providerProfiles);
+    } catch (error) {
+      console.error('Error fetching workshop provider profiles:', error);
+      res.status(500).json({ message: 'Failed to fetch workshop provider profiles' });
+    }
+  });
+
   // Get speaker topics
   app.get('/api/admin/speakers/:id/topics', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
@@ -10285,7 +10400,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user's workshop registrations
+  // Get user's workshop bookings (formatted for profile display)
+  app.get("/api/users/:userId/workshop-bookings", isAuthenticated, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const requestingUserId = req.session?.userId || req.user?.id;
+      
+      // Users can only view their own bookings unless they're admin
+      if (userId !== requestingUserId && !req.user?.isAdmin) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's badge IDs to match registrations
+      let userBadgeIds: string[] = [];
+      try {
+        const userBadges = await storage.getBadgesByEmail(user.email);
+        userBadgeIds = userBadges?.map(badge => badge.badgeId) || [];
+      } catch (error) {
+        // No badges found, continue with email-only search
+      }
+
+      // Get all workshop registrations for this user
+      let whereCondition;
+      if (userBadgeIds.length > 0) {
+        whereCondition = or(
+          eq(aiSummitWorkshopRegistrations.attendeeEmail, user.email),
+          inArray(aiSummitWorkshopRegistrations.badgeId, userBadgeIds)
+        );
+      } else {
+        whereCondition = eq(aiSummitWorkshopRegistrations.attendeeEmail, user.email);
+      }
+
+      const registrations = await db
+        .select({
+          id: aiSummitWorkshopRegistrations.id,
+          workshopId: aiSummitWorkshopRegistrations.workshopId,
+          workshopTitle: aiSummitWorkshops.title,
+          workshopDescription: aiSummitWorkshops.description,
+          providerName: aiSummitWorkshops.facilitator,
+          providerCompany: aiSummitWorkshops.facilitatorCompany,
+          scheduledDate: aiSummitWorkshops.startTime,
+          scheduledEndTime: aiSummitWorkshops.endTime,
+          duration: aiSummitWorkshops.duration,
+          location: aiSummitWorkshops.room,
+          maxParticipants: aiSummitWorkshops.maxCapacity,
+          currentParticipants: aiSummitWorkshops.currentRegistrations,
+          category: aiSummitWorkshops.category,
+          prerequisites: aiSummitWorkshops.prerequisites,
+          learningObjectives: aiSummitWorkshops.learningObjectives,
+          materials: aiSummitWorkshops.materials,
+          registeredAt: aiSummitWorkshopRegistrations.registeredAt,
+          checkedIn: aiSummitWorkshopRegistrations.checkedIn,
+          checkedInAt: aiSummitWorkshopRegistrations.checkedInAt,
+          noShow: aiSummitWorkshopRegistrations.noShow,
+          experienceLevel: aiSummitWorkshopRegistrations.experienceLevel,
+          specificInterests: aiSummitWorkshopRegistrations.specificInterests
+        })
+        .from(aiSummitWorkshopRegistrations)
+        .leftJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
+        .where(whereCondition)
+        .orderBy(desc(aiSummitWorkshops.startTime));
+
+      // Format the registrations for the frontend component
+      const formattedBookings = registrations.map(reg => ({
+        id: reg.id.toString(),
+        workshopTitle: reg.workshopTitle || 'Workshop Title TBD',
+        workshopDescription: reg.workshopDescription || undefined,
+        providerName: reg.providerName || 'TBD',
+        providerEmail: user.email, // Fallback - could be improved
+        scheduledDate: reg.scheduledDate?.toISOString() || undefined,
+        scheduledTime: reg.scheduledDate ? 
+          reg.scheduledDate.toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit' }) : 
+          undefined,
+        duration: reg.duration ? `${reg.duration} minutes` : undefined,
+        location: reg.location || 'Location TBD',
+        status: reg.noShow ? 'cancelled' : 
+                reg.checkedIn ? 'completed' : 
+                (reg.scheduledDate && new Date(reg.scheduledDate) < new Date()) ? 'completed' : 'confirmed',
+        bookingDate: reg.registeredAt?.toISOString() || new Date().toISOString(),
+        workshopId: reg.workshopId?.toString(),
+        maxParticipants: reg.maxParticipants || undefined,
+        currentParticipants: reg.currentParticipants || undefined,
+        category: reg.category || undefined,
+        prerequisites: reg.prerequisites || undefined,
+        learningObjectives: reg.learningObjectives || undefined,
+        materials: reg.materials || undefined,
+        experienceLevel: reg.experienceLevel || undefined,
+        specificInterests: reg.specificInterests || undefined
+      }));
+
+      res.json(formattedBookings);
+    } catch (error: any) {
+      console.error("Get user workshop bookings error:", error);
+      res.status(500).json({ message: "Failed to get workshop bookings: " + error.message });
+    }
+  });
+
+  // Get user's workshop registrations (legacy endpoint)
   app.get("/api/my-workshop-registrations", isAuthenticated, async (req, res) => {
     try {
       const userId = req.session?.userId || req.user?.id;
@@ -12787,6 +13003,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Track user interest/role selection for admin follow-up
+  async function trackUserSelection(userId: string, personTypeId: number, actionType: 'selected' | 'deselected') {
+    try {
+      const { userInterestContacts, insertUserInterestContactSchema } = await import("@shared/schema");
+      
+      const trackingData = insertUserInterestContactSchema.parse({
+        userId,
+        personTypeId,
+        actionType,
+        needsContact: actionType === 'selected' // Only need contact when selected
+      });
+
+      await db.insert(userInterestContacts).values(trackingData);
+    } catch (error) {
+      console.error('Error tracking user selection:', error);
+      // Don't fail the main operation if tracking fails
+    }
+  }
+
   // Self-assign interest type (user can assign interests to themselves)
   app.post('/api/users/me/person-types', isAuthenticated, async (req: any, res) => {
     try {
@@ -12818,6 +13053,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         assignedBy: userId, // User assigned it to themselves
         notes: notes || 'Self-assigned interest'
       });
+      
+      // Track this selection for admin follow-up
+      await trackUserSelection(userId, personTypeId, 'selected');
       
       res.json(assignment);
     } catch (error) {
@@ -12851,6 +13089,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const success = await storage.removePersonTypeFromUser(userId, personTypeId);
+      
+      // Track this deselection for admin follow-up
+      await trackUserSelection(userId, personTypeId, 'deselected');
+      
       res.json({ success });
     } catch (error) {
       console.error('Error removing self-assigned person type:', error);
@@ -12883,6 +13125,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error setting primary person type:', error);
       res.status(500).json({ message: 'Failed to set primary person type' });
+    }
+  });
+
+  // Admin Interest Contact Management Endpoints
+
+  // Get all users who need contact about their interests/roles
+  app.get('/api/admin/interest-contacts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userInterestContacts, personTypes, users } = await import("@shared/schema");
+      
+      const contacts = await db
+        .select({
+          id: userInterestContacts.id,
+          userId: userInterestContacts.userId,
+          userName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          userEmail: users.email,
+          userPhone: users.phone,
+          userCompany: users.company,
+          personTypeId: userInterestContacts.personTypeId,
+          personTypeName: personTypes.name,
+          personTypeDisplayName: personTypes.displayName,
+          personTypeCategory: personTypes.category,
+          actionType: userInterestContacts.actionType,
+          selectedAt: userInterestContacts.selectedAt,
+          needsContact: userInterestContacts.needsContact,
+          contactedBy: userInterestContacts.contactedBy,
+          contactedAt: userInterestContacts.contactedAt,
+          contactMethod: userInterestContacts.contactMethod,
+          contactNotes: userInterestContacts.contactNotes
+        })
+        .from(userInterestContacts)
+        .leftJoin(users, eq(userInterestContacts.userId, users.id))
+        .leftJoin(personTypes, eq(userInterestContacts.personTypeId, personTypes.id))
+        .where(eq(userInterestContacts.needsContact, true))
+        .orderBy(desc(userInterestContacts.selectedAt));
+      
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching interest contacts:', error);
+      res.status(500).json({ message: 'Failed to fetch interest contacts' });
+    }
+  });
+
+  // Mark user as contacted about their interest/role
+  app.put('/api/admin/interest-contacts/:contactId/contacted', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userInterestContacts } = await import("@shared/schema");
+      const contactId = parseInt(req.params.contactId);
+      const { contactMethod, contactNotes } = req.body;
+      const adminUserId = req.user?.id;
+      
+      const [updatedContact] = await db
+        .update(userInterestContacts)
+        .set({
+          needsContact: false,
+          contactedBy: adminUserId,
+          contactedAt: new Date(),
+          contactMethod: contactMethod || 'email',
+          contactNotes: contactNotes || '',
+          updatedAt: new Date()
+        })
+        .where(eq(userInterestContacts.id, contactId))
+        .returning();
+      
+      if (!updatedContact) {
+        return res.status(404).json({ message: 'Contact record not found' });
+      }
+      
+      res.json({ success: true, contact: updatedContact });
+    } catch (error) {
+      console.error('Error marking contact as contacted:', error);
+      res.status(500).json({ message: 'Failed to mark as contacted' });
+    }
+  });
+
+  // Get contact history for a specific user
+  app.get('/api/admin/users/:userId/interest-contacts', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userInterestContacts, personTypes } = await import("@shared/schema");
+      const userId = req.params.userId;
+      
+      const contacts = await db
+        .select({
+          id: userInterestContacts.id,
+          personTypeId: userInterestContacts.personTypeId,
+          personTypeName: personTypes.name,
+          personTypeDisplayName: personTypes.displayName,
+          personTypeCategory: personTypes.category,
+          actionType: userInterestContacts.actionType,
+          selectedAt: userInterestContacts.selectedAt,
+          needsContact: userInterestContacts.needsContact,
+          contactedBy: userInterestContacts.contactedBy,
+          contactedAt: userInterestContacts.contactedAt,
+          contactMethod: userInterestContacts.contactMethod,
+          contactNotes: userInterestContacts.contactNotes
+        })
+        .from(userInterestContacts)
+        .leftJoin(personTypes, eq(userInterestContacts.personTypeId, personTypes.id))
+        .where(eq(userInterestContacts.userId, userId))
+        .orderBy(desc(userInterestContacts.selectedAt));
+      
+      res.json(contacts);
+    } catch (error) {
+      console.error('Error fetching user contact history:', error);
+      res.status(500).json({ message: 'Failed to fetch contact history' });
     }
   });
 

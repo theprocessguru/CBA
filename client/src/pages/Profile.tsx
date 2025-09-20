@@ -17,9 +17,13 @@ import {
   StudentSection, 
   StartupFounderSection, 
   JobSeekerSection,
+  SpeakerSection,
+  WorkshopProviderSection,
   ROLE_METADATA,
   type RoleComponentType
 } from "@/components/profile/roles";
+import { PasswordChangeSection } from "@/components/profile/PasswordChangeSection";
+import { WorkshopBookingsSection } from "@/components/profile/WorkshopBookingsSection";
 import { apiRequest } from "@/lib/queryClient";
 import { PersonType, UserPersonType, User as DbUser } from "@shared/schema";
 
@@ -526,6 +530,12 @@ export default function Profile() {
             </CardContent>
           </Card>
 
+          {/* Password Change Section */}
+          <PasswordChangeSection />
+
+          {/* Workshop Bookings Section */}
+          <WorkshopBookingsSection userId={user?.id || ''} />
+
           {/* Role-Specific Sections */}
           {getAssignedRoles().length > 0 && (
             <div className="space-y-4">
@@ -586,6 +596,28 @@ export default function Profile() {
                   case 'job_seeker':
                     return (
                       <JobSeekerSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  case 'speaker':
+                    return (
+                      <SpeakerSection
+                        key={roleName}
+                        roleData={roleData}
+                        onSave={handleSaveRoleData}
+                        isSaving={updateRoleDataMutation.isPending}
+                        isOpen={isOpen}
+                        onToggle={() => toggleRoleSection(roleName)}
+                      />
+                    );
+                  case 'workshop_provider':
+                    return (
+                      <WorkshopProviderSection
                         key={roleName}
                         roleData={roleData}
                         onSave={handleSaveRoleData}
@@ -688,19 +720,24 @@ export default function Profile() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="h-5 w-5" />
-                Express Your Interests
+                Express Your Roles & Interests
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Select interests to receive relevant opportunities and notifications.
+                  Select roles and interests to receive relevant opportunities and notifications. 
+                  When you select an interest, our admin team will contact you with relevant information and opportunities.
                 </AlertDescription>
               </Alert>
 
               <div className="space-y-3">
-                {availablePersonTypes.filter(type => type.category === 'interest').map((type) => {
+                {/* First display roles alphabetically, then interests alphabetically */}
+                {[
+                  ...availablePersonTypes.filter(type => type.category === 'role').sort((a, b) => a.displayName.localeCompare(b.displayName)),
+                  ...availablePersonTypes.filter(type => type.category === 'interest').sort((a, b) => a.displayName.localeCompare(b.displayName))
+                ].map((type) => {
                   const isAssigned = assignedPersonTypes.includes(type.id);
                   
                   return (

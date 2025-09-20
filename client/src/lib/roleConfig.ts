@@ -362,6 +362,13 @@ export const ADMIN_SIDEBAR_ITEMS: SidebarItem[] = [
     href: "/admin/affiliates",
     icon: DollarSign,
     description: "Manage affiliate programmes"
+  },
+  {
+    id: "interest-contacts",
+    label: "Interest Contacts",
+    href: "/admin/interest-contacts",
+    icon: MessageSquare,
+    description: "Manage user interest and role contact requests"
   }
 ];
 
@@ -390,10 +397,10 @@ export function getSidebarItemsForUser(user: any): SidebarItem[] {
   if (user.personTypes && Array.isArray(user.personTypes) && user.personTypes.length > 0) {
     // Filter out null, undefined, or invalid personTypes
     const validPersonTypes = user.personTypes.filter(
-      personType => personType && 
-                   typeof personType === 'object' && 
-                   personType.name && 
-                   typeof personType.name === 'string'
+      (personType: any) => personType && 
+                          typeof personType === 'object' && 
+                          personType.name && 
+                          typeof personType.name === 'string'
     );
     
     for (const personType of validPersonTypes) {
@@ -429,10 +436,10 @@ export function getDashboardTitle(user: any): string {
   if (user.personTypes && Array.isArray(user.personTypes) && user.personTypes.length > 0) {
     // Find the first valid personType
     const primaryRole = user.personTypes.find(
-      personType => personType && 
-                   typeof personType === 'object' && 
-                   personType.name && 
-                   typeof personType.name === 'string'
+      (personType: any) => personType && 
+                          typeof personType === 'object' && 
+                          personType.name && 
+                          typeof personType.name === 'string'
     );
     
     if (primaryRole) {

@@ -2155,6 +2155,27 @@ export const userPersonTypes = pgTable("user_person_types", {
   index("user_person_types_type_idx").on(table.personTypeId),
 ]);
 
+// User Interest/Role Contact Tracking - tracks when users select interests/roles and when admins contact them
+export const userInterestContacts = pgTable("user_interest_contacts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  personTypeId: integer("person_type_id").notNull().references(() => personTypes.id),
+  actionType: varchar("action_type").notNull(), // "selected", "deselected"
+  selectedAt: timestamp("selected_at").defaultNow(),
+  contactedBy: varchar("contacted_by").references(() => users.id), // Admin who contacted them
+  contactedAt: timestamp("contacted_at"),
+  contactMethod: varchar("contact_method"), // "email", "phone", "in_person"
+  contactNotes: text("contact_notes"),
+  needsContact: boolean("needs_contact").default(true), // false when admin marks as contacted
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("user_interest_contacts_user_idx").on(table.userId),
+  index("user_interest_contacts_type_idx").on(table.personTypeId),
+  index("user_interest_contacts_needs_contact_idx").on(table.needsContact),
+  index("user_interest_contacts_selected_at_idx").on(table.selectedAt),
+]);
+
 // Person Type Schema and Types
 export const insertPersonTypeSchema = createInsertSchema(personTypes, {
   name: z.string().min(1, "Name is required"),
@@ -2180,6 +2201,19 @@ export const insertUserPersonTypeSchema = createInsertSchema(userPersonTypes, {
 
 export type InsertUserPersonType = z.infer<typeof insertUserPersonTypeSchema>;
 export type UserPersonType = typeof userPersonTypes.$inferSelect;
+
+// User Interest Contact Schema and Types
+export const insertUserInterestContactSchema = createInsertSchema(userInterestContacts, {
+  userId: z.string().min(1, "User ID is required"),
+  personTypeId: z.number().min(1, "Person type ID is required"),
+  actionType: z.enum(["selected", "deselected"]),
+  contactMethod: z.enum(["email", "phone", "in_person"]).optional(),
+  contactNotes: z.string().optional(),
+  needsContact: z.boolean().default(true),
+}).omit({ id: true, selectedAt: true, contactedBy: true, contactedAt: true, createdAt: true, updatedAt: true });
+
+export type InsertUserInterestContact = z.infer<typeof insertUserInterestContactSchema>;
+export type UserInterestContact = typeof userInterestContacts.$inferSelect;
 
 // User Connections/Partnerships table - for networking
 export const userConnections = pgTable("user_connections", {

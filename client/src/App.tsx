@@ -804,6 +804,13 @@ function Router() {
           </MainLayout>
         </AdminRoute>
       </Route>
+      <Route path="/admin/interest-contacts">
+        <AdminRoute>
+          <MainLayout>
+            <AdminInterestContacts />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
       <Route path="/admin/speakers">
         <AdminRoute>
           <MainLayout>
