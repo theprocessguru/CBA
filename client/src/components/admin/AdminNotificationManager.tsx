@@ -115,7 +115,7 @@ export function AdminNotificationManager() {
   // Send single notification
   const sendSingleMutation = useMutation({
     mutationFn: (data: SingleNotificationFormData) => 
-      apiRequest('/api/admin/notifications', 'POST', data),
+      apiRequest('POST', '/api/admin/notifications', data),
     onSuccess: () => {
       toast({ title: "Success", description: "Notification sent successfully" });
       singleForm.reset();
@@ -133,7 +133,7 @@ export function AdminNotificationManager() {
   // Send bulk notification
   const sendBulkMutation = useMutation({
     mutationFn: (data: { notification: InsertNotification; userIds: string[] }) => 
-      apiRequest('/api/admin/notifications/bulk', 'POST', data),
+      apiRequest('POST', '/api/admin/notifications/bulk', data),
     onSuccess: (response: any) => {
       toast({ 
         title: "Success", 
@@ -154,7 +154,7 @@ export function AdminNotificationManager() {
   // Schedule notification
   const scheduleMutation = useMutation({
     mutationFn: (data: SingleNotificationFormData) => 
-      apiRequest('/api/admin/notifications/schedule', 'POST', data),
+      apiRequest('POST', '/api/admin/notifications/schedule', data),
     onSuccess: () => {
       toast({ title: "Success", description: "Notification scheduled successfully" });
       singleForm.reset();

@@ -118,7 +118,7 @@ export default function SpeakerManagement() {
 
   const createSpeakerMutation = useMutation({
     mutationFn: (data: CreateSpeakerFormData) =>
-      apiRequest('/api/ai-summit-speaker-interest', 'POST', data),
+      apiRequest('POST', '/api/ai-summit-speaker-interest', data),
     onSuccess: () => {
       toast({
         title: "Success",

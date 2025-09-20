@@ -80,7 +80,7 @@ export default function SpeakingSessionManagement() {
 
   const createSessionMutation = useMutation({
     mutationFn: (data: CreateSessionFormData) =>
-      apiRequest('/api/ai-summit/speaking-sessions', 'POST', data),
+      apiRequest('POST', '/api/ai-summit/speaking-sessions', data),
     onSuccess: () => {
       toast({
         title: "Success",

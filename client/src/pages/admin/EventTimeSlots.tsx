@@ -150,7 +150,7 @@ export default function EventTimeSlots() {
   // Update time slot mutation
   const updateSlotMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof formData & { speakers?: string[] } }) => {
-      return apiRequest(`/api/time-slots/${id}`, "PUT", {
+      return apiRequest("PUT", `/api/time-slots/${id}`, {
         ...data,
         maxCapacity: data.maxCapacity ? parseInt(data.maxCapacity) : null,
         displayOrder: parseInt(data.displayOrder),
@@ -183,7 +183,7 @@ export default function EventTimeSlots() {
   // Delete time slot mutation
   const deleteSlotMutation = useMutation({
     mutationFn: async (id: number) => {
-      return apiRequest(`/api/time-slots/${id}`, "DELETE");
+      return apiRequest("DELETE", `/api/time-slots/${id}`);
     },
     onSuccess: () => {
       toast({

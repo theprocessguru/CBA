@@ -46,7 +46,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   });
 
   const markAsReadMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/notifications/${id}/read`, 'PATCH'),
+    mutationFn: (id: number) => apiRequest('PATCH', `/api/notifications/${id}/read`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
@@ -61,7 +61,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   });
 
   const markAllAsReadMutation = useMutation({
-    mutationFn: () => apiRequest('/api/notifications/mark-all-read', 'PATCH'),
+    mutationFn: () => apiRequest('PATCH', '/api/notifications/mark-all-read'),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
@@ -77,7 +77,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   });
 
   const archiveMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/notifications/${id}/archive`, 'PATCH'),
+    mutationFn: (id: number) => apiRequest('PATCH', `/api/notifications/${id}/archive`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       toast({ title: "Success", description: "Notification archived" });
@@ -92,7 +92,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/notifications/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/notifications/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/notifications'] });
       queryClient.invalidateQueries({ queryKey: ['/api/notifications/unread-count'] });
