@@ -15,6 +15,7 @@ interface Registration {
   location: string;
   capacity?: number;
   registered?: boolean;
+  description?: string;
 }
 
 interface RegistrationCalendarProps {
@@ -29,6 +30,7 @@ const RegistrationCalendar = ({
   onCancel 
 }: RegistrationCalendarProps) => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | null>(null);
+  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set());
   
   // Ensure userRegistrations is always an array to prevent runtime errors
   const safeUserRegistrations = Array.isArray(userRegistrations) ? userRegistrations : [];
@@ -91,11 +93,12 @@ const RegistrationCalendar = ({
     return workshops.map(workshop => ({
       id: `workshop-${workshop.id}`,
       type: 'workshop' as const,
-      title: workshop.title,
+      title: workshop.eventName || workshop.title || 'Workshop',
       time: formatSessionTime(workshop.startTime, workshop.endTime),
       duration: calculateDuration(workshop.startTime, workshop.endTime),
-      location: workshop.room || 'Second Floor Classroom',
-      capacity: workshop.maxCapacity || 30
+      location: workshop.venue || workshop.room || 'Second Floor Classroom',
+      capacity: workshop.maxCapacity || 30,
+      description: workshop.description
     }));
   };
 
@@ -240,6 +243,18 @@ const RegistrationCalendar = ({
 
   const sortedSessions = [...allSessions].sort((a, b) => parseTime(a.time) - parseTime(b.time));
 
+  const toggleSessionDetails = (sessionId: string) => {
+    setExpandedSessions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(sessionId)) {
+        newSet.delete(sessionId);
+      } else {
+        newSet.add(sessionId);
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -316,7 +331,20 @@ const RegistrationCalendar = ({
                         )}
                       </div>
                       
-                      <h4 className="font-medium text-gray-900 mb-1">{session.title}</h4>
+                      <h4 
+                        className="font-medium text-gray-900 mb-1 cursor-pointer hover:text-blue-600 transition-colors" 
+                        onClick={() => toggleSessionDetails(session.id)}
+                      >
+                        {session.title} {session.description && (expandedSessions.has(session.id) ? '📖 ▼' : '📖 ▶')}
+                      </h4>
+                      
+                      {/* Expandable course description */}
+                      {expandedSessions.has(session.id) && session.description && (
+                        <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <h5 className="font-medium text-blue-800 mb-2">Course Description:</h5>
+                          <p className="text-sm text-blue-700">{session.description}</p>
+                        </div>
+                      )}
                       
                       <div className="flex items-center gap-4 text-sm text-gray-600">
                         <div className="flex items-center gap-1">
