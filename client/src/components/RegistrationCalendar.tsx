@@ -41,16 +41,50 @@ const RegistrationCalendar = ({
 
   // Convert live workshops to Registration format
   const formatSessionTime = (startTime: string, endTime: string) => {
-    const start = format(new Date(startTime), 'H:mm');
-    const end = format(new Date(endTime), 'H:mm');
-    return `${start} - ${end}`;
+    try {
+      // Handle null/undefined/empty values
+      if (!startTime || !endTime) {
+        return 'TBD';
+      }
+      
+      const startDate = new Date(startTime);
+      const endDate = new Date(endTime);
+      
+      // Check if dates are valid
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return 'TBD';
+      }
+      
+      const start = format(startDate, 'H:mm');
+      const end = format(endDate, 'H:mm');
+      return `${start} - ${end}`;
+    } catch (error) {
+      console.warn('Error formatting session time:', { startTime, endTime, error });
+      return 'TBD';
+    }
   };
 
   const calculateDuration = (startTime: string, endTime: string) => {
-    const start = new Date(startTime);
-    const end = new Date(endTime);
-    const diffMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
-    return `${diffMinutes}min`;
+    try {
+      // Handle null/undefined/empty values
+      if (!startTime || !endTime) {
+        return '30min';
+      }
+      
+      const start = new Date(startTime);
+      const end = new Date(endTime);
+      
+      // Check if dates are valid
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return '30min';
+      }
+      
+      const diffMinutes = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
+      return `${diffMinutes}min`;
+    } catch (error) {
+      console.warn('Error calculating duration:', { startTime, endTime, error });
+      return '30min';
+    }
   };
 
   const convertWorkshopsToSessions = (workshops: any[]): Registration[] => {
