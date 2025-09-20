@@ -2602,21 +2602,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
       .where(eq(cbaEventRegistrations.userId, userId));
 
-      // Get AI Summit speaking session registrations for this user
-      // First find user's badges, then find their session registrations
-      const speakingSessionRegistrations = await db.select({
-        registrationId: aiSummitSessionRegistrations.id,
-        sessionId: aiSummitSessionRegistrations.sessionId,
-        registeredAt: aiSummitSessionRegistrations.registeredAt,
-        sessionTitle: aiSummitSpeakingSessions.title,
-        sessionDescription: aiSummitSpeakingSessions.description,
-        startTime: aiSummitSpeakingSessions.startTime,
-        endTime: aiSummitSpeakingSessions.endTime,
-        room: aiSummitSpeakingSessions.room
+      // Get AI Summit workshop registrations for this user
+      // First find user's badges, then find their workshop registrations
+      const workshopRegistrations = await db.select({
+        registrationId: aiSummitWorkshopRegistrations.id,
+        workshopId: aiSummitWorkshopRegistrations.workshopId,
+        registeredAt: aiSummitWorkshopRegistrations.registeredAt,
+        workshopTitle: aiSummitWorkshops.title,
+        workshopDescription: aiSummitWorkshops.description,
+        startTime: aiSummitWorkshops.startTime,
+        endTime: aiSummitWorkshops.endTime,
+        room: aiSummitWorkshops.room,
+        facilitator: aiSummitWorkshops.facilitator
       })
-      .from(aiSummitSessionRegistrations)
-      .innerJoin(aiSummitSpeakingSessions, eq(aiSummitSessionRegistrations.sessionId, aiSummitSpeakingSessions.id))
-      .innerJoin(aiSummitBadges, eq(aiSummitSessionRegistrations.badgeId, aiSummitBadges.badgeId))
+      .from(aiSummitWorkshopRegistrations)
+      .innerJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
+      .innerJoin(aiSummitBadges, eq(aiSummitWorkshopRegistrations.badgeId, aiSummitBadges.badgeId))
       .where(eq(aiSummitBadges.participantId, userId));
       
       // Format CBA registrations for calendar (matching RegistrationCalendar expected format)
@@ -2642,30 +2643,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
 
-      // Format speaking session registrations 
-      const speakingFormattedRegistrations = speakingSessionRegistrations.map(reg => {
-        // For speaking sessions, times should already include date
+      // Format workshop registrations 
+      const workshopFormattedRegistrations = workshopRegistrations.map(reg => {
+        // For workshops, times should already include date
         const startDateTime = reg.startTime instanceof Date ? reg.startTime.toISOString() : reg.startTime;
         const endDateTime = reg.endTime instanceof Date ? reg.endTime.toISOString() : reg.endTime;
         
         return {
           id: reg.registrationId,
-          eventId: reg.sessionId,
-          type: 'speaking_session',
-          sessionType: 'speaking_session',
-          title: reg.sessionTitle,
-          description: reg.sessionDescription || 'AI Summit Speaking Session',
+          eventId: reg.workshopId,
+          type: 'workshop',
+          sessionType: 'workshop',
+          title: reg.workshopTitle,
+          description: reg.workshopDescription || 'AI Summit Workshop',
+          facilitator: reg.facilitator,
           startTime: startDateTime,
           endTime: endDateTime,
-          location: reg.room || 'Main Auditorium',
+          location: reg.room || 'Workshop Room',
           registeredAt: reg.registeredAt,
-          checkedIn: false, // Speaking sessions may not have check-in tracking yet
+          checkedIn: false,
           checkedInAt: null
         };
       });
       
       // Combine all registrations
-      const allRegistrations = [...cbaFormattedRegistrations, ...speakingFormattedRegistrations];
+      const allRegistrations = [...cbaFormattedRegistrations, ...workshopFormattedRegistrations];
       
       res.json(allRegistrations);
     } catch (error: any) {
