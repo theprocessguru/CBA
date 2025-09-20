@@ -8302,6 +8302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (cbaEvent.length > 0) {
         // Handle CBA event registration
+        const event = cbaEvent[0];
         
         // Check if user is already registered
         const existingRegistration = await db.select().from(cbaEventRegistrations)
@@ -8313,6 +8314,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (existingRegistration.length > 0) {
           return res.status(400).json({ message: "Already registered for this event" });
+        }
+
+        // Check current capacity
+        const currentRegistrationCount = await db.select({ count: sql<number>`count(*)` })
+          .from(cbaEventRegistrations)
+          .where(eq(cbaEventRegistrations.eventId, parseInt(eventId)));
+        
+        const currentCount = currentRegistrationCount[0]?.count || 0;
+        const maxCapacity = event.maxCapacity || 0;
+        
+        if (maxCapacity > 0 && currentCount >= maxCapacity) {
+          return res.status(400).json({ 
+            message: "Event is at full capacity", 
+            availableSpaces: 0,
+            maxCapacity: maxCapacity
+          });
         }
 
         // Get user details for registration
@@ -8333,10 +8350,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           noShow: false
         }).returning();
 
+        // Update the current_registrations count in the events table
+        await db.update(cbaEvents)
+          .set({ currentRegistrations: currentCount + 1 })
+          .where(eq(cbaEvents.id, parseInt(eventId)));
+
+        const remainingSpaces = maxCapacity > 0 ? maxCapacity - (currentCount + 1) : null;
+
         return res.json({ 
           success: true, 
           message: "Successfully registered for event",
-          registration: registration
+          registration: registration,
+          availableSpaces: remainingSpaces,
+          maxCapacity: maxCapacity
         });
       }
 
