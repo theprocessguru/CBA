@@ -10456,7 +10456,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           providerCompany: aiSummitWorkshops.facilitatorCompany,
           scheduledDate: aiSummitWorkshops.startTime,
           scheduledEndTime: aiSummitWorkshops.endTime,
-          duration: aiSummitWorkshops.duration,
           location: aiSummitWorkshops.room,
           maxParticipants: aiSummitWorkshops.maxCapacity,
           currentParticipants: aiSummitWorkshops.currentRegistrations,
@@ -10487,7 +10486,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         scheduledTime: reg.scheduledDate ? 
           reg.scheduledDate.toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit' }) : 
           undefined,
-        duration: reg.duration ? `${reg.duration} minutes` : undefined,
+        duration: reg.scheduledDate && reg.scheduledEndTime ? 
+          `${Math.round((reg.scheduledEndTime.getTime() - reg.scheduledDate.getTime()) / (1000 * 60))} minutes` : 
+          undefined,
         location: reg.location || 'Location TBD',
         status: reg.noShow ? 'cancelled' : 
                 reg.checkedIn ? 'completed' : 
