@@ -164,8 +164,8 @@ const AISummit = () => {
   // Transform live workshops data into schedule format
   const classroomSchedule = (liveWorkshops || []).map(workshop => ({
     time: formatSessionTime(workshop.startTime, workshop.endTime),
-    title: workshop.title,
-    type: "workshop",
+    title: workshop.eventName || workshop.title,
+    type: "workshop", 
     speaker: workshop.facilitator || "CBA Team",
     description: workshop.description || "Interactive workshop session",
     capacity: `${workshop.maxCapacity} people`,
@@ -508,14 +508,6 @@ const AISummit = () => {
                 First AI Summit
                 <span className="block text-3xl md:text-5xl text-blue-200">Croydon 2025</span>
               </h1>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 mb-4 border border-white/20 max-w-3xl mx-auto">
-                <h2 className="text-2xl md:text-3xl font-bold mb-2 text-yellow-300">
-                  Opening the Future: The Minister for AI Takes the Stage
-                </h2>
-                <p className="text-lg md:text-xl text-white">
-                  Don't Miss Our New AI Minister Kanishka Narayan's Opening Keynote!
-                </p>
-              </div>
               <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
                 Join South London's premier AI technology event - Educate • Motivate • Develop • Inspire • Empower
               </p>
