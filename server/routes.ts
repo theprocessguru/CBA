@@ -2612,8 +2612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         workshopDescription: aiSummitWorkshops.description,
         startTime: aiSummitWorkshops.startTime,
         endTime: aiSummitWorkshops.endTime,
-        room: aiSummitWorkshops.room,
-        facilitator: aiSummitWorkshops.facilitator
+        speakerName: aiSummitWorkshops.speakerName
       })
       .from(aiSummitWorkshopRegistrations)
       .innerJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
@@ -2656,10 +2655,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionType: 'workshop',
           title: reg.workshopTitle,
           description: reg.workshopDescription || 'AI Summit Workshop',
-          facilitator: reg.facilitator,
+          facilitator: reg.speakerName,
           startTime: startDateTime,
           endTime: endDateTime,
-          location: reg.room || 'Workshop Room',
+          location: 'AI Summit Venue',
           registeredAt: reg.registeredAt,
           checkedIn: false,
           checkedInAt: null
