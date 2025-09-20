@@ -320,49 +320,59 @@ export async function setupLocalAuth(app: Express) {
         console.log(`Auto-verified user ${user.email} during login`);
       }
 
-      // Set session
-      (req.session as any).userId = user.id;
-      (req.session as any).user = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        isAdmin: user.isAdmin || false,
-      };
-
-      // Generate auth token for Replit environment
-      const authToken = crypto.randomBytes(32).toString('hex');
-      const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // Token expires in 7 days
-      
-      // Store token
-      authTokens.set(authToken, {
-        userId: user.id,
-        expiresAt
-      });
-      
-      // Explicitly save the session (for non-Replit environments)
-      req.session.save((err) => {
+      // Regenerate session ID to prevent reusing blacklisted sessions
+      req.session.regenerate((err) => {
         if (err) {
-          console.error("Session save error:", err);
-          return res.status(500).json({ message: "Failed to save session" });
+          console.error("Session regenerate error:", err);
+          return res.status(500).json({ message: "Failed to create session" });
         }
+
+        console.log("Session regenerated - Old ID avoided, new ID:", req.sessionID);
+
+        // Set session data after regeneration
+        (req.session as any).userId = user.id;
+        (req.session as any).user = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          isAdmin: user.isAdmin || false,
+        };
+
+        // Generate auth token for Replit environment
+        const authToken = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7); // Token expires in 7 days
         
-        console.log("Login successful - Session saved for user:", user.email);
-        console.log("Session ID after save:", req.sessionID);
-        console.log("Session data after save:", req.session);
+        // Store token
+        authTokens.set(authToken, {
+          userId: user.id,
+          expiresAt
+        });
         
-        res.json({ 
-          success: true,
-          sessionId: req.sessionID, // Include session ID for debugging
-          authToken, // Include auth token for Replit environment
-          user: {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            isAdmin: user.isAdmin || false,
+        // Explicitly save the session (for non-Replit environments)
+        req.session.save((err) => {
+          if (err) {
+            console.error("Session save error:", err);
+            return res.status(500).json({ message: "Failed to save session" });
           }
+          
+          console.log("Login successful - Session saved for user:", user.email);
+          console.log("Session ID after save:", req.sessionID);
+          console.log("Session data after save:", req.session);
+          
+          res.json({ 
+            success: true,
+            sessionId: req.sessionID, // Include session ID for debugging
+            authToken, // Include auth token for Replit environment
+            user: {
+              id: user.id,
+              email: user.email,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              isAdmin: user.isAdmin || false,
+            }
+          });
         });
       });
     } catch (error) {
@@ -405,19 +415,28 @@ export async function setupLocalAuth(app: Express) {
       });
     }
     
-    // Clear cookies immediately
-    res.clearCookie('cba.sid', { path: '/', domain: undefined });
-    res.clearCookie('connect.sid', { path: '/', domain: undefined });
-    res.clearCookie('session', { path: '/', domain: undefined });
-    
-    console.log("Logout completed - blacklisted session and cleared cookies");
-    
-    // Redirect for GET requests, JSON response for POST
-    if (req.method === 'GET') {
-      res.redirect('/');
-    } else {
-      res.json({ success: true, message: "Logged out successfully" });
-    }
+    // Properly destroy the session to prevent reuse
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Session destroy error:", err);
+      } else {
+        console.log("Session destroyed successfully:", sessionId);
+      }
+      
+      // Clear cookies immediately
+      res.clearCookie('cba.sid', { path: '/', domain: undefined });
+      res.clearCookie('connect.sid', { path: '/', domain: undefined });
+      res.clearCookie('session', { path: '/', domain: undefined });
+      
+      console.log("Logout completed - destroyed session, blacklisted, and cleared cookies");
+      
+      // Redirect for GET requests, JSON response for POST
+      if (req.method === 'GET') {
+        res.redirect('/');
+      } else {
+        res.json({ success: true, message: "Logged out successfully" });
+      }
+    });
   };
   
   app.post('/api/auth/logout', handleLogout);
