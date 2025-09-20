@@ -287,6 +287,139 @@ export async function setupLocalAuth(app: Express) {
     }
   });
 
+  // Speaker profile registration endpoint (profile only, no session data)
+  app.post('/api/auth/register-speaker-profile', async (req: Request, res: Response) => {
+    try {
+      const {
+        email,
+        password,
+        firstName,
+        lastName,
+        phone,
+        homeAddress,
+        homeCity,
+        homePostcode,
+        jobTitle,
+        company,
+        bio,
+        websiteUrl,
+        linkedinUrl,
+        speakingExperience,
+        previousSpeakingEngagements,
+        availableSlots
+      } = req.body;
+
+      if (!email || !password || !firstName || !lastName || !phone || !bio) {
+        return res.status(400).json({ message: "Email, password, first name, last name, phone, and bio are required" });
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
+      }
+
+      // Password strength validation
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters long" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+
+      // Check if speaker already exists
+      const { aiSummitSpeakers } = await import("@shared/schema");
+      const { db } = await import("@/db");
+      const { eq } = await import("drizzle-orm");
+      
+      const existingSpeaker = await db.select().from(aiSummitSpeakers)
+        .where(eq(aiSummitSpeakers.email, email))
+        .limit(1);
+
+      if (existingSpeaker.length > 0) {
+        return res.status(400).json({ message: "Speaker with this email already exists" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user account
+      const user = await storage.upsertUser({
+        id: `speaker_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        email,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        phone: phone || null,
+        homeAddress: homeAddress || null,
+        homeCity: homeCity || null,
+        homePostcode: homePostcode || null,
+        homeCountry: "UK",
+        company: company || null,
+        jobTitle: jobTitle || null,
+        bio: bio || null,
+        profileImageUrl: null,
+        passwordHash: hashedPassword,
+        participantType: 'speaker'
+      });
+
+      // Create speaker profile (NO session data)
+      const [speaker] = await db.insert(aiSummitSpeakers).values({
+        userId: user.id,
+        name: `${firstName} ${lastName}`,
+        email: email,
+        phone: phone || null,
+        company: company || null,
+        jobTitle: jobTitle || null,
+        website: websiteUrl || null,
+        linkedIn: linkedinUrl || null,
+        bio: bio,
+        speakingExperience: speakingExperience || null,
+        previousSpeaking: !!previousSpeakingEngagements,
+        availableSlots: availableSlots ? [availableSlots] : [],
+        status: 'pending', // Requires admin approval
+        source: 'form'
+      }).returning();
+
+      // Send welcome email
+      try {
+        const emailService = await import("@/emailService");
+        await emailService.default.sendWelcomeEmail(email, `${firstName} ${lastName}`, 'speaker');
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Don't fail registration if email fails
+      }
+
+      // Set up session for the new user
+      (req.session as any).userId = user.id;
+      (req.session as any).user = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        isAdmin: user.isAdmin || false
+      };
+
+      res.json({
+        success: true,
+        message: "Speaker profile created successfully! Your application is pending review.",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          speakerId: speaker.id
+        }
+      });
+
+    } catch (error: any) {
+      console.error("Speaker registration error:", error);
+      res.status(500).json({ message: "Failed to register speaker profile" });
+    }
+  });
+
   // Login endpoint
   app.post('/api/auth/login', async (req: Request, res: Response) => {
     try {

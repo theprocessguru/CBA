@@ -26,16 +26,12 @@ export default function SpeakerRegister() {
     jobTitle: "",
     company: "",
     bio: "",
-    // Speaker-specific fields
-    presentationTitle: "",
-    presentationDescription: "",
-    presentationDuration: "",
-    audienceLevel: "",
-    topicCategory: "",
-    speakerExperience: "",
+    // Speaker profile fields only (NO session data)
     websiteUrl: "",
     linkedinUrl: "",
+    speakingExperience: "",
     previousSpeakingEngagements: "",
+    availableSlots: "", // When they're available to speak
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,7 +40,7 @@ export default function SpeakerRegister() {
 
   const registerMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const response = await apiRequest("POST", "/api/auth/register-speaker", data);
+      const response = await apiRequest("POST", "/api/auth/register-speaker-profile", data);
       return response.json();
     },
     onSuccess: () => {
@@ -227,94 +223,16 @@ export default function SpeakerRegister() {
               </div>
             </div>
 
-            {/* Speaking Details */}
+            {/* Speaker Profile (NO session data) */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold border-b pb-2">Speaking Details</h3>
+              <h3 className="text-lg font-semibold border-b pb-2">Speaker Profile</h3>
               
               <div>
-                <Label htmlFor="presentationTitle">Presentation Title <span className="text-red-500">*</span></Label>
-                <Input
-                  id="presentationTitle"
-                  name="presentationTitle"
-                  value={formData.presentationTitle}
-                  onChange={handleChange}
-                  required
-                  placeholder="What will you be speaking about?"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="presentationDescription">Presentation Description <span className="text-red-500">*</span></Label>
+                <Label htmlFor="speakingExperience">Speaking Experience</Label>
                 <Textarea
-                  id="presentationDescription"
-                  name="presentationDescription"
-                  value={formData.presentationDescription}
-                  onChange={handleChange}
-                  required
-                  placeholder="Detailed description of your presentation content, key takeaways, and learning objectives..."
-                  className="min-h-[120px]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="presentationDuration">Duration</Label>
-                  <Select onValueChange={(value) => handleSelectChange("presentationDuration", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select duration" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                      <SelectItem value="30">30 minutes</SelectItem>
-                      <SelectItem value="45">45 minutes</SelectItem>
-                      <SelectItem value="60">1 hour</SelectItem>
-                      <SelectItem value="90">1.5 hours</SelectItem>
-                      <SelectItem value="flexible">Flexible</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="audienceLevel">Audience Level</Label>
-                  <Select onValueChange={(value) => handleSelectChange("audienceLevel", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select audience level" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="beginner">Beginner</SelectItem>
-                      <SelectItem value="intermediate">Intermediate</SelectItem>
-                      <SelectItem value="advanced">Advanced</SelectItem>
-                      <SelectItem value="all">All Levels</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="topicCategory">Topic Category</Label>
-                <Select onValueChange={(value) => handleSelectChange("topicCategory", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select topic category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ai-technology">AI & Technology</SelectItem>
-                    <SelectItem value="business-strategy">Business Strategy</SelectItem>
-                    <SelectItem value="marketing">Marketing & Sales</SelectItem>
-                    <SelectItem value="finance">Finance & Investment</SelectItem>
-                    <SelectItem value="leadership">Leadership & Management</SelectItem>
-                    <SelectItem value="innovation">Innovation & Entrepreneurship</SelectItem>
-                    <SelectItem value="sustainability">Sustainability</SelectItem>
-                    <SelectItem value="networking">Networking & Partnerships</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="speakerExperience">Speaking Experience</Label>
-                <Textarea
-                  id="speakerExperience"
-                  name="speakerExperience"
-                  value={formData.speakerExperience}
+                  id="speakingExperience"
+                  name="speakingExperience"
+                  value={formData.speakingExperience}
                   onChange={handleChange}
                   placeholder="Describe your speaking experience, previous engagements, and relevant expertise..."
                   className="min-h-[100px]"
@@ -330,6 +248,18 @@ export default function SpeakerRegister() {
                   onChange={handleChange}
                   placeholder="List notable conferences, events, or organizations where you've spoken..."
                   className="min-h-[80px]"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="availableSlots">Available Time Slots</Label>
+                <Textarea
+                  id="availableSlots"
+                  name="availableSlots"
+                  value={formData.availableSlots}
+                  onChange={handleChange}
+                  placeholder="When are you available to speak? (e.g., weekday mornings, Friday afternoons, specific dates...)"
+                  className="min-h-[60px]"
                 />
               </div>
             </div>
