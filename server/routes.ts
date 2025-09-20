@@ -98,6 +98,8 @@ import {
   aiSummitVolunteers,
   aiSummitWorkshops,
   aiSummitWorkshopRegistrations,
+  aiSummitSpeakingSessions,
+  aiSummitSessionRegistrations,
   users,
   businesses,
   membershipTiers,
@@ -2602,19 +2604,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .where(eq(cbaEventRegistrations.userId, userId));
 
       // Get AI Summit speaking session registrations for this user
+      // First find user's badges, then find their session registrations
       const speakingSessionRegistrations = await db.select({
-        registrationId: aiSummitSpeakingSessionRegistrations.id,
-        sessionId: aiSummitSpeakingSessionRegistrations.sessionId,
-        registeredAt: aiSummitSpeakingSessionRegistrations.registeredAt,
+        registrationId: aiSummitSessionRegistrations.id,
+        sessionId: aiSummitSessionRegistrations.sessionId,
+        registeredAt: aiSummitSessionRegistrations.registeredAt,
         sessionTitle: aiSummitSpeakingSessions.title,
         sessionDescription: aiSummitSpeakingSessions.description,
         startTime: aiSummitSpeakingSessions.startTime,
         endTime: aiSummitSpeakingSessions.endTime,
         room: aiSummitSpeakingSessions.room
       })
-      .from(aiSummitSpeakingSessionRegistrations)
-      .innerJoin(aiSummitSpeakingSessions, eq(aiSummitSpeakingSessionRegistrations.sessionId, aiSummitSpeakingSessions.id))
-      .where(eq(aiSummitSpeakingSessionRegistrations.userId, userId));
+      .from(aiSummitSessionRegistrations)
+      .innerJoin(aiSummitSpeakingSessions, eq(aiSummitSessionRegistrations.sessionId, aiSummitSpeakingSessions.id))
+      .innerJoin(aiSummitBadges, eq(aiSummitSessionRegistrations.badgeId, aiSummitBadges.badgeId))
+      .where(eq(aiSummitBadges.participantId, userId));
       
       // Format CBA registrations for calendar (matching RegistrationCalendar expected format)
       const cbaFormattedRegistrations = cbaRegistrations.map(reg => {

@@ -32,8 +32,8 @@ export function getSession() {
   const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     store: sessionStore,
-    resave: true, // Force session save
-    saveUninitialized: true, // Create sessions immediately
+    resave: false, // Don't force unnecessary saves
+    saveUninitialized: false, // Don't create empty sessions
     rolling: true, // Reset expiry on activity
     name: 'cba.sid', // Custom name to avoid conflicts
     cookie: {
