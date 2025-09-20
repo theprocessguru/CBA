@@ -565,7 +565,9 @@ export const aiSummitExhibitorRegistrations = pgTable("ai_summit_exhibitor_regis
 export const aiSummitSpeakers = pgTable("ai_summit_speakers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").references(() => users.id), // Link to user account
-  name: varchar("name").notNull(),
+  name: varchar("name").notNull(), // Legacy field - kept for backward compatibility
+  firstName: varchar("first_name"), // New field - nullable during transition
+  lastName: varchar("last_name"), // New field - nullable during transition
   email: varchar("email").notNull().unique(), // Ensure one speaker per email
   phone: varchar("phone"),
   company: varchar("company"),

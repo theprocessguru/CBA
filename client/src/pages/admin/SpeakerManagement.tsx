@@ -35,7 +35,9 @@ import {
 interface SpeakerProfile {
   id: string;
   userId?: string;
-  name: string;
+  name: string; // Legacy field
+  firstName?: string; // New field
+  lastName?: string; // New field
   email: string;
   phone?: string;
   company?: string;
@@ -52,7 +54,8 @@ interface SpeakerProfile {
 
 // FIXED: Speaker profile only schema (NO session data)
 const createSpeakerProfileSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone is required"),
   company: z.string().optional(),
@@ -95,8 +98,17 @@ export default function SpeakerManagement() {
   });
 
   const createSpeakerMutation = useMutation({
-    mutationFn: (data: CreateSpeakerProfileFormData) =>
-      apiRequest('POST', '/api/auth/register-speaker-profile', data),
+    mutationFn: (data: CreateSpeakerProfileFormData) => {
+      // Clean payload: remove form-only fields and populate both new and legacy fields
+      const { confirmPassword, agreesToTerms, ...cleanData } = data;
+      const transformedData = {
+        ...cleanData,
+        name: `${data.firstName} ${data.lastName}`.trim(), // Legacy field for backward compatibility
+        firstName: data.firstName, // New field
+        lastName: data.lastName, // New field
+      };
+      return apiRequest('POST', '/api/auth/register-speaker-profile', transformedData);
+    },
     onSuccess: () => {
       toast({
         title: "Success",
@@ -116,8 +128,12 @@ export default function SpeakerManagement() {
   });
 
   const filteredSpeakers = speakers?.filter(speaker => {
+    // Use firstName/lastName if available, fallback to legacy name field
+    const displayName = speaker.firstName && speaker.lastName 
+      ? `${speaker.firstName} ${speaker.lastName}` 
+      : speaker.name;
     const matchesSearch = 
-      speaker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       speaker.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (speaker.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (speaker.bio || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -133,7 +149,7 @@ export default function SpeakerManagement() {
     const csv = [
       ["Name", "Email", "Phone", "Company", "Job Title", "Bio", "Status", "Available Slots", "Registered Date"],
       ...speakers.map(s => [
-        s.name,
+        s.firstName && s.lastName ? `${s.firstName} ${s.lastName}` : s.name,
         s.email,
         s.phone || "",
         s.company || "",
@@ -225,17 +241,34 @@ export default function SpeakerManagement() {
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={createSpeakerForm.control}
-                        name="name"
+                        name="firstName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Full Name *</FormLabel>
+                            <FormLabel>First Name *</FormLabel>
                             <FormControl>
-                              <Input placeholder="Enter full name" {...field} data-testid="input-speaker-name" />
+                              <Input placeholder="Enter first name" {...field} data-testid="input-speaker-firstname" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={createSpeakerForm.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Last Name *</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter last name" {...field} data-testid="input-speaker-lastname" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
 
                       <FormField
                         control={createSpeakerForm.control}

@@ -6358,7 +6358,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select({
           id: aiSummitSpeakers.id,
           userId: aiSummitSpeakers.userId,
-          name: aiSummitSpeakers.name,
+          name: aiSummitSpeakers.name, // Legacy field
+          firstName: aiSummitSpeakers.firstName, // New field
+          lastName: aiSummitSpeakers.lastName, // New field
           email: aiSummitSpeakers.email,
           phone: aiSummitSpeakers.phone,
           company: aiSummitSpeakers.company,
