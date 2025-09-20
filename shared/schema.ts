@@ -605,37 +605,7 @@ export const aiSummitSpeakerTopics = pgTable("ai_summit_speaker_topics", {
   uniqueSpeakerTitle: unique("unique_speaker_title").on(table.speakerId, table.title)
 }));
 
-// Legacy table - kept for backward compatibility during migration
-export const aiSummitSpeakerInterests = pgTable("ai_summit_speaker_interests", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users.id), // Link to user account
-  name: varchar("name").notNull(),
-  email: varchar("email").notNull(),
-  phone: varchar("phone"),
-  company: varchar("company"),
-  jobTitle: varchar("job_title"),
-  website: varchar("website"),
-  linkedIn: varchar("linked_in"),
-  bio: text("bio"),
-  sessionType: varchar("session_type").default("talk"), // talk, workshop
-  talkTitle: varchar("talk_title"),
-  talkDescription: text("talk_description"),
-  talkDuration: varchar("talk_duration"),
-  audienceLevel: varchar("audience_level"),
-  speakingExperience: text("speaking_experience"),
-  previousSpeaking: boolean("previous_speaking").default(false),
-  techRequirements: text("tech_requirements"),
-  availableSlots: text("available_slots"), // JSON string
-  motivationToSpeak: text("motivation_to_speak"),
-  keyTakeaways: text("key_takeaways"),
-  interactiveElements: boolean("interactive_elements").default(false),
-  handoutsProvided: boolean("handouts_provided").default(false),
-  agreesToTerms: boolean("agrees_to_terms").default(false),
-  source: varchar("source"), // Track source of registration (direct, exhibitor_registration, etc.)
-  registeredAt: timestamp("registered_at").defaultNow(),
-  // AI Summit 2025 specific fields - added for venue association compatibility
-  venueId: integer("venue_id").references(() => aiSummitVenues.id),
-});
+// Legacy table REMOVED - Use aiSummitSpeakers + aiSummitSpeakerTopics instead
 
 // Personal Badges - Reusable across all events with role-based styling
 export const personalBadges = pgTable("personal_badges", {
@@ -1532,8 +1502,7 @@ export const insertAISummitExhibitorRegistrationSchema = createInsertSchema(aiSu
 export const insertAISummitSpeakerSchema = createInsertSchema(aiSummitSpeakers).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertAISummitSpeakerTopicSchema = createInsertSchema(aiSummitSpeakerTopics).omit({ id: true, createdAt: true, updatedAt: true });
 
-// Legacy schema - kept for backward compatibility
-export const insertAISummitSpeakerInterestSchema = createInsertSchema(aiSummitSpeakerInterests).omit({ id: true });
+// Legacy schema REMOVED - Use insertAISummitSpeakerSchema + insertAISummitSpeakerTopicSchema instead
 export const insertAISummitBadgeSchema = createInsertSchema(aiSummitBadges).omit({ id: true });
 export const insertAISummitCheckInSchema = createInsertSchema(aiSummitCheckIns).omit({ id: true });
 export const insertAISummitVolunteerSchema = createInsertSchema(aiSummitVolunteers).omit({ id: true });

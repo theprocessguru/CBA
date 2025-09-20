@@ -31,34 +31,27 @@ import {
   EyeOff
 } from "lucide-react";
 
-interface SpeakerRegistration {
+// FIXED: Speaker profile only interface (NO session data)
+interface SpeakerProfile {
   id: string;
-  speakerName: string;
-  speakerEmail: string;
-  speakerPhone: string;
-  speakerCompany: string;
-  speakerJobTitle: string;
-  speakerWebsite?: string;
-  speakerLinkedIn?: string;
-  speakerBio: string;
-  sessionType: string;
-  talkTitle: string;
-  talkDescription: string;
-  talkDuration: string;
-  audienceLevel: string;
+  userId?: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  jobTitle?: string;
+  website?: string;
+  linkedIn?: string;
+  bio: string;
   speakingExperience?: string;
   previousSpeaking: boolean;
-  techRequirements?: string;
   availableSlots?: string;
-  motivationToSpeak?: string;
-  keyTakeaways?: string;
-  interactiveElements: boolean;
-  handoutsProvided: boolean;
+  status: string;
   createdAt: string;
-  status?: string;
 }
 
-const createSpeakerSchema = z.object({
+// FIXED: Speaker profile only schema (NO session data)
+const createSpeakerProfileSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(1, "Phone is required"),
@@ -69,26 +62,16 @@ const createSpeakerSchema = z.object({
   bio: z.string().min(1, "Bio is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
-  sessionType: z.enum(["keynote", "talk", "panel", "workshop", "demo"]),
-  talkTitle: z.string().min(1, "Talk title is required"),
-  talkDescription: z.string().min(1, "Talk description is required"),
-  talkDuration: z.string().min(1, "Duration is required"),
-  audienceLevel: z.enum(["beginner", "intermediate", "advanced", "all"]),
   speakingExperience: z.string().optional(),
   previousSpeaking: z.boolean().default(false),
-  techRequirements: z.string().optional(),
   availableSlots: z.string().optional(),
-  motivationToSpeak: z.string().optional(),
-  keyTakeaways: z.string().min(1, "Key takeaways are required"),
-  interactiveElements: z.boolean().default(false),
-  handoutsProvided: z.boolean().default(false),
   agreesToTerms: z.boolean().default(true),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
-type CreateSpeakerFormData = z.infer<typeof createSpeakerSchema>;
+type CreateSpeakerProfileFormData = z.infer<typeof createSpeakerProfileSchema>;
 
 export default function SpeakerManagement() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,26 +82,21 @@ export default function SpeakerManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: speakers, isLoading, error } = useQuery<SpeakerRegistration[]>({
+  const { data: speakers, isLoading, error } = useQuery<SpeakerProfile[]>({
     queryKey: ["/api/admin/speakers"],
   });
 
-  const createSpeakerForm = useForm<CreateSpeakerFormData>({
-    resolver: zodResolver(createSpeakerSchema),
+  const createSpeakerForm = useForm<CreateSpeakerProfileFormData>({
+    resolver: zodResolver(createSpeakerProfileSchema),
     defaultValues: {
-      sessionType: "talk",
-      audienceLevel: "all",
-      talkDuration: "30",
       previousSpeaking: false,
-      interactiveElements: false,
-      handoutsProvided: false,
       agreesToTerms: true,
     },
   });
 
   const createSpeakerMutation = useMutation({
-    mutationFn: (data: CreateSpeakerFormData) =>
-      apiRequest('POST', '/api/ai-summit-speaker-interest', data),
+    mutationFn: (data: CreateSpeakerProfileFormData) =>
+      apiRequest('POST', '/api/auth/register-speaker-profile', data),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -139,10 +117,10 @@ export default function SpeakerManagement() {
 
   const filteredSpeakers = speakers?.filter(speaker => {
     const matchesSearch = 
-      speaker.speakerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      speaker.speakerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      speaker.speakerCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      speaker.talkTitle.toLowerCase().includes(searchTerm.toLowerCase());
+      speaker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      speaker.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (speaker.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (speaker.bio || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = filterStatus === "all" || speaker.status === filterStatus;
     
@@ -153,18 +131,16 @@ export default function SpeakerManagement() {
     if (!speakers) return;
     
     const csv = [
-      ["Name", "Email", "Phone", "Company", "Job Title", "Session Type", "Talk Title", "Duration", "Audience Level", "Status", "Registered Date"],
+      ["Name", "Email", "Phone", "Company", "Job Title", "Bio", "Status", "Available Slots", "Registered Date"],
       ...speakers.map(s => [
-        s.speakerName,
-        s.speakerEmail,
-        s.speakerPhone,
-        s.speakerCompany,
-        s.speakerJobTitle,
-        s.sessionType,
-        s.talkTitle,
-        s.talkDuration + " mins",
-        s.audienceLevel,
+        s.name,
+        s.email,
+        s.phone || "",
+        s.company || "",
+        s.jobTitle || "",
+        s.bio || "",
         s.status || "pending",
+        s.availableSlots || "",
         format(new Date(s.createdAt), "yyyy-MM-dd")
       ])
     ].map(row => row.map(cell => `"${cell}"`).join(",")).join("\n");
@@ -173,24 +149,16 @@ export default function SpeakerManagement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `speakers-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    a.download = `speaker-profiles-${format(new Date(), "yyyy-MM-dd")}.csv`;
     a.click();
   };
 
-  const getSessionTypeColor = (type: string) => {
-    switch(type) {
-      case 'keynote': return 'bg-purple-100 text-purple-800';
-      case 'talk': return 'bg-blue-100 text-blue-800';
-      case 'panel': return 'bg-green-100 text-green-800';
-      case 'workshop': return 'bg-orange-100 text-orange-800';
-      case 'demo': return 'bg-pink-100 text-pink-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getAudienceLevelColor = (level: string) => {
-    switch(level.toLowerCase()) {
-      case 'beginner': return 'bg-green-100 text-green-800';
+  // Session-related helpers REMOVED - speaker profiles don't have session data
+  
+  const getStatusColor = (status: string) => {
+    switch(status.toLowerCase()) {
+      case 'active': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'intermediate': return 'bg-yellow-100 text-yellow-800';
       case 'advanced': return 'bg-red-100 text-red-800';
       case 'all': return 'bg-blue-100 text-blue-800';
@@ -444,71 +412,22 @@ export default function SpeakerManagement() {
                     </div>
                   </div>
 
-                  {/* Session Information Section */}
+                  {/* Speaker Profile Section (NO session data) */}
                   <div className="space-y-4">
                     <div className="border-b pb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">Session Information</h3>
-                      <p className="text-sm text-gray-600">Details about what they will be presenting</p>
+                      <h3 className="text-lg font-semibold text-gray-900">Speaker Profile</h3>
+                      <p className="text-sm text-gray-600">Professional background and experience</p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={createSpeakerForm.control}
-                        name="sessionType"
+                        name="speakingExperience"
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Session Type *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger data-testid="select-session-type">
-                                  <SelectValue placeholder="Select session type" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="keynote">Keynote</SelectItem>
-                                <SelectItem value="talk">Talk/Presentation</SelectItem>
-                                <SelectItem value="panel">Panel Discussion</SelectItem>
-                                <SelectItem value="workshop">Workshop</SelectItem>
-                                <SelectItem value="demo">Demo</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="audienceLevel"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Audience Level *</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger data-testid="select-audience-level">
-                                  <SelectValue placeholder="Select audience level" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="all">All Levels</SelectItem>
-                                <SelectItem value="beginner">Beginner</SelectItem>
-                                <SelectItem value="intermediate">Intermediate</SelectItem>
-                                <SelectItem value="advanced">Advanced</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="talkDuration"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Session Duration *</FormLabel>
+                          <FormItem className="col-span-2">
+                            <FormLabel>Speaking Experience</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., 30, 45, 60 minutes" {...field} data-testid="input-talk-duration" />
+                              <Textarea placeholder="Describe your speaking experience and expertise..." {...field} data-testid="textarea-speaking-experience" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -519,80 +438,10 @@ export default function SpeakerManagement() {
                         control={createSpeakerForm.control}
                         name="availableSlots"
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className="col-span-2">
                             <FormLabel>Available Time Slots</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., Morning, Afternoon, Any" {...field} data-testid="input-available-slots" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="talkTitle"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Session Title *</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter session/presentation title" {...field} data-testid="input-talk-title" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="talkDescription"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Session Description *</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Describe what the session will cover" {...field} data-testid="textarea-talk-description" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="keyTakeaways"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Key Takeaways *</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="What will attendees learn from this session?" {...field} data-testid="textarea-key-takeaways" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="techRequirements"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Technical Requirements</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Any special tech setup needed for the session?" {...field} data-testid="textarea-tech-requirements" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={createSpeakerForm.control}
-                        name="motivationToSpeak"
-                        render={({ field }) => (
-                          <FormItem className="col-span-2">
-                            <FormLabel>Why This Session?</FormLabel>
-                            <FormControl>
-                              <Textarea placeholder="Why is this session important for the AI Summit?" {...field} data-testid="textarea-motivation" />
+                              <Input placeholder="When are you available to speak? (e.g., Morning sessions, Friday afternoon, etc.)" {...field} data-testid="input-available-slots" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

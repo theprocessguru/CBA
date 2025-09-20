@@ -93,7 +93,6 @@ import {
   eventScanners,
   scanHistory,
   scanSessions,
-  aiSummitSpeakerInterests,
   aiSummitExhibitorRegistrations,
   aiSummitVolunteers,
   aiSummitWorkshops,
