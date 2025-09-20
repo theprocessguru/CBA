@@ -2583,38 +2583,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       
-      // Get user's badge
-      const userBadges = await storage.getBadgesByEmail(req.user.email);
-      if (!userBadges || userBadges.length === 0) {
-        return res.json([]);
-      }
-      
-      const badgeId = userBadges[0].badgeId;
-      
-      // Get workshop registrations
-      const workshopRegistrations = await storage.getWorkshopRegistrationsByBadgeId(badgeId);
+      // Get CBA event registrations for this user
+      const cbaRegistrations = await db.select({
+        registrationId: cbaEventRegistrations.id,
+        eventId: cbaEventRegistrations.eventId,
+        registeredAt: cbaEventRegistrations.registeredAt,
+        checkedIn: cbaEventRegistrations.checkedIn,
+        checkedInAt: cbaEventRegistrations.checkedInAt,
+        eventName: cbaEvents.eventName,
+        eventDescription: cbaEvents.eventDescription,
+        startTime: cbaEvents.startTime,
+        endTime: cbaEvents.endTime,
+        location: cbaEvents.location,
+        facilitator: cbaEvents.facilitator
+      })
+      .from(cbaEventRegistrations)
+      .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
+      .where(eq(cbaEventRegistrations.userId, userId));
       
       // Format registrations for calendar
-      const registrations = [];
-      
-      for (const registration of workshopRegistrations) {
-        const workshop = await storage.getAISummitWorkshopById(registration.workshopId);
-        if (workshop) {
-          registrations.push({
-            id: registration.id,
-            type: 'workshop',
-            title: workshop.title,
-            description: workshop.description,
-            startTime: workshop.startTime,
-            endTime: workshop.endTime,
-            location: workshop.room,
-            facilitator: workshop.facilitator,
-            registeredAt: registration.registeredAt,
-            checkedIn: registration.checkedIn,
-            checkedInAt: registration.checkedInAt
-          });
-        }
-      }
+      const registrations = cbaRegistrations.map(reg => ({
+        id: reg.registrationId,
+        type: 'workshop',
+        title: reg.eventName,
+        description: reg.eventDescription,
+        startTime: reg.startTime,
+        endTime: reg.endTime,
+        location: reg.location,
+        facilitator: reg.facilitator,
+        registeredAt: reg.registeredAt,
+        checkedIn: reg.checkedIn,
+        checkedInAt: reg.checkedInAt
+      }));
       
       res.json(registrations);
     } catch (error: any) {
