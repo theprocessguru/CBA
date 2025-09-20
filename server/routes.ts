@@ -7106,13 +7106,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const workshops = await db.select().from(cbaEvents).where(eq(cbaEvents.eventType, 'workshop'));
       
-      // Parse tags field for frontend consumption
-      const workshopsWithParsedFields = workshops.map(workshop => ({
-        ...workshop,
-        tags: workshop.tags ? 
-          (workshop.tags.startsWith('[') ? JSON.parse(workshop.tags) : workshop.tags.split(',').map(tag => tag.trim())) 
-          : []
-      }));
+      // Parse tags field and format datetime strings for frontend consumption
+      const workshopsWithParsedFields = workshops.map(workshop => {
+        // Combine event date with time to create proper datetime strings
+        const eventDateStr = workshop.eventDate instanceof Date ? workshop.eventDate.toISOString().split('T')[0] : workshop.eventDate;
+        const startDateTime = `${eventDateStr}T${workshop.startTime}`;
+        const endDateTime = `${eventDateStr}T${workshop.endTime}`;
+        
+        return {
+          ...workshop,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          tags: workshop.tags ? 
+            (workshop.tags.startsWith('[') ? JSON.parse(workshop.tags) : workshop.tags.split(',').map(tag => tag.trim())) 
+            : []
+        };
+      });
       
       res.json(workshopsWithParsedFields);
     } catch (error) {
