@@ -8273,20 +8273,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register for an event
+  // Register for an event (both regular events and CBA events/workshops)
   app.post('/api/events/:eventId/register', isAuthenticated, async (req: any, res) => {
     try {
       const { eventId } = req.params;
       const userId = req.user.id;
       const registrationData = req.body;
 
-      // Check if event exists and is published
+      // First check if it's a CBA event (workshop)
+      const cbaEvent = await db.select().from(cbaEvents)
+        .where(and(eq(cbaEvents.id, parseInt(eventId)), eq(cbaEvents.isActive, true)))
+        .limit(1);
+      
+      if (cbaEvent.length > 0) {
+        // Handle CBA event registration
+        
+        // Check if user is already registered
+        const existingRegistration = await db.select().from(cbaEventRegistrations)
+          .where(and(
+            eq(cbaEventRegistrations.eventId, parseInt(eventId)),
+            eq(cbaEventRegistrations.userId, userId)
+          ))
+          .limit(1);
+
+        if (existingRegistration.length > 0) {
+          return res.status(400).json({ message: "Already registered for this event" });
+        }
+
+        // Get user details for registration
+        const user = await storage.getUserById(userId);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Create CBA event registration
+        const [registration] = await db.insert(cbaEventRegistrations).values({
+          eventId: parseInt(eventId),
+          userId: userId,
+          participantName: `${user.firstName} ${user.lastName}`,
+          participantEmail: user.email,
+          registrationStatus: 'confirmed',
+          registeredAt: new Date(),
+          checkedIn: false,
+          noShow: false
+        }).returning();
+
+        return res.json({ 
+          success: true, 
+          message: "Successfully registered for event",
+          registration: registration
+        });
+      }
+
+      // Fallback to regular event registration
       const event = await storage.getEventById(parseInt(eventId));
       if (!event || event.status !== 'published') {
         return res.status(404).json({ message: "Event not found or not available for registration" });
       }
 
-      // Create registration
+      // Create regular event registration
       const registration = await storage.createEventRegistration({
         eventId: parseInt(eventId),
         userId,
@@ -12069,62 +12114,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Register for a CBA event (workshop)
-  app.post('/api/events/:eventId/register', isAuthenticated, async (req: any, res) => {
-    try {
-      const { eventId } = req.params;
-      const userId = req.user.id;
-
-      // Check if CBA event exists and is active
-      const event = await db.select().from(cbaEvents)
-        .where(and(eq(cbaEvents.id, parseInt(eventId)), eq(cbaEvents.isActive, true)))
-        .limit(1);
-      
-      if (event.length === 0) {
-        return res.status(404).json({ message: "Event not found or not available for registration" });
-      }
-
-      // Check if user is already registered
-      const existingRegistration = await db.select().from(cbaEventRegistrations)
-        .where(and(
-          eq(cbaEventRegistrations.eventId, parseInt(eventId)),
-          eq(cbaEventRegistrations.userId, userId)
-        ))
-        .limit(1);
-
-      if (existingRegistration.length > 0) {
-        return res.status(400).json({ message: "Already registered for this event" });
-      }
-
-      // Get user details for registration
-      const user = await storage.getUserById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Create registration
-      const [registration] = await db.insert(cbaEventRegistrations).values({
-        eventId: parseInt(eventId),
-        userId: userId,
-        participantName: `${user.firstName} ${user.lastName}`,
-        participantEmail: user.email,
-        registrationStatus: 'confirmed',
-        registeredAt: new Date(),
-        checkedIn: false,
-        noShow: false
-      }).returning();
-
-      res.json({ 
-        success: true, 
-        message: "Successfully registered for event",
-        registration: registration
-      });
-
-    } catch (error: any) {
-      console.error("Error registering for CBA event:", error);
-      res.status(500).json({ message: "Failed to register for event" });
-    }
-  });
 
   // Create personal badge event linking
   app.post('/api/personal-badge-events', isAuthenticated, async (req: Request, res: Response) => {
