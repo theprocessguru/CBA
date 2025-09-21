@@ -168,10 +168,10 @@ const DashboardOverview = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/event-booking">
-          <Button className="w-full justify-start" data-testid="button-event-booking">
+        <Link href="/ai-summit">
+          <Button className="w-full justify-start" data-testid="button-ai-summit-register">
             <Calendar className="mr-2 h-4 w-4" />
-            Book AI Summit Sessions
+            Register for AI Summit
           </Button>
         </Link>
         <Link href="/events">
@@ -251,10 +251,10 @@ const DashboardOverview = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/event-booking">
-          <Button className="w-full justify-start" data-testid="button-event-booking">
+        <Link href="/ai-summit">
+          <Button className="w-full justify-start" data-testid="button-ai-summit-register">
             <Calendar className="mr-2 h-4 w-4" />
-            Book AI Summit Sessions
+            Register for AI Summit
           </Button>
         </Link>
         <Link href="/events">
@@ -334,10 +334,10 @@ const DashboardOverview = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link href="/event-booking">
-          <Button className="w-full justify-start" data-testid="button-event-booking">
+        <Link href="/ai-summit">
+          <Button className="w-full justify-start" data-testid="button-ai-summit-register">
             <Calendar className="mr-2 h-4 w-4" />
-            Book AI Summit Sessions
+            Register for AI Summit
           </Button>
         </Link>
         <Link href="/jobs">
@@ -436,10 +436,10 @@ const DashboardOverview = () => {
       <div>
         <h4 className="font-medium text-neutral-900 mb-4">Quick Actions</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Link href="/event-booking">
-            <Button className="w-full justify-start" data-testid="button-event-booking">
+          <Link href="/ai-summit">
+            <Button className="w-full justify-start" data-testid="button-ai-summit-register">
               <Calendar className="mr-2 h-4 w-4" />
-              Book AI Summit Sessions
+              Register for AI Summit
             </Button>
           </Link>
           <Link href={hasBusinessType ? "/dashboard/business-profile" : "/profile"}>
