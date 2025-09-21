@@ -332,7 +332,7 @@ export async function setupLocalAuth(app: Express) {
 
       // Check if speaker already exists
       const { aiSummitSpeakers } = await import("@shared/schema");
-      const { db } = await import("../db");
+      const { db } = await import("./db");
       const { eq } = await import("drizzle-orm");
       
       const existingSpeaker = await db.select().from(aiSummitSpeakers)
