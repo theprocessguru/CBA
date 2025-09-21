@@ -23,7 +23,6 @@ import {
   type RoleComponentType
 } from "@/components/profile/roles";
 import { PasswordChangeSection } from "@/components/profile/PasswordChangeSection";
-import { WorkshopBookingsSection } from "@/components/profile/WorkshopBookingsSection";
 import { apiRequest } from "@/lib/queryClient";
 import { PersonType, UserPersonType, User as DbUser } from "@shared/schema";
 
@@ -579,8 +578,6 @@ export default function Profile() {
           {/* Password Change Section */}
           <PasswordChangeSection />
 
-          {/* Workshop Bookings Section */}
-          <WorkshopBookingsSection userId={user?.id || ''} />
 
           {/* Role-Specific Sections */}
           {getAssignedRoles().length > 0 && (
