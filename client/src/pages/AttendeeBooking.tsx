@@ -8,26 +8,24 @@ import { useToast } from "@/hooks/use-toast";
 import { Clock, Users, MapPin, Calendar, Check, X, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 
-interface TimeSlot {
+interface WorkshopEvent {
   id: number;
-  title: string;
+  eventName: string;
   description: string;
-  slotType: string;
   startTime: string;
   endTime: string;
-  room: string;
+  venue: string;
   maxCapacity: number;
-  currentAttendees: number;
-  speakers: Array<{
-    speakerId: string;
-    role: string;
-    firstName: string;
-    lastName: string;
-  }>;
+  currentRegistrations: number;
+  eventDate: string;
+  registrationFee: number;
+  memberPrice: number;
 }
 
 interface Registration {
-  timeSlotId: number;
+  id: number;
+  eventId: number;
+  eventName: string;
   attendanceStatus: string;
 }
 
@@ -36,32 +34,30 @@ export default function AttendeeBooking() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch available time slots
-  const { data: timeSlots, isLoading: slotsLoading } = useQuery<TimeSlot[]>({
-    queryKey: ['/api/events/1/time-slots'],
+  // Fetch available workshops
+  const { data: workshops, isLoading: workshopsLoading } = useQuery<WorkshopEvent[]>({
+    queryKey: ['/api/workshops'],
     enabled: isAuthenticated
   });
 
   // Fetch user's registrations
   const { data: registrations, isLoading: registrationsLoading } = useQuery<Registration[]>({
-    queryKey: ['/api/my-time-slot-registrations'],
+    queryKey: ['/api/my-registrations'],
     enabled: isAuthenticated
   });
 
-  // Register for time slot mutation
+  // Register for workshop mutation
   const registerMutation = useMutation({
-    mutationFn: async (slotId: number) => {
-      return apiRequest('POST', `/api/events/1/time-slots/${slotId}/register`, {
-        badgeId: (user as any)?.qrHandle || `USER-${user?.id}` // Use QR handle as badge ID
-      });
+    mutationFn: async (eventId: number) => {
+      return apiRequest('POST', `/api/events/${eventId}/register`);
     },
     onSuccess: () => {
       toast({
         title: "Registration Successful",
-        description: "You've been registered for the session!",
+        description: "You've been registered for the workshop!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/events/1/time-slots'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/my-time-slot-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
       toast({
@@ -74,16 +70,16 @@ export default function AttendeeBooking() {
 
   // Cancel registration mutation
   const cancelMutation = useMutation({
-    mutationFn: async (slotId: number) => {
-      return apiRequest('DELETE', `/api/events/1/time-slots/${slotId}/register`);
+    mutationFn: async (registrationId: number) => {
+      return apiRequest('DELETE', `/api/my-registrations/${registrationId}`);
     },
     onSuccess: () => {
       toast({
         title: "Registration Cancelled",
         description: "Your registration has been cancelled.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/events/1/time-slots'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/my-time-slot-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
     },
     onError: (error: any) => {
       toast({
@@ -107,7 +103,7 @@ export default function AttendeeBooking() {
     );
   }
 
-  if (slotsLoading || registrationsLoading) {
+  if (workshopsLoading || registrationsLoading) {
     return (
       <div className="container mx-auto p-6">
         <div className="animate-pulse space-y-4">
@@ -120,14 +116,33 @@ export default function AttendeeBooking() {
     );
   }
 
-  const isRegistered = (slotId: number) => {
-    return registrations?.some(r => r.timeSlotId === slotId);
+  const isRegistered = (eventId: number) => {
+    return registrations?.some(r => r.eventId === eventId);
+  };
+  
+  const getRegistrationId = (eventId: number) => {
+    return registrations?.find(r => r.eventId === eventId)?.id;
   };
 
-  const formatTime = (dateString: string | null | undefined) => {
-    if (!dateString) return "TBD";
+  const formatTime = (timeString: string | null | undefined) => {
+    if (!timeString) return "TBD";
+    
     try {
-      const date = new Date(dateString);
+      // Handle time strings like "13:00:00"
+      if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(timeString)) {
+        const [hours, minutes] = timeString.split(':');
+        const hour = parseInt(hours);
+        const minute = parseInt(minutes);
+        
+        if (hour === 0 && minute === 0) return "TBD";
+        
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+        return `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+      }
+      
+      // Handle full date strings
+      const date = new Date(timeString);
       if (isNaN(date.getTime())) return "TBD";
       return format(date, "h:mm a");
     } catch (error) {
@@ -135,170 +150,153 @@ export default function AttendeeBooking() {
     }
   };
 
-  const getSlotTypeColor = (slotType: string) => {
-    switch (slotType) {
-      case 'keynote': return 'bg-purple-100 text-purple-800';
-      case 'workshop': return 'bg-blue-100 text-blue-800';
-      case 'talk': return 'bg-green-100 text-green-800';
-      case 'break': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getSpeakingDuration = (slotType: string) => {
-    return slotType === 'workshop' ? '45 minutes' : '15 minutes';
-  };
-
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">AI Summit 2025 - Book Your Sessions</h1>
         <p className="text-gray-600">
-          Reserve your seats for talks and workshops. Use your QR code badge for attendance tracking.
+          Reserve your seats for workshops. Use your QR code badge for attendance tracking.
         </p>
       </div>
 
       <div className="grid gap-6">
-        {timeSlots?.map((slot) => {
-          if (slot.slotType === 'break') return null; // Don't show breaks for booking
-          
-          const registered = isRegistered(slot.id);
-          
-          // Enforce strict capacity limits: Auditorium=80, Classroom=65
-          let maxAllowed = slot.maxCapacity;
-          if (slot.room === 'Auditorium' && maxAllowed > 80) {
-            maxAllowed = 80;
-          } else if (slot.room === 'Classroom' && maxAllowed > 65) {
-            maxAllowed = 65;
-          }
-          
-          const isFull = slot.currentAttendees >= maxAllowed;
-          const availableSeats = maxAllowed - slot.currentAttendees;
+        {workshops?.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-8">
+              <h3 className="text-lg font-semibold mb-2">No workshops available</h3>
+              <p className="text-gray-600">Check back later for available sessions.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          workshops?.map((workshop) => {
+            const registered = isRegistered(workshop.id);
+            const registrationId = getRegistrationId(workshop.id);
+            
+            const isFull = workshop.currentRegistrations >= workshop.maxCapacity;
+            const availableSeats = workshop.maxCapacity - workshop.currentRegistrations;
 
-          return (
-            <Card key={slot.id} className={`${
-              registered ? 'ring-2 ring-green-500' : 
-              isFull ? 'opacity-75 bg-gray-50' :
-              availableSeats <= 5 ? 'ring-2 ring-red-400 animate-pulse' :
-              ''
-            }`}>
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      {slot.title}
-                      <Badge className={getSlotTypeColor(slot.slotType)}>
-                        {slot.slotType} - {getSpeakingDuration(slot.slotType)}
-                      </Badge>
-                      {registered && (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          <Check className="w-3 h-3 mr-1" />
-                          Registered
+            return (
+              <Card key={workshop.id} className={`${
+                registered ? 'ring-2 ring-green-500' : 
+                isFull ? 'opacity-75 bg-gray-50' :
+                availableSeats <= 5 ? 'ring-2 ring-red-400 animate-pulse' :
+                ''
+              }`}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        {workshop.eventName}
+                        <Badge className="bg-blue-100 text-blue-800">
+                          Workshop - 30 minutes
                         </Badge>
-                      )}
-                    </CardTitle>
-                    <p className="text-gray-600">{slot.description}</p>
-                  </div>
-                  <div className="text-right">
-                    <div className="flex items-center text-sm text-gray-500 mb-1">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                        {registered && (
+                          <Badge variant="default" className="bg-green-100 text-green-800">
+                            <Check className="w-3 h-3 mr-1" />
+                            Registered
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <p className="text-gray-600">{workshop.description}</p>
                     </div>
-                    <div className="flex items-center text-sm text-gray-500 mb-1">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {slot.room}
-                    </div>
-                    <div className="mt-2">
-                      {isFull ? (
-                        <Badge className="bg-red-100 text-red-800 font-bold px-3 py-1">
-                          SOLD OUT
-                        </Badge>
-                      ) : (
-                        <div className={`inline-flex items-center px-3 py-1 rounded-lg font-medium ${
-                          availableSeats <= 5 ? 'bg-red-100 text-red-800' :
-                          availableSeats <= 10 ? 'bg-orange-100 text-orange-800' :
-                          availableSeats <= 20 ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
-                          <Users className="w-4 h-4 mr-1" />
-                          <span className="font-bold text-lg">{availableSeats}</span>
-                          <span className="ml-1 text-sm">seats left</span>
+                    <div className="text-right">
+                      <div className="flex items-center text-sm text-gray-500 mb-1">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {formatTime(workshop.startTime)} - {formatTime(workshop.endTime)}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 mb-1">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {workshop.venue || 'TBD'}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 mb-1">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {workshop.eventDate || 'TBD'}
+                      </div>
+                      <div className="mt-2">
+                        {isFull ? (
+                          <Badge className="bg-red-100 text-red-800 font-bold px-3 py-1">
+                            SOLD OUT
+                          </Badge>
+                        ) : (
+                          <div className={`inline-flex items-center px-3 py-1 rounded-lg font-medium ${
+                            availableSeats <= 5 ? 'bg-red-100 text-red-800' :
+                            availableSeats <= 10 ? 'bg-orange-100 text-orange-800' :
+                            availableSeats <= 20 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>
+                            <Users className="w-4 h-4 mr-1" />
+                            <span className="font-bold text-lg">{availableSeats}</span>
+                            <span className="ml-1 text-sm">seats left</span>
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500 mt-1">
+                          Max capacity: {workshop.maxCapacity}
                         </div>
-                      )}
-                      <div className="text-xs text-gray-500 mt-1">
-                        {slot.room === 'Auditorium' && 'Max capacity: 80'}
-                        {slot.room === 'Classroom' && 'Max capacity: 65'}
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              
-              <CardContent>
-                {slot.speakers.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="font-medium text-sm text-gray-700 mb-2">Speakers:</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {slot.speakers.map((speaker, index) => (
-                        <Badge key={index} variant="outline">
-                          {speaker.firstName} {speaker.lastName} ({speaker.role})
-                        </Badge>
-                      ))}
+                </CardHeader>
+                
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600">
+                        {workshop.registrationFee > 0 ? `£${workshop.registrationFee}` : 'Free'}
+                        {workshop.memberPrice > 0 && workshop.memberPrice < workshop.registrationFee && (
+                          <span className="ml-2 text-green-600">Members: £{workshop.memberPrice}</span>
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      {registered ? (
+                        <Button
+                          variant="outline"
+                          onClick={() => cancelMutation.mutate(registrationId!)}
+                          disabled={cancelMutation.isPending}
+                          className="text-red-600 hover:text-red-700"
+                          data-testid={`button-cancel-${workshop.id}`}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Cancel Registration
+                        </Button>
+                      ) : isFull ? (
+                        <Button
+                          disabled
+                          variant="outline"
+                          className="cursor-not-allowed bg-gray-100 text-gray-500 border-gray-300"
+                          data-testid={`button-soldout-${workshop.id}`}
+                        >
+                          <X className="w-4 h-4 mr-1" />
+                          Sold Out
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => registerMutation.mutate(workshop.id)}
+                          disabled={registerMutation.isPending}
+                          className={`${
+                            availableSeats <= 5 ? 'bg-red-600 hover:bg-red-700' :
+                            availableSeats <= 10 ? 'bg-orange-600 hover:bg-orange-700' :
+                            ''
+                          }`}
+                          data-testid={`button-register-${workshop.id}`}
+                        >
+                          {availableSeats <= 5 && (
+                            <AlertTriangle className="w-4 h-4 mr-1 animate-pulse" />
+                          )}
+                          Book Seat
+                          {availableSeats <= 5 && (
+                            <span className="ml-1 text-xs">(Only {availableSeats} left!)</span>
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </div>
-                )}
-
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <Calendar className="w-4 h-4 mr-1 text-gray-500" />
-                    <span className="text-sm text-gray-600">January 27, 2025</span>
-                  </div>
-
-                  <div className="flex gap-2">
-                    {registered ? (
-                      <Button
-                        variant="outline"
-                        onClick={() => cancelMutation.mutate(slot.id)}
-                        disabled={cancelMutation.isPending}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Cancel Registration
-                      </Button>
-                    ) : isFull ? (
-                      <Button
-                        disabled
-                        variant="outline"
-                        className="cursor-not-allowed bg-gray-100 text-gray-500 border-gray-300"
-                      >
-                        <X className="w-4 h-4 mr-1" />
-                        Sold Out
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => registerMutation.mutate(slot.id)}
-                        disabled={registerMutation.isPending}
-                        className={`${
-                          availableSeats <= 5 ? 'bg-red-600 hover:bg-red-700' :
-                          availableSeats <= 10 ? 'bg-orange-600 hover:bg-orange-700' :
-                          ''
-                        }`}
-                      >
-                        {availableSeats <= 5 && (
-                          <AlertTriangle className="w-4 h-4 mr-1 animate-pulse" />
-                        )}
-                        Book Seat
-                        {availableSeats <= 5 && (
-                          <span className="ml-1 text-xs">(Only {availableSeats} left!)</span>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {registrations && registrations.length > 0 && (
