@@ -72,6 +72,7 @@ import ContactImport from "@/pages/admin/contact-import";
 import CouncillorImport from "@/pages/admin/CouncillorImport";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
+import MyRegistrations from "@/pages/my-registrations";
 import MyQRCodeSimple from "@/pages/my-qr-code-simple";
 import MyPersonalBadge from "@/pages/my-personal-badge";
 import EnhancedPersonalBadge from "@/pages/enhanced-personal-badge";
@@ -97,6 +98,7 @@ import { ExhibitorScanner } from "@/pages/ExhibitorScanner";
 import EventTimeSlots from "@/pages/admin/EventTimeSlots";
 import TimeSlotManager from "@/pages/admin/TimeSlotManager";
 import EventDataExports from "@/pages/admin/EventDataExports";
+import AttendeeBooking from "@/pages/AttendeeBooking";
 import EventMoodDashboard from "@/pages/EventMoodDashboard";
 import MoodSubmission from "@/pages/MoodSubmission";
 import AffiliateProgrammeComingSoon from "@/pages/AffiliateProgrammeComingSoon";
@@ -121,6 +123,7 @@ import { EventMoodDemo } from "@/pages/EventMoodDemo";
 import BusinessEventManagement from "@/pages/BusinessEventManagement";
 import BusinessEvents from "@/pages/BusinessEvents";
 import EconomicGrowth from "@/pages/EconomicGrowth";
+import EventBooking from "@/pages/EventBooking";
 import VolunteerEvents from "@/pages/VolunteerEvents";
 import PhoneRecovery from "@/pages/PhoneRecovery";
 
@@ -297,6 +300,20 @@ function Router() {
           <VolunteerEvents />
         </MainLayout>
       </Route>
+      <Route path="/attendee-booking">
+        <ProtectedRoute>
+          <MainLayout>
+            <AttendeeBooking />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
+      <Route path="/event-booking">
+        <ProtectedRoute>
+          <MainLayout>
+            <EventBooking />
+          </MainLayout>
+        </ProtectedRoute>
+      </Route>
       <Route path="/badge-scanner">
         <ProtectedRoute>
           <MainLayout>
@@ -427,6 +444,11 @@ function Router() {
       <Route path="/workshop-registration">
         <MainLayout>
           <WorkshopRegistration />
+        </MainLayout>
+      </Route>
+      <Route path="/my-registrations">
+        <MainLayout>
+          <MyRegistrations />
         </MainLayout>
       </Route>
       <Route path="/event-scanner">
@@ -772,7 +794,7 @@ function Router() {
       <Route path="/book-sessions">
         <ProtectedRoute>
           <MainLayout>
-            <div>Page removed - please contact admin</div>
+            <AttendeeBooking />
           </MainLayout>
         </ProtectedRoute>
       </Route>
