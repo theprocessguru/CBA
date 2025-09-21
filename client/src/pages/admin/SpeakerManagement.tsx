@@ -182,6 +182,27 @@ export default function SpeakerManagement() {
     }
   };
 
+  const getSessionTypeColor = (type?: string) => {
+    if (!type) return 'bg-gray-100 text-gray-800 border-gray-200';
+    switch (type.toLowerCase()) {
+      case 'talk': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'workshop': return 'bg-green-100 text-green-800 border-green-200';
+      case 'networking': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'exhibition': return 'bg-purple-100 text-purple-800 border-purple-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getAudienceLevelColor = (level?: string) => {
+    if (!level) return 'bg-gray-100 text-gray-800 border-gray-200';
+    switch (level.toLowerCase()) {
+      case 'beginner': return 'bg-green-100 text-green-800 border-green-200';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'advanced': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto p-6">
@@ -532,7 +553,7 @@ export default function SpeakerManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {speakers?.filter(s => s.sessionType === 'keynote').length || 0}
+              0
             </div>
             <p className="text-xs text-muted-foreground">Keynote speakers</p>
           </CardContent>
@@ -545,7 +566,7 @@ export default function SpeakerManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {speakers?.filter(s => s.sessionType === 'workshop').length || 0}
+              0
             </div>
             <p className="text-xs text-muted-foreground">Workshop leaders</p>
           </CardContent>
@@ -558,7 +579,7 @@ export default function SpeakerManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {speakers?.filter(s => s.sessionType === 'panel').length || 0}
+              0
             </div>
             <p className="text-xs text-muted-foreground">Panel participants</p>
           </CardContent>
@@ -620,69 +641,54 @@ export default function SpeakerManagement() {
                   {/* Speaker Info Header */}
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-xl font-semibold text-gray-900">{speaker.speakerName}</h3>
-                      <p className="text-gray-600">{speaker.speakerJobTitle} at {speaker.speakerCompany}</p>
+                      <h3 className="text-xl font-semibold text-gray-900">{speaker.firstName && speaker.lastName ? `${speaker.firstName} ${speaker.lastName}` : speaker.name}</h3>
+                      <p className="text-gray-600">{speaker.jobTitle} at {speaker.company}</p>
                     </div>
                     <div className="flex gap-2">
-                      <Badge className={getSessionTypeColor(speaker.sessionType)}>
-                        {speaker.sessionType}
+                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                        Speaker
                       </Badge>
-                      <Badge className={getAudienceLevelColor(speaker.audienceLevel)}>
-                        {speaker.audienceLevel}
-                      </Badge>
-                      {speaker.talkDuration && (
-                        <Badge variant="outline" className="gap-1">
-                          <Clock className="h-3 w-3" />
-                          {speaker.talkDuration} mins
-                        </Badge>
-                      )}
                     </div>
                   </div>
 
                   {/* Talk Details */}
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-900 mb-2">{speaker.talkTitle}</h4>
-                    <p className="text-gray-600 text-sm">{speaker.talkDescription}</p>
+                    <h4 className="font-semibold text-gray-900 mb-2">Speaker Biography</h4>
+                    <p className="text-gray-600 text-sm">{speaker.bio}</p>
                   </div>
 
                   {/* Contact & Links */}
                   <div className="flex flex-wrap gap-4 text-sm">
                     <div className="flex items-center gap-1 text-gray-600">
                       <Mail className="h-4 w-4" />
-                      <a href={`mailto:${speaker.speakerEmail}`} className="hover:text-blue-600">
-                        {speaker.speakerEmail}
+                      <a href={`mailto:${speaker.email}`} className="hover:text-blue-600">
+                        {speaker.email}
                       </a>
                     </div>
-                    {speaker.speakerPhone && (
+                    {speaker.phone && (
                       <div className="flex items-center gap-1 text-gray-600">
                         <Phone className="h-4 w-4" />
-                        {speaker.speakerPhone}
+                        {speaker.phone}
                       </div>
                     )}
-                    {speaker.speakerWebsite && (
+                    {speaker.website && (
                       <div className="flex items-center gap-1 text-gray-600">
                         <Globe className="h-4 w-4" />
-                        <a href={speaker.speakerWebsite} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
+                        <a href={speaker.website} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
                           Website
                         </a>
                       </div>
                     )}
-                    {speaker.speakerLinkedIn && (
+                    {speaker.linkedIn && (
                       <div className="flex items-center gap-1 text-gray-600">
                         <Linkedin className="h-4 w-4" />
-                        <a href={speaker.speakerLinkedIn} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
+                        <a href={speaker.linkedIn} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600">
                           LinkedIn
                         </a>
                       </div>
                     )}
                   </div>
 
-                  {/* Additional Info */}
-                  {speaker.speakerBio && (
-                    <div className="border-t pt-4">
-                      <p className="text-sm text-gray-600">{speaker.speakerBio}</p>
-                    </div>
-                  )}
 
                   {/* Meta Info */}
                   <div className="flex justify-between items-center pt-4 border-t">
@@ -693,12 +699,6 @@ export default function SpeakerManagement() {
                       <Badge variant="outline">
                         {speaker.previousSpeaking ? "Experienced Speaker" : "New Speaker"}
                       </Badge>
-                      {speaker.interactiveElements && (
-                        <Badge variant="outline">Interactive Session</Badge>
-                      )}
-                      {speaker.handoutsProvided && (
-                        <Badge variant="outline">Handouts Provided</Badge>
-                      )}
                     </div>
                   </div>
                 </div>
