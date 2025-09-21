@@ -196,6 +196,10 @@ export default function AttendeeBooking() {
     }
   };
 
+  // Get URL parameters to set default tab
+  const urlParams = new URLSearchParams(window.location.search);
+  const defaultTab = urlParams.get('tab') === 'speaking' ? 'speaking' : 'workshops';
+
   return (
     <div className="container mx-auto p-6">
       <div className="mb-8">
@@ -205,7 +209,7 @@ export default function AttendeeBooking() {
         </p>
       </div>
 
-      <Tabs defaultValue="workshops" className="w-full">
+      <Tabs defaultValue={defaultTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="workshops" className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />

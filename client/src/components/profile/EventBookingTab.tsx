@@ -15,7 +15,8 @@ import {
   BookOpen,
   CheckCircle,
   AlertTriangle,
-  Plus
+  Plus,
+  Mic
 } from "lucide-react";
 
 export const EventBookingTab = () => {
@@ -186,11 +187,17 @@ export const EventBookingTab = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Link href="/book-sessions" data-testid="link-book-ai-summit">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Link href="/book-sessions?tab=workshops" data-testid="link-book-workshops">
               <Button className="w-full h-16 flex flex-col items-center gap-2">
                 <BookOpen className="h-5 w-5" />
-                <span className="text-sm">Book AI Summit Sessions</span>
+                <span className="text-sm">Book Workshops</span>
+              </Button>
+            </Link>
+            <Link href="/book-sessions?tab=speaking" data-testid="link-book-speaking">
+              <Button variant="outline" className="w-full h-16 flex flex-col items-center gap-2">
+                <Mic className="h-5 w-5" />
+                <span className="text-sm">Book Speaker Sessions</span>
               </Button>
             </Link>
             <Link href="/my-registrations" data-testid="link-manage-bookings">
