@@ -43,7 +43,8 @@ import {
   Plus,
   Shield,
   MessageCircle,
-  Briefcase
+  Briefcase,
+  X
 } from "lucide-react";
 import { Link } from "wouter";
 import { SponsorSpotlight } from "@/components/SponsorSpotlight";
@@ -445,11 +446,12 @@ const AISummit = () => {
 
   // Admin test data fill function (updated with all fields)
   const fillTestData = () => {
+    const randomId = Math.floor(Math.random() * 10000);
     setRegistrationData({
       firstName: "John",
       lastName: "Smith", 
-      email: "john.smith@test.com",
-      confirmEmail: "john.smith@test.com",
+      email: `john.smith.${randomId}@test.com`,
+      confirmEmail: `john.smith.${randomId}@test.com`,
       password: "TestPass123",
       confirmPassword: "TestPass123",
       mobileNumber: "+44 7700 900123",
@@ -1458,11 +1460,12 @@ const AISummit = () => {
                       <h2 className="text-2xl font-bold text-neutral-900">Create Account & Register for AI Summit</h2>
                       <Button 
                         variant="ghost" 
-                        className="h-6 w-6 p-0"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
                         onClick={() => setShowRegistrationForm(false)}
+                        data-testid="button-close-form"
                       >
                         <span className="sr-only">Close</span>
-                        <Eye className="h-4 w-4" />
+                        <X className="h-5 w-5" />
                       </Button>
                     </div>
                     
@@ -1681,11 +1684,12 @@ const AISummit = () => {
                       <h2 className="text-2xl font-bold text-green-600">Registration Successful! 🎉</h2>
                       <Button 
                         variant="ghost" 
-                        className="h-6 w-6 p-0"
+                        className="h-8 w-8 p-0 hover:bg-gray-100"
                         onClick={handleSuccessClose}
+                        data-testid="button-close-success"
                       >
                         <span className="sr-only">Close</span>
-                        <Eye className="h-4 w-4" />
+                        <X className="h-5 w-5" />
                       </Button>
                     </div>
                     
