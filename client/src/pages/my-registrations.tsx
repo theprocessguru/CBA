@@ -104,8 +104,8 @@ const MyRegistrations = () => {
 
   // Cancel a registration
   const cancelMutation = useMutation({
-    mutationFn: async (sessionId: string) => {
-      return apiRequest('DELETE', '/api/cancel-registration', { sessionId });
+    mutationFn: async (registrationId: string) => {
+      return apiRequest('DELETE', `/api/my-registrations/${registrationId}`);
     },
     onSuccess: () => {
       toast({
@@ -127,8 +127,8 @@ const MyRegistrations = () => {
     registerMutation.mutate(sessionId);
   };
 
-  const handleCancel = (sessionId: string) => {
-    cancelMutation.mutate(sessionId);
+  const handleCancel = (registrationId: string) => {
+    cancelMutation.mutate(registrationId);
   };
 
   const downloadBadge = async (registration: Registration) => {
