@@ -6391,7 +6391,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           )`
         })
         .from(aiSummitSpeakers)
-        .orderBy(desc(aiSummitSpeakers.createdAt));
+        .orderBy(aiSummitSpeakers.lastName, aiSummitSpeakers.firstName, aiSummitSpeakers.name);
       
       res.json(speakers);
     } catch (error) {
@@ -10821,15 +10821,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sessionSchema = insertAISummitSpeakingSessionSchema.extend({
         startTime: z.string(),
         endTime: z.string(),
+        speakerId: z.string().optional(), // Optional speaker selection
       });
       
       const validated = sessionSchema.parse(req.body);
       
-      const session = await storage.createAISummitSpeakingSession({
+      // If speakerId is provided, look up speaker and auto-populate fields
+      let sessionData = {
         ...validated,
         startTime: new Date(validated.startTime),
         endTime: new Date(validated.endTime),
-      });
+      };
+      
+      if (validated.speakerId) {
+        try {
+          const { aiSummitSpeakers } = await import("@shared/schema");
+          
+          const [speaker] = await db
+            .select({
+              id: aiSummitSpeakers.id,
+              name: aiSummitSpeakers.name,
+              firstName: aiSummitSpeakers.firstName,
+              lastName: aiSummitSpeakers.lastName,
+              company: aiSummitSpeakers.company,
+              jobTitle: aiSummitSpeakers.jobTitle,
+            })
+            .from(aiSummitSpeakers)
+            .where(eq(aiSummitSpeakers.id, validated.speakerId))
+            .limit(1);
+          
+          if (speaker) {
+            // Auto-populate speaker fields from selected speaker
+            const fullName = speaker.firstName && speaker.lastName 
+              ? `${speaker.firstName} ${speaker.lastName}` 
+              : speaker.name;
+            
+            sessionData = {
+              ...sessionData,
+              speakerName: fullName || sessionData.speakerName,
+              speakerCompany: speaker.company || sessionData.speakerCompany,
+              speakerJobTitle: speaker.jobTitle || sessionData.speakerJobTitle,
+            };
+          }
+        } catch (speakerLookupError) {
+          console.warn("Could not lookup speaker:", speakerLookupError);
+          // Continue with manual entry if speaker lookup fails
+        }
+      }
+      
+      const session = await storage.createAISummitSpeakingSession(sessionData);
       
       res.json({
         success: true,

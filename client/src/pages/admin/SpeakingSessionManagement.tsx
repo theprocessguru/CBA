@@ -33,9 +33,20 @@ interface SessionStats {
   activeAttendance: number;
 }
 
+interface Speaker {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  company: string;
+  jobTitle: string;
+}
+
 const createSessionSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
+  speakerId: z.string().optional(), // Optional speaker selection from dropdown
   speakerName: z.string().min(1, "Speaker name is required"),
   speakerBio: z.string().optional(),
   speakerCompany: z.string().optional(),
@@ -65,6 +76,12 @@ export default function SpeakingSessionManagement() {
   const { data: stats, isLoading: statsLoading } = useQuery<SessionStats>({
     queryKey: ['/api/admin/speaking-session-stats'],
     refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
+  // Fetch speakers for dropdown
+  const { data: speakers, isLoading: speakersLoading } = useQuery<Speaker[]>({
+    queryKey: ['/api/admin/speakers'],
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   const createSessionForm = useForm<CreateSessionFormData>({
@@ -232,6 +249,70 @@ export default function SpeakingSessionManagement() {
                         />
 
                         {/* Speaker Information */}
+                        <div className="col-span-2">
+                          <FormField
+                            control={createSessionForm.control}
+                            name="speakerId"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Select Speaker (Optional)</FormLabel>
+                                <Select
+                                  onValueChange={(value) => {
+                                    // Handle manual entry case
+                                    if (value === "manual") {
+                                      field.onChange(undefined); // Don't send speakerId for manual entry
+                                      return;
+                                    }
+                                    
+                                    field.onChange(value);
+                                    // Auto-populate speaker fields when speaker is selected
+                                    if (value && speakers) {
+                                      const selectedSpeaker = speakers.find(s => s.id === value);
+                                      if (selectedSpeaker) {
+                                        const fullName = selectedSpeaker.firstName && selectedSpeaker.lastName 
+                                          ? `${selectedSpeaker.firstName} ${selectedSpeaker.lastName}` 
+                                          : selectedSpeaker.name;
+                                        createSessionForm.setValue('speakerName', fullName || '');
+                                        createSessionForm.setValue('speakerCompany', selectedSpeaker.company || '');
+                                        createSessionForm.setValue('speakerJobTitle', selectedSpeaker.jobTitle || '');
+                                      }
+                                    }
+                                  }}
+                                  value={field.value}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger data-testid="select-speaker">
+                                      <SelectValue placeholder="Choose from registered speakers or enter manually below" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="manual">
+                                      Manual Entry (No Speaker Selected)
+                                    </SelectItem>
+                                    {speakers?.map((speaker) => {
+                                      const displayName = speaker.firstName && speaker.lastName 
+                                        ? `${speaker.firstName} ${speaker.lastName}` 
+                                        : speaker.name;
+                                      const subtitle = [speaker.jobTitle, speaker.company].filter(Boolean).join(' at ');
+                                      return (
+                                        <SelectItem key={speaker.id} value={speaker.id}>
+                                          <div className="flex flex-col">
+                                            <span className="font-medium">{displayName}</span>
+                                            {subtitle && (
+                                              <span className="text-sm text-muted-foreground">{subtitle}</span>
+                                            )}
+                                          </div>
+                                        </SelectItem>
+                                      );
+                                    })}
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
                         <FormField
                           control={createSessionForm.control}
                           name="speakerName"
