@@ -15,6 +15,19 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { enGB } from "date-fns/locale";
 
+// Safe format function that handles invalid dates
+const safeFormat = (date: Date | string, formatString: string, options?: any): string => {
+  try {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) {
+      return typeof date === 'string' ? date : '';
+    }
+    return format(dateObj, formatString, options);
+  } catch (error) {
+    return typeof date === 'string' ? date : '';
+  }
+};
+
 interface Event {
   id: number;
   eventName: string;
@@ -93,7 +106,10 @@ const formatUKDate = (dateString: string | undefined) => {
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
-    return format(date, 'dd/MM/yyyy', { locale: enGB });
+    if (isNaN(date.getTime())) {
+      return dateString; // Return original string if date is invalid
+    }
+    return safeFormat(date, 'dd/MM/yyyy', { locale: enGB });
   } catch (error) {
     return dateString;
   }
@@ -104,7 +120,10 @@ const formatUKDateTime = (dateString: string | undefined, timeString: string | u
   if (!dateString) return '';
   try {
     const date = new Date(dateString);
-    const formattedDate = format(date, 'dd/MM/yyyy', { locale: enGB });
+    if (isNaN(date.getTime())) {
+      return dateString || ''; // Return original string if date is invalid
+    }
+    const formattedDate = safeFormat(date, 'dd/MM/yyyy', { locale: enGB });
     return timeString ? `${formattedDate} at ${timeString}` : formattedDate;
   } catch (error) {
     return dateString || '';
@@ -932,7 +951,14 @@ export default function EventManagement() {
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <Clock className="w-4 h-4 mr-2" />
-                      {format(new Date(event.startDate), "h:mm a")}
+                      {(() => {
+                        try {
+                          const date = new Date(event.startDate);
+                          return safeFormat(date, "h:mm a");
+                        } catch (error) {
+                          return '';
+                        }
+                      })()}
                     </div>
                     <div className="flex items-center text-muted-foreground">
                       <MapPin className="w-4 h-4 mr-2" />
@@ -1311,8 +1337,17 @@ export default function EventManagement() {
                         </div>
                         <div className="text-right text-sm">
                           <p className="font-medium">
-                            {format(new Date(`2000-01-01 ${slot.startTime}`), "h:mm a")} - 
-                            {format(new Date(`2000-01-01 ${slot.endTime}`), "h:mm a")}
+                            {(() => {
+                              try {
+                                const startDate = new Date(`2000-01-01 ${slot.startTime}`);
+                                const endDate = new Date(`2000-01-01 ${slot.endTime}`);
+                                const startTime = safeFormat(startDate, "h:mm a") || slot.startTime;
+                                const endTime = safeFormat(endDate, "h:mm a") || slot.endTime;
+                                return `${startTime} - ${endTime}`;
+                              } catch (error) {
+                                return `${slot.startTime} - ${slot.endTime}`;
+                              }
+                            })()}
                           </p>
                           {slot.room && (
                             <p className="text-muted-foreground">{slot.room}</p>
