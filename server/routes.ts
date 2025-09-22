@@ -2619,7 +2619,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(aiSummitWorkshopRegistrations)
       .innerJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
       .innerJoin(aiSummitBadges, eq(aiSummitWorkshopRegistrations.badgeId, aiSummitBadges.badgeId))
-      .where(eq(aiSummitBadges.participantId, userId));
+      .where(or(
+        eq(aiSummitBadges.participantId, userId),
+        eq(aiSummitBadges.email, req.user.email.toLowerCase())
+      ));
 
       // Get AI Summit speaking session registrations for this user
       const speakingSessionRegistrations = await db.select({
@@ -2637,7 +2640,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .from(aiSummitSessionRegistrations)
       .innerJoin(aiSummitSpeakingSessions, eq(aiSummitSessionRegistrations.sessionId, aiSummitSpeakingSessions.id))
       .innerJoin(aiSummitBadges, eq(aiSummitSessionRegistrations.badgeId, aiSummitBadges.badgeId))
-      .where(eq(aiSummitBadges.participantId, userId));
+      .where(or(
+        eq(aiSummitBadges.participantId, userId),
+        eq(aiSummitBadges.email, req.user.email.toLowerCase())
+      ));
       
       // Format CBA registrations for calendar (matching RegistrationCalendar expected format)
       const cbaFormattedRegistrations = cbaRegistrations.map(reg => {
