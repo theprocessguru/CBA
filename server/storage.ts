@@ -1951,7 +1951,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllAISummitSpeakingSessions(): Promise<AISummitSpeakingSession[]> {
-    return await db.select().from(aiSummitSpeakingSessions).orderBy(aiSummitSpeakingSessions.startTime);
+    // Get all sessions first
+    const sessions = await db.select().from(aiSummitSpeakingSessions).orderBy(aiSummitSpeakingSessions.startTime);
+    
+    // For each session, calculate the current registrations dynamically
+    const sessionsWithCorrectCounts = await Promise.all(sessions.map(async (session) => {
+      const registrations = await this.getSessionRegistrationsBySessionId(session.id);
+      return {
+        ...session,
+        currentRegistrations: registrations.length // Use actual count, not stored value
+      };
+    }));
+    
+    return sessionsWithCorrectCounts;
   }
 
   async updateAISummitSpeakingSession(id: number, sessionData: Partial<InsertAISummitSpeakingSession>): Promise<AISummitSpeakingSession> {
