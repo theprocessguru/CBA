@@ -119,7 +119,7 @@ export default function EventManagement() {
 
   // Fetch all events
   const { data: events = [], isLoading: eventsLoading } = useQuery<Event[]>({
-    queryKey: ["/api/events"],
+    queryKey: ["/api/admin/events"],
   });
 
   // Fetch registrations for selected event
@@ -130,7 +130,7 @@ export default function EventManagement() {
 
   // Fetch sub-events (time slots) for selected event
   const { data: subEvents = [], isLoading: subEventsLoading } = useQuery<EventTimeSlot[]>({
-    queryKey: selectedEvent?.id ? [`/api/events/${selectedEvent.id}/time-slots`] : [],
+    queryKey: selectedEvent?.id ? [`/api/admin/events/${selectedEvent.id}/time-slots`] : [],
     enabled: !!selectedEvent && !!selectedEvent?.id && showSubEventsDialog,
   });
 
@@ -141,7 +141,7 @@ export default function EventManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setShowCreateDialog(false);
       setImageFile(null);
       setImagePreview(null);
@@ -166,7 +166,7 @@ export default function EventManagement() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setShowEditDialog(false);
       setSelectedEvent(null);
       setImageFile(null);
@@ -212,7 +212,7 @@ export default function EventManagement() {
       await apiRequest("POST", `/api/admin/events/${id}/archive`, { reason });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setShowArchiveDialog(false);
       toast({
         title: "Event Archived",
@@ -234,7 +234,7 @@ export default function EventManagement() {
       await apiRequest("POST", `/api/admin/events/${id}/copy`, { newDate });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setShowCopyDialog(false);
       toast({
         title: "Event Copied",
@@ -256,7 +256,7 @@ export default function EventManagement() {
       await apiRequest("POST", `/api/admin/events/${id}/recurring`, { maxInstances });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/events"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/events"] });
       setShowRecurringDialog(false);
       toast({
         title: "Recurring Events Created",
