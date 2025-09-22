@@ -2620,6 +2620,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       .innerJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
       .innerJoin(aiSummitBadges, eq(aiSummitWorkshopRegistrations.badgeId, aiSummitBadges.badgeId))
       .where(eq(aiSummitBadges.participantId, userId));
+
+      // Get AI Summit speaking session registrations for this user
+      const speakingSessionRegistrations = await db.select({
+        registrationId: aiSummitSessionRegistrations.id,
+        sessionId: aiSummitSessionRegistrations.sessionId,
+        registeredAt: aiSummitSessionRegistrations.registeredAt,
+        sessionTitle: aiSummitSpeakingSessions.title,
+        sessionDescription: aiSummitSpeakingSessions.description,
+        startTime: aiSummitSpeakingSessions.startTime,
+        endTime: aiSummitSpeakingSessions.endTime,
+        speakerName: aiSummitSpeakingSessions.speakerName,
+        speakerCompany: aiSummitSpeakingSessions.speakerCompany,
+        venue: aiSummitSpeakingSessions.venue
+      })
+      .from(aiSummitSessionRegistrations)
+      .innerJoin(aiSummitSpeakingSessions, eq(aiSummitSessionRegistrations.sessionId, aiSummitSpeakingSessions.id))
+      .innerJoin(aiSummitBadges, eq(aiSummitSessionRegistrations.badgeId, aiSummitBadges.badgeId))
+      .where(eq(aiSummitBadges.participantId, userId));
       
       // Format CBA registrations for calendar (matching RegistrationCalendar expected format)
       const cbaFormattedRegistrations = cbaRegistrations.map(reg => {
@@ -2673,9 +2691,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           checkedInAt: null
         };
       });
+
+      // Format speaking session registrations 
+      const speakingSessionFormattedRegistrations = speakingSessionRegistrations.map(reg => {
+        const startDateTime = reg.startTime instanceof Date ? reg.startTime.toISOString() : reg.startTime;
+        const endDateTime = reg.endTime instanceof Date ? reg.endTime.toISOString() : reg.endTime;
+        
+        return {
+          id: reg.registrationId,
+          eventId: reg.sessionId,
+          type: 'speaking_session',
+          sessionType: 'speaking_session',
+          title: reg.sessionTitle,
+          description: reg.sessionDescription || 'AI Summit Speaking Session',
+          speaker: reg.speakerName,
+          speakerCompany: reg.speakerCompany,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          location: reg.venue || 'AI Summit Venue',
+          registeredAt: reg.registeredAt,
+          checkedIn: false,
+          checkedInAt: null
+        };
+      });
       
       // Combine all registrations
-      const allRegistrations = [...cbaFormattedRegistrations, ...workshopFormattedRegistrations];
+      const allRegistrations = [...cbaFormattedRegistrations, ...workshopFormattedRegistrations, ...speakingSessionFormattedRegistrations];
       
       res.json(allRegistrations);
     } catch (error: any) {
