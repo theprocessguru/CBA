@@ -1,0 +1,435 @@
+ID,First Name,Last Name,Email,Phone,Company,Job Title,Business Type,AI Interest,Participant Roles,Custom Role,Email Verified,Registration Date,Pricing Status,Payment Status,Tags,Type
+1,Exhibition,Test Visitor,test.visitor@exhibition.com,07123456789,Test Exhibition Company,Technology Visitor,Technology,Learning about AI solutions for business automation,"[""attendee""]",,No,2025-08-01T13:00:06.608Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+2,Steven,Ball,steve@croydonba.org.uk,07123456789,CBA Administration,Founder & CEO,Business Association,Leading AI adoption in Croydon business community,"[""attendee""]",,No,2025-08-01T13:03:18.918Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+5,Paul,McDermott,paul@codezest.net,07940215901,CodeZest Ltd,Director,small-business,chatbots,"[""attendee""]",,No,2025-08-06T10:16:41.921Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+6,George,Hammond,george@construction-software.org,07983570305,Construction Software Experts,CEO,medium-enterprise,productivity,"[""attendee""]",,No,2025-08-06T10:43:05.987Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+7,Kareem,,kareem_newton@yahoo.com,07851462018,"Kareem ",,small-business,,"[""attendee""]",,No,2025-08-06T13:40:19.063Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+8,Arun,Joseph,arunvjoseph@outlook.com,07746339663,"Retailer Robotics ltd ",COO,small-business,automation,"[""attendee""]",,No,2025-08-07T09:31:15.337Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+9,Sangeeta,Patel,sangeetapatel22@gmail.com,07956423691,P o relief ltd,"Director ",small-business,customer-service,"[""attendee""]",,No,2025-08-07T09:36:33.951Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+10,Saul,Truman,saul@relai.chat,07468390300,Jely,Cofounder,,,"[""attendee""]",,No,2025-08-07T09:44:45.301Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+11,Julien,Allwood,julien_allwppd@hotmail.co.uk,07368458717,,"Data Analyst ",large-corporation,data-analytics,"[""attendee""]",,No,2025-08-07T09:55:09.667Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+12,Vijay,Patel,Vijay@shivtravel.co.uk,07904220575,"Shiv Travel ","Owner ",other,,"[""attendee""]",,No,2025-08-07T10:00:32.500Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+13,Aruna,Sellahewa,aruna@pamban.co.uk,07595 547003,Pamban Chai,co founder,small-business,,"[""attendee""]",,No,2025-08-07T10:21:25.084Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+14,Michael,Young,michaelgyounguk@gmail.com,07523797277,SMM,Web Developer,small-business,automation,"[""attendee""]",,No,2025-08-07T10:22:34.446Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+15,Alberta,Owusu,albertaowusu19@yahoo.com,07378896235,"Alberta’s kitchen ",Chef,small-business,general-learning,"[""attendee""]",,No,2025-08-07T11:34:08.777Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+16,Ravinder,Sahota Sahota,rssahota24@outlook.com,07961136364,"KeeCare ","Integrative Natural Health and Wellness Practitioner ",small-business,content-creation,"[""attendee""]",,No,2025-08-07T13:31:20.589Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+17,Dr,Robert WoW De Souza,robertdesouzawow@gmail.com,07814379254,Caring Game Changers Global,Founder,,productivity,"[""attendee""]",,No,2025-08-07T13:52:26.019Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+18,Sarah,Bowell,s.bowell@btopenworld.com,07512721340,,,,other,"[""attendee""]",,No,2025-08-07T13:56:24.391Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+19,Rico,Wagner Caleap,rico@wagnercalesp.com,07818192535,Wagnercaleap.com,"Director ",small-business,customer-service,"[""attendee""]",,No,2025-08-07T13:58:08.651Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+20,Abdul,Malik,renttwobuy@gmail.com,,"My World ","Consultant ",,,"[""attendee""]",,No,2025-08-07T14:01:14.269Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+21,Sammy,Hegab,sammy.hegab@outlook.com,07514049901,"Umicom Foundation ",Trustee,startup,productivity,"[""attendee""]",,No,2025-08-07T14:23:23.303Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+22,Harikrishnan,Karuppaiah,hkkrish789@gmail.com,07823715698,"University of Birmingham ","Healthcare student ",student,other,"[""attendee""]",,No,2025-08-07T16:21:26.899Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+23,Pankaj,Patel,pankaj@pankaj.net,0795 834 6381,Flexistay Ltd,"Director ",small-business,general-learning,"[""attendee""]",,No,2025-08-07T17:49:50.620Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+24,Dhanush,senthilkumar,gsdhanush01@gmail.com,,,,student,automation,"[""attendee""]",,No,2025-08-08T01:21:20.474Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+25,Sritharan,Sriparthipan,sri@orugroup.com,07966757573,ORU PAPER Ltd,"Director ",non-profit,chatbots,"[""attendee""]",,No,2025-08-09T06:47:06.661Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+26,Bharath,Kumar,bharathkumar2098@gmail.com,07778199685,"Brunel University ",Student,student,data-analytics,"[""attendee""]",,No,2025-08-09T19:58:03.406Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+27,Dipesh,Modha,dipesh_modha@yahoo.co.uk,07791844111,,,small-business,customer-service,"[""attendee""]",,No,2025-08-10T10:24:06.570Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+28,Siobhan,Puschmann,siobhan.puschmann@gmail.com,,,,,automation,"[""attendee""]",,No,2025-08-10T20:51:05.356Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+29,Dahna-Esther,Fearon,dahna.fearon@googlemail.com,07377417370,Release Me,Founder,other,content-creation,"[""attendee""]",,No,2025-08-11T16:37:05.215Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+31,Jo,Chesney,jochesney@tbxh.co.uk,,TBXH@,CEO,small-business,general-learning,"[""attendee""]",,No,2025-08-12T16:42:40.683Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+32,Emma,Cleevely,bookme@tbxh.co.uk,,TBXH@,Meetings & Events Manager,small-business,general-learning,"[""attendee""]",,No,2025-08-12T16:43:25.284Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+33,Tegan,Jones,Askme@tbxh.co.uk,,TBXH@,Community Manager,small-business,general-learning,"[""attendee""]",,No,2025-08-12T16:44:02.503Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+34,Finlay,Carney,hello@tbxh.co.uk,,TBXH@,Social Media / Marketing Exec,small-business,content-creation,"[""attendee""]",,No,2025-08-12T16:44:45.737Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+35,Mark,Waterstone,mark@rosepride.co.uk,,Rosepride,CEO,small-business,general-learning,"[""attendee""]",,No,2025-08-12T16:46:19.525Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+36,Direct,Test,directtest@example.com,,,,,,"[""attendee""]",,No,2025-08-12T17:09:56.173Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+39,Attendee,Test Final,attendeefinal32054@example.com,07123456789,Final Company,Manager,Technology,AI/ML Development,"[""attendee""]",,No,2025-08-12T22:03:41.156Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+42,Calvin,,knignivlac@gmail.com,07519588097,EbonyClass,ceo,startup,productivity,"[""attendee""]",,No,2025-08-14T15:41:52.416Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+43,Amol,,amoldower@gmail.com,07835472879,,,,general-learning,"[""attendee""]",,No,2025-08-16T21:34:08.421Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+44,Ranjani,,rranjani1303@gmail.com,07423034395,,,student,general-learning,"[""team""]",testing,No,2025-08-17T15:59:54.926Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+45,Rithu,,rithurv346@gmail.com,07448263255,,,,chatbots,"[""team""]",testing,No,2025-08-17T16:01:43.609Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+46,Kaushal,Patel,stingosales@gmail.com,9873895154,STINGO INC,Busienss Head,startup,automation,"[""attendee""]",,No,2025-08-19T05:06:47.818Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+47,Benedict,Selvaratnam,BUXTONTCHIBO@GMAIL.COM,07832417784,FRESHFIELDS MARKET,,,,"[""attendee""]",,No,2025-08-19T08:15:49.114Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+48,Bibhuti,Patro,bibhuti_patro@yahoo.com,07961 234165,,,small-business,customer-service,"[""attendee""]",,No,2025-08-19T11:03:15.747Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+49,Imran,Tafader,i.tafader786@gmail.con,07944880709,Croydon Eye Clinic,"Store Manager ",small-business,automation,"[""attendee""]",,No,2025-08-20T11:35:43.516Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+50,Oumesh,Sauba,oumesh@nubooks.mu,07919156104,Nubooks,CEO,small-business,automation,"[""attendee""]",,No,2025-08-20T12:03:39.472Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+51,Jude,Joseph,judejoe@gmail.com,07448617431,,,,,"[""attendee""]",,No,2025-08-20T13:02:02.524Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+52,Deniz,sengul,info@poshclinic.co.uk,07421053999,Posh Skin Clinic Ltd,Director/Owner,small-business,customer-service,"[""attendee""]",,No,2025-08-20T15:46:21.727Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+53,Geoffrey,Cox,geoffrey@cyber8.biz,07762525738,Cyber 8 Ltd,"Founder & managing director ",small-business,content-creation,"[""attendee""]",,No,2025-08-21T18:38:09.519Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+54,Swathika,Rajkumar,swathiraj2911@gmail.com,07887152187,,,,,"[""attendee""]",,No,2025-08-22T10:12:18.557Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+55,Jeeva,Kathiresan,jeevakathiresan05@gmail.com,08220997736,,,,,"[""attendee""]",,No,2025-08-23T15:40:59.761Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+56,Arun,Krishnan,arunkrishnaasankar@gmail.com,07799354897,,,,,"[""attendee""]",,No,2025-08-23T15:44:50.097Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+57,Helen,Roshna,helenroshna63cruz@gmail.com,07512369122,,,,,"[""attendee""]",,No,2025-08-23T15:46:14.179Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+58,Pavithra,Murali,pavikutty038@gmail.com,07423 021676,,,,,"[""attendee""]",,No,2025-08-23T15:49:29.322Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+59,Prem,Srikanth,premsrikanth123@gmail.com,07799831410,,,,,"[""attendee""]",,No,2025-08-23T15:50:50.715Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+60,Test,User,test@example.com,,Test Co,Tester,,,"[""attendee""]",,No,2025-08-26T13:28:37.711Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+61,Steve,Ball,steve@mytai.co.uk,07564723762,MYT AI,Founder and EO,small-business,productivity,"[""attendee""]",,No,2025-08-26T13:40:50.217Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+62,Test,Email User,testemail@example.com,,Test Co,Tester,,,"[""attendee""]",,No,2025-08-26T13:43:36.176Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+63,Debug,Email,debug@example.com,,Test Co,Tester,,,"[""attendee""]",,No,2025-08-26T13:44:19.095Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+64,URL,Test User,urltest@example.com,,Test Co,Tester,,,"[""attendee""]",,No,2025-08-26T13:55:14.971Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+65,James,southern,ukcctv121@gmail.com,07983241778,CCTV installer,"Director ",small-business,,"[""attendee""]",,No,2025-08-27T08:12:26.241Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+66,Lance,Wybrow,lancewybrow@hotmail.co.uk,07709835320,Profit First Business Advisor,Business Growth Advisor,small-business,productivity,"[""attendee""]",,No,2025-08-29T14:40:56.759Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+67,John,Smith,john.smith@test.com,+44 7700 900123,,,,,"[""attendee""]",,No,2025-08-31T14:07:19.433Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+68,test,Test,TEST@test.com,01293265205,,,,chatbots,"[""attendee""]",,No,2025-08-31T14:15:17.720Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+69,Scott,Longman,scott@scott-longman.org.uk,07352097149,,,,other,"[""attendee""]",,No,2025-09-01T09:53:27.773Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+70,New,Attendee,newuser@example.com,+44123456789,,,,,"[""attendee""]",,No,2025-09-01T13:56:13.543Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+71,Test,User With Very Long Name That Might Exceed Database Field Limits,longname@test.com,,,,,,"[""attendee""]",,No,2025-09-01T13:56:37.790Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+72,Louisa,Bartlett-Pestell,louisa@stanleyarts.org,02082510184,,,,automation,"[""attendee""]",,No,2025-09-01T14:51:45.341Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+73,Sumeet,Vermani,sumeetvermani@gmail.com,+447799892474,,,,automation,"[""attendee""]",,No,2025-09-02T15:52:55.568Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+74,Umer,Farooq,umerfrq876@gmail.com,+447863995843,,,,automation,"[""attendee""]",,No,2025-09-03T13:19:52.888Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+75,Pankaj,Patel,pankaj@panjaj.net,0795 834 6381,,,,content-creation,"[""attendee""]",,No,2025-09-03T21:15:49.432Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+76,Chowdhury,Akbary,mohsin@caspianschool.ac.uk,07423050484,,,,content-creation,"[""attendee""]",,No,2025-09-03T22:41:54.406Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+77,Jo-Ann,Gumb,jgumb@wlcreative.org.uk,+447894704819,,,,general-learning,"[""attendee""]",,No,2025-09-04T09:10:37.017Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+78,John,chandler,john@leadingnote.co.uk,+44 7795205065,,,,content-creation,"[""attendee""]",,No,2025-09-04T10:50:12.223Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+79,Ben,Taylor,ben.taylor1000@gmail.com,07449883426,,,,chatbots,"[""attendee""]",,No,2025-09-04T10:58:38.483Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+80,Mark,Huggett,mark.huggett@croydon.gov.uk,"020 8726 7777 ",,,,general-learning,"[""attendee""]",,No,2025-09-04T11:01:01.240Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+81,Usman,Azam,usman@uatax.co.uk,+447751981120,,,,automation,"[""attendee""]",,No,2025-09-04T11:19:21.595Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+82,John,Johnson,jwjohnson999@yahoo.com,07957706399,,,,general-learning,"[""attendee""]",,No,2025-09-04T13:42:32.750Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+83,Paul,Harper,paulrharper151@gmail.com,+447846582800,,,,general-learning,"[""attendee""]",,No,2025-09-04T13:42:45.753Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+84,Allwyn,Mendes,allwyn.mendes@outlook.ckm,+447846041273,,,,productivity,"[""attendee""]",,No,2025-09-04T14:18:31.948Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+85,Guy,Campos,camposguy@yahoo.com,07506847791,,,,,"[""attendee""]",,No,2025-09-04T20:40:23.262Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+86,Fiona,Satiro,fiona@croydonnightwatch.org.uk,+447867491978,,,,customer-service,"[""attendee""]",,No,2025-09-04T23:37:28.266Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+87,Shuba,Rao,shuba@theshiftcollective.org,7712051712,,,,,"[""attendee""]",,No,2025-09-05T11:01:25.193Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+88,Tim,Hurstwyn,tim.hurstwyn@urw.com,+447340825228,,,,general-learning,"[""attendee""]",,No,2025-09-05T11:46:31.924Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+89,Alex,Elliott,alex@elliottflemming.com,+447806306155,,,,automation,"[""attendee""]",,No,2025-09-05T14:35:29.242Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+90,Faheem,Mirza,faheemirza@aol.com,07966965065,,,,,"[""attendee""]",,No,2025-09-08T10:04:24.336Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+91,Antonio,Lewis,info@tvox.uk,+447920071719,,,,content-creation,"[""attendee""]",,No,2025-09-08T11:33:06.870Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+92,Haydn,Griffiths,haydnmg@gmail.com,+447495922658,,,,general-learning,"[""attendee""]",,No,2025-09-08T20:07:48.843Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+93,Robert,Hall,r.hall@snagitltd.com,07772442182,,,,automation,"[""attendee""]",,No,2025-09-09T09:12:37.962Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+94,VINOTHINI,GOPINATH,vinoelanthamil199529@gmail.com,+44 7424 927570,,,,,"[""attendee""]",,No,2025-09-09T10:32:41.158Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+95,Mousa,Ibra,alimousa20802080@gmail.com,07405860764,,,,general-learning,"[""attendee""]",,No,2025-09-09T11:36:02.904Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+96,Ewemade,Orobator,eorobator@communitiesfirst.uk.com,02086829579,,,,automation,"[""attendee""]",,No,2025-09-09T11:42:52.205Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+97,Oumesh,Sauba,osauba@yahoo.co.uk,07919156104,,,,automation,"[""attendee""]",,No,2025-09-09T16:46:42.399Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+98,jose,Joseph,jjoseph.croydon@gmail.com,07540858257,,,,,"[""attendee""]",,No,2025-09-09T16:53:37.408Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+99,Clement,Akran,cakran@cottagefactory.co.uk,07861789383,,,,general-learning,"[""attendee""]",,No,2025-09-09T17:19:39.800Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+100,Jim,Jordan,jim@kentbusinessconsultancy.com,07810710142,,,,general-learning,"[""attendee""]",,No,2025-09-10T13:38:36.166Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+101,Pavels,Antonovs,p.a@elkor.uk,+447711128884,,,,customer-service,"[""attendee""]",,No,2025-09-10T13:56:42.479Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+516,Steve,jones,steve@mytautomation.co.uk,+447564723762,,,,,"[""attendee""]",,No,2025-09-19T14:37:36.144Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+103,Bree,Van zyl,briarley@hotmail.co.uk,07972355530,,,,productivity,"[""attendee""]",,No,2025-09-11T07:29:14.337Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+104,Colin,Humphrey,colin@cadava.com,+447931282561,,,,automation,"[""attendee""]",,No,2025-09-11T17:26:00.745Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+105,Matthew,Sims,matthew.sims@croydonbid.com,020 8603 0050,,,,,"[""attendee""]",,No,2025-09-12T11:57:03.269Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+106,Syed,Hoque,restaurantpundit@gmail.com,+44 7932 649792,,,,customer-service,"[""attendee""]",,No,2025-09-12T20:37:40.158Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+107,Donna,Nelson,donnamarianelson@gmail.com,07903632442,,,,,"[""attendee""]",,No,2025-09-13T07:27:42.674Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+108,Gopi,Subbarayan,gopi@globetechsoft.com,+4402071268272,,,,data-analytics,"[""attendee""]",,No,2025-09-14T09:47:57.181Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+109,Oumesh,Sauba,osauba@gmail.com,07919156104,,,,,"[""attendee""]",,No,2025-09-14T13:04:12.172Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+110,Yasin,altaf,yasin.altaf@goodcore.co.uk,+442087816903,,,,,"[""attendee""]",,No,2025-09-15T09:21:34.607Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+111,Test,User 2,testuser2@example.com,1234567891,,,,,"[""attendee""]",,No,2025-09-15T13:04:11.114Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+112,Simon,Teague,simon.teague@newlevelresults.co.uk,+447909681627,,,,content-creation,"[""attendee""]",,No,2025-09-15T15:54:52.035Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+113,Steve,ball,steven.ball@icloud.com,07564723762,,,,,"[""attendee""]",,No,2025-09-15T18:17:09.011Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+114,John,Test Smith,test-user-1757961315@example.com,+44 7123 456789,Test Company Ltd,Software Developer,Technology,Business automation and productivity tools,"[""attendee""]",,No,2025-09-15T18:35:16.042Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+115,Jane,Speaker,speaker-1757961380@example.com,+44 7234 567890,Speaking Corp,AI Expert,Consulting,Machine learning applications,"[""attendee""]",,No,2025-09-15T18:36:21.155Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+116,Mike,Exhibitor,exhibitor-1757961384@example.com,+44 7345 678901,Tech Solutions Ltd,Sales Manager,Software,AI-powered business solutions,"[""attendee""]",,No,2025-09-15T18:36:24.721Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+117,Sarah,Volunteer,volunteer-1757961388@example.com,+44 7456 789012,,Event Coordinator,,Supporting AI education events,"[""attendee""]",,No,2025-09-15T18:36:28.386Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+118,Aravindh,Suresh,aravindh@asure.uk,+447479923302,,,,content-creation,"[""attendee""]",,No,2025-09-16T09:58:30.581Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+119,Thilagarani,Sekar,kisonaa@hotmail.co.uk,07878817741,,,,,"[""attendee""]",,No,2025-09-16T19:59:44.251Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+120,Yvonne,Schofield,ickledragon@hotmail.co.uk,07530035023,,,,,"[""attendee""]",,No,2025-09-16T20:58:22.252Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+121,Ayesha,Rehmat,ayesha@croydonba.org.uk,+923240893004,,,,,"[""attendee""]",,No,2025-09-17T11:00:31.532Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+122,Michael,Kohn,michael@choirfarm.com,+447939519356,,,,,"[""attendee""]",,No,2025-09-17T11:18:19.395Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+123,Joe,McIntosh,jlmc91@yahoo.co.uk,+447572905981,,,,,"[""attendee""]",,No,2025-09-17T14:43:10.846Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+124,Lynda,Howarth,lynda.howarth@perfectreception.co.uk,07989139101,,,,,"[""attendee""]",,No,2025-09-17T16:15:00.030Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+125,Naren,Raj,naren@gritfinancials.co.uk,07878464240,,,,,"[""attendee""]",,No,2025-09-17T16:44:34.586Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+126,Waheed,Aziz,wa3207486@gmail.com,+447719181732,,,,,"[""attendee""]",,No,2025-09-18T14:33:30.635Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+127,Shalini,Okane,shaliniokane@yahoo.com,0915720132,,,,,"[""attendee""]",,No,2025-09-19T05:41:32.332Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+128,Debraj,Deb,debsinbox@gmail.com,7530921730,,,,,"[""attendee""]",,No,2025-09-19T08:11:08.260Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+129,Mohit,Jain,mohit_j15@yahoo.com,+447553944881,,,,,"[""attendee""]",,No,2025-09-19T08:47:03.973Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+518,Chittaranjan,Rout,crout4108@gmail.com,00447801962054,,,,,"[""attendee""]",,No,2025-09-19T17:48:28.632Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+519,Asif,Raja,asif.raja@onworld.co.uk,07725566309,,,,,"[""attendee""]",,No,2025-09-20T17:07:22.282Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+520,Simon,Steele,sjs@trinity.croydon.sch.uk,+447956831226,,,,,"[""attendee""]",,No,2025-09-22T09:11:24.194Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+521,Tony,Lloyd,walloyduk@hotmail.com,07960280091,,,,,"[""attendee""]",,No,2025-09-22T13:24:23.692Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+517,Oumesh,Sauba,oumesh.sauba@outlook.com,07919156104,,,,,"[""attendee""]",,No,2025-09-19T14:41:29.469Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+208,Ravinder,Singh Sahota,contact@keecare.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+209,Sudhir,Biyani,sudhirbiyani@rediffmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+210,Oumesh,Sauba,oumesh.sauba@gmail.com,+447919156104,MYT Software,CEO,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+211,Naveen,Reddy,naveenramireddy111@gmail.com,07384022414,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+212,Benedict,Selvaratnam,benedict.selvaratnam@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+213,Romell,D,itsjustbazaar@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+214,Adrian,chirila,deepclasea@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+215,Arron,Maddix,arron.maddix@icloud.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+216,Rajan,Amin,rajan1305@outlook.com,07973727893,Coversure Insurance Croydon,Insurance Broker,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+217,Anshita,Bansal,anshita@squaredpegs.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+218,Steven,Ball,steven.ball@me.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+219,Sivasathiyan," Shanmugam",sivasathiyan1997@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+220,Dr,Hana Patel,hanapatel@nhs.net,07925 336753,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+221,Prem,Kumar Manoharan,mpremkumar19@gmail.com,07900 427430,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+222,Oumesh,Sauba,oumesh@croydonba.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+223,Surendra,Amin,Suruamin@hotmail.co.uk,07931 643259,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+224,Ian,Anantharajah,ian_anantharajah@hotmail.com,07490 656056,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+225,Rensley,Pope,Rensley.pope@gmail.com,07958 567710,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+226,Giselle,Alvarado,giselle.alvarado@gmail.com,07398 470601,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+227,Lorenzo,Savi,lorenzo.savi@albemarleasset.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+228,Zeeshan,,sales@ars-int.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+229,and,people. Through initiatives like LaunchPad GET5 Referrals,The Experience Live,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+230,Kaushik,Mehta,kaushikgmehta@yahoo.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+231,Ajay,Jobanputra,ajay_jobanputra@hotmail.com,+447710236542,Lohana Community South London,Community President,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+232,Chris,Clark,me@chrisclark.org.uk,07957 588519,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+233,Mohamed,Sherefudheen,Smohamedfarouk@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+234,John,Doe,testnewuser@example.com,+447890123456,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+235,Charles,Ajunwa,cajunwa14@gmail.com,07405 430304,"NHS England ","Project Manager ",,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+236,Mandy,Booley,mandy@safesurecare.co.uk,07969205490,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+237,Steve,Ball - The Process Guru,steve.ball@theprocess.guru,07564723762,The Process Guru Ltd,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+238,Tamkin,Riaz,tamkin.riaz@croydonba.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+239,Demo,User,demo@croydonba.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+240,Cllr,Mohammed Islam,til786@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+241,Teslimat,Akanbi,teslimat.akanbi@legacyyouthzone.org,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+242,MR,P ANTONOVS,judonov@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+243,Jagdeep,Singh,jagdeepdhillon12@yahoo.com,07478687793,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+244,Anandhan,Srinivasan,send2anandh@gmail.com,+44 7900735489,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+245,Sritharan,Sriparthipan,rahulan@orugroup.com,+447966757573,ORU PAPER Ltd,Director,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+246,Jafferhusein,Kapasi,jaffer.kapasi@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+247,Bilal,Abbas,babbas0505@gmail.com,07548 572714,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+248,Abbas,Ibrahim,zaz070702@gmail.com,+447842922975,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+249,Ausra,,ausra.b@elkor.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+250,Rico,Wagner Caleap,rico@croydonba.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+251,Henna,Idnani,hennaidnani@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+252,KOVSHIK,CHOWDARI RAMINENI,kovshik.ramineni@flipout.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+253,Logeswari,Jeyaraj Nallathambi,jeylog@yahoo.co.in,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+254,Ian,Kierans,ifkierans@gmail.com,07751 359733,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+255,Richard,Hoque,richard@getfounddigital.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+256,Muhammed,Rauf,Muhammed@elysium.london,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+257,Rico,,rico@lolalearn.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+258,Sarah,Johnson,exhibitor9054@techsolutions.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+259,Sarah,Johnson,sarah@techsolutions.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+260,Steve,Ball - the Process Guru,steve.ball@theprocessguru.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+261,Mike,Chen,mike@techsolutions.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+262,Michael,Johnson,sponsor2064@techcorp.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+263,Admin,User,admin@croydonba.org.uk,+447564723762,CBA,AI and Business Strategist,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+264,TEJA,,narisettynani@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+265,Gaurav,Bajaj,gabajaj@gmail.com,07944 489731,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+266,I,"am just under 69 years old,resident,SE25 6BX,[AI Basics Education & Learning","Career Opportunities],",,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+267,Sheldon,St. Clair,spstclair@aol.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+268,Al," Kannu",alxkannu@yahoo.com,+447887992999,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+269,Ryan," Kelman",p.kelman@hotmail.com,,"Marlowe Technology Group ","Managing Director ",,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+271,Pamela,Rene,pam@pamspeople.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+272,Kalpan,Patel,kalps0309@yahoo.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+273,Richard,Caplin,richard@catalysedata.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+274,Sola,Fadojutimi,sola.fadojutimi@cppadvisory.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+275,Fredrick,Elliott,fredrick.elliott@danieljosephconsultancy.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+276,Ashish,Shah,AshishAshah@outlook.com,07440 442077,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+277,Vijayakumar,Devarajan,vijay.dev@futureascenttrade.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+278,Dhiren,Mistry,dhiren@dmtsolutions.co.uk,+447942748189,Digital Media Technology Solutions,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+279,Dayana,carvalho,dayanacarvalho840@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+280,Ben,Admin,ben@croydonba.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+281,Phalguna,Avalagunta,phalgunaavalagunta252@outlook.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+282,Balaji,Ekambaram,balajiekambaram@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+283,R,,freshfieldsmarketcroydon@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+284,Rithu,V,revathy31097@gmail.com,,"Freshfield’s market ","Manager ",,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+285,Sheren,Tabassum,writetorogfed@gmail.com,07440 567502,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+286,mshakthi019@gmail.com,,mshakthi019@gmail.com,07765 677788,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+287,Kwame,Akissi Akissi,kwameakissi10@gmail.com,07393 812708,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+288,Masthan,Mohammed,mdmasthancse@gmail.com,07825 444008,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+289,Muhammad,Asif,mohammad.asif566@yahoo.com,07861 135811,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+290,niveditavs@gmail.com,,niveditavs@gmail.com,07584 123872,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+291,James,Hillam,james@londonitsmconsulting.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+292,John,Sponsor,testsponsor5@example.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+293,ANANDHAN,SRINIVASAN,SEND2ANANDH@GMAIL.COM,07900 735489,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+294,Patrick,McGinn,kimchi.pmcginn@gmail.com,07546 519427,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+295,Vijayakumar,Devarajan,dvrj733@hotmail.com,07453 884040,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+296,Dr,Mohammed Iqbal Memon,i.memon@btinternet.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+297,Sumanta,Saha,sumanta.saha2@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+298,Test,User,test-verification@example.com,+1234567890,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+299,James,Hutt,james@paradigmjunction.com,+447871244504,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+300,Michelle,Kazi,michellekazi@hotmail.com,07767 713463,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+301,Dionne,Smith,dionnegsmith7@hotmail.com,0788 2897509,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+302,Safaraz,Ali,safaraz@pathwayfirst.co.uk,07974 650751,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+303,industrial,automation AEC,"and manufacturing at global scale.”,business owner",,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+304,Ruiyou,,info@alleatapp.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+305,Sharmilan,Sivakumaran,sharmilansiva@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+306,New,TestUser,newuser-test@example.com,+1234567891,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+307,John,Doe,john@test.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+308,Benedict,Selvaratnam,ben@freshfieldsmarket.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+309,Irfan,Qureshi,irfan@iqmarketing.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+310,Shujah,Iqbal,Shujah.iqbal@gmail.com,07958 015111,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+311,sadiasaleem940@gmail.com,,sadiasaleem940@gmail.com,07874 982178,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+312,TARIQ,JAVED,tariq@amb.org.pk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+313,nayantara,Chotai,Naina@Professionalsupport4ultd.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+314,KINGSLEY,DICKSON,info@gyenyamefoundation.org.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+315,Gokul,Sundra,gokul@ecsolitionsltd.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+316,Olutoyin,Sakutu,ndcassociationcic@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+317,Princess,Glover,lawyer.princess27@yahoo.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+318,Viktorija,Safonova,viktorija@mission.guru,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+319,Abbas,Zainy,abbasb.zainy.1961@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+320,Tamkin,Riaz,tamkin.riaz@croydon.ac.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+321,navidmikhak@gmail.com,,navidmikhak@gmail.com,07361 882599,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+322,Maliha,Ahmad,malihajanaat@gmail.com,07496 530763,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+323,Bridget,Galloway,bridgetgalloway771@hotmail.com,07865 409892,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+324,Rowenna,Davis,rowenna.davis@croydonlabour.org.uk,07957 981497,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+325,Jio,Xavier,jio.xavier@gmail.com,07808 791540,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+326,doneke@yahoo.com,,doneke@yahoo.com,07783 604021,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+327,Gerald,Dzathor,gerald@gkdservices.com.,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+328,Andrew,Mason,info@stellarcommercial.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+329,Warren,Sims,wjfsims@msn.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+330,Praveen,Mahadani,praveenmahadani@yahoo.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+331,Kevin,XIE,kevindrxie@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+332,Sanchit,Kaushal,sanchitmahant@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+333,imran,Khawaja,imran.khawaja1@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+334,Joel,Black,blackjoel050@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+335,Emmanuel,Asolo,asoloemmanuelo@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+336,EYEWALE,DESTA FERENJA,eyewaledesta4@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+337,Nivi,Naor,naornivi@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+338,Kaarunyan,Sritharan,kaarunmahi98@gmail.com,07438 467924,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+339,Malcolm,Gill,Malcgill@gmail.com,07939 609824,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+340,Naveed,Dean,nzdean1@gmail.com,07956 340197,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+341,Sulman,Akhtar,sulmanakhtar@live.co.uk,07956 541519,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+342,Kantha,Gopalasundaram,gkgretailltd@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+343,Rathin,Sinha,ec23735@qmul.ac.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+344,Margaret,Kyakunda,mkyakunda19@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+345,Adam,Simmons,adam@barons-group.org,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+346,Abdul,Hye,abs100ro@hotmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+347,Nidhi,Dabhi,nidhidabhi2000@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+348,Jonas,Tiknius,jj.tiknius@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+349,Jasmine,Mahdani,jasminenurm@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+350,Dammy,Kushimo,dammykush@yahoo.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+351,Menisha,Patel,menishaapatel@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+352,Zain,Masroor,zainm280904@gmail.com,07572875330,Carry Crew Limited,"Director ",,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+353,Hussein,Ghor,hussein.ghor@printwell.co.uk,07973 156883,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+354,Sunil,Ramakrishnan,sunilkumar.ramakrishnan@yahoo.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+355,Paul,Gottardi,limijapa@yahoo.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+356,bvc@gmail.com,,bvc@gmail.com,07841 256358,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+357,Adil,Qureshi,info@property-want.com,07944 513532,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+358,Mel,Hollett,melaniehollett@gmail.com,07399 290914,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+359,Michail,Bempis,bmixalis2@hotmail.com,07561 379878,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+360,Mahmood,Javaid,mahmood.javaid5@gmail.com,07947 641165,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+361,Kamran,Mahmood,info@kamranandcoaccountants.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+362,Aska,Miah,am93blossom@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+363,Amit,Kapoor,amit@mindfulcontract.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+364,Jaymin,Patel,jsp@trinity.croydon.sch.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+365,Waseem,Ahmad,waseem@hamsabcl.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+366,HRH,Sir Leslie Anthony Stanley O'Connor,lasoconnor@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+367,industrial,automation AEC,"and manufacturing at global scale.”,attendee",,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+368,Purav,Tadvi,tadvipurav@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+369,Troy,McDonald,innercirclecapitalgroup@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+370,Naresh,Jhawar,nareshjhawar9@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+371,Shayan,Sunny,shriphunthru@gmail.com,07763 636463,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+372,Kavinvenkat,gunavathi Kumar,Kavinvenkatgk@gmail.com,07909 326474,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+373,Tariq,Salim,tariqsalim@hotmail.com,020 8768 1330,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+374,Bola,Okuboyejo,babsaction@yahoo.co.uk,07956 977750,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+375,Amin,Chishti,aminanwar1@hotmail.com,07947 661560,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+376,Rithu,R,rithu@croydonba.org.uk,+44 7448 263255,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+377,koushik,chowdari ramineni,kovshikramineni01@gmail.com,07863 865786,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+378,Dr,Catherine Pestano,catherine.pestano@gmail.com,07981 298541,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+379,ANIK,SAHA,spreadgiffgaff@gmail.com,07523 228728,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+380,Jyothsna,Vijayakumar,jyovj@outlook.com,07402 259650,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+381,Ellily,Ponnuthurai,ellilyp@hotmail.com,07803 471557,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+382,Dipti,Mohantry,diptimohanty@hotmail.com,07872 340362,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+383,sagilendira@gmail.com,,sagilendira@gmail.com,07500 967636,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+384,Sarah,Mbabazi,sarahmbabazi46@hotmail.com,07368 198367,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+385,Prerana,Patil,preranapatil.iris@gmail.com,07576 554442,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+386,alexandra.tel78@gmail.com,,alexandra.tel78@gmail.com,07853 395301,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+387,Jeeban,Parida,JEEBAN.PARIDA@GMAIL.COM,07828 634796,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+388,Dilip,Rajasingham,dilip.rajasingham@gmail.com,07947 524013,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+389,Rizwan,Alibhai,rizwanalibhai@gmail.com,07956 550881,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+390,Rohaan,Mirza,rohaanmirza@aol.com,07475 510263,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+391,Gohar,Khan,alla_hazrat@yahoo.com,07718 373028,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+392,Aamnah,Noor Madani,aamnahmadani@gmail.com,07711 903068,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+393,Enamul,Khan,enamulkhan1@hotmail.com,07939 822785,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+394,Sivapalan,Vignesh Sivagnanam,sumshiftyguy@gmail.com,07800 891537,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+395,Haroon,Sheikh,hrsheikh@hotmail.co.uk,07792 781212,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+396,Humayun,Kabir,hr_kabir@hotmail.com,07956 548707,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+397,Jignesh,Patel,jjpatel999@yahoo.com,07760 465358,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+398,Lalitendu,Swain,lalit123@gmail.com,07931 117799,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+399,Venise,Michael Durairaj,venisemichaeld@gmail.com,07424 702469,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+400,Dervis,Kucukkose,d_kucukkose@live.co.uk,07830 023934,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+401,Zahid,Dean,zahiddean@yahoo.co.uk,07957 140589,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+402,Dev,Kamat,kamatd@yahoo.com,07722 009031,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+403,Adil,Qureshi,adilqureshibusinessrelations@gmail.com,07450 277424,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+404,Ivy,Xu,ivyxxu@hotmail.com,07888 841502,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+405,Alisa,Flemming,alisa.flemming@yahoo.com,07541 193327,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+406,Ash,Riaz,master_riaz@hotmail.com,07944 371235,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+407,Farkhanda,Uddin,farkhanda_uddin@hotmail.com,07932 712666,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+408,Athalia,Smith,athalia-asb@hotmail.co.uk,07717 945746,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+409,Christopher,Herman,mr.chris.herman@gmail.com,07377 533857,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+410,Pavlos,Joseph,pavlos.joseph@gmail.com,07891 653512,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+411,Johnson,Narh,ikeking64@hotmail.com,07463 195927,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+412,Tim,Johnson,tim@axcelera.co.uk,07427 688215,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+413,Jude,Pereira,jude@nanjgel.com,07424 184268,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+414,reguram2@gmail.com,,reguram2@gmail.com,07885 987430,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+415,Nikhil,Sherine Thampi,sherinethampinikhil@gmail.com,07424 218092,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+416,Laurence,Lowne,laurence.combyne@gmail.com,07957 890757,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+417,Srini,K,uksrini.online@gmail.com,07725 991020,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+418,Tariq,Madani,tariq_madani@hotmail.com,07944 773303,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+419,Moazzam,Shahid,moz.shahid@gmail.com,07578 556341,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+420,FATIMA,MADANI,fatimamadani75@gmail.com,07792 375537,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+421,Patsy,Cummings,patsy.cummings@croydonlabour.org.uk,07840 385352,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+422,Ankur,Sharma,sharma.ankur@hotmail.co.uk,07429 555535,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+423,Elijah,Selvaratnam,elijah.selvaratnam@gmail.com,07832 417784,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+424,Amit,Bajaj,ambaj.ab@gmail.com,07944 487909,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+425,Abhijit,Ganguly,abhijit29@gmail.com,07525 830847,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+426,Rudi,Hinds,rudihinds@gmail.com,07852 806618,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+427,Councillor,Mohammed Islam,Mohammed.Islam@croydon.gov.uk,07958 121079,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+428,Richard,Padun,richard.padun@theepitome.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+429,Jude,Pereira,jude@defenix.ai,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+430,Pankaj,,pankaj@anyfeast.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+431,Balaji,Ekambaram,balaji@britappsystems.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+432,Anant,Mani,anant@randomwalk.ai,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+433,Atul,Sharma,atulsharma55@hotmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+434,Adrian,Chirila,abcvisuals@yahoo.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+435,Konesh,Vel,konesh@atomicai.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+436,Abhinav,,abhinav@iamreadyai.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+437,Oumesh,Sauba,oumesh@mytsoftware.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+438,AKM,Ismail,akm@techone.services,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+439,Preethi,Leonard,preethi@atomicAI.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+440,Saba,Khan,Saba@artease.org,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+441,Rajan,Amin,rajanam@coversure.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+442,Sanjay,Malhotra,thecrownandpeppercroydon@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+443,Azhagesh,Rengasamy,azhages@hotmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+444,Adam,Pavitt,adam@busyjo.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+445,Olamide,Wagner Caleap,lakeragroup@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+446,Farook,Ahmad,pioneerpropertiesservices@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+447,trades,and manufacturing,with a particular focus on helping business owners gain control,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+448,AK,Afghan,info@sakhome.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+449,Edwin,Selvaratnam,edwin@mantravales.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+450,Raja,Murugesan,info.priyamfoods@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+451,Amit,Sharma,amit@rcsv.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+452,ben,Selvaratnam,winecellar910@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+453,Durai,,selladurai2022@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+454,Pathy,Aiyar,pathyaiyar@vamosmedia.co,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+455,Jonathan,Teidy,Jonathan@alexdesilvaco.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+456,Siva,Sivasuthan,ss1va@yahoo.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+457,Roshan,Antonypillai,xenltd@outlook.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+458,Sadhana,Singh,Coulsdon@firstclasslearning.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+459,Aska,Miah,alittleblossom35@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+460,Nithushan,Uthayakumar,nithushan@bluelotus360.cok,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+461,Mariam,Abdallah,abdallahm@ealing.gov.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+462,Srini,Ram,sriniram@sakshad.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+463,scaleups,and SMEs by helping them build strong sustainable businesses through better processes,smarter tools,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+464,Nikhil,Adhiya,hello@supersoftdigiads.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+465,Madeleine,Duxbury,info@eastcroydoncool.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+466,Pramodrai,Chotai,pramodchotai@pnnassetslimited.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+467,Trisha,williamson,trisha@serendipchildrenshome.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+468,,,sellatamco@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+469,Dr,Carlos Richard Sankoh,multisierraslltd.23@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+470,Geoff,Ranson,geoff@startupcroydon.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+471,Melrone,Silva,Infocgtraders@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+472,Trisha,Williamson,trisha@kstaccountants.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+473,Yash,Rastogi,yashrastogi00987@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+474,Dr,Assad Pasha,assadpasha@nhs.net,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+475,Robert,Ewens,robert@visu.ai,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+476,Paloma,Nannig,palomanannig@zeitech.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+477,Winkie,Lo,gjg9j7pk4y@privaterelay.appleid.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+478,Jey,Moorthy,jkanth84@hotmail.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+479,Nandan,Vaghela,npvaghela1314@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+480,Anthony,David King,hello@anthonydavidking.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+481,Elona,Josifi,elona.josifi@akshi.gov.al,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+482,Khaled,mann,zakbling@outlook.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+483,umar,sujad,umar_sujad@hotmail.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+484,Jane,Haack,annehaack77@googlemail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+485,Jason,Hanson,mrjasonhanson@hotmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+486,Amrita,Matharu,amritakm@hotmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+487,Emma,Orgu,orguemmanuel@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+488,Shona,Barker,shonacbarker@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+489,ADESINA,KATIE,kingscollege.africa@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+490,Joseph,Balendran,Josephbalendran@Gmail.com,020 8459 2649,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+491,Nivea,Gita Manohar,niveagmanohar@gmail.com,07424 218092,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+492,Rayaan,Mustafa Madani,madanirayaan@gmail.com,07375 563823,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+493,Cllr,Arshad Mahmood,amahmood480@gmail.com,07944 437177,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+494,Ryan,van Graan,rvg@trinity.croydon.sch.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+495,Oliver,R,Oliver@SpartonCapital.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+496,Biju,Menon,soc@do2.world,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+497,Richard,Chatterjee,richard.chatterjee@croydon.gov.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+498,Peter,Pitra,peter.pitra@young-london.org,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+499,Abhijeet,Kar,kar.abhijeet1998@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+500,Chaya,Mungroosing,chayamungroosing@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+501,Dominic,Sterling,1dominicsterling@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+502,Joseph,Dissington,jahrostudios@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+503,Colin,Francis,2508colin@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+504,Abdul,Rahman,abdurrahmanx01@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+505,ROSE,CHIDOKA,couragechidoka@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+506,Rosy,Burton,burt100519@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+507,Latoya,Johnson,latoyajohnson77@outlook.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+508,David,Ojabo,davidojabo5@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+509,Mel,Brown,mel.brown@governanceresolutions.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+510,Sénamé,Agblevon,senameagblevon@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+511,Caspar,Kennerdale,caspar@clearcommunityweb.co.uk,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+512,HAMMED,IBRAHIM,localgovernmentnigeria@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+513,Faridah,Shuaibu,xxh775b9v6@privaterelay.appleid.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+514,Mohamed,Raza Taiab,razataiab25.11@gmail.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
+515,Test,Admin,admin@test.com,,,,,,"[""attendee""]",,No,2025-09-19T14:34:00.861Z,free,not_required,"AI Summit 2025,Attendee",AI Summit Registration
