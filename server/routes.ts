@@ -16921,7 +16921,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Email': user.email || '',
         'First Name': user.firstName || '',
         'Last Name': user.lastName || '',
-        'Phone': user.phone || '',
+        'Phone': String(user.phone || ''), // Force to text string
         'Company': user.company || '',
         'Job Title': user.jobTitle || '',
         'Membership Tier': user.membershipTier || 'Starter Tier',
@@ -16957,11 +16957,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const registrations = await db.select().from(aiSummitRegistrations);
       
-      const csvData = registrations.map(reg => ({
+      const csvData = registrations.map(reg => {
+        // Parse name into firstName and lastName for GoHighLevel compatibility
+        const fullName = reg.name || '';
+        const nameParts = fullName.trim().split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+        
+        return {
         'ID': reg.id,
-        'Name': reg.name || '',
+        'First Name': firstName,
+        'Last Name': lastName,
         'Email': reg.email || '',
-        'Phone': reg.phoneNumber || '',
+        'Phone': String(reg.phoneNumber || ''), // Force to text string
         'Company': reg.company || '',
         'Job Title': reg.jobTitle || '',
         'Business Type': reg.businessType || '',
@@ -16974,7 +16982,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Payment Status': reg.paymentStatus || 'not_required',
         'Tags': 'AI Summit 2025,Attendee',
         'Type': 'AI Summit Registration'
-      }));
+        };
+      });
       
       const csv = Papa.unparse(csvData);
       
@@ -16997,7 +17006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ID': speaker.id,
         'Name': speaker.name || '',
         'Email': speaker.email || '',
-        'Phone': speaker.phone || '',
+        'Phone': String(speaker.phone || ''), // Force to text string
         'Company': speaker.company || '',
         'Job Title': speaker.jobTitle || '',
         'Website': speaker.website || '',
@@ -17039,7 +17048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Company Name': exhibitor.companyName || '',
         'Contact Name': exhibitor.contactName || '',
         'Email': exhibitor.email || '',
-        'Phone': exhibitor.phone || '',
+        'Phone': String(exhibitor.phone || ''), // Force to text string
         'Website': exhibitor.website || '',
         'Description': exhibitor.description || '',
         'Products/Services': exhibitor.productsServices || '',
@@ -17082,7 +17091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Email': user.email || '',
           'First Name': user.firstName || '',
           'Last Name': user.lastName || '',
-          'Phone': user.phone || '',
+          'Phone': String(user.phone || ''), // Force to text string
           'Company': user.company || '',
           'Job Title': user.jobTitle || '',
           'Title': user.title || '',
@@ -17154,7 +17163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Business Name': business.name || '',
         'Description': business.description || '',
         'Email': business.email || '',
-        'Phone': business.phone || '',
+        'Phone': String(business.phone || ''), // Force to text string
         'Website': business.website || '',
         'Address': business.address || '',
         'City': business.city || '',
@@ -17211,7 +17220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Title': user.title || '',
           'Company': user.company || '',
           'Job Title': user.jobTitle || '',
-          'Phone': user.phone || '',
+          'Phone': String(user.phone || ''), // Force to text string
           'Bio': user.bio || '',
           'Home Address': user.homeAddress || '',
           'Home City': user.homeCity || '',
@@ -17277,7 +17286,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'User ID': speaker.userId || '',
           'Name': speaker.name || '',
           'Email': speaker.email || '',
-          'Phone': speaker.phone || '',
+          'Phone': String(speaker.phone || ''), // Force to text string
           'Company': speaker.company || '',
           'Job Title': speaker.jobTitle || '',
           'Website': speaker.website || '',
@@ -17315,7 +17324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Address': business.address || '',
           'City': business.city || 'Croydon',
           'Postcode': business.postcode || '',
-          'Phone': business.phone || '',
+          'Phone': String(business.phone || ''), // Force to text string
           'Email': business.email || '',
           'Website': business.website || '',
           'Logo': business.logo || '',
