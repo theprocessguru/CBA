@@ -10919,14 +10919,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Speaking session not found or inactive" });
       }
 
-      // Get user's badge for this event
+      // Get user details to check badge by multiple identifiers
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      // Get user's badge for this event - check by participantId or email
       const userBadge = await db.select().from(aiSummitBadges)
-        .where(eq(aiSummitBadges.participantId, userId))
+        .where(or(
+          eq(aiSummitBadges.participantId, userId),
+          eq(aiSummitBadges.email, (user.email || '').toLowerCase())
+        ))
         .limit(1);
 
       if (userBadge.length === 0) {
+        console.log(`Badge lookup failed for user ${userId} (${user.email})`);
         return res.status(400).json({ message: "You need a badge to register for speaking sessions. Please register for the AI Summit first." });
       }
+
+      console.log(`Badge found for user ${userId}: ${userBadge[0].badgeId}`);
+      console.log(`Badge linked by: participantId=${userBadge[0].participantId}, email=${userBadge[0].email}`);
 
       const badgeId = userBadge[0].badgeId;
 
@@ -10959,11 +10972,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Get user details for registration
-      const user = await storage.getUserById(userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      // User details already fetched above for badge lookup
 
       // Create speaking session registration using badge details
       const [registration] = await db.insert(aiSummitSessionRegistrations).values({
