@@ -307,6 +307,12 @@ function AdminSidebar() {
               <span>Contact Import</span>
             </div>
           </Link>
+          <Link href="/admin/bulk-sync" data-testid="nav-admin-bulk-sync">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-green-50 text-gray-700 hover:text-green-700">
+              <FileText size={18} />
+              <span>MYT Automation Bulk Sync</span>
+            </div>
+          </Link>
         </div>
 
         <div className="pt-2 border-t border-gray-200">
