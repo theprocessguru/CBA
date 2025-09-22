@@ -150,7 +150,8 @@ import {
   organizationMemberships,
   insertOrganizationMembershipSchema,
   type OrganizationMembership,
-  type InsertOrganizationMembership
+  type InsertOrganizationMembership,
+  aiSummitSpeakers
 } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
@@ -16888,7 +16889,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get counts from all tables
       const userCount = await db.select({ count: sql<number>`count(*)::int` }).from(users);
       const attendeeCount = await db.select({ count: sql<number>`count(*)::int` }).from(aiSummitRegistrations);
-      const speakerCount = await db.select({ count: sql<number>`count(*)::int` }).from(aiSummitSpeakerInterests);
+      const speakerCount = await db.select({ count: sql<number>`count(*)::int` }).from(aiSummitSpeakers);
       // Skip exhibitor count due to schema issues - we have 0 anyway
       const exhibitorCount = [{ count: 0 }];
       const businessCount = await db.select({ count: sql<number>`count(*)::int` }).from(businesses);
