@@ -2750,7 +2750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return {
           id: reg.registrationId,
           eventId: reg.sessionId,
-          type: 'speaking_session',
+          type: 'talk',
           sessionType: 'speaking_session',
           title: reg.sessionTitle,
           description: reg.sessionDescription || 'AI Summit Speaking Session',
