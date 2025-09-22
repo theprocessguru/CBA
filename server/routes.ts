@@ -7512,6 +7512,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Handle endTime field - ALWAYS process to ensure correct format
         endTime: extractTime(req.body.endTime || req.body.endDate),
         registrationDeadline: req.body.registrationDeadline ? new Date(req.body.registrationDeadline) : undefined,
+        // Handle tags field - convert array to JSON string if it's an array
+        tags: Array.isArray(req.body.tags) ? JSON.stringify(req.body.tags) : req.body.tags,
 
         updatedAt: new Date()
       };
