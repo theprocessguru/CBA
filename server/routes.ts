@@ -165,6 +165,43 @@ import { LimitService } from "./limitService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
+// Phone number formatting function to restore Excel-safe spacing
+function formatPhoneForExcel(phone: string): string {
+  if (!phone) return '';
+  
+  // Remove any existing spaces, hyphens, or formatting
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
+  
+  // UK mobile numbers (07... with 11 digits)
+  if (cleanPhone.match(/^07\d{9}$/)) {
+    return `${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`;
+  }
+  
+  // UK landline numbers (01... or 02... with 11 digits)
+  if (cleanPhone.match(/^0[12]\d{9}$/)) {
+    return `${cleanPhone.slice(0, 4)} ${cleanPhone.slice(4, 7)} ${cleanPhone.slice(7)}`;
+  }
+  
+  // International format starting with +44
+  if (cleanPhone.match(/^\+44\d{10}$/)) {
+    const ukNumber = '0' + cleanPhone.slice(3);
+    return formatPhoneForExcel(ukNumber);
+  }
+  
+  // International format starting with 0044
+  if (cleanPhone.match(/^0044\d{10}$/)) {
+    const ukNumber = '0' + cleanPhone.slice(4);
+    return formatPhoneForExcel(ukNumber);
+  }
+  
+  // For any other format, add spaces every 3-4 digits to force text treatment
+  if (cleanPhone.length > 6) {
+    return cleanPhone.replace(/(\d{3,4})/g, '$1 ').trim();
+  }
+  
+  return cleanPhone;
+}
+
 // Fallback chatbot response function
 function getFallbackChatbotResponse(message: string): string {
   const lowerMessage = message.toLowerCase();
@@ -16921,7 +16958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Email': user.email || '',
         'First Name': user.firstName || '',
         'Last Name': user.lastName || '',
-        'Phone': String(user.phone || ''), // Force to text string
+        'Phone': formatPhoneForExcel(user.phone || ''), // Excel-safe formatting with spaces
         'Company': user.company || '',
         'Job Title': user.jobTitle || '',
         'Membership Tier': user.membershipTier || 'Starter Tier',
@@ -16969,7 +17006,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'First Name': firstName,
         'Last Name': lastName,
         'Email': reg.email || '',
-        'Phone': String(reg.phoneNumber || ''), // Force to text string
+        'Phone': formatPhoneForExcel(reg.phoneNumber || ''), // Excel-safe formatting with spaces
         'Company': reg.company || '',
         'Job Title': reg.jobTitle || '',
         'Business Type': reg.businessType || '',
@@ -17006,7 +17043,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'ID': speaker.id,
         'Name': speaker.name || '',
         'Email': speaker.email || '',
-        'Phone': String(speaker.phone || ''), // Force to text string
+        'Phone': formatPhoneForExcel(speaker.phone || ''), // Excel-safe formatting with spaces
         'Company': speaker.company || '',
         'Job Title': speaker.jobTitle || '',
         'Website': speaker.website || '',
@@ -17048,7 +17085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Company Name': exhibitor.companyName || '',
         'Contact Name': exhibitor.contactName || '',
         'Email': exhibitor.email || '',
-        'Phone': String(exhibitor.phone || ''), // Force to text string
+        'Phone': formatPhoneForExcel(exhibitor.phone || ''), // Excel-safe formatting with spaces
         'Website': exhibitor.website || '',
         'Description': exhibitor.description || '',
         'Products/Services': exhibitor.productsServices || '',
@@ -17091,7 +17128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Email': user.email || '',
           'First Name': user.firstName || '',
           'Last Name': user.lastName || '',
-          'Phone': String(user.phone || ''), // Force to text string
+          'Phone': formatPhoneForExcel(user.phone || ''), // Excel-safe formatting with spaces
           'Company': user.company || '',
           'Job Title': user.jobTitle || '',
           'Title': user.title || '',
@@ -17163,7 +17200,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Business Name': business.name || '',
         'Description': business.description || '',
         'Email': business.email || '',
-        'Phone': String(business.phone || ''), // Force to text string
+        'Phone': formatPhoneForExcel(business.phone || ''), // Excel-safe formatting with spaces
         'Website': business.website || '',
         'Address': business.address || '',
         'City': business.city || '',
@@ -17220,7 +17257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Title': user.title || '',
           'Company': user.company || '',
           'Job Title': user.jobTitle || '',
-          'Phone': String(user.phone || ''), // Force to text string
+          'Phone': formatPhoneForExcel(user.phone || ''), // Excel-safe formatting with spaces
           'Bio': user.bio || '',
           'Home Address': user.homeAddress || '',
           'Home City': user.homeCity || '',
@@ -17286,7 +17323,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'User ID': speaker.userId || '',
           'Name': speaker.name || '',
           'Email': speaker.email || '',
-          'Phone': String(speaker.phone || ''), // Force to text string
+          'Phone': formatPhoneForExcel(speaker.phone || ''), // Excel-safe formatting with spaces
           'Company': speaker.company || '',
           'Job Title': speaker.jobTitle || '',
           'Website': speaker.website || '',
@@ -17324,7 +17361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Address': business.address || '',
           'City': business.city || 'Croydon',
           'Postcode': business.postcode || '',
-          'Phone': String(business.phone || ''), // Force to text string
+          'Phone': formatPhoneForExcel(business.phone || ''), // Excel-safe formatting with spaces
           'Email': business.email || '',
           'Website': business.website || '',
           'Logo': business.logo || '',
