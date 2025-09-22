@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore, Download, CheckCircle, UserCheck, Mail } from "lucide-react";
+import { Calendar, Clock, MapPin, Users, Plus, Edit, Trash2, Eye, Upload, Image, ChevronRight, Layers, X, Archive, Copy, Repeat, ArchiveRestore, Download, CheckCircle, UserCheck, Mail, Mic } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
@@ -74,6 +74,20 @@ interface EventTimeSlot {
   displayOrder: number;
 }
 
+interface SpeakingSession {
+  id: number;
+  title: string;
+  description: string;
+  startTime: string;
+  endTime: string;
+  maxCapacity: number;
+  currentRegistrations: number;
+  isActive: boolean;
+  speakerName?: string;
+  sessionType?: string;
+  venue?: string;
+}
+
 // Helper function to format dates in UK format (DD/MM/YYYY)
 const formatUKDate = (dateString: string | undefined) => {
   if (!dateString) return '';
@@ -132,6 +146,11 @@ export default function EventManagement() {
   const { data: subEvents = [], isLoading: subEventsLoading } = useQuery<EventTimeSlot[]>({
     queryKey: selectedEvent?.id ? [`/api/admin/events/${selectedEvent.id}/time-slots`] : [],
     enabled: !!selectedEvent && !!selectedEvent?.id && showSubEventsDialog,
+  });
+
+  // Fetch speaking sessions
+  const { data: speakingSessions = [], isLoading: speakingSessionsLoading } = useQuery<SpeakingSession[]>({
+    queryKey: ['/api/ai-summit/speaking-sessions']
   });
 
   // Create event mutation
@@ -887,6 +906,7 @@ export default function EventManagement() {
           <TabsTrigger value="all-events">All Events</TabsTrigger>
           <TabsTrigger value="published">Published</TabsTrigger>
           <TabsTrigger value="draft">Drafts</TabsTrigger>
+          <TabsTrigger value="speaking-sessions">Speaking Sessions</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all-events" className="space-y-4">
@@ -1078,6 +1098,76 @@ export default function EventManagement() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="speaking-sessions" className="space-y-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {speakingSessionsLoading ? (
+              <div className="col-span-full text-center py-8">Loading speaking sessions...</div>
+            ) : speakingSessions.length > 0 ? (
+              speakingSessions.map((session: SpeakingSession) => (
+                <Card key={session.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Mic className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-lg">{session.title}</CardTitle>
+                      </div>
+                      <Badge variant={session.isActive ? "default" : "secondary"}>
+                        {session.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="text-sm text-muted-foreground line-clamp-2">
+                      {session.description}
+                    </div>
+                    
+                    {session.speakerName && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <UserCheck className="h-4 w-4" />
+                        <span className="font-medium">{session.speakerName}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4" />
+                      <span>{session.startTime} - {session.endTime}</span>
+                    </div>
+                    
+                    {session.venue && (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{session.venue}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4" />
+                      <span>{session.currentRegistrations}/{session.maxCapacity} registered</span>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <Mic className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Speaking Sessions</h3>
+                <p className="text-muted-foreground">Create your first speaking session to get started.</p>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
