@@ -811,7 +811,7 @@ export const aiSummitSpeakingSessions = pgTable("ai_summit_speaking_sessions", {
   title: varchar("title").notNull(),
   description: text("description"),
   speakerName: varchar("speaker_name").notNull(),
-  speakerId: varchar("speaker_id").references(() => users.id), // Optional reference to users table for selected speakers
+  speakerId: integer("speaker_id").references(() => aiSummitSpeakers.id), // Optional reference to ai_summit_speakers table
   speakerBio: text("speaker_bio"),
   speakerCompany: varchar("speaker_company"),
   speakerJobTitle: varchar("speaker_job_title"),
