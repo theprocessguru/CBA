@@ -182,10 +182,16 @@ function formatPhoneForExcel(phone: string): string {
     return `${cleanPhone.slice(0, 4)} ${cleanPhone.slice(4, 7)} ${cleanPhone.slice(7)}`;
   }
   
-  // International format starting with +44
+  // International format starting with +44 - preserve international format with spacing
   if (cleanPhone.match(/^\+44\d{10}$/)) {
-    const ukNumber = '0' + cleanPhone.slice(3);
-    return formatPhoneForExcel(ukNumber);
+    const numberPart = cleanPhone.slice(3); // Remove +44
+    if (numberPart.startsWith('7')) {
+      // Mobile: +44 7xxx xxx xxx
+      return `+44 ${numberPart.slice(0, 4)} ${numberPart.slice(4, 7)} ${numberPart.slice(7)}`;
+    } else {
+      // Landline: +44 1xxx xxx xxx or +44 2xxx xxx xxx
+      return `+44 ${numberPart.slice(0, 4)} ${numberPart.slice(4, 7)} ${numberPart.slice(7)}`;
+    }
   }
   
   // International format starting with 0044
