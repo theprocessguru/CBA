@@ -41,7 +41,7 @@ export function SpeakingSessionAttendanceCount() {
         {sessionStats.activeAttendance} Live
       </Badge>
       <Badge variant="outline" className="text-xs" data-testid="session-total-count">
-        {sessionStats.totalRegistrations} Total
+        {sessionStats.totalSessions} Sessions
       </Badge>
     </div>
   );
