@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Eye, EyeOff, User, Building, GraduationCap, Home, Users, Mic, Heart, Crown } from "lucide-react";
+import { formatToE164, isValidPhoneNumber, getPhoneValidationError } from "@/lib/phone-utils";
 
 export default function Register() {
   const [, setLocation] = useLocation();
@@ -99,6 +100,8 @@ export default function Register() {
   }]);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [businessPhoneError, setBusinessPhoneError] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -275,10 +278,37 @@ export default function Register() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [name]: value
     }));
+    
+    // Clear phone validation errors when user starts typing
+    if (name === 'phone') {
+      setPhoneError(null);
+    }
+    if (name === 'businessPhone') {
+      setBusinessPhoneError(null);
+    }
+  };
+
+  const handlePhoneBlur = (fieldName: 'phone' | 'businessPhone') => {
+    const phoneValue = formData[fieldName];
+    if (phoneValue) {
+      const error = getPhoneValidationError(phoneValue);
+      if (fieldName === 'phone') {
+        setPhoneError(error);
+      } else {
+        setBusinessPhoneError(error);
+      }
+      
+      // Auto-format to E.164 if valid
+      if (!error) {
+        const formatted = formatToE164(phoneValue);
+        setFormData(prev => ({ ...prev, [fieldName]: formatted }));
+      }
+    }
   };
 
   const handleOrganizationChange = (index: number, field: string, value: string) => {
@@ -534,9 +564,13 @@ export default function Register() {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={() => handlePhoneBlur('phone')}
                 required
-                placeholder="+44 20 xxxx xxxx"
+                placeholder="+447564723762 (E.164 format)"
+                className={phoneError ? "border-red-500" : ""}
               />
+              {phoneError && <p className="text-sm text-red-500 mt-1">{phoneError}</p>}
+              <p className="text-xs text-gray-500 mt-1">Enter UK numbers as +447xxxxxxxxx or international E.164 format</p>
             </div>
 
             {/* Home Address */}
