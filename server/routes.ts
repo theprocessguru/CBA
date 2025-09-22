@@ -165,44 +165,44 @@ import { LimitService } from "./limitService";
 import Stripe from "stripe";
 import rateLimit from "express-rate-limit";
 
-// Phone number formatting function to restore Excel-safe spacing
+// Phone number formatting function to output clean E.164 format for GoHighLevel
 function formatPhoneForExcel(phone: string): string {
   if (!phone) return '';
   
-  // Remove any existing spaces, hyphens, or formatting
+  // Remove any existing spaces, hyphens, parentheses, or formatting
   const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
   
-  // UK mobile numbers (07... with 11 digits)
+  // UK mobile numbers (07... with 11 digits) - convert to +44 format
   if (cleanPhone.match(/^07\d{9}$/)) {
-    return `${cleanPhone.slice(0, 5)} ${cleanPhone.slice(5)}`;
+    return `+44${cleanPhone.slice(1)}`; // Remove leading 0, add +44
   }
   
-  // UK landline numbers (01... or 02... with 11 digits)
+  // UK landline numbers (01... or 02... with 11 digits) - convert to +44 format
   if (cleanPhone.match(/^0[12]\d{9}$/)) {
-    return `${cleanPhone.slice(0, 4)} ${cleanPhone.slice(4, 7)} ${cleanPhone.slice(7)}`;
+    return `+44${cleanPhone.slice(1)}`; // Remove leading 0, add +44
   }
   
-  // International format starting with +44 - preserve international format with spacing
+  // International format starting with +44 - already correct, just ensure no spaces
   if (cleanPhone.match(/^\+44\d{10}$/)) {
-    const numberPart = cleanPhone.slice(3); // Remove +44
-    if (numberPart.startsWith('7')) {
-      // Mobile: +44 7xxx xxx xxx
-      return `+44 ${numberPart.slice(0, 4)} ${numberPart.slice(4, 7)} ${numberPart.slice(7)}`;
-    } else {
-      // Landline: +44 1xxx xxx xxx or +44 2xxx xxx xxx
-      return `+44 ${numberPart.slice(0, 4)} ${numberPart.slice(4, 7)} ${numberPart.slice(7)}`;
-    }
+    return cleanPhone; // Already in correct E.164 format
   }
   
-  // International format starting with 0044
+  // International format starting with 0044 - convert to +44
   if (cleanPhone.match(/^0044\d{10}$/)) {
-    const ukNumber = '0' + cleanPhone.slice(4);
-    return formatPhoneForExcel(ukNumber);
+    return `+44${cleanPhone.slice(4)}`; // Remove 0044, add +44
   }
   
-  // For any other format, add spaces every 3-4 digits to force text treatment
-  if (cleanPhone.length > 6) {
-    return cleanPhone.replace(/(\d{3,4})/g, '$1 ').trim();
+  // For any other international format, ensure it starts with +
+  if (cleanPhone.match(/^\d{10,15}$/) && !cleanPhone.startsWith('+')) {
+    // Assume it's a UK number missing country code if it's 10-11 digits
+    if (cleanPhone.length === 10 && cleanPhone.startsWith('7')) {
+      return `+44${cleanPhone}`; // UK mobile without leading 0
+    }
+    if (cleanPhone.length === 11 && cleanPhone.startsWith('0')) {
+      return `+44${cleanPhone.slice(1)}`; // UK number with leading 0
+    }
+    // For other patterns, return as-is
+    return cleanPhone;
   }
   
   return cleanPhone;
