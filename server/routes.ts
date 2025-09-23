@@ -2857,6 +2857,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine all registrations
       const allRegistrations = [...cbaFormattedRegistrations, ...workshopFormattedRegistrations, ...speakingSessionFormattedRegistrations];
       
+      // Sort registrations by start time (earliest to latest)
+      allRegistrations.sort((a, b) => {
+        const aTime = new Date(a.startTime).getTime();
+        const bTime = new Date(b.startTime).getTime();
+        return aTime - bTime;
+      });
+      
       res.json(allRegistrations);
     } catch (error: any) {
       console.error("Error fetching user registrations:", error);
