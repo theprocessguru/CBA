@@ -475,7 +475,10 @@ const DashboardOverview = () => {
         <Separator className="my-6" />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <IncomeWarningWidget showTitle={false} />
+          {/* Only show HMRC widget for pure business users, not residents */}
+          {primaryType === 'business' && (
+            <IncomeWarningWidget showTitle={false} />
+          )}
           <DonationWidget 
             showInline={true}
             trigger={
