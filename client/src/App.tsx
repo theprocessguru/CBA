@@ -73,6 +73,7 @@ import CouncillorImport from "@/pages/admin/CouncillorImport";
 import EventsPage from "@/pages/events";
 import MyBenefitsPage from "@/pages/my-benefits";
 import MyRegistrations from "@/pages/my-registrations";
+import FullyBooked from "@/pages/fully-booked";
 import MyQRCodeSimple from "@/pages/my-qr-code-simple";
 import MyPersonalBadge from "@/pages/my-personal-badge";
 import EnhancedPersonalBadge from "@/pages/enhanced-personal-badge";
@@ -228,7 +229,10 @@ function Router() {
         <CouncillorRegister />
       </Route>
       <Route path="/speaker-register">
-        <SpeakerRegister />
+        <FullyBooked />
+      </Route>
+      <Route path="/fully-booked">
+        <FullyBooked />
       </Route>
       <Route path="/forgot-password">
         <ForgotPassword />
