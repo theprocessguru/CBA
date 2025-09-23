@@ -50,11 +50,13 @@ import {
 import { Link } from "wouter";
 import { SponsorSpotlight } from "@/components/SponsorSpotlight";
 import { AISummitSchedule } from "@/components/schedule/AISummitSchedule";
+import CountdownPopup from "@/components/CountdownPopup";
 
 const AISummit = () => {
   const { user, isAuthenticated } = useAuth();
   const [selectedSession, setSelectedSession] = useState("");
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  const [showCountdownPopup, setShowCountdownPopup] = useState(true);
 
   // Check registration status
   const { data: registrationStatus, refetch: refetchStatus } = useQuery({
@@ -506,6 +508,14 @@ const AISummit = () => {
         <meta property="og:description" content="Educational AI event for entrepreneurs and residents. Talks, workshops, and networking at LSBU Croydon. Free admission, limited places." />
       </Helmet>
 
+      {/* Countdown Popup */}
+      {showCountdownPopup && (
+        <CountdownPopup
+          targetDate="2025-10-01T10:00:00"
+          onClose={() => setShowCountdownPopup(false)}
+        />
+      )}
+
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         {/* Hero Section with Minister Keynote Announcement */}
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-700 text-white">
@@ -581,14 +591,6 @@ const AISummit = () => {
                       </div>
                     </Link>
                   )}
-                </div>
-                <div className="pt-4">
-                  <Link href="/my-registrations">
-                    <div className="bg-blue-500 text-white hover:bg-blue-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 mb-4 cursor-pointer">
-                      <Calendar className="h-5 w-5" />
-                      My Schedule & Calendar
-                    </div>
-                  </Link>
                 </div>
               </div>
             </div>
