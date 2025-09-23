@@ -311,7 +311,7 @@ const RegistrationCalendar = ({
             </h3>
             {safeUserRegistrations.length > 0 ? (
               <div className="space-y-2">
-                {safeUserRegistrations.map((reg) => (
+                {[...safeUserRegistrations].sort((a, b) => parseTime(a.time) - parseTime(b.time)).map((reg) => (
                   <div key={reg.id} className="flex items-center justify-between text-sm">
                     <span className="font-medium">{reg.time}</span>
                     <span>{reg.title}</span>
