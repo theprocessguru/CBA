@@ -1,5 +1,5 @@
-import { Helmet } from "react-helmet";
 import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet";
 import HeroSection from "@/components/home/HeroSection";
 import FeaturedMembers from "@/components/home/FeaturedMembers";
 import SpecialOffers from "@/components/home/SpecialOffers";
@@ -15,7 +15,7 @@ const Home = () => {
 
   useEffect(() => {
     // Show countdown popup until October 2nd
-    const cutoffDate = new Date('2024-10-02T23:59:59');
+    const cutoffDate = new Date('2025-10-02T23:59:59');
     const currentDate = new Date();
     
     if (currentDate <= cutoffDate) {
