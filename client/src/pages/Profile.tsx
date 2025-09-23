@@ -229,12 +229,12 @@ export default function Profile() {
       
       return response.json();
     },
-    onSuccess: async (data) => {
+    onSuccess: (data) => {
       // Update profile with new image URL
       if (profileData) {
         const updatedProfile = { ...profileData, profileImageUrl: data.imageUrl };
-        await updateProfileMutation.mutateAsync(updatedProfile);
         setProfileData(updatedProfile);
+        updateProfileMutation.mutate(updatedProfile);
       }
       toast({
         title: "Profile Picture Updated",
