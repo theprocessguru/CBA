@@ -92,11 +92,13 @@ export default function Profile() {
         description: "Your profile has been successfully updated",
       });
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/profile'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Profile update error:", error);
       toast({
         title: "Update Failed",
-        description: error.message,
+        description: error?.message || "Failed to update profile",
         variant: "destructive",
       });
     },
