@@ -67,10 +67,7 @@ export function ExhibitorVisitors() {
   // Update visitor mutation
   const updateVisitorMutation = useMutation({
     mutationFn: ({ visitorId, updates }: { visitorId: number; updates: any }) =>
-      apiRequest(`/api/exhibitor/visitors/${visitorId}`, {
-        method: "PATCH",
-        body: JSON.stringify(updates),
-      }),
+      apiRequest("PATCH", `/api/exhibitor/visitors/${visitorId}`, updates),
     onSuccess: () => {
       toast({
         title: "Success",

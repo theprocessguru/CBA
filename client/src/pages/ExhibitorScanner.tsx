@@ -44,11 +44,10 @@ export function ExhibitorScanner() {
 
   // Scan visitor mutation
   const scanVisitorMutation = useMutation({
-    mutationFn: (data: { visitorId: string; eventId: number | null; standNumber: string }) =>
-      apiRequest("/api/exhibitor/scan-visitor", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+    mutationFn: async (data: { visitorId: string; eventId: number | null; standNumber: string }): Promise<ScanResult> => {
+      const response = await apiRequest("POST", "/api/exhibitor/scan-visitor", data);
+      return response as ScanResult;
+    },
     onSuccess: (data: ScanResult) => {
       setScanResult(data);
       if (data.alreadyScanned) {
@@ -202,7 +201,7 @@ export function ExhibitorScanner() {
                 onChange={(e) => setSelectedEventId(e.target.value ? Number(e.target.value) : null)}
               >
                 <option value="">No specific event</option>
-                {events.map((event: any) => (
+                {Array.isArray(events) && events.map((event: any) => (
                   <option key={event.id} value={event.id}>
                     {event.title}
                   </option>

@@ -1642,9 +1642,7 @@ export type AISummitSpeaker = typeof aiSummitSpeakers.$inferSelect;
 export type InsertAISummitSpeakerTopic = z.infer<typeof insertAISummitSpeakerTopicSchema>;
 export type AISummitSpeakerTopic = typeof aiSummitSpeakerTopics.$inferSelect;
 
-// Legacy types - kept for backward compatibility  
-export type InsertAISummitSpeakerInterest = z.infer<typeof insertAISummitSpeakerInterestSchema>;
-export type AISummitSpeakerInterest = typeof aiSummitSpeakerInterests.$inferSelect;
+// Legacy types - removed as they were causing compilation errors
 
 export type InsertAISummitBadge = z.infer<typeof insertAISummitBadgeSchema>;
 export type AISummitBadge = typeof aiSummitBadges.$inferSelect;
