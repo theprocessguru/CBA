@@ -335,22 +335,11 @@ export default function AttendeeBooking() {
                             </Button>
                           ) : (
                             <Button
-                              onClick={() => registerMutation.mutate(workshop.id)}
-                              disabled={registerMutation.isPending}
-                              className={`${
-                                availableSeats <= 5 ? 'bg-red-600 hover:bg-red-700' :
-                                availableSeats <= 10 ? 'bg-orange-600 hover:bg-orange-700' :
-                                ''
-                              }`}
+                              onClick={() => window.location.href = '/fully-booked'}
+                              className="bg-red-600 hover:bg-red-700 text-white"
                               data-testid={`button-register-${workshop.id}`}
                             >
-                              {availableSeats <= 5 && (
-                                <AlertTriangle className="w-4 h-4 mr-1 animate-pulse" />
-                              )}
-                              Book Seat
-                              {availableSeats <= 5 && (
-                                <span className="ml-1 text-xs">(Only {availableSeats} left!)</span>
-                              )}
+                              FULLY BOOKED
                             </Button>
                           )}
                         </div>
@@ -480,22 +469,11 @@ export default function AttendeeBooking() {
                             </Button>
                           ) : (
                             <Button
-                              onClick={() => registerSpeakingMutation.mutate(session.id)}
-                              disabled={registerSpeakingMutation.isPending}
-                              className={`${
-                                availableSeats <= 5 ? 'bg-red-600 hover:bg-red-700' :
-                                availableSeats <= 10 ? 'bg-orange-600 hover:bg-orange-700' :
-                                'bg-purple-600 hover:bg-purple-700'
-                              }`}
+                              onClick={() => window.location.href = '/fully-booked'}
+                              className="bg-red-600 hover:bg-red-700 text-white"
                               data-testid={`button-register-session-${session.id}`}
                             >
-                              {availableSeats <= 5 && (
-                                <AlertTriangle className="w-4 h-4 mr-1 animate-pulse" />
-                              )}
-                              Book Seat
-                              {availableSeats <= 5 && (
-                                <span className="ml-1 text-xs">(Only {availableSeats} left!)</span>
-                              )}
+                              FULLY BOOKED
                             </Button>
                           )}
                         </div>
