@@ -123,7 +123,10 @@ export async function setupLocalAuth(app: Express) {
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Create user
+      // Create user with proper 12-month membership setup
+      const membershipEndDate = new Date();
+      membershipEndDate.setFullYear(membershipEndDate.getFullYear() + 1); // 12 months from now
+      
       const user = await storage.upsertUser({
         id: Date.now().toString(), // Simple ID generation
         email,
@@ -140,6 +143,14 @@ export async function setupLocalAuth(app: Express) {
         businessCountry: businessAddress ? "UK" : null,
         profileImageUrl: null,
         passwordHash: hashedPassword,
+        // ✅ PROMISE: 12 months free membership access
+        membershipTier: "Starter Tier",
+        membershipStatus: "trial", // Will be updated to "active" if donation is made
+        membershipStartDate: new Date(),
+        membershipEndDate: membershipEndDate,
+        isTrialMember: true,
+        trialDonationPaid: false,
+        accountStatus: "active"
       });
 
       // Assign person types to new user
@@ -188,6 +199,33 @@ export async function setupLocalAuth(app: Express) {
               console.warn(`Failed to save organization membership for user ${user.id}:`, error);
             }
           }
+        }
+      }
+
+      // ✅ PROMISE: Directory listing goes live immediately (for business members)
+      if (businessName && businessDescription) {
+        try {
+          const businessData = {
+            userId: user.id,
+            name: businessName,
+            description: businessDescription,
+            website: businessWebsite || null,
+            email: businessEmail || email, // Use business email or fallback to personal
+            phone: businessPhone || phone, // Use business phone or fallback to personal
+            address: businessAddress || null,
+            city: businessCity || null,
+            postcode: businessPostcode || null,
+            country: businessAddress ? "UK" : null,
+            categoryId: businessCategory ? parseInt(businessCategory) : null,
+            isActive: true, // ✅ PROMISE: Directory listing goes live immediately
+            isApproved: true, // Auto-approve for members
+          };
+          
+          await storage.createBusiness(businessData);
+          console.log(`✅ Business directory listing created for ${businessName} (User: ${user.id})`);
+        } catch (businessError) {
+          console.error(`Failed to create business directory listing for user ${user.id}:`, businessError);
+          // Don't fail registration if business creation fails
         }
       }
 
