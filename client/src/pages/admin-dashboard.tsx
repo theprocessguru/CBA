@@ -233,6 +233,12 @@ function AdminSidebar() {
               <span>Speaker Recovery</span>
             </div>
           </Link>
+          <Link href="/admin/exhibitor-management">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-700">
+              <Building size={18} />
+              <span>Exhibitor Management</span>
+            </div>
+          </Link>
           <Link href="/ai-summit">
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-blue-50 text-gray-700 hover:text-blue-700">
               <Sparkles size={18} />
