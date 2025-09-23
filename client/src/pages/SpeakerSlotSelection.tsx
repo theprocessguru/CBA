@@ -163,10 +163,10 @@ export default function SpeakerSlotSelection() {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={() => window.location.href = '/ai-summit/speaker-interest'}
-              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => window.location.href = '/fully-booked'}
+              className="bg-red-600 hover:bg-red-700"
             >
-              Submit Speaker Details
+              Speaking Slots - FULLY BOOKED
             </Button>
           </CardContent>
         </Card>
