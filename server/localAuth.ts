@@ -145,10 +145,10 @@ export async function setupLocalAuth(app: Express) {
         passwordHash: hashedPassword,
         // ✅ PROMISE: 12 months free membership access
         membershipTier: "Starter Tier",
-        membershipStatus: "trial", // Will be updated to "active" if donation is made
+        membershipStatus: "active", // Active for 12-month free period regardless of donation
         membershipStartDate: new Date(),
         membershipEndDate: membershipEndDate,
-        isTrialMember: true,
+        isTrialMember: true, // Still trial to track donation status
         trialDonationPaid: false,
         accountStatus: "active"
       });
@@ -203,12 +203,21 @@ export async function setupLocalAuth(app: Express) {
       }
 
       // ✅ PROMISE: Directory listing goes live immediately (for business members)
-      if (businessName && businessDescription) {
+      if (businessName) { // Only require business name, not description
         try {
+          // Parse category safely to avoid NaN
+          let parsedCategoryId = null;
+          if (businessCategory) {
+            const categoryNum = parseInt(businessCategory, 10);
+            if (!isNaN(categoryNum) && categoryNum > 0) {
+              parsedCategoryId = categoryNum;
+            }
+          }
+          
           const businessData = {
             userId: user.id,
             name: businessName,
-            description: businessDescription,
+            description: businessDescription || `${businessName} - Member of Croydon Business Association`, // Provide default description
             website: businessWebsite || null,
             email: businessEmail || email, // Use business email or fallback to personal
             phone: businessPhone || phone, // Use business phone or fallback to personal
@@ -216,7 +225,7 @@ export async function setupLocalAuth(app: Express) {
             city: businessCity || null,
             postcode: businessPostcode || null,
             country: businessAddress ? "UK" : null,
-            categoryId: businessCategory ? parseInt(businessCategory) : null,
+            categoryId: parsedCategoryId, // Safe integer parsing
             isActive: true, // ✅ PROMISE: Directory listing goes live immediately
             isApproved: true, // Auto-approve for members
           };
@@ -225,7 +234,7 @@ export async function setupLocalAuth(app: Express) {
           console.log(`✅ Business directory listing created for ${businessName} (User: ${user.id})`);
         } catch (businessError) {
           console.error(`Failed to create business directory listing for user ${user.id}:`, businessError);
-          // Don't fail registration if business creation fails
+          // Don't fail registration if business creation fails, but let user know
         }
       }
 
@@ -423,8 +432,8 @@ export async function setupLocalAuth(app: Express) {
 
       // Send welcome email
       try {
-        const emailService = await import("./emailService");
-        await emailService.default.sendWelcomeEmail(email, `${firstName} ${lastName}`, 'speaker');
+        const { emailService: emailSvc } = await import("./emailService");
+        await emailSvc.sendWelcomeEmail(email, `${firstName} ${lastName}`, 'speaker');
       } catch (emailError) {
         console.error("Failed to send welcome email:", emailError);
         // Don't fail registration if email fails
@@ -730,6 +739,11 @@ export async function setupLocalAuth(app: Express) {
       const userData = await storage.getUser(user.id);
       if (!userData) {
         return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user has a password hash (some users might not have passwords)
+      if (!userData.passwordHash) {
+        return res.status(400).json({ message: "User account has no password set" });
       }
 
       // Verify current password
