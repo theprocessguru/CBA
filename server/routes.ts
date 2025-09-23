@@ -7656,15 +7656,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public endpoint for workshops (accessible to regular authenticated users)
   app.get('/api/workshops', isAuthenticated, async (req: any, res) => {
     try {
-      const workshops = await db.select().from(aiSummitWorkshops).where(eq(aiSummitWorkshops.isActive, true));
+      const workshops = await db.select().from(cbaEvents).where(
+        and(
+          eq(cbaEvents.isActive, true),
+          eq(cbaEvents.eventType, 'workshop')
+        )
+      );
       
-      // Format workshops for frontend consumption
+      // Parse tags field and format datetime strings for frontend consumption
       const workshopsWithParsedFields = workshops.map(workshop => {
+        // Combine event date with time to create proper datetime strings
+        const eventDateStr = workshop.eventDate instanceof Date ? workshop.eventDate.toISOString().split('T')[0] : workshop.eventDate;
+        const startDateTime = `${eventDateStr}T${workshop.startTime}`;
+        const endDateTime = `${eventDateStr}T${workshop.endTime}`;
+        
         return {
           ...workshop,
-          // aiSummitWorkshops already has proper timestamp fields
-          eventName: workshop.title, // Map title to eventName for consistency
-          venue: workshop.room, // Map room to venue for consistency  
+          startTime: startDateTime,
+          endTime: endDateTime,
           tags: workshop.tags ? 
             (workshop.tags.startsWith('[') ? JSON.parse(workshop.tags) : workshop.tags.split(',').map(tag => tag.trim())) 
             : []
