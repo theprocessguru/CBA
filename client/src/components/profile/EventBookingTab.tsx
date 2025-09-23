@@ -188,10 +188,10 @@ export const EventBookingTab = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link href="/fully-booked" data-testid="link-book-workshops">
-              <Button className="w-full h-16 flex flex-col items-center gap-2 bg-red-500 hover:bg-red-600 text-white">
+            <Link href="/event-booking" data-testid="link-book-workshops">
+              <Button className="w-full h-16 flex flex-col items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white">
                 <BookOpen className="h-5 w-5" />
-                <span className="text-sm">Workshops - FULLY BOOKED</span>
+                <span className="text-sm">Book Workshops</span>
               </Button>
             </Link>
             <Link href="/fully-booked" data-testid="link-book-speaking">
