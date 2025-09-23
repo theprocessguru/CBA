@@ -46,6 +46,16 @@ interface ExhibitorProfile {
   productsServices?: string;
   specialRequirements?: string;
   registeredAt: string;
+  // Enhanced with assigned stands from new system
+  assignedStands?: {
+    id: number;
+    standNumber: string;
+    location?: string;
+    squareMetres: number;
+    finalCost: number;
+    eventName: string;
+    status: string;
+  }[];
 }
 
 // Create exhibitor from existing user schema
@@ -495,6 +505,33 @@ export default function ExhibitorManagement() {
                   )}
                 </div>
               </div>
+
+              {/* Assigned Stands from New System */}
+              {exhibitor.assignedStands && exhibitor.assignedStands.length > 0 && (
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <h4 className="font-medium text-sm mb-2 text-blue-900">Assigned Exhibition Stands</h4>
+                  <div className="space-y-2">
+                    {exhibitor.assignedStands.map((stand, index) => (
+                      <div key={stand.id} className="bg-white p-2 rounded border border-blue-200">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium text-sm text-blue-900">
+                            Stand {stand.standNumber}
+                          </span>
+                          <Badge variant={stand.status === 'occupied' ? 'default' : 'secondary'} className="text-xs">
+                            {stand.status}
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-xs text-blue-700">
+                          <p><strong>Event:</strong> {stand.eventName}</p>
+                          <p><strong>Size:</strong> {stand.squareMetres}m²</p>
+                          {stand.location && <p><strong>Location:</strong> {stand.location}</p>}
+                          <p><strong>Cost:</strong> £{stand.finalCost.toFixed(2)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {exhibitor.businessDescription && (
                 <div>

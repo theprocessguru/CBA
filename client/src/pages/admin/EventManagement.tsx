@@ -797,6 +797,44 @@ export default function EventManagement() {
         </div>
       </div>
 
+      {/* Exhibition Area Settings */}
+      <div className="border rounded-lg p-4 space-y-4 bg-orange-50">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-medium text-orange-900">Exhibition Area</h3>
+            <p className="text-sm text-orange-700">Configure exhibition stands for this event</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input 
+              type="checkbox" 
+              name="hasExhibitionArea" 
+              id="hasExhibitionArea" 
+              className="rounded border-gray-300"
+              data-testid="checkbox-exhibition-area"
+            />
+            <Label htmlFor="hasExhibitionArea" className="text-orange-900">Enable Exhibition Area</Label>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-4">
+          <div>
+            <Label htmlFor="pricePerSquareMetre" className="text-orange-900">Price per Square Metre (£)</Label>
+            <Input 
+              type="number" 
+              step="0.01" 
+              name="pricePerSquareMetre" 
+              min="0"
+              placeholder="e.g., 150.00"
+              className="bg-white"
+              data-testid="input-price-per-sqm"
+            />
+            <p className="text-sm text-orange-600 mt-1">
+              This price will be used to calculate standard costs for exhibition stands
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div>
         <Label>Event Logo/Image</Label>
         <div className="space-y-2">

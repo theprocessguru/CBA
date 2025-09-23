@@ -142,10 +142,16 @@ import {
   businessEvents,
   networkingConnections,
   businessEventRegistrations,
+  stands,
   insertBusinessEventSchema,
   insertBusinessEventRegistrationSchema,
+  insertStandSchema,
+  updateStandSchema,
   type BusinessEvent,
   type BusinessEventRegistration,
+  type Stand,
+  type InsertStand,
+  type UpdateStand,
   personTypes,
   organizationMemberships,
   insertOrganizationMembershipSchema,
@@ -16840,6 +16846,231 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating business event approval:", error);
       res.status(500).json({ message: "Failed to update event approval" });
+    }
+  });
+
+  // ===== EXHIBITION STANDS MANAGEMENT API =====
+
+  // PATCH /api/admin/events/:id - Update event with exhibition area and pricing
+  app.patch("/api/admin/events/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const eventId = parseInt(req.params.id);
+      const { hasExhibitionArea, pricePerSquareMetre, ...otherUpdates } = req.body;
+
+      // Update the event with exhibition area configuration
+      const updateData: any = { ...otherUpdates, updatedAt: new Date() };
+      
+      if (hasExhibitionArea !== undefined) {
+        updateData.hasExhibitionArea = hasExhibitionArea;
+      }
+      
+      if (pricePerSquareMetre !== undefined) {
+        updateData.pricePerSquareMetre = pricePerSquareMetre.toString();
+      }
+
+      const [updatedEvent] = await db
+        .update(businessEvents)
+        .set(updateData)
+        .where(eq(businessEvents.id, eventId))
+        .returning();
+
+      if (!updatedEvent) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      res.json(updatedEvent);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+
+  // GET /api/admin/events/:id/stands - List stands for event
+  app.get("/api/admin/events/:id/stands", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const eventId = parseInt(req.params.id);
+      const stands = await storage.getStandsByEventId(eventId);
+
+      res.json(stands);
+    } catch (error) {
+      console.error("Error fetching stands:", error);
+      res.status(500).json({ message: "Failed to fetch stands" });
+    }
+  });
+
+  // POST /api/admin/events/:id/stands - Create new stand (auto-calculate pricing)
+  app.post("/api/admin/events/:id/stands", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const eventId = parseInt(req.params.id);
+      
+      // Get event pricing information
+      const [event] = await db.select({ pricePerSquareMetre: businessEvents.pricePerSquareMetre })
+        .from(businessEvents)
+        .where(eq(businessEvents.id, eventId));
+
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+
+      if (!event.pricePerSquareMetre) {
+        return res.status(400).json({ message: "Event pricing not configured. Please set pricePerSquareMetre first." });
+      }
+
+      const standData = {
+        ...req.body,
+        eventId
+      };
+
+      const validation = insertStandSchema.safeParse(standData);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid stand data", 
+          errors: fromZodError(validation.error).toString() 
+        });
+      }
+
+      // Calculate pricing
+      const pricing = storage.calculateStandPricing(
+        parseFloat(validation.data.width),
+        parseFloat(validation.data.length),
+        parseFloat(event.pricePerSquareMetre),
+        validation.data.specialRate ? parseFloat(validation.data.specialRate) : undefined
+      );
+
+      // Create stand with calculated pricing
+      const standToCreate = {
+        ...validation.data,
+        squareMetres: pricing.squareMetres.toString(),
+        standardCost: pricing.standardCost.toString(),
+        finalCost: pricing.finalCost.toString(),
+      };
+
+      const [newStand] = await db.insert(stands).values(standToCreate).returning();
+
+      res.status(201).json(newStand);
+    } catch (error) {
+      console.error("Error creating stand:", error);
+      if (error.message?.includes('unique_stand_per_event')) {
+        res.status(400).json({ message: "Stand number already exists for this event" });
+      } else {
+        res.status(500).json({ message: "Failed to create stand" });
+      }
+    }
+  });
+
+  // PATCH /api/admin/stands/:id - Update stand (recalculate pricing if dimensions change)
+  app.patch("/api/admin/stands/:id", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const standId = parseInt(req.params.id);
+
+      const validation = updateStandSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid stand data", 
+          errors: fromZodError(validation.error).toString() 
+        });
+      }
+
+      const updatedStand = await storage.updateStand(standId, validation.data);
+      
+      res.json(updatedStand);
+    } catch (error) {
+      console.error("Error updating stand:", error);
+      if (error.message === 'Stand not found') {
+        res.status(404).json({ message: "Stand not found" });
+      } else if (error.message === 'Event pricing not configured') {
+        res.status(400).json({ message: "Event pricing not configured" });
+      } else {
+        res.status(500).json({ message: "Failed to update stand" });
+      }
+    }
+  });
+
+  // POST /api/admin/stands/:id/assign/:exhibitorId - Assign stand to exhibitor
+  app.post("/api/admin/stands/:id/assign/:exhibitorId", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const standId = parseInt(req.params.id);
+      const exhibitorId = parseInt(req.params.exhibitorId);
+
+      // Check if stand exists and is available
+      const stand = await storage.getStandById(standId);
+      if (!stand) {
+        return res.status(404).json({ message: "Stand not found" });
+      }
+
+      if (stand.exhibitorRegistrationId) {
+        return res.status(400).json({ message: "Stand is already assigned to another exhibitor" });
+      }
+
+      // Check if exhibitor exists
+      const [exhibitor] = await db.select()
+        .from(aiSummitExhibitorRegistrations)
+        .where(eq(aiSummitExhibitorRegistrations.id, exhibitorId));
+
+      if (!exhibitor) {
+        return res.status(404).json({ message: "Exhibitor not found" });
+      }
+
+      const updatedStand = await storage.assignStandToExhibitor(standId, exhibitorId);
+      
+      res.json(updatedStand);
+    } catch (error) {
+      console.error("Error assigning stand:", error);
+      res.status(500).json({ message: "Failed to assign stand" });
+    }
+  });
+
+  // DELETE /api/admin/stands/:id/assign - Unassign stand
+  app.delete("/api/admin/stands/:id/assign", isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const user = req.user;
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const standId = parseInt(req.params.id);
+
+      // Check if stand exists
+      const stand = await storage.getStandById(standId);
+      if (!stand) {
+        return res.status(404).json({ message: "Stand not found" });
+      }
+
+      if (!stand.exhibitorRegistrationId) {
+        return res.status(400).json({ message: "Stand is not currently assigned" });
+      }
+
+      const updatedStand = await storage.unassignStand(standId);
+      
+      res.json(updatedStand);
+    } catch (error) {
+      console.error("Error unassigning stand:", error);
+      res.status(500).json({ message: "Failed to unassign stand" });
     }
   });
 

@@ -1292,6 +1292,9 @@ export const businessEvents = pgTable("business_events", {
   socialLinks: jsonb("social_links").$type<{facebook?: string, instagram?: string, twitter?: string}>(),
   specialOffers: text("special_offers"), // Any special offers for attendees
   requirements: text("requirements"), // Age restrictions, dress code, etc.
+  // Exhibition area fields
+  hasExhibitionArea: boolean("has_exhibition_area").default(false), // Whether this event has exhibition stands
+  pricePerSquareMetre: decimal("price_per_square_metre", { precision: 10, scale: 2 }), // Price per square metre for exhibition stands
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1309,6 +1312,28 @@ export const businessEventRegistrations = pgTable("business_event_registrations"
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Exhibition Stands - for events with exhibition areas
+export const stands = pgTable("stands", {
+  id: serial("id").primaryKey(),
+  eventId: integer("event_id").notNull().references(() => businessEvents.id, { onDelete: "cascade" }),
+  standNumber: varchar("stand_number").notNull(), // e.g., "A12", "B45", "C103"
+  location: varchar("location"), // e.g., "Hall A", "Main Exhibition Hall", "Outdoor Area"
+  width: decimal("width", { precision: 8, scale: 2 }).notNull(), // Width in metres
+  length: decimal("length", { precision: 8, scale: 2 }).notNull(), // Length in metres
+  squareMetres: decimal("square_metres", { precision: 10, scale: 2 }).notNull(), // Calculated: width × length
+  standardCost: decimal("standard_cost", { precision: 10, scale: 2 }).notNull(), // Calculated: squareMetres × event.pricePerSquareMetre
+  specialRate: decimal("special_rate", { precision: 10, scale: 2 }), // Optional override rate
+  finalCost: decimal("final_cost", { precision: 10, scale: 2 }).notNull(), // Calculated: specialRate || standardCost
+  exhibitorRegistrationId: integer("exhibitor_registration_id").references(() => aiSummitExhibitorRegistrations.id), // Nullable FK to exhibitor
+  status: varchar("status").default("available"), // available, reserved, occupied, maintenance
+  notes: text("notes"), // Additional information about the stand
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  // Ensure stand number is unique per event
+  uniqueStandPerEvent: unique("unique_stand_per_event").on(table.eventId, table.standNumber)
+}));
 
 // Define relations
 export const businessesRelations = relations(businesses, ({ one, many }) => ({
@@ -1337,6 +1362,7 @@ export const businessEventsRelations = relations(businessEvents, ({ one, many })
     references: [businesses.id],
   }),
   registrations: many(businessEventRegistrations),
+  stands: many(stands),
 }));
 
 export const businessEventRegistrationsRelations = relations(businessEventRegistrations, ({ one }) => ({
@@ -1347,6 +1373,17 @@ export const businessEventRegistrationsRelations = relations(businessEventRegist
   user: one(users, {
     fields: [businessEventRegistrations.userId],
     references: [users.id],
+  }),
+}));
+
+export const standsRelations = relations(stands, ({ one }) => ({
+  event: one(businessEvents, {
+    fields: [stands.eventId],
+    references: [businessEvents.id],
+  }),
+  exhibitorRegistration: one(aiSummitExhibitorRegistrations, {
+    fields: [stands.exhibitorRegistrationId],
+    references: [aiSummitExhibitorRegistrations.id],
   }),
 }));
 
@@ -1537,6 +1574,30 @@ export type InsertBusinessEvent = z.infer<typeof insertBusinessEventSchema>;
 export type BusinessEvent = typeof businessEvents.$inferSelect;
 export type BusinessEventRegistration = typeof businessEventRegistrations.$inferSelect;
 export type InsertBusinessEventRegistration = z.infer<typeof insertBusinessEventRegistrationSchema>;
+
+// Exhibition Stands Schemas
+export const insertStandSchema = createInsertSchema(stands).omit({
+  id: true,
+  squareMetres: true, // Auto-calculated
+  standardCost: true, // Auto-calculated
+  finalCost: true, // Auto-calculated
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateStandSchema = createInsertSchema(stands).omit({
+  id: true,
+  eventId: true, // Cannot change event
+  squareMetres: true, // Auto-calculated
+  standardCost: true, // Auto-calculated
+  finalCost: true, // Auto-calculated
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
+export type InsertStand = z.infer<typeof insertStandSchema>;
+export type UpdateStand = z.infer<typeof updateStandSchema>;
+export type Stand = typeof stands.$inferSelect;
 
 // Enhanced Event System Schemas
 export const insertCBAEventSchema = createInsertSchema(cbaEvents, {

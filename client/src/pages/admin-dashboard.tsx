@@ -26,7 +26,8 @@ import {
   Mail,
   Sparkles,
   QrCode,
-  ScanLine
+  ScanLine,
+  Layers
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -237,6 +238,12 @@ function AdminSidebar() {
             <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-orange-50 text-gray-700 hover:text-orange-700">
               <Building size={18} />
               <span>Exhibitor Management</span>
+            </div>
+          </Link>
+          <Link href="/admin/stands-management">
+            <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-purple-50 text-gray-700 hover:text-purple-700">
+              <Layers size={18} />
+              <span>Stands Management</span>
             </div>
           </Link>
           <Link href="/ai-summit">

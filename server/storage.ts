@@ -138,6 +138,16 @@ import {
   type InsertEventMoodEntry,
   type EventMoodAggregation,
   type InsertEventMoodAggregation,
+  businessEvents,
+  businessEventRegistrations,
+  stands,
+  type BusinessEvent,
+  type InsertBusinessEvent,
+  type BusinessEventRegistration,
+  type InsertBusinessEventRegistration,
+  type Stand,
+  type InsertStand,
+  type UpdateStand,
   type EmailCampaign,
   type InsertEmailCampaign,
   type EmailCampaignRecipient,
@@ -384,6 +394,16 @@ export interface IStorage {
   checkOutCBAEventRegistration(registrationId: number, checkOutTime?: Date): Promise<CBAEventRegistration>;
   markCBAEventRegistrationNoShow(registrationId: number): Promise<CBAEventRegistration>;
   getCBAEventCapacity(eventId: number): Promise<{ current: number; max: number; available: number }>;
+
+  // Exhibition Stands Management operations
+  getStandsByEventId(eventId: number): Promise<Stand[]>;
+  getStandById(id: number): Promise<Stand | undefined>;
+  createStand(stand: InsertStand): Promise<Stand>;
+  updateStand(id: number, stand: UpdateStand): Promise<Stand>;
+  deleteStand(id: number): Promise<boolean>;
+  assignStandToExhibitor(standId: number, exhibitorRegistrationId: number): Promise<Stand>;
+  unassignStand(standId: number): Promise<Stand>;
+  calculateStandPricing(width: number, length: number, pricePerSquareMetre: number, specialRate?: number): { squareMetres: number; standardCost: number; finalCost: number };
 
   // Event Attendance Analytics operations
   createEventAttendanceAnalytics(analytics: InsertEventAttendanceAnalytics): Promise<EventAttendanceAnalytics>;
@@ -3467,6 +3487,121 @@ export class DatabaseStorage implements IStorage {
     const available = max - current;
 
     return { current, max, available };
+  }
+
+  // Exhibition Stands Management operations
+  async getStandsByEventId(eventId: number): Promise<Stand[]> {
+    return db.select().from(stands)
+      .where(eq(stands.eventId, eventId))
+      .orderBy(asc(stands.standNumber));
+  }
+
+  async getStandById(id: number): Promise<Stand | undefined> {
+    const [stand] = await db.select().from(stands).where(eq(stands.id, id));
+    return stand;
+  }
+
+  async createStand(standData: InsertStand): Promise<Stand> {
+    // Calculate pricing before insertion
+    const pricing = this.calculateStandPricing(
+      parseFloat(standData.width),
+      parseFloat(standData.length),
+      // We need to get the event's pricePerSquareMetre
+      0, // Will be filled by the API layer
+      standData.specialRate ? parseFloat(standData.specialRate) : undefined
+    );
+
+    const [stand] = await db.insert(stands).values({
+      ...standData,
+      squareMetres: pricing.squareMetres.toString(),
+      standardCost: pricing.standardCost.toString(),
+      finalCost: pricing.finalCost.toString(),
+    }).returning();
+    
+    return stand;
+  }
+
+  async updateStand(id: number, standData: UpdateStand): Promise<Stand> {
+    // If dimensions changed, recalculate pricing
+    if (standData.width || standData.length) {
+      const currentStand = await this.getStandById(id);
+      if (!currentStand) throw new Error('Stand not found');
+
+      // Get event pricing information
+      const [event] = await db.select({ pricePerSquareMetre: businessEvents.pricePerSquareMetre })
+        .from(businessEvents)
+        .where(eq(businessEvents.id, currentStand.eventId));
+
+      if (!event?.pricePerSquareMetre) {
+        throw new Error('Event pricing not configured');
+      }
+
+      const width = standData.width ? parseFloat(standData.width) : parseFloat(currentStand.width);
+      const length = standData.length ? parseFloat(standData.length) : parseFloat(currentStand.length);
+      const specialRate = standData.specialRate ? parseFloat(standData.specialRate) : 
+                         currentStand.specialRate ? parseFloat(currentStand.specialRate) : undefined;
+
+      const pricing = this.calculateStandPricing(width, length, parseFloat(event.pricePerSquareMetre), specialRate);
+
+      standData = {
+        ...standData,
+        squareMetres: pricing.squareMetres.toString(),
+        standardCost: pricing.standardCost.toString(),
+        finalCost: pricing.finalCost.toString(),
+      };
+    }
+
+    const [updatedStand] = await db.update(stands)
+      .set({ ...standData, updatedAt: new Date() })
+      .where(eq(stands.id, id))
+      .returning();
+    
+    return updatedStand;
+  }
+
+  async deleteStand(id: number): Promise<boolean> {
+    const result = await db.delete(stands)
+      .where(eq(stands.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async assignStandToExhibitor(standId: number, exhibitorRegistrationId: number): Promise<Stand> {
+    const [updatedStand] = await db.update(stands)
+      .set({ 
+        exhibitorRegistrationId,
+        status: 'occupied',
+        updatedAt: new Date()
+      })
+      .where(eq(stands.id, standId))
+      .returning();
+    
+    return updatedStand;
+  }
+
+  async unassignStand(standId: number): Promise<Stand> {
+    const [updatedStand] = await db.update(stands)
+      .set({ 
+        exhibitorRegistrationId: null,
+        status: 'available',
+        updatedAt: new Date()
+      })
+      .where(eq(stands.id, standId))
+      .returning();
+    
+    return updatedStand;
+  }
+
+  calculateStandPricing(width: number, length: number, pricePerSquareMetre: number, specialRate?: number): { squareMetres: number; standardCost: number; finalCost: number } {
+    const squareMetres = width * length;
+    const standardCost = squareMetres * pricePerSquareMetre;
+    const finalCost = specialRate || standardCost;
+
+    return {
+      squareMetres: Math.round(squareMetres * 100) / 100, // Round to 2 decimal places
+      standardCost: Math.round(standardCost * 100) / 100,
+      finalCost: Math.round(finalCost * 100) / 100
+    };
   }
 
   // Placeholder implementations for remaining missing methods
