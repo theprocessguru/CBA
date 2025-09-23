@@ -48,6 +48,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { SponsorSpotlight } from "@/components/SponsorSpotlight";
+import { AISummitSchedule } from "@/components/schedule/AISummitSchedule";
 
 const AISummit = () => {
   const { user, isAuthenticated } = useAuth();
