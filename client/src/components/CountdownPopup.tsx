@@ -107,7 +107,7 @@ const CountdownPopup = ({ targetDate, onClose }: CountdownPopupProps) => {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-700">
               <Users className="h-4 w-4 text-purple-600" />
-              <span><strong>Status:</strong> Workshops available, Speaking fully booked</span>
+              <span><strong>Status:</strong> Attendee seats still available for workshops & talks</span>
             </div>
           </div>
 
