@@ -79,6 +79,12 @@ const AISummit = () => {
     retry: false,
   });
 
+  // Fetch live exhibitor data
+  const { data: liveExhibitors = [], isLoading: exhibitorsLoading } = useQuery<any[]>({
+    queryKey: ['/api/ai-summit/exhibitors'],
+    retry: false,
+  });
+
   // Full registration form with all required fields for account creation + AI Summit registration
   const [registrationData, setRegistrationData] = useState({
     firstName: "",
@@ -718,23 +724,61 @@ const AISummit = () => {
                   <Card>
                     <CardContent className="p-6">
                       <h3 className="text-xl font-bold mb-4 text-center">3rd Floor Exhibition Space</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-semibold mb-2">AI Startups Showcase</h4>
-                          <p className="text-sm text-gray-600">Discover innovative AI solutions from local entrepreneurs</p>
+                      
+                      {/* Loading state */}
+                      {exhibitorsLoading ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {[...Array(4)].map((_, i) => (
+                            <div key={i} className="bg-gray-100 p-4 rounded-lg animate-pulse">
+                              <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                              <div className="h-3 bg-gray-300 rounded"></div>
+                            </div>
+                          ))}
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-semibold mb-2">Tech Demos</h4>
-                          <p className="text-sm text-gray-600">Live demonstrations of cutting-edge AI tools</p>
+                      ) : liveExhibitors && liveExhibitors.length > 0 ? (
+                        /* Live exhibitor data */
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {liveExhibitors.map((exhibitor, index) => (
+                            <div key={exhibitor.id || index} className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                              <h4 className="font-semibold mb-2 text-blue-800">
+                                {exhibitor.companyName || 'Company Name'}
+                              </h4>
+                              <p className="text-sm text-blue-600 mb-1">
+                                {exhibitor.contactName && `Contact: ${exhibitor.contactName}`}
+                              </p>
+                              <p className="text-sm text-blue-600">
+                                {exhibitor.businessDescription || exhibitor.productsServices || 'Innovative business solutions'}
+                              </p>
+                              {exhibitor.standLocation && (
+                                <p className="text-xs text-blue-500 mt-2">
+                                  📍 {exhibitor.standLocation} {exhibitor.standNumber && `- Stand ${exhibitor.standNumber}`}
+                                </p>
+                              )}
+                            </div>
+                          ))}
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-semibold mb-2">Networking Hub</h4>
-                          <p className="text-sm text-gray-600">Connect with fellow entrepreneurs and investors</p>
+                      ) : (
+                        /* No exhibitors message */
+                        <div className="text-center py-8">
+                          <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h4 className="text-lg font-semibold text-gray-700 mb-2">Exhibition Spaces Available</h4>
+                          <p className="text-gray-600 mb-4">
+                            We're currently finalizing our exhibitor lineup. Check back soon to see the amazing companies that will be showcasing their AI innovations!
+                          </p>
+                          <div className="bg-gray-50 p-4 rounded-lg">
+                            <p className="text-sm text-gray-600">
+                              <strong>What to expect:</strong> AI startups, tech demonstrations, networking opportunities, and business service providers
+                            </p>
+                          </div>
                         </div>
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                          <h4 className="font-semibold mb-2">Business Services</h4>
-                          <p className="text-sm text-gray-600">AI-powered solutions for your business needs</p>
-                        </div>
+                      )}
+
+                      {/* Exhibition booking notice */}
+                      <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                        <h4 className="font-semibold text-red-700 mb-2">Exhibition Spaces - FULLY BOOKED</h4>
+                        <p className="text-sm text-red-600">
+                          All exhibition stands have been reserved. Thank you for the overwhelming response!
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
