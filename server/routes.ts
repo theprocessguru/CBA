@@ -6714,6 +6714,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new exhibitor user (provision new user + exhibitor registration)
+  app.post('/api/admin/exhibitors/provision', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { users, aiSummitExhibitorRegistrations, insertAISummitExhibitorRegistrationSchema } = await import("@shared/schema");
+      const { v4: uuidv4 } = await import("uuid");
+      const bcrypt = await import("bcrypt");
+      
+      // Validate input
+      const requiredFields = ['firstName', 'lastName', 'email', 'companyName'];
+      for (const field of requiredFields) {
+        if (!req.body[field]) {
+          return res.status(400).json({ message: `${field} is required` });
+        }
+      }
+      
+      // Check if email already exists
+      const existingUser = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, req.body.email.toLowerCase()))
+        .limit(1);
+      
+      if (existingUser.length > 0) {
+        return res.status(409).json({ 
+          code: 'EMAIL_EXISTS',
+          message: 'Email already exists',
+          userId: existingUser[0].id
+        });
+      }
+      
+      // Create new user and exhibitor in transaction
+      const result = await db.transaction(async (tx) => {
+        // Create new user
+        const userId = uuidv4();
+        const defaultPassword = Math.random().toString(36).slice(-8); // Generate random password
+        const passwordHash = await bcrypt.hash(defaultPassword, 10);
+        
+        const [newUser] = await tx
+          .insert(users)
+          .values({
+            id: userId,
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email.toLowerCase(),
+            phone: req.body.phone || null,
+            company: req.body.companyName,
+            passwordHash: passwordHash,
+            memberSegment: 'business',
+            rolesData: JSON.stringify({ exhibitor: { active: true, createdAt: new Date() } }),
+            emailVerified: false,
+            accountStatus: 'active',
+          })
+          .returning();
+        
+        // Create exhibitor registration
+        const exhibitorData = {
+          userId: newUser.id,
+          contactName: `${req.body.firstName} ${req.body.lastName}`,
+          email: req.body.email.toLowerCase(),
+          phone: req.body.phone || null,
+          companyName: req.body.companyName,
+          website: req.body.website || null,
+          businessDescription: req.body.businessDescription || null,
+          productsServices: req.body.productsServices || null,
+          specialRequirements: req.body.specialRequirements || null,
+          agreesToTerms: true,
+        };
+        
+        const validatedExhibitorData = insertAISummitExhibitorRegistrationSchema.parse(exhibitorData);
+        
+        const [newExhibitor] = await tx
+          .insert(aiSummitExhibitorRegistrations)
+          .values(validatedExhibitorData)
+          .returning();
+        
+        return { user: newUser, exhibitor: newExhibitor };
+      });
+      
+      res.status(201).json({ 
+        message: 'Exhibitor user created successfully',
+        exhibitor: result.exhibitor,
+        user: { id: result.user.id, email: result.user.email, name: `${result.user.firstName} ${result.user.lastName}` }
+      });
+      
+    } catch (error) {
+      console.error('Error creating exhibitor user:', error);
+      res.status(400).json({ message: 'Failed to create exhibitor user' });
+    }
+  });
+
   // Create new exhibitor from existing user
   app.post('/api/admin/exhibitors', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
@@ -6740,15 +6830,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         phone: userData.phone,
         companyName: userData.company || req.body.companyName,
         website: req.body.website || null,
-        standLocation: req.body.standLocation,
-        standNumber: req.body.standNumber,
-        standSize: req.body.standSize,
-        boothRequirements: req.body.boothRequirements || null,
         businessDescription: req.body.businessDescription || null,
         productsServices: req.body.productsServices || null,
         specialRequirements: req.body.specialRequirements || null,
-        electricalNeeds: req.body.electricalNeeds || false,
-        internetNeeds: req.body.internetNeeds || false,
         agreesToTerms: true,
       };
       
@@ -6769,7 +6853,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users for dropdown selection
   app.get('/api/admin/users-list', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const { users, isNotNull } = await import("@shared/schema");
+      const { users } = await import("@shared/schema");
+      const { isNotNull } = await import("drizzle-orm");
       
       const usersList = await db
         .select({

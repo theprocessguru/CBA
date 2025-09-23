@@ -58,38 +58,24 @@ interface ExhibitorProfile {
   }[];
 }
 
-// Create exhibitor from existing user schema
+// Create new exhibitor user schema
 const createExhibitorSchema = z.object({
-  userId: z.string().min(1, "Please select a user"),
-  standLocation: z.string().min(1, "Stand location is required"),
-  standNumber: z.string().min(1, "Stand number is required"),
-  standSize: z.string().min(1, "Stand size is required"),
-  boothRequirements: z.string().optional(),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Please enter a valid email address"),
+  phone: z.string().optional(),
+  companyName: z.string().min(1, "Company name is required"),
+  website: z.string().optional(),
   businessDescription: z.string().optional(),
   productsServices: z.string().optional(),
   specialRequirements: z.string().optional(),
-  companyName: z.string().optional(),
-  website: z.string().optional(),
 });
 
 type CreateExhibitorFormData = z.infer<typeof createExhibitorSchema>;
 
-// User interface for dropdown
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  jobTitle?: string;
-}
-
 export default function ExhibitorManagement() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -98,49 +84,50 @@ export default function ExhibitorManagement() {
     queryKey: ["/api/admin/exhibitors"],
   });
 
-  // Fetch all users for dropdown
-  const { data: users } = useQuery<User[]>({
-    queryKey: ["/api/admin/users-list"],
-  });
-
   const createExhibitorForm = useForm<CreateExhibitorFormData>({
     resolver: zodResolver(createExhibitorSchema),
     defaultValues: {
-      standSize: "3x3m",
-      boothRequirements: "Standard",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      companyName: "",
+      website: "",
+      businessDescription: "",
+      productsServices: "",
+      specialRequirements: "",
     },
   });
 
   const createExhibitorMutation = useMutation({
     mutationFn: (data: CreateExhibitorFormData) => {
-      return apiRequest('POST', '/api/admin/exhibitors', data);
+      return apiRequest('POST', '/api/admin/exhibitors/provision', data);
     },
     onSuccess: () => {
       toast({
         title: "Success",
-        description: "Exhibitor created successfully!",
+        description: "New exhibitor user created successfully!",
       });
       createExhibitorForm.reset();
       setCreateDialogOpen(false);
-      setSelectedUser(null);
       queryClient.invalidateQueries({ queryKey: ['/api/admin/exhibitors'] });
     },
     onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create exhibitor",
-        variant: "destructive",
-      });
+      if (error.code === 'EMAIL_EXISTS') {
+        toast({
+          title: "Email Already Exists",
+          description: `This email is already registered. Please use a different email address.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to create exhibitor",
+          variant: "destructive",
+        });
+      }
     },
   });
-
-  const handleUserSelect = (userId: string) => {
-    const user = users?.find(u => u.id === userId);
-    if (user) {
-      setSelectedUser(user);
-      createExhibitorForm.setValue('userId', userId);
-    }
-  };
 
   const handleSubmit = (data: CreateExhibitorFormData) => {
     createExhibitorMutation.mutate(data);
@@ -201,63 +188,23 @@ export default function ExhibitorManagement() {
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Add New Exhibitor</DialogTitle>
+              <DialogTitle>Create New Exhibitor</DialogTitle>
               <DialogDescription>
-                Assign an existing user as an exhibitor with stand details.
+                Create a new user account and set them up as an exhibitor with business owner privileges.
               </DialogDescription>
             </DialogHeader>
             <Form {...createExhibitorForm}>
               <form onSubmit={createExhibitorForm.handleSubmit(handleSubmit)} className="space-y-4">
-                {/* User Selection */}
-                <FormField
-                  control={createExhibitorForm.control}
-                  name="userId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Select User</FormLabel>
-                      <Select value={field.value} onValueChange={handleUserSelect}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-user">
-                            <SelectValue placeholder="Choose an existing user..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {users?.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.firstName} {user.lastName} ({user.email})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* User Details Preview */}
-                {selectedUser && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-medium mb-2">Selected User Details:</h4>
-                    <div className="text-sm space-y-1">
-                      <p><strong>Name:</strong> {selectedUser.firstName} {selectedUser.lastName}</p>
-                      <p><strong>Email:</strong> {selectedUser.email}</p>
-                      {selectedUser.phone && <p><strong>Phone:</strong> {selectedUser.phone}</p>}
-                      {selectedUser.company && <p><strong>Company:</strong> {selectedUser.company}</p>}
-                      {selectedUser.jobTitle && <p><strong>Job Title:</strong> {selectedUser.jobTitle}</p>}
-                    </div>
-                  </div>
-                )}
-
-                {/* Stand Information */}
+                {/* User Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FormField
                     control={createExhibitorForm.control}
-                    name="standLocation"
+                    name="firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stand Location</FormLabel>
+                        <FormLabel>First Name</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="e.g., Hall A, Main Floor" data-testid="input-stand-location" />
+                          <Input {...field} placeholder="Enter first name" data-testid="input-first-name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -265,12 +212,12 @@ export default function ExhibitorManagement() {
                   />
                   <FormField
                     control={createExhibitorForm.control}
-                    name="standNumber"
+                    name="lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Stand Number</FormLabel>
+                        <FormLabel>Last Name</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="e.g., A12, B5" data-testid="input-stand-number" />
+                          <Input {...field} placeholder="Enter last name" data-testid="input-last-name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -280,105 +227,119 @@ export default function ExhibitorManagement() {
 
                 <FormField
                   control={createExhibitorForm.control}
-                  name="standSize"
+                  name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Stand Size</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <FormLabel>Email Address</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" placeholder="Enter email address" data-testid="input-email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={createExhibitorForm.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number (Optional)</FormLabel>
                         <FormControl>
-                          <SelectTrigger data-testid="select-stand-size">
-                            <SelectValue />
-                          </SelectTrigger>
+                          <Input {...field} placeholder="Enter phone number" data-testid="input-phone" />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="3x3m">3x3m (Standard)</SelectItem>
-                          <SelectItem value="3x6m">3x6m (Double)</SelectItem>
-                          <SelectItem value="6x6m">6x6m (Large)</SelectItem>
-                          <SelectItem value="6x9m">6x9m (Premium)</SelectItem>
-                          <SelectItem value="custom">Custom Size</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={createExhibitorForm.control}
-                  name="boothRequirements"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Booth Requirements</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={createExhibitorForm.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Name</FormLabel>
                         <FormControl>
-                          <SelectTrigger data-testid="select-booth-requirements">
-                            <SelectValue />
-                          </SelectTrigger>
+                          <Input {...field} placeholder="Enter company name" data-testid="input-company-name" />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Standard">Standard Package</SelectItem>
-                          <SelectItem value="Premium">Premium Package</SelectItem>
-                          <SelectItem value="Custom">Custom Package</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={createExhibitorForm.control}
-                  name="businessDescription"
+                  name="website"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Business Description</FormLabel>
+                      <FormLabel>Website (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Brief description of the business..." 
-                          data-testid="textarea-business-description"
-                        />
+                        <Input {...field} placeholder="https://example.com" data-testid="input-website" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
-                  control={createExhibitorForm.control}
-                  name="productsServices"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Products & Services</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Key products and services to showcase..." 
-                          data-testid="textarea-products-services"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Business Information */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-gray-900">Business Information</h4>
+                  
+                  <FormField
+                    control={createExhibitorForm.control}
+                    name="businessDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Business Description</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            placeholder="Brief description of the business..." 
+                            data-testid="textarea-business-description"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={createExhibitorForm.control}
-                  name="specialRequirements"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Special Requirements</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="Setup notes, special requests, marketing materials..." 
-                          data-testid="textarea-special-requirements"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormField
+                    control={createExhibitorForm.control}
+                    name="productsServices"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Products & Services</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            placeholder="Key products and services to showcase..." 
+                            data-testid="textarea-products-services"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={createExhibitorForm.control}
+                    name="specialRequirements"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Special Requirements</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            {...field} 
+                            placeholder="Setup notes, special requests, marketing materials..." 
+                            data-testid="textarea-special-requirements"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
