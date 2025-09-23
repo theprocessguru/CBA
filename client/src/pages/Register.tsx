@@ -115,9 +115,32 @@ export default function Register() {
   });
 
   // Filter person types for self-registration (exclude admin-only ones)
-  const selfRegisterPersonTypes = personTypes.filter((type: any) => 
+  const filteredPersonTypes = personTypes.filter((type: any) => 
     !['administrator', 'staff', 'sponsor', 'vip', 'councillor', 'speaker'].includes(type.name)
   );
+
+  // Separate roles from interests and sort alphabetically
+  const selfRegisterPersonTypes = (() => {
+    const roles: any[] = [];
+    const interests: any[] = [];
+
+    filteredPersonTypes.forEach((type: any) => {
+      // Classify as interest if displayName contains "interest" or "interested"
+      if (type.displayName?.toLowerCase().includes('interest') || 
+          type.description?.toLowerCase().includes('interested in')) {
+        interests.push(type);
+      } else {
+        roles.push(type);
+      }
+    });
+
+    // Sort both groups alphabetically by displayName
+    roles.sort((a, b) => a.displayName.localeCompare(b.displayName));
+    interests.sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+    // Return roles first, then interests
+    return [...roles, ...interests];
+  })();
 
   // Fetch business categories
   const { data: categories = [] } = useQuery({
