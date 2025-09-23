@@ -68,10 +68,20 @@ export default function Profile() {
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserWithPersonTypes>) => {
+      // Add auth token for authentication
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       const response = await fetch(`/api/users/${user?.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(data),
+        credentials: 'include',
       });
       if (!response.ok) throw new Error('Failed to update profile');
       return response.json();
