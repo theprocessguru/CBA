@@ -110,6 +110,7 @@ import Profile from "@/pages/Profile";
 import ResidentProfile from "@/pages/ResidentProfile";
 import SpeakerManagement from "@/pages/admin/SpeakerManagement";
 import SpeakerRecovery from "@/pages/admin/SpeakerRecovery";
+import ExhibitorManagement from "@/pages/admin/ExhibitorManagement";
 import OnboardingManagement from "@/pages/admin/OnboardingManagement";
 import EmailTemplates from "@/pages/admin/EmailTemplates";
 import BulkSync from "@/pages/admin/BulkSync";
@@ -827,6 +828,13 @@ function Router() {
         <AdminRoute>
           <MainLayout>
             <SpeakerRecovery />
+          </MainLayout>
+        </AdminRoute>
+      </Route>
+      <Route path="/admin/exhibitor-management">
+        <AdminRoute>
+          <MainLayout>
+            <ExhibitorManagement />
           </MainLayout>
         </AdminRoute>
       </Route>
