@@ -73,16 +73,18 @@ const FullyBooked = () => {
               </CardHeader>
               <CardContent className="text-center space-y-4">
                 <p className="text-lg text-red-600 font-medium">
-                  Thank you for the incredible response! We're thrilled to announce that the following are now completely booked:
+                  Thank you for the incredible response! Speaking slots and exhibition spaces are now fully booked, but workshops are still available:
                 </p>
                 
                 <div className="grid md:grid-cols-3 gap-4 mt-6">
-                  <div className="bg-white p-4 rounded-lg border border-red-200">
-                    <div className="flex items-center justify-center gap-2 text-red-700 mb-2">
+                  <div className="bg-white p-4 rounded-lg border border-green-200">
+                    <div className="flex items-center justify-center gap-2 text-green-700 mb-2">
                       <BookOpen className="h-5 w-5" />
                       <span className="font-semibold">Workshops</span>
                     </div>
-                    <Badge className="bg-red-100 text-red-800 w-full">FULLY BOOKED</Badge>
+                    <Link href="/event-booking">
+                      <Badge className="bg-green-100 text-green-800 w-full cursor-pointer hover:bg-green-200">STILL AVAILABLE</Badge>
+                    </Link>
                   </div>
                   
                   <div className="bg-white p-4 rounded-lg border border-red-200">
