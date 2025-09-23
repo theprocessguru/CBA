@@ -554,7 +554,7 @@ const AISummit = () => {
                     ) : (
                       <>
                         <UserPlus className="h-5 w-5" />
-                        Register FREE - Limited Places
+                        Register FREE - Bookings Now Open
                       </>
                     )}
                   </button>
