@@ -566,10 +566,10 @@ const AISummit = () => {
                       </Link>
                     </div>
                   ) : (
-                    <Link href="/workshop-registration">
-                      <div className="bg-green-500 text-white hover:bg-green-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
+                    <Link href="/fully-booked">
+                      <div className="bg-red-500 text-white hover:bg-red-600 text-lg px-8 py-4 font-semibold rounded-lg shadow-lg transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer">
                         <BookOpen className="h-5 w-5" />
-                        Workshop Registration
+                        Workshops - FULLY BOOKED
                       </div>
                     </Link>
                   )}

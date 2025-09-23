@@ -147,8 +147,8 @@ export default function WorkshopRegistration() {
   };
 
   const handleRegister = (workshop: Workshop) => {
-    // Redirect to login page for registration
-    window.location.href = '/login';
+    // Redirect to fully booked page as workshops are sold out
+    window.location.href = '/fully-booked';
   };
 
   const isWorkshopFull = (workshopId: number) => {
