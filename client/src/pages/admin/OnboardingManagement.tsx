@@ -52,6 +52,9 @@ interface User {
   membershipTier?: string;
   createdAt: string;
   emailVerified: boolean;
+  hasFailedEmails?: boolean;
+  lastEmailStatus?: string;
+  emailCount?: number;
 }
 
 interface PersonType {
@@ -80,6 +83,8 @@ export default function OnboardingManagement() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedEmailStatus, setSelectedEmailStatus] = useState<string>("all");
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [selectedUserForEmails, setSelectedUserForEmails] = useState<User | null>(null);
@@ -168,7 +173,7 @@ export default function OnboardingManagement() {
     }
   };
 
-  // Filter users based on search and type
+  // Filter users based on search, type, and verification status
   const filteredUsers = users.filter(user => {
     const matchesSearch = !searchTerm || 
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -178,7 +183,16 @@ export default function OnboardingManagement() {
     
     const matchesType = selectedType === "all" || user.participantType === selectedType;
     
-    return matchesSearch && matchesType;
+    const matchesStatus = selectedStatus === "all" || 
+      (selectedStatus === "verified" && user.emailVerified) ||
+      (selectedStatus === "unverified" && !user.emailVerified);
+
+    const matchesEmailStatus = selectedEmailStatus === "all" ||
+      (selectedEmailStatus === "failed" && user.hasFailedEmails) ||
+      (selectedEmailStatus === "no_emails" && (!user.emailCount || user.emailCount === 0)) ||
+      (selectedEmailStatus === "sent" && user.emailCount && user.emailCount > 0 && !user.hasFailedEmails);
+    
+    return matchesSearch && matchesType && matchesStatus && matchesEmailStatus;
   });
 
   const handleSelectAll = () => {
@@ -311,6 +325,29 @@ export default function OnboardingManagement() {
                 <SelectItem value="student">Student</SelectItem>
                 <SelectItem value="councillor">Councillor</SelectItem>
                 <SelectItem value="media">Media</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="unverified">Unverified</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedEmailStatus} onValueChange={setSelectedEmailStatus}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Email status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Emails</SelectItem>
+                <SelectItem value="failed">Failed Emails</SelectItem>
+                <SelectItem value="no_emails">No Emails Sent</SelectItem>
+                <SelectItem value="sent">Successfully Sent</SelectItem>
               </SelectContent>
             </Select>
             

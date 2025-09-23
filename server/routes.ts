@@ -2325,12 +2325,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
       const { search, status, limit } = req.query;
-      const users = await storage.listUsers({
-        search,
-        status,
-        limit: limit ? parseInt(limit) : undefined
-      });
-      res.json(users);
+      const { users, emailCommunications } = await import("@shared/schema");
+      const { sql, count, eq } = await import("drizzle-orm");
+      
+      // Get users with email statistics
+      const usersWithEmails = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          company: users.company,
+          participantType: users.participantType,
+          membershipTier: users.membershipTier,
+          createdAt: users.createdAt,
+          emailVerified: users.emailVerified,
+          emailCount: sql<number>`(
+            SELECT COUNT(*)::int 
+            FROM ${emailCommunications} 
+            WHERE ${emailCommunications.userId} = ${users.id}
+          )`,
+          failedEmailCount: sql<number>`(
+            SELECT COUNT(*)::int 
+            FROM ${emailCommunications} 
+            WHERE ${emailCommunications.userId} = ${users.id} 
+            AND ${emailCommunications.status} = 'failed'
+          )`,
+          lastEmailStatus: sql<string>`(
+            SELECT status 
+            FROM ${emailCommunications} 
+            WHERE ${emailCommunications.userId} = ${users.id} 
+            ORDER BY sent_at DESC 
+            LIMIT 1
+          )`
+        })
+        .from(users)
+        .orderBy(users.createdAt);
+
+      // Add computed fields
+      const result = usersWithEmails.map(user => ({
+        ...user,
+        hasFailedEmails: user.failedEmailCount > 0,
+        emailCount: user.emailCount || 0
+      }));
+      
+      res.json(result);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
