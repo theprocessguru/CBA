@@ -129,10 +129,11 @@ export const EventBookingTab = () => {
       return timeString; // Return original string if can't parse
     }
     
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString('en-GB', {
       hour: 'numeric',
       minute: '2-digit',
-      hour12: true
+      hour12: true,
+      timeZone: 'Europe/London' // This ensures BST/GMT is used
     });
   };
 
@@ -146,10 +147,11 @@ export const EventBookingTab = () => {
       return dateString; // Return original string if can't parse
     }
     
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('en-GB', {
       weekday: 'short',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      timeZone: 'Europe/London' // This ensures BST/GMT is used
     });
   };
 

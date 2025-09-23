@@ -83,10 +83,11 @@ export function AISummitSchedule({
       const end = new Date(endTime);
       
       const formatTime = (date: Date) => {
-        return date.toLocaleTimeString('en-US', { 
+        return date.toLocaleTimeString('en-GB', { 
           hour: 'numeric', 
           minute: '2-digit', 
-          hour12: false 
+          hour12: false,
+          timeZone: 'Europe/London' // This ensures BST/GMT is used
         });
       };
       
