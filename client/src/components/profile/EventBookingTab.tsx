@@ -194,10 +194,10 @@ export const EventBookingTab = () => {
                 <span className="text-sm">Book Workshops</span>
               </Button>
             </Link>
-            <Link href="/fully-booked" data-testid="link-book-speaking">
-              <Button variant="outline" className="w-full h-16 flex flex-col items-center gap-2 border-red-300 text-red-600 hover:bg-red-50">
+            <Link href="/event-booking" data-testid="link-book-speaking">
+              <Button className="w-full h-16 flex flex-col items-center gap-2 bg-green-500 hover:bg-green-600 text-white">
                 <Mic className="h-5 w-5" />
-                <span className="text-sm">Speaking - FULLY BOOKED</span>
+                <span className="text-sm">Book Speaking Sessions</span>
               </Button>
             </Link>
             <Link href="/my-registrations" data-testid="link-manage-bookings">
