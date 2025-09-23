@@ -235,7 +235,9 @@ export const EventBookingTab = () => {
                 // Handle different data structures for workshops vs speaking sessions
                 const maxCapacity = session.maxCapacity || session.max_capacity || 30;
                 const currentRegistrations = session.currentRegistrations || session.current_registrations || 0;
-                const isFull = currentRegistrations >= maxCapacity;
+                // Force speaking sessions to show as fully booked
+                const isFull = session.sessionType === 'speaking_session' || session.sessionType === 'keynote' || session.sessionType === 'talk' || 
+                              currentRegistrations >= maxCapacity;
                 const availableSeats = maxCapacity - currentRegistrations;
                 
                 // Get session title from different possible fields
