@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { AI_SUMMIT_DATE } from "@/lib/constants";
 import RegistrationCalendar from "@/components/RegistrationCalendar";
 import { Calendar, Download, QrCode, Mail, Phone, User, Building } from "lucide-react";
 
@@ -180,7 +181,7 @@ const MyRegistrations = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My AI Summit Registrations</h1>
             <p className="text-gray-600">
-              Manage your schedule for the First AI Summit Croydon 2025 - January 27th
+              Manage your schedule for the First AI Summit Croydon 2025 - {AI_SUMMIT_DATE}
             </p>
           </div>
 

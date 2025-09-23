@@ -7,6 +7,7 @@ import { MoodTracker } from "@/components/MoodTracker";
 import { MoodVisualization } from "@/components/MoodVisualization";
 import { Brain, Presentation, Users, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { AI_SUMMIT_DATE } from "@/lib/constants";
 
 export function EventMoodDemo() {
   const [selectedEvent, setSelectedEvent] = useState<string>("");
@@ -30,7 +31,7 @@ export function EventMoodDemo() {
       return {
         id: event.id,
         name: event.eventName,
-        date: "January 27, 2025" // Use correct date for AI Summit
+        date: AI_SUMMIT_DATE // Use correct date for AI Summit
       };
     }
     return {

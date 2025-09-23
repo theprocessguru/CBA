@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { AI_SUMMIT_DATE, AI_SUMMIT_VENUE } from "@/lib/constants";
 import { 
   Calendar, 
   Clock, 
@@ -44,7 +45,7 @@ const FullyBooked = () => {
               <div className="flex flex-wrap justify-center items-center gap-6 text-lg">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  <span>January 27, 2025</span>
+                  <span>{AI_SUMMIT_DATE}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-5 w-5" />
@@ -52,7 +53,7 @@ const FullyBooked = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
-                  <span>LSBU Croydon</span>
+                  <span>LSBU London South Bank University Croydon</span>
                 </div>
               </div>
             </div>
@@ -138,7 +139,7 @@ const FullyBooked = () => {
                     </div>
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-                      <span>Complimentary refreshments</span>
+                      <span>Complimentary Water Dispenser Access</span>
                     </div>
                     <div className="flex items-start gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />

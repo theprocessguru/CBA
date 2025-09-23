@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Users, ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "wouter";
+import { AI_SUMMIT_DATE } from "@/lib/constants";
 
 const AISummitBanner = () => {
   return (
@@ -38,7 +39,7 @@ const AISummitBanner = () => {
           <div className="flex flex-wrap justify-center items-center gap-6 text-sm md:text-base py-4">
             <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
               <Calendar className="h-4 w-4" />
-              <span className="font-medium">January 27, 2025</span>
+              <span className="font-medium">{AI_SUMMIT_DATE}</span>
             </div>
             <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-lg">
               <Clock className="h-4 w-4" />

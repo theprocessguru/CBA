@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { Clock, MapPin, Users, Calendar, User, BookOpen, AlertCircle, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
+import { AI_SUMMIT_DATE, AI_SUMMIT_VENUE } from "@/lib/constants";
 
 interface Workshop {
   id: number;
@@ -185,7 +186,7 @@ export default function WorkshopRegistration() {
           </p>
           <div className="mt-4 flex items-center justify-center gap-2 text-sm text-blue-600">
             <Calendar className="h-4 w-4" />
-            <span>January 27, 2025 | LSBU London South Bank University Croydon</span>
+            <span>{AI_SUMMIT_DATE} | {AI_SUMMIT_VENUE}</span>
           </div>
         </div>
 

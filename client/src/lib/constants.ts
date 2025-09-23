@@ -115,3 +115,10 @@ export const META_DESCRIPTIONS = {
   businessProfile: "View this business profile and discover their products, services, and special offers available to the community.",
   dashboard: "Member dashboard for Croydon Business Association. Manage your business profile, products, services, and special offers.",
 };
+
+// AI Summit Configuration
+export const AI_SUMMIT_DATE = "1 October 2025";
+export const AI_SUMMIT_DATE_SHORT = "Oct 1st";
+export const AI_SUMMIT_DATE_ISO = "2025-10-01";
+export const AI_SUMMIT_NAME = "First AI Summit Croydon 2025";
+export const AI_SUMMIT_VENUE = "LSBU London South Bank University Croydon";

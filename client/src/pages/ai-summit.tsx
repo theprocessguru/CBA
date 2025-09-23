@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { AI_SUMMIT_DATE } from "@/lib/constants";
 import { 
   Calendar, 
   Clock, 
@@ -126,7 +127,7 @@ const AISummit = () => {
 
   const eventDetails = {
     title: "First AI Summit Croydon 2025",
-    date: "January 27, 2025",
+    date: AI_SUMMIT_DATE,
     time: "10:00 AM - 4:00 PM",
     venue: "LSBU London South Bank University Croydon",
     price: "Reserve your spot - No payment required",
