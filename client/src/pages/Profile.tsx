@@ -199,9 +199,18 @@ export default function Profile() {
       const formData = new FormData();
       formData.append('image', file);
       
+      // Add auth token for authentication
+      const headers: Record<string, string> = {};
+      const authToken = localStorage.getItem('authToken');
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      
       const response = await fetch('/api/upload/image', {
         method: 'POST',
+        headers,
         body: formData,
+        credentials: 'include',
       });
       
       if (!response.ok) {
