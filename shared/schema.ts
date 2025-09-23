@@ -37,7 +37,7 @@ export const users = pgTable("users", {
   email: varchar("email").unique().notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
+  profileImageUrl: text("profile_image_url"),
   passwordHash: varchar("password_hash"), // For local authentication
   isAdmin: boolean("is_admin").default(false),
   membershipTier: varchar("membership_tier").default("Starter Tier"), // Starter Tier, Growth Tier, Strategic Tier, Patron Tier, Partner
