@@ -2710,6 +2710,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Workshop notification scheduling system
+  // Schedule notifications for user's workshops
+  const scheduleWorkshopNotifications = async (userId: string) => {
+    try {
+      // Get user's upcoming workshops (next 7 days)
+      const upcomingWorkshops = await db.select({
+        registrationId: cbaEventRegistrations.id,
+        eventName: cbaEvents.eventName,
+        startTime: cbaEvents.startTime,
+        endTime: cbaEvents.endTime,
+        eventDate: cbaEvents.eventDate,
+        venue: cbaEvents.venue
+      })
+      .from(cbaEventRegistrations)
+      .innerJoin(cbaEvents, eq(cbaEventRegistrations.eventId, cbaEvents.id))
+      .where(
+        and(
+          eq(cbaEventRegistrations.userId, userId),
+          eq(cbaEvents.isActive, true),
+          gte(cbaEvents.eventDate, new Date()),
+          lte(cbaEvents.eventDate, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)) // Next 7 days
+        )
+      );
+
+      // For each workshop, schedule a 5-minute reminder notification
+      for (const workshop of upcomingWorkshops) {
+        const eventDateStr = workshop.eventDate instanceof Date ? 
+          workshop.eventDate.toISOString().split('T')[0] : 
+          workshop.eventDate;
+        const workshopDateTime = new Date(`${eventDateStr}T${workshop.startTime}`);
+        const reminderTime = new Date(workshopDateTime.getTime() - 5 * 60 * 1000); // 5 minutes before
+
+        // Only schedule if reminder time is in the future
+        if (reminderTime > new Date()) {
+          // Check if notification already exists for this workshop
+          const existingNotification = await db.select()
+            .from(notifications)
+            .where(
+              and(
+                eq(notifications.userId, userId),
+                eq(notifications.category, 'event_reminder'),
+                eq(notifications.title, `Workshop Starting Soon: ${workshop.eventName}`)
+              )
+            )
+            .limit(1);
+
+          if (existingNotification.length === 0) {
+            // Create the scheduled notification
+            await db.insert(notifications).values({
+              userId,
+              title: `Workshop Starting Soon: ${workshop.eventName}`,
+              message: `Your workshop "${workshop.eventName}" starts in 5 minutes at ${workshop.venue}. Don't forget to join!`,
+              type: 'reminder',
+              category: 'event_reminder', 
+              priority: 'high',
+              isRead: false,
+              isArchived: false,
+              scheduledFor: reminderTime,
+              actionUrl: '/my-registrations',
+              actionText: 'View My Schedule'
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error scheduling workshop notifications:', error);
+    }
+  };
+
+  // Process and send scheduled notifications
+  const processScheduledNotifications = async () => {
+    try {
+      const now = new Date();
+      
+      // Find notifications that should be sent now
+      const dueNotifications = await db.select()
+        .from(notifications)
+        .where(
+          and(
+            lte(notifications.scheduledFor, now),
+            eq(notifications.isRead, false),
+            eq(notifications.isArchived, false)
+          )
+        );
+
+      // Mark them as "sent" by updating scheduledFor to null
+      if (dueNotifications.length > 0) {
+        const notificationIds = dueNotifications.map(n => n.id);
+        await db.update(notifications)
+          .set({ scheduledFor: null })
+          .where(inArray(notifications.id, notificationIds));
+        
+        console.log(`Processed ${dueNotifications.length} scheduled notifications`);
+      }
+    } catch (error) {
+      console.error('Error processing scheduled notifications:', error);
+    }
+  };
+
+  // Endpoint to manually schedule notifications for a user
+  app.post('/api/schedule-workshop-notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      await scheduleWorkshopNotifications(req.user.id);
+      res.json({ success: true, message: 'Workshop notifications scheduled successfully' });
+    } catch (error) {
+      console.error('Error scheduling notifications:', error);
+      res.status(500).json({ message: 'Failed to schedule notifications' });
+    }
+  });
+
+  // Run notification processor every minute
+  setInterval(processScheduledNotifications, 60 * 1000); // Check every minute
+
+  // Schedule notifications for new registrations automatically
+  const originalRegisterSessionHandler = app._router.stack.find((layer: any) => 
+    layer.route?.path === '/api/register-session' && layer.route?.methods?.post
+  );
+
   // User registration management endpoints
   
   // Get user's current registrations
@@ -2943,6 +3061,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         attendeeEmail: req.user.email,
         registeredAt: new Date()
       });
+      
+      // Automatically schedule notifications for this user's workshops
+      await scheduleWorkshopNotifications(userId);
       
       res.json({ 
         success: true, 
