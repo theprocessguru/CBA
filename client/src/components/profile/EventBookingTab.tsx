@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -36,11 +37,7 @@ export const EventBookingTab = () => {
     enabled: isAuthenticated
   });
 
-  // Combine workshops and speaking sessions into a unified list
-  const timeSlots = [
-    ...(workshops || []).map(workshop => ({ ...workshop, sessionType: 'workshop' })),
-    ...(speakingSessions || []).map(session => ({ ...session, sessionType: 'speaking_session' }))
-  ];
+  // Keep workshops and speaking sessions separate
   
   const slotsLoading = workshopsLoading || speakingSessionsLoading;
 
@@ -210,7 +207,7 @@ export const EventBookingTab = () => {
         </CardContent>
       </Card>
 
-      {/* Available Sessions */}
+      {/* Available Sessions - Tabbed by Type */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -219,18 +216,25 @@ export const EventBookingTab = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {slotsLoading ? (
-            <div className="text-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
-            </div>
-          ) : !timeSlots || timeSlots.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No sessions available for booking at this time</p>
-            </div>
-          ) : (
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {timeSlots.map((session) => {
+          <Tabs defaultValue="workshops" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="workshops">Workshops</TabsTrigger>
+              <TabsTrigger value="speaking">Speaking Sessions</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="workshops" className="mt-4">
+              {workshopsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              ) : !workshops || workshops.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No workshops available for booking at this time</p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {workshops.map((session) => {
                 const registered = isRegistered(session.id);
                 // Handle different data structures for workshops vs speaking sessions
                 const maxCapacity = session.maxCapacity || session.max_capacity || 30;
@@ -257,8 +261,8 @@ export const EventBookingTab = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold text-gray-900 leading-tight">{sessionTitle}</h3>
-                          <Badge className={getSlotTypeColor(session.sessionType)}>
-                            {getSlotTypeName(session.sessionType)}
+                          <Badge className={getSlotTypeColor('workshop')}>
+                            {getSlotTypeName('workshop')}
                           </Badge>
                           {registered && (
                             <Badge className="bg-green-100 text-green-800">
@@ -299,7 +303,7 @@ export const EventBookingTab = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => cancelMutation.mutate({ eventId: session.id, sessionType: session.sessionType })}
+                            onClick={() => cancelMutation.mutate({ eventId: session.id, sessionType: 'workshop' })}
                             disabled={cancelMutation.isPending}
                             data-testid={`button-cancel-${session.id}`}
                           >
@@ -312,7 +316,7 @@ export const EventBookingTab = () => {
                         ) : (
                           <Button
                             size="sm"
-                            onClick={() => registerMutation.mutate({ eventId: session.id, sessionType: session.sessionType })}
+                            onClick={() => registerMutation.mutate({ eventId: session.id, sessionType: 'workshop' })}
                             disabled={registerMutation.isPending}
                             data-testid={`button-register-${session.id}`}
                           >
@@ -332,8 +336,128 @@ export const EventBookingTab = () => {
                   </div>
                 );
               })}
-            </div>
-          )}
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="speaking" className="mt-4">
+              {speakingSessionsLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto"></div>
+                </div>
+              ) : !speakingSessions || speakingSessions.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Mic className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No speaking sessions available for booking at this time</p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {speakingSessions.map((session) => {
+                const registered = isRegistered(session.id);
+                // Handle different data structures for workshops vs speaking sessions
+                const maxCapacity = session.maxCapacity || session.max_capacity || 30;
+                const currentRegistrations = session.currentRegistrations || session.current_registrations || 0;
+                const isFull = currentRegistrations >= maxCapacity;
+                const availableSeats = maxCapacity - currentRegistrations;
+                
+                // Get session title from different possible fields
+                const sessionTitle = session.title || session.event_name || session.eventName || 'Untitled Session';
+                const sessionDescription = session.description || 'No description available';
+                const sessionVenue = session.room || session.venue || 'TBD';
+
+                return (
+                  <div
+                    key={session.id}
+                    className={`border rounded-lg p-4 ${
+                      registered ? 'ring-2 ring-green-500 bg-green-50' : 
+                      isFull ? 'opacity-75 bg-gray-50' :
+                      availableSeats <= 5 ? 'ring-2 ring-red-400' : ''
+                    }`}
+                    data-testid={`session-${session.id}`}
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-gray-900 leading-tight">{sessionTitle}</h3>
+                          <Badge className={getSlotTypeColor('speaking_session')}>
+                            {getSlotTypeName('speaking_session')}
+                          </Badge>
+                          {registered && (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Registered
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mb-2">{sessionDescription}</p>
+                        
+                        <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            {formatDate(session.date || session.startTime || session.start_time)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="h-4 w-4" />
+                            {formatTime(session.startTime || session.start_time)} - {formatTime(session.endTime || session.end_time)}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-4 w-4" />
+                            {sessionVenue}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            <span className="font-medium">
+                              {currentRegistrations}/{maxCapacity}
+                              <span className="text-green-600 ml-1">
+                                ({availableSeats} left)
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="ml-4">
+                        {registered ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => cancelMutation.mutate({ eventId: session.id, sessionType: 'speaking_session' })}
+                            disabled={cancelMutation.isPending}
+                            data-testid={`button-cancel-${session.id}`}
+                          >
+                            Cancel
+                          </Button>
+                        ) : isFull ? (
+                          <Button variant="outline" size="sm" disabled>
+                            Full
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={() => registerMutation.mutate({ eventId: session.id, sessionType: 'speaking_session' })}
+                            disabled={registerMutation.isPending}
+                            data-testid={`button-register-${session.id}`}
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            Register
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {availableSeats <= 5 && availableSeats > 0 && !registered && (
+                      <div className="flex items-center gap-1 text-sm text-red-600 bg-red-50 p-2 rounded">
+                        <AlertTriangle className="h-4 w-4" />
+                        Only {availableSeats} seats left!
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -353,7 +477,8 @@ export const EventBookingTab = () => {
             </div>
             <div className="space-y-3">
               {sessionRegistrations.map((registration) => {
-                const slot = timeSlots?.find(s => s.id === registration.eventId);
+                // Find the session in either workshops or speaking sessions
+                const slot = [...(workshops || []), ...(speakingSessions || [])].find(s => s.id === registration.eventId);
                 if (!slot) return null;
                 
                 return (
