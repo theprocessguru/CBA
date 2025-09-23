@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown, Award } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User, Save, Settings, Users, Star, AlertCircle, ChevronDown, Award, Camera, Trash2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -37,6 +37,8 @@ export default function Profile() {
   const [primaryPersonType, setPrimaryPersonType] = useState<number | null>(null);
   const [rolesData, setRolesData] = useState<Record<string, any>>({});
   const [openRoles, setOpenRoles] = useState<Set<string>>(new Set());
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -186,6 +188,70 @@ export default function Profile() {
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update role data",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Profile image upload mutation
+  const uploadImageMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await fetch('/api/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to upload image');
+      }
+      
+      return response.json();
+    },
+    onSuccess: async (data) => {
+      // Update profile with new image URL
+      if (profileData) {
+        const updatedProfile = { ...profileData, profileImageUrl: data.imageUrl };
+        await updateProfileMutation.mutateAsync(updatedProfile);
+        setProfileData(updatedProfile);
+      }
+      toast({
+        title: "Profile Picture Updated",
+        description: "Your profile picture has been successfully updated",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload profile picture",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Remove profile image
+  const removeImageMutation = useMutation({
+    mutationFn: async () => {
+      if (profileData) {
+        const updatedProfile = { ...profileData, profileImageUrl: null };
+        return updateProfileMutation.mutateAsync(updatedProfile);
+      }
+    },
+    onSuccess: () => {
+      if (profileData) {
+        setProfileData({ ...profileData, profileImageUrl: null });
+      }
+      toast({
+        title: "Profile Picture Removed",
+        description: "Your profile picture has been removed",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Remove Failed",
+        description: error.message || "Failed to remove profile picture",
         variant: "destructive",
       });
     },
@@ -362,6 +428,52 @@ export default function Profile() {
     return assignedRoles;
   };
 
+  // Handle image upload
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setIsUploadingImage(true);
+      uploadImageMutation.mutate(file, {
+        onSettled: () => {
+          setIsUploadingImage(false);
+          // Reset file input
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }
+      });
+    }
+  };
+
+  // Handle remove image
+  const handleRemoveImage = () => {
+    removeImageMutation.mutate();
+  };
+
+  // Trigger file input
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   const calculateProfileCompletion = (): number => {
     if (!profileData) return 0;
@@ -490,17 +602,65 @@ export default function Profile() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
-                <Avatar className="w-16 h-16">
-                  <AvatarFallback>
-                    {profileData.firstName?.[0]}{profileData.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="w-20 h-20">
+                    {profileData.profileImageUrl ? (
+                      <AvatarImage 
+                        src={profileData.profileImageUrl} 
+                        alt="Profile picture"
+                        className="object-cover"
+                      />
+                    ) : null}
+                    <AvatarFallback className="text-lg">
+                      {profileData.firstName?.[0]}{profileData.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-2 -right-2 flex gap-1">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-8 w-8 p-0 rounded-full bg-white shadow-md border"
+                      onClick={triggerFileInput}
+                      disabled={isUploadingImage}
+                      data-testid="button-upload-profile-picture"
+                    >
+                      <Camera className="h-3 w-3" />
+                    </Button>
+                    {profileData.profileImageUrl && (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0 rounded-full bg-white shadow-md border text-red-600 hover:text-red-700"
+                        onClick={handleRemoveImage}
+                        disabled={removeImageMutation.isPending}
+                        data-testid="button-remove-profile-picture"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
                 <div>
                   <h3 className="font-semibold">{profileData.firstName} {profileData.lastName}</h3>
                   <p className="text-sm text-gray-600">{profileData.email}</p>
                   <Badge variant="outline">{profileData.membershipTier}</Badge>
+                  <div className="mt-1">
+                    <p className="text-xs text-gray-500">
+                      {isUploadingImage ? "Uploading..." : "Click camera to change profile picture"}
+                    </p>
+                  </div>
                 </div>
               </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                data-testid="input-profile-picture"
+              />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
