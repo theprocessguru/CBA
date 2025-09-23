@@ -719,6 +719,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User profile update endpoint for regular users to update their own profile
+  app.put('/api/users/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user.id;
+      
+      // Users can only update their own profile (unless admin)
+      if (id !== userId && !req.user.isAdmin) {
+        return res.status(403).json({ message: "You can only update your own profile" });
+      }
+      
+      const { 
+        firstName, 
+        lastName, 
+        phone,
+        company,
+        jobTitle,
+        title,
+        bio,
+        profileImageUrl
+      } = req.body;
+      
+      // Build update data object with only provided fields
+      const updateData: any = {};
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (phone !== undefined) updateData.phone = phone;
+      if (company !== undefined) updateData.company = company;
+      if (jobTitle !== undefined) updateData.jobTitle = jobTitle;
+      if (title !== undefined) updateData.title = title;
+      if (bio !== undefined) updateData.bio = bio;
+      if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
+      
+      await storage.updateUser(id, updateData);
+      
+      // Return updated user
+      const updatedUser = await storage.getUser(id);
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Comprehensive user update endpoint for admins
   app.put('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
