@@ -75,7 +75,7 @@ export function ProfileCompletionWidget({
           data-testid="progress-completion" 
         />
         {overall.percentage < 100 && (
-          <Link href="/profile">
+          <Link href="/my-profile">
             <a className="text-xs text-primary hover:underline" data-testid="link-complete-profile">
               Complete your profile →
             </a>
@@ -108,7 +108,7 @@ export function ProfileCompletionWidget({
               />
             </div>
             {overall.percentage < 100 && (
-              <Link href="/profile">
+              <Link href="/my-profile">
                 <Button variant="outline" size="sm" data-testid="button-complete-profile">
                   <ArrowRight className="h-4 w-4 ml-1" />
                   Complete
@@ -177,7 +177,7 @@ export function ProfileCompletionWidget({
                 </li>
               ))}
             </ul>
-            <Link href="/profile">
+            <Link href="/my-profile">
               <Button size="sm" className="mt-3" data-testid="button-update-profile">
                 Update Profile
               </Button>

@@ -442,7 +442,7 @@ const DashboardOverview = () => {
               Book AI Summit Sessions
             </Button>
           </Link>
-          <Link href={hasBusinessType ? "/dashboard/business-profile" : "/profile"}>
+          <Link href={hasBusinessType ? "/dashboard/business-profile" : "/my-profile"}>
             <Button className="w-full justify-start" variant="outline">
               <Building className="mr-2 h-4 w-4" />
               Update Profile

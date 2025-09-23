@@ -213,14 +213,14 @@ const DynamicDashboardLayout = ({ children }: DynamicDashboardLayoutProps) => {
             {/* Profile Settings Link */}
             <Separator className="my-4" />
             
-            <Link href="/profile">
+            <Link href="/my-profile">
               <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                location === '/profile' 
+                location === '/my-profile' 
                   ? 'bg-primary text-white' 
                   : 'text-neutral-700 hover:bg-neutral-100'
               }`} data-testid="link-profile-settings">
                 <User className={`mr-3 h-4 w-4 ${
-                  location === '/profile' ? 'text-white' : 'text-neutral-500'
+                  location === '/my-profile' ? 'text-white' : 'text-neutral-500'
                 }`} />
                 Profile Settings
               </a>
