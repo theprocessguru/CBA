@@ -646,7 +646,7 @@ export default function Profile() {
                   <Badge variant="outline">{profileData.membershipTier}</Badge>
                   <div className="mt-1">
                     <p className="text-xs text-gray-500">
-                      {isUploadingImage ? "Uploading..." : "Click camera to change profile picture"}
+                      {isUploadingImage ? "Uploading..." : "🔺 Click camera to change profile picture"}
                     </p>
                   </div>
                 </div>
