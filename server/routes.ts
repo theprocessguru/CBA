@@ -6684,26 +6684,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .select({
           id: aiSummitExhibitorRegistrations.id,
           userId: aiSummitExhibitorRegistrations.userId,
-          firstName: aiSummitExhibitorRegistrations.firstName,
-          lastName: aiSummitExhibitorRegistrations.lastName,
+          contactName: aiSummitExhibitorRegistrations.contactName,
           email: aiSummitExhibitorRegistrations.email,
           phone: aiSummitExhibitorRegistrations.phone,
-          company: aiSummitExhibitorRegistrations.company,
-          jobTitle: aiSummitExhibitorRegistrations.jobTitle,
+          companyName: aiSummitExhibitorRegistrations.companyName,
           website: aiSummitExhibitorRegistrations.website,
           standLocation: aiSummitExhibitorRegistrations.standLocation,
           standNumber: aiSummitExhibitorRegistrations.standNumber,
           standSize: aiSummitExhibitorRegistrations.standSize,
           boothRequirements: aiSummitExhibitorRegistrations.boothRequirements,
-          technicalNeeds: aiSummitExhibitorRegistrations.technicalNeeds,
           businessDescription: aiSummitExhibitorRegistrations.businessDescription,
           productsServices: aiSummitExhibitorRegistrations.productsServices,
           specialRequirements: aiSummitExhibitorRegistrations.specialRequirements,
-          status: aiSummitExhibitorRegistrations.status,
-          createdAt: aiSummitExhibitorRegistrations.createdAt,
+          registeredAt: aiSummitExhibitorRegistrations.registeredAt,
         })
         .from(aiSummitExhibitorRegistrations)
-        .orderBy(desc(aiSummitExhibitorRegistrations.createdAt));
+        .orderBy(desc(aiSummitExhibitorRegistrations.registeredAt));
       
       res.json(exhibitors);
     } catch (error) {
@@ -6733,22 +6729,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine user data with exhibition-specific fields
       const exhibitorData = {
         userId: userData.id,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+        contactName: `${userData.firstName} ${userData.lastName}`,
         email: userData.email,
         phone: userData.phone,
-        company: userData.company,
-        jobTitle: userData.jobTitle,
+        companyName: userData.company || req.body.companyName,
         website: req.body.website || null,
         standLocation: req.body.standLocation,
         standNumber: req.body.standNumber,
         standSize: req.body.standSize,
         boothRequirements: req.body.boothRequirements || null,
-        technicalNeeds: req.body.technicalNeeds || null,
         businessDescription: req.body.businessDescription || null,
         productsServices: req.body.productsServices || null,
         specialRequirements: req.body.specialRequirements || null,
-        status: 'active',
+        electricalNeeds: req.body.electricalNeeds || false,
+        internetNeeds: req.body.internetNeeds || false,
+        agreesToTerms: true,
       };
       
       const validatedData = insertAISummitExhibitorRegistrationSchema.parse(exhibitorData);
@@ -6768,7 +6763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all users for dropdown selection
   app.get('/api/admin/users-list', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const { users } = await import("@shared/schema");
+      const { users, isNotNull } = await import("@shared/schema");
       
       const usersList = await db
         .select({

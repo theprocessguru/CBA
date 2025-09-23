@@ -33,23 +33,19 @@ import {
 interface ExhibitorProfile {
   id: string;
   userId: string;
-  firstName: string;
-  lastName: string;
+  contactName: string;
   email: string;
   phone?: string;
-  company?: string;
-  jobTitle?: string;
+  companyName?: string;
   website?: string;
   standLocation?: string;
   standNumber?: string;
   standSize?: string;
   boothRequirements?: string;
-  technicalNeeds?: string;
   businessDescription?: string;
   productsServices?: string;
   specialRequirements?: string;
-  status: string;
-  createdAt: string;
+  registeredAt: string;
 }
 
 // Create exhibitor from existing user schema
@@ -59,10 +55,11 @@ const createExhibitorSchema = z.object({
   standNumber: z.string().min(1, "Stand number is required"),
   standSize: z.string().min(1, "Stand size is required"),
   boothRequirements: z.string().optional(),
-  technicalNeeds: z.string().optional(),
   businessDescription: z.string().optional(),
   productsServices: z.string().optional(),
   specialRequirements: z.string().optional(),
+  companyName: z.string().optional(),
+  website: z.string().optional(),
 });
 
 type CreateExhibitorFormData = z.infer<typeof createExhibitorSchema>;
@@ -142,15 +139,12 @@ export default function ExhibitorManagement() {
   // Filter exhibitors
   const filteredExhibitors = exhibitors?.filter((exhibitor) => {
     const matchesSearch = 
-      exhibitor.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exhibitor.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exhibitor.contactName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exhibitor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      exhibitor.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exhibitor.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       exhibitor.standNumber?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = filterStatus === "all" || exhibitor.status === filterStatus;
-    
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   }) || [];
 
   if (isLoading) {
@@ -324,24 +318,6 @@ export default function ExhibitorManagement() {
 
                 <FormField
                   control={createExhibitorForm.control}
-                  name="technicalNeeds"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Technical Needs</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          {...field} 
-                          placeholder="e.g., Power outlets, Internet connection, AV equipment..." 
-                          data-testid="textarea-technical-needs"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={createExhibitorForm.control}
                   name="businessDescription"
                   render={({ field }) => (
                     <FormItem>
@@ -431,19 +407,19 @@ export default function ExhibitorManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {filteredExhibitors.filter(e => e.status === 'active').length}
+              {filteredExhibitors.length}
             </div>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Setup</CardTitle>
+            <CardTitle className="text-sm font-medium">Stand Locations</CardTitle>
             <Edit3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {filteredExhibitors.filter(e => e.status === 'pending').length}
+              {new Set(filteredExhibitors.map(e => e.standLocation).filter(Boolean)).size}
             </div>
           </CardContent>
         </Card>
@@ -455,7 +431,7 @@ export default function ExhibitorManagement() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Set(filteredExhibitors.map(e => e.company).filter(Boolean)).size}
+              {new Set(filteredExhibitors.map(e => e.companyName).filter(Boolean)).size}
             </div>
           </CardContent>
         </Card>
@@ -473,17 +449,9 @@ export default function ExhibitorManagement() {
             data-testid="input-search-exhibitors"
           />
         </div>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-status">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="text-sm text-gray-500">
+          {filteredExhibitors.length} exhibitor{filteredExhibitors.length !== 1 ? 's' : ''} found
+        </div>
       </div>
 
       {/* Exhibitors Grid */}
@@ -494,12 +462,12 @@ export default function ExhibitorManagement() {
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-lg">
-                    {exhibitor.firstName} {exhibitor.lastName}
+                    {exhibitor.contactName}
                   </CardTitle>
-                  <p className="text-sm text-gray-600">{exhibitor.company}</p>
+                  <p className="text-sm text-gray-600">{exhibitor.companyName}</p>
                 </div>
-                <Badge variant={exhibitor.status === 'active' ? 'default' : 'secondary'}>
-                  {exhibitor.status}
+                <Badge variant="default">
+                  Active
                 </Badge>
               </div>
             </CardHeader>
@@ -539,7 +507,7 @@ export default function ExhibitorManagement() {
 
               <div className="flex justify-between items-center pt-2">
                 <span className="text-xs text-gray-500">
-                  Created {format(new Date(exhibitor.createdAt), 'MMM dd, yyyy')}
+                  Registered {format(new Date(exhibitor.registeredAt), 'MMM dd, yyyy')}
                 </span>
                 <div className="flex space-x-2">
                   <Button size="sm" variant="outline" data-testid={`button-edit-exhibitor-${exhibitor.id}`}>
