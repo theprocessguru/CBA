@@ -6675,6 +6675,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Exhibitor Management API - Get all exhibitors
+  app.get('/api/admin/exhibitors', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitExhibitorRegistrations } = await import("@shared/schema");
+      
+      const exhibitors = await db
+        .select({
+          id: aiSummitExhibitorRegistrations.id,
+          userId: aiSummitExhibitorRegistrations.userId,
+          firstName: aiSummitExhibitorRegistrations.firstName,
+          lastName: aiSummitExhibitorRegistrations.lastName,
+          email: aiSummitExhibitorRegistrations.email,
+          phone: aiSummitExhibitorRegistrations.phone,
+          company: aiSummitExhibitorRegistrations.company,
+          jobTitle: aiSummitExhibitorRegistrations.jobTitle,
+          website: aiSummitExhibitorRegistrations.website,
+          standLocation: aiSummitExhibitorRegistrations.standLocation,
+          standNumber: aiSummitExhibitorRegistrations.standNumber,
+          standSize: aiSummitExhibitorRegistrations.standSize,
+          boothRequirements: aiSummitExhibitorRegistrations.boothRequirements,
+          technicalNeeds: aiSummitExhibitorRegistrations.technicalNeeds,
+          businessDescription: aiSummitExhibitorRegistrations.businessDescription,
+          productsServices: aiSummitExhibitorRegistrations.productsServices,
+          specialRequirements: aiSummitExhibitorRegistrations.specialRequirements,
+          status: aiSummitExhibitorRegistrations.status,
+          createdAt: aiSummitExhibitorRegistrations.createdAt,
+        })
+        .from(aiSummitExhibitorRegistrations)
+        .orderBy(desc(aiSummitExhibitorRegistrations.createdAt));
+      
+      res.json(exhibitors);
+    } catch (error) {
+      console.error('Error fetching exhibitors:', error);
+      res.status(500).json({ message: 'Failed to fetch exhibitors' });
+    }
+  });
+
+  // Create new exhibitor from existing user
+  app.post('/api/admin/exhibitors', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { aiSummitExhibitorRegistrations, insertAISummitExhibitorRegistrationSchema, users } = await import("@shared/schema");
+      
+      // Get user details from the database
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, req.body.userId))
+        .limit(1);
+      
+      if (!user || user.length === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      const userData = user[0];
+      
+      // Combine user data with exhibition-specific fields
+      const exhibitorData = {
+        userId: userData.id,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+        company: userData.company,
+        jobTitle: userData.jobTitle,
+        website: req.body.website || null,
+        standLocation: req.body.standLocation,
+        standNumber: req.body.standNumber,
+        standSize: req.body.standSize,
+        boothRequirements: req.body.boothRequirements || null,
+        technicalNeeds: req.body.technicalNeeds || null,
+        businessDescription: req.body.businessDescription || null,
+        productsServices: req.body.productsServices || null,
+        specialRequirements: req.body.specialRequirements || null,
+        status: 'active',
+      };
+      
+      const validatedData = insertAISummitExhibitorRegistrationSchema.parse(exhibitorData);
+      
+      const [newExhibitor] = await db
+        .insert(aiSummitExhibitorRegistrations)
+        .values(validatedData)
+        .returning();
+      
+      res.status(201).json(newExhibitor);
+    } catch (error) {
+      console.error('Error creating exhibitor:', error);
+      res.status(400).json({ message: 'Failed to create exhibitor' });
+    }
+  });
+
+  // Get all users for dropdown selection
+  app.get('/api/admin/users-list', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { users } = await import("@shared/schema");
+      
+      const usersList = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          phone: users.phone,
+          company: users.company,
+          jobTitle: users.jobTitle,
+        })
+        .from(users)
+        .where(and(
+          isNotNull(users.firstName),
+          isNotNull(users.lastName),
+          isNotNull(users.email)
+        ))
+        .orderBy(users.firstName, users.lastName);
+      
+      res.json(usersList);
+    } catch (error) {
+      console.error('Error fetching users list:', error);
+      res.status(500).json({ message: 'Failed to fetch users list' });
+    }
+  });
+
   // Legacy API - For backward compatibility (maps to new normalized structure)
   app.get('/api/admin/speakers-legacy', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
