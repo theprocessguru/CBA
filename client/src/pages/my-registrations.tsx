@@ -113,7 +113,10 @@ const MyRegistrations = () => {
         title: "Registration Cancelled",
         description: "Your registration has been cancelled successfully.",
       });
+      // Invalidate all relevant caches to update UI immediately
       queryClient.invalidateQueries({ queryKey: ['/api/my-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/workshops'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/ai-summit/speaking-sessions/active'] });
     },
     onError: (error) => {
       toast({
