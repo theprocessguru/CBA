@@ -384,6 +384,25 @@ export default function EventManagement() {
   };
 
   const handleCreateEvent = async (formData: FormData) => {
+    // Validate that end time is after start time
+    const startTime = formData.get("startTime") as string;
+    const endTime = formData.get("endTime") as string;
+    
+    if (startTime && endTime) {
+      const eventDate = formData.get("eventDate") as string;
+      const startDateTime = new Date(`${eventDate} ${startTime}`);
+      const endDateTime = new Date(`${eventDate} ${endTime}`);
+      
+      if (!isNaN(startDateTime.getTime()) && !isNaN(endDateTime.getTime()) && endDateTime <= startDateTime) {
+        toast({
+          title: "Invalid Time Range",
+          description: "Event end time must be after start time",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     let imageUrl = formData.get("imageUrl") as string || undefined;
     
     // If there's an image file, convert to base64
@@ -1440,6 +1459,26 @@ export default function EventManagement() {
           <form onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.currentTarget);
+            
+            // Validate that end time is after start time
+            const startTime = formData.get("startTime") as string;
+            const endTime = formData.get("endTime") as string;
+            
+            if (startTime && endTime) {
+              const slotDate = selectedEvent?.eventDate;
+              const startDateTime = new Date(`${slotDate} ${startTime}`);
+              const endDateTime = new Date(`${slotDate} ${endTime}`);
+              
+              if (!isNaN(startDateTime.getTime()) && !isNaN(endDateTime.getTime()) && endDateTime <= startDateTime) {
+                toast({
+                  title: "Invalid Time Range",
+                  description: "Session end time must be after start time",
+                  variant: "destructive",
+                });
+                return;
+              }
+            }
+            
             const subEventData = {
               eventId: selectedEvent?.id,
               title: formData.get("title"),
