@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DynamicDashboardLayout from "@/components/dashboard/DynamicDashboardLayout";
 import BusinessProfile from "@/components/dashboard/BusinessProfile";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -11,9 +11,9 @@ const BusinessProfilePage = () => {
         <meta name="description" content="Update your business profile information including contact details, description, and more." />
       </Helmet>
       
-      <DashboardLayout>
+      <DynamicDashboardLayout>
         <BusinessProfile />
-      </DashboardLayout>
+      </DynamicDashboardLayout>
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DynamicDashboardLayout from "@/components/dashboard/DynamicDashboardLayout";
 import ProductsServices from "@/components/dashboard/ProductsServices";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -18,9 +18,9 @@ const ProductsServicesPage = () => {
         />
       </div>
       
-      <DashboardLayout>
+      <DynamicDashboardLayout>
         <ProductsServices />
-      </DashboardLayout>
+      </DynamicDashboardLayout>
     </>
   );
 };
