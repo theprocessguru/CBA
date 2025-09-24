@@ -60,6 +60,21 @@ const createSessionSchema = z.object({
   audienceLevel: z.enum(["all", "beginner", "intermediate", "advanced", "business_leaders"]),
   keyTakeaways: z.string().optional(),
   isActive: z.boolean().default(true),
+}).superRefine(({ startTime, endTime }, ctx) => {
+  try {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "End time must be after start time",
+        path: ["endTime"],
+      });
+    }
+  } catch (error) {
+    // Invalid date format will be caught by string validation
+  }
 });
 
 type CreateSessionFormData = z.infer<typeof createSessionSchema>;
