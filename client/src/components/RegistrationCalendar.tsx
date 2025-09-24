@@ -300,9 +300,31 @@ const RegistrationCalendar = ({
   };
 
   const parseTime = (timeStr: string) => {
-    const [start] = timeStr.split(' - ');
-    const [hours, minutes] = start.split(':').map(Number);
-    return hours * 60 + minutes;
+    try {
+      // Handle TBD and invalid times by putting them at the end
+      if (!timeStr || timeStr === 'TBD' || !timeStr.includes(':')) {
+        return 9999; // Put TBD sessions at the end
+      }
+      
+      const [start] = timeStr.split(' - ');
+      const timeParts = start.split(':');
+      
+      if (timeParts.length < 2) {
+        return 9999; // Invalid format, put at end
+      }
+      
+      const [hours, minutes] = timeParts.map(Number);
+      
+      // Check if we got valid numbers
+      if (isNaN(hours) || isNaN(minutes)) {
+        return 9999; // Invalid numbers, put at end
+      }
+      
+      return hours * 60 + minutes;
+    } catch (error) {
+      console.warn('Error parsing time:', timeStr, error);
+      return 9999; // Error case, put at end
+    }
   };
 
   const sortedSessions = [...allSessions].sort((a, b) => parseTime(a.time) - parseTime(b.time));
