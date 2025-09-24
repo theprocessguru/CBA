@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import DynamicDashboardLayout from "@/components/dashboard/DynamicDashboardLayout";
 import MemberDirectory from "@/components/dashboard/MemberDirectory";
 
 const MemberDirectoryPage = () => {
@@ -10,9 +10,9 @@ const MemberDirectoryPage = () => {
         <meta name="description" content="Browse and connect with other Croydon Business Association members in this exclusive directory." />
       </Helmet>
       
-      <DashboardLayout>
+      <DynamicDashboardLayout>
         <MemberDirectory />
-      </DashboardLayout>
+      </DynamicDashboardLayout>
     </>
   );
 };
