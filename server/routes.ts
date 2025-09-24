@@ -2999,24 +2999,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid registration ID" });
       }
       
-      // Get user's badge to verify ownership
-      const userBadges = await storage.getBadgesByEmail(req.user.email);
-      if (!userBadges || userBadges.length === 0) {
-        return res.status(403).json({ message: "No badge found for user" });
+      let registrationFound = false;
+      let registrationType = '';
+      
+      // Try to find the registration in CBA events first
+      try {
+        const cbaRegistration = await db.select()
+          .from(cbaEventRegistrations)
+          .where(and(
+            eq(cbaEventRegistrations.id, registrationId),
+            eq(cbaEventRegistrations.userId, userId)
+          ))
+          .limit(1);
+        
+        if (cbaRegistration.length > 0) {
+          await storage.deleteCBAEventRegistration(registrationId);
+          registrationFound = true;
+          registrationType = 'CBA Event';
+        }
+      } catch (error) {
+        console.log("Not a CBA event registration");
       }
       
-      const badgeId = userBadges[0].badgeId;
-      
-      // Verify registration belongs to user
-      const registration = await storage.getAISummitWorkshopRegistrationById(registrationId);
-      if (!registration || registration.badgeId !== badgeId) {
-        return res.status(403).json({ message: "Registration not found or not owned by user" });
+      // If not found in CBA events, try AI Summit workshops
+      if (!registrationFound) {
+        try {
+          // Get user's badge to verify ownership
+          const userBadges = await storage.getBadgesByEmail(req.user.email);
+          if (userBadges && userBadges.length > 0) {
+            const badgeId = userBadges[0].badgeId;
+            
+            const workshopRegistration = await storage.getAISummitWorkshopRegistrationById(registrationId);
+            if (workshopRegistration && workshopRegistration.badgeId === badgeId) {
+              await storage.deleteAISummitWorkshopRegistration(registrationId);
+              registrationFound = true;
+              registrationType = 'AI Summit Workshop';
+            }
+          }
+        } catch (error) {
+          console.log("Not an AI Summit workshop registration");
+        }
       }
       
-      // Delete the registration (implement in storage)
-      await storage.deleteAISummitWorkshopRegistration(registrationId);
+      // If not found in workshops, try AI Summit speaking sessions
+      if (!registrationFound) {
+        try {
+          // Get user's badge to verify ownership
+          const userBadges = await storage.getBadgesByEmail(req.user.email);
+          if (userBadges && userBadges.length > 0) {
+            const badgeId = userBadges[0].badgeId;
+            
+            const speakingRegistration = await db.select()
+              .from(aiSummitSessionRegistrations)
+              .where(and(
+                eq(aiSummitSessionRegistrations.id, registrationId),
+                eq(aiSummitSessionRegistrations.badgeId, badgeId)
+              ))
+              .limit(1);
+            
+            if (speakingRegistration.length > 0) {
+              const sessionId = speakingRegistration[0].sessionId;
+              await storage.cancelAISummitSpeakingSessionRegistration(userId, sessionId);
+              registrationFound = true;
+              registrationType = 'AI Summit Speaking Session';
+            }
+          }
+        } catch (error) {
+          console.log("Not an AI Summit speaking session registration");
+        }
+      }
       
-      res.json({ success: true, message: "Registration cancelled successfully" });
+      if (!registrationFound) {
+        return res.status(404).json({ message: "Registration not found or not owned by user" });
+      }
+      
+      res.json({ success: true, message: `${registrationType} registration cancelled successfully` });
     } catch (error: any) {
       console.error("Error cancelling registration:", error);
       res.status(500).json({ message: "Failed to cancel registration" });
