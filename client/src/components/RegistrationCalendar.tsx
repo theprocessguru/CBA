@@ -44,6 +44,12 @@ const RegistrationCalendar = ({
     select: (data) => data || []
   });
 
+  // Fetch live speaking sessions from database
+  const { data: liveSpeakingSessions = [] } = useQuery({
+    queryKey: ['/api/ai-summit/speaking-sessions/active'],
+    select: (data) => data || []
+  });
+
   // Convert live workshops to Registration format
   const formatSessionTime = (startTime: string, endTime: string) => {
     try {
@@ -109,7 +115,26 @@ const RegistrationCalendar = ({
     }));
   };
 
-  const allSessions: Registration[] = convertWorkshopsToSessions(liveWorkshops || []);
+  const convertSpeakingSessionsToSessions = (sessions: any[]): Registration[] => {
+    return sessions.map(session => ({
+      id: `session-${session.id}`,
+      type: 'talk' as const,
+      title: session.title || 'Speaking Session',
+      time: formatSessionTime(session.startTime, session.endTime),
+      duration: calculateDuration(session.startTime, session.endTime),
+      location: session.venue || 'Main Auditorium',
+      capacity: session.maxCapacity || 100,
+      description: session.description,
+      eventId: session.id,
+      startTime: session.startTime,
+      endTime: session.endTime
+    }));
+  };
+
+  const allSessions: Registration[] = [
+    ...convertWorkshopsToSessions(liveWorkshops || []),
+    ...convertSpeakingSessionsToSessions(liveSpeakingSessions || [])
+  ];
 
   // Static fallback sessions (kept as backup if needed)
   const staticSessions: Registration[] = [
@@ -231,12 +256,16 @@ const RegistrationCalendar = ({
   };
 
   const isRegistered = (sessionId: string) => {
-    // Extract workshop ID from session ID format (workshop-10 -> 10)
+    // Extract workshop ID from session ID format (workshop-10 -> 10) 
+    // or session ID from session ID format (session-8 -> 8)
     const workshopId = sessionId.replace('workshop-', '');
+    const speakingSessionId = sessionId.replace('session-', '');
     return safeUserRegistrations.some(reg => 
       reg.id === sessionId || 
       reg.id === workshopId || 
-      reg.eventId?.toString() === workshopId
+      reg.id === speakingSessionId ||
+      reg.eventId?.toString() === workshopId ||
+      reg.eventId?.toString() === speakingSessionId
     );
   };
 
