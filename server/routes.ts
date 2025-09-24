@@ -3058,10 +3058,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .limit(1);
             
             if (speakingRegistration.length > 0) {
-              const sessionId = speakingRegistration[0].sessionId;
-              await storage.cancelAISummitSpeakingSessionRegistration(userId, sessionId);
-              registrationFound = true;
-              registrationType = 'AI Summit Speaking Session';
+              // Directly delete the registration by ID
+              const result = await db
+                .delete(aiSummitSessionRegistrations)
+                .where(eq(aiSummitSessionRegistrations.id, registrationId))
+                .returning();
+              
+              if (result.length > 0) {
+                registrationFound = true;
+                registrationType = 'AI Summit Speaking Session';
+              }
             }
           }
         } catch (error) {
