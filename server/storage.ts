@@ -342,6 +342,7 @@ export interface IStorage {
   getSessionRegistrationsBySessionId(sessionId: number): Promise<AISummitSpeakingSessionRegistration[]>;
   getSessionRegistrationsByBadgeId(badgeId: string): Promise<AISummitSpeakingSessionRegistration[]>;
   checkSessionCapacity(sessionId: number): Promise<{ current: number; max: number; available: number }>;
+  cancelAISummitSpeakingSessionRegistration(userId: string, sessionId: number): Promise<boolean>;
 
   // General Event Management
   getAllEvents(): Promise<Event[]>;
@@ -2056,6 +2057,33 @@ export class DatabaseStorage implements IStorage {
     const available = max - current;
 
     return { current, max, available };
+  }
+
+  async cancelAISummitSpeakingSessionRegistration(userId: string, sessionId: number): Promise<boolean> {
+    // Get user's email first
+    const user = await this.getUser(userId);
+    if (!user || !user.email) {
+      throw new Error('User not found or no email');
+    }
+    
+    // Get user's badge
+    const userBadges = await this.getBadgesByEmail(user.email);
+    if (!userBadges || userBadges.length === 0) {
+      throw new Error('No badge found for user');
+    }
+    
+    const badgeId = userBadges[0].badgeId;
+    
+    // Find and delete the registration
+    const result = await db
+      .delete(aiSummitSessionRegistrations)
+      .where(and(
+        eq(aiSummitSessionRegistrations.sessionId, sessionId),
+        eq(aiSummitSessionRegistrations.badgeId, badgeId)
+      ))
+      .returning();
+    
+    return result.length > 0;
   }
 
   // Real-time occupancy tracking methods
