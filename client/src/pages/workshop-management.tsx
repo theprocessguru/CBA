@@ -120,11 +120,43 @@ export default function WorkshopManagement() {
 
   const handleCreateWorkshop = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that end time is after start time
+    if (workshopForm.startTime && workshopForm.endTime) {
+      const startTime = new Date(workshopForm.startTime);
+      const endTime = new Date(workshopForm.endTime);
+      
+      if (!isNaN(startTime.getTime()) && !isNaN(endTime.getTime()) && endTime <= startTime) {
+        toast({
+          title: "Invalid Time Range",
+          description: "End time must be after start time",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     createWorkshopMutation.mutate(workshopForm);
   };
 
   const handleCreateSession = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that end time is after start time
+    if (sessionForm.startTime && sessionForm.endTime) {
+      const startTime = new Date(sessionForm.startTime);
+      const endTime = new Date(sessionForm.endTime);
+      
+      if (!isNaN(startTime.getTime()) && !isNaN(endTime.getTime()) && endTime <= startTime) {
+        toast({
+          title: "Invalid Time Range",
+          description: "End time must be after start time",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
     createSessionMutation.mutate(sessionForm);
   };
 
