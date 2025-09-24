@@ -10847,6 +10847,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workshopSchema = insertAISummitWorkshopSchema.extend({
         startTime: z.string(),
         endTime: z.string(),
+      }).superRefine(({ startTime, endTime }, ctx) => {
+        try {
+          const start = new Date(startTime);
+          const end = new Date(endTime);
+          
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "End time must be after start time",
+              path: ["endTime"],
+            });
+          }
+        } catch (error) {
+          // Invalid date format will be caught by string validation
+        }
       });
       
       const validated = workshopSchema.parse(req.body);
@@ -11400,6 +11415,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         startTime: z.string(),
         endTime: z.string(),
         speakerId: z.string().optional(), // Optional speaker selection
+      }).superRefine(({ startTime, endTime }, ctx) => {
+        try {
+          const start = new Date(startTime);
+          const end = new Date(endTime);
+          
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end <= start) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "End time must be after start time",
+              path: ["endTime"],
+            });
+          }
+        } catch (error) {
+          // Invalid date format will be caught by string validation
+        }
       });
       
       const validated = sessionSchema.parse(req.body);
