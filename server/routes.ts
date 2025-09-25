@@ -11039,64 +11039,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         whereCondition = eq(aiSummitWorkshopRegistrations.attendeeEmail, user.email);
       }
 
+      // Get registrations with simplified query to avoid field conflicts
       const registrations = await db
-        .select({
-          id: aiSummitWorkshopRegistrations.id,
-          workshopId: aiSummitWorkshopRegistrations.workshopId,
-          workshopTitle: aiSummitWorkshops.title,
-          workshopDescription: aiSummitWorkshops.description,
-          providerName: aiSummitWorkshops.speakerName,
-          providerCompany: null, // No company field for workshops in schema
-          scheduledDate: aiSummitWorkshops.startTime,
-          scheduledEndTime: aiSummitWorkshops.endTime,
-          location: aiSummitWorkshops.room,
-          maxParticipants: aiSummitWorkshops.maxCapacity,
-          currentParticipants: aiSummitWorkshops.currentRegistrations,
-          category: aiSummitWorkshops.category,
-          prerequisites: aiSummitWorkshops.prerequisites,
-          learningObjectives: aiSummitWorkshops.learningObjectives,
-          materials: aiSummitWorkshops.materials,
-          registeredAt: aiSummitWorkshopRegistrations.registeredAt,
-          checkedIn: aiSummitWorkshopRegistrations.checkedIn,
-          checkedInAt: aiSummitWorkshopRegistrations.checkedInAt,
-          noShow: aiSummitWorkshopRegistrations.noShow,
-          experienceLevel: aiSummitWorkshopRegistrations.experienceLevel,
-          specificInterests: aiSummitWorkshopRegistrations.specificInterests
-        })
+        .select()
         .from(aiSummitWorkshopRegistrations)
         .leftJoin(aiSummitWorkshops, eq(aiSummitWorkshopRegistrations.workshopId, aiSummitWorkshops.id))
-        .where(whereCondition)
-        .orderBy(desc(aiSummitWorkshops.startTime));
+        .where(whereCondition);
 
       // Format the registrations for the frontend component
-      const formattedBookings = registrations.map(reg => ({
-        id: reg.id.toString(),
-        workshopTitle: reg.workshopTitle || 'Workshop Title TBD',
-        workshopDescription: reg.workshopDescription || undefined,
-        providerName: reg.providerName || 'TBD',
-        providerEmail: user.email, // Fallback - could be improved
-        scheduledDate: reg.scheduledDate?.toISOString() || undefined,
-        scheduledTime: reg.scheduledDate ? 
-          reg.scheduledDate.toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit' }) : 
-          undefined,
-        duration: reg.scheduledDate && reg.scheduledEndTime ? 
-          `${Math.round((reg.scheduledEndTime.getTime() - reg.scheduledDate.getTime()) / (1000 * 60))} minutes` : 
-          undefined,
-        location: reg.location || 'Location TBD',
-        status: reg.noShow ? 'cancelled' : 
-                reg.checkedIn ? 'completed' : 
-                (reg.scheduledDate && new Date(reg.scheduledDate) < new Date()) ? 'completed' : 'confirmed',
-        bookingDate: reg.registeredAt?.toISOString() || new Date().toISOString(),
-        workshopId: reg.workshopId?.toString(),
-        maxParticipants: reg.maxParticipants || undefined,
-        currentParticipants: reg.currentParticipants || undefined,
-        category: reg.category || undefined,
-        prerequisites: reg.prerequisites || undefined,
-        learningObjectives: reg.learningObjectives || undefined,
-        materials: reg.materials || undefined,
-        experienceLevel: reg.experienceLevel || undefined,
-        specificInterests: reg.specificInterests || undefined
-      }));
+      const formattedBookings = registrations.map(reg => {
+        const registration = reg.ai_summit_workshop_registrations;
+        const workshop = reg.ai_summit_workshops;
+
+        return {
+          id: registration.id.toString(),
+          workshopTitle: workshop?.title || 'Workshop Title TBD',
+          workshopDescription: workshop?.description || undefined,
+          providerName: workshop?.speakerName || 'TBD',
+          providerEmail: user.email, // Fallback - could be improved
+          scheduledDate: workshop?.startTime?.toISOString() || undefined,
+          scheduledTime: workshop?.startTime ? 
+            workshop.startTime.toLocaleTimeString('en-UK', { hour: '2-digit', minute: '2-digit' }) : 
+            undefined,
+          duration: workshop?.startTime && workshop?.endTime ? 
+            `${Math.round((workshop.endTime.getTime() - workshop.startTime.getTime()) / (1000 * 60))} minutes` : 
+            undefined,
+          location: workshop?.room || 'Location TBD',
+          status: registration.noShow ? 'cancelled' : 
+                  registration.checkedIn ? 'completed' : 
+                  (workshop?.startTime && new Date(workshop.startTime) < new Date()) ? 'completed' : 'confirmed',
+          bookingDate: registration.registeredAt?.toISOString() || new Date().toISOString(),
+          workshopId: registration.workshopId?.toString(),
+          maxParticipants: workshop?.maxCapacity || undefined,
+          currentParticipants: workshop?.currentRegistrations || undefined,
+          category: workshop?.category || undefined,
+          prerequisites: workshop?.prerequisites || undefined,
+          learningObjectives: workshop?.learningObjectives || undefined,
+          materials: workshop?.materials || undefined,
+          experienceLevel: registration.experienceLevel || undefined,
+          specificInterests: registration.specificInterests || undefined
+        };
+      });
 
       res.json(formattedBookings);
     } catch (error: any) {
