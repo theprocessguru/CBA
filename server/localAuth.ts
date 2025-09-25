@@ -717,7 +717,51 @@ export async function setupLocalAuth(app: Express) {
     }
   });
 
-  // Change password endpoint (for authenticated users)
+  // Set password endpoint (for authenticated users with no existing password)
+  app.post('/api/auth/set-password', isAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { newPassword } = req.body;
+
+      if (!newPassword) {
+        return res.status(400).json({ message: "New password is required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+
+      const user = req.user as any;
+      if (!user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Get current user data
+      const userData = await storage.getUser(user.id);
+      if (!userData) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Only allow setting password if user doesn't have one already
+      if (userData.passwordHash) {
+        return res.status(400).json({ message: "User already has a password. Use change-password instead." });
+      }
+
+      // Hash new password
+      const saltRounds = 10;
+      const passwordHash = await bcrypt.hash(newPassword, saltRounds);
+
+      // Update user password
+      await storage.updateUser(user.id, { passwordHash });
+
+      console.log(`Password set for user: ${user.email}`);
+      res.json({ message: "Password set successfully" });
+    } catch (error) {
+      console.error("Set password error:", error);
+      res.status(500).json({ message: "Failed to set password" });
+    }
+  });
+
+  // Change password endpoint (for authenticated users with existing password)
   app.post('/api/auth/change-password', isAuthenticated, async (req: Request, res: Response) => {
     try {
       const { currentPassword, newPassword } = req.body;
@@ -741,9 +785,9 @@ export async function setupLocalAuth(app: Express) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Check if user has a password hash (some users might not have passwords)
+      // Check if user has a password hash (redirect to set-password if they don't)
       if (!userData.passwordHash) {
-        return res.status(400).json({ message: "User account has no password set" });
+        return res.status(400).json({ message: "User account has no password set. Use set-password instead." });
       }
 
       // Verify current password
