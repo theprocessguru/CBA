@@ -11045,8 +11045,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           workshopId: aiSummitWorkshopRegistrations.workshopId,
           workshopTitle: aiSummitWorkshops.title,
           workshopDescription: aiSummitWorkshops.description,
-          providerName: aiSummitWorkshops.facilitator,
-          providerCompany: aiSummitWorkshops.facilitatorCompany,
+          providerName: aiSummitWorkshops.speakerName,
+          providerCompany: null, // No company field for workshops in schema
           scheduledDate: aiSummitWorkshops.startTime,
           scheduledEndTime: aiSummitWorkshops.endTime,
           location: aiSummitWorkshops.room,
