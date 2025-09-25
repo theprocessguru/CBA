@@ -5,12 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface PasswordChangeData {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  passwordHash?: string | null;
+  hasPassword?: boolean;
 }
 
 export function PasswordChangeSection() {
@@ -27,7 +36,54 @@ export function PasswordChangeSection() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
-  // Password change mutation
+  // Fetch current user to check if they have a password
+  const { data: user, isLoading: userLoading } = useQuery<User>({
+    queryKey: ['/api/auth/user'],
+    refetchOnWindowFocus: false,
+  });
+
+  // Determine if user has a password
+  const hasPassword = Boolean(user?.passwordHash);
+
+  // Set password mutation (for users without existing password)
+  const setPasswordMutation = useMutation({
+    mutationFn: async (data: { newPassword: string }) => {
+      const response = await fetch('/api/auth/set-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to set password');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Set",
+        description: "Your password has been successfully set",
+      });
+      // Clear form
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+      setErrors({});
+    },
+    onError: (error) => {
+      toast({
+        title: "Set Password Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Change password mutation (for users with existing password)
   const changePasswordMutation = useMutation({
     mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
       const response = await fetch('/api/auth/change-password', {
@@ -68,7 +124,8 @@ export function PasswordChangeSection() {
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!passwordData.currentPassword) {
+    // Only validate current password if user has an existing password
+    if (hasPassword && !passwordData.currentPassword) {
       newErrors.currentPassword = "Current password is required";
     }
 
@@ -84,7 +141,8 @@ export function PasswordChangeSection() {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    if (passwordData.currentPassword && passwordData.newPassword && 
+    // Only check against current password if user has one
+    if (hasPassword && passwordData.currentPassword && passwordData.newPassword && 
         passwordData.currentPassword === passwordData.newPassword) {
       newErrors.newPassword = "New password must be different from current password";
     }
@@ -100,10 +158,18 @@ export function PasswordChangeSection() {
       return;
     }
 
-    changePasswordMutation.mutate({
-      currentPassword: passwordData.currentPassword,
-      newPassword: passwordData.newPassword
-    });
+    if (hasPassword) {
+      // User has existing password - use change password endpoint
+      changePasswordMutation.mutate({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword
+      });
+    } else {
+      // User doesn't have password - use set password endpoint
+      setPasswordMutation.mutate({
+        newPassword: passwordData.newPassword
+      });
+    }
   };
 
   const updateField = (field: keyof PasswordChangeData, value: string) => {
@@ -129,50 +195,68 @@ export function PasswordChangeSection() {
     }));
   };
 
+  if (userLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Lock className="w-5 h-5 mr-2" />
+            Loading...
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-4">Loading password settings...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center">
           <Lock className="w-5 h-5 mr-2" />
-          Change Password
+          {hasPassword ? "Change Password" : "Set Password"}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Current Password */}
-          <div className="space-y-2">
-            <Label htmlFor="currentPassword">Current Password *</Label>
-            <div className="relative">
-              <Input
-                id="currentPassword"
-                type={showPasswords.current ? "text" : "password"}
-                value={passwordData.currentPassword}
-                onChange={(e) => updateField('currentPassword', e.target.value)}
-                placeholder="Enter your current password"
-                data-testid="input-current-password"
-                className={errors.currentPassword ? "border-red-500" : ""}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
-                onClick={() => togglePasswordVisibility('current')}
-                data-testid="button-toggle-current-password"
-              >
-                {showPasswords.current ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
+          {/* Current Password - only show if user has existing password */}
+          {hasPassword && (
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Current Password *</Label>
+              <div className="relative">
+                <Input
+                  id="currentPassword"
+                  type={showPasswords.current ? "text" : "password"}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => updateField('currentPassword', e.target.value)}
+                  placeholder="Enter your current password"
+                  data-testid="input-current-password"
+                  className={errors.currentPassword ? "border-red-500" : ""}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                  onClick={() => togglePasswordVisibility('current')}
+                  data-testid="button-toggle-current-password"
+                >
+                  {showPasswords.current ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {errors.currentPassword && (
+                <p className="text-sm text-red-500" data-testid="error-current-password">
+                  {errors.currentPassword}
+                </p>
+              )}
             </div>
-            {errors.currentPassword && (
-              <p className="text-sm text-red-500" data-testid="error-current-password">
-                {errors.currentPassword}
-              </p>
-            )}
-          </div>
+          )}
 
           {/* New Password */}
           <div className="space-y-2">
@@ -249,7 +333,7 @@ export function PasswordChangeSection() {
             <p className="font-medium mb-1">Password Requirements:</p>
             <ul className="list-disc list-inside space-y-1">
               <li>At least 8 characters long</li>
-              <li>Different from your current password</li>
+              {hasPassword && <li>Different from your current password</li>}
               <li>Mix of letters, numbers, and symbols recommended</li>
             </ul>
           </div>
@@ -258,13 +342,13 @@ export function PasswordChangeSection() {
           <Button
             type="submit"
             className="w-full"
-            disabled={changePasswordMutation.isPending}
-            data-testid="button-change-password"
+            disabled={changePasswordMutation.isPending || setPasswordMutation.isPending}
+            data-testid={hasPassword ? "button-change-password" : "button-set-password"}
           >
-            {changePasswordMutation.isPending ? (
-              "Changing Password..."
+            {hasPassword ? (
+              changePasswordMutation.isPending ? "Changing Password..." : "Change Password"
             ) : (
-              "Change Password"
+              setPasswordMutation.isPending ? "Setting Password..." : "Set Password"
             )}
           </Button>
         </form>
