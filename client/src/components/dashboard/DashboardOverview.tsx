@@ -81,16 +81,16 @@ const DashboardOverview = () => {
   // Determine what dashboard content to show based on user types
   const renderPersonalizedDashboard = () => {
     // Prioritize based on primary type first, then fallback to any type
-    if (primaryType === 'volunteer') {
+    if (primaryType?.name === 'volunteer') {
       return renderVolunteerDashboard();
     }
-    if (primaryType === 'resident') {
+    if (primaryType?.name === 'resident') {
       return renderResidentDashboard();
     }
-    if (primaryType === 'student') {
+    if (primaryType?.name === 'student') {
       return renderStudentDashboard();
     }
-    if (primaryType === 'business') {
+    if (primaryType?.name === 'business') {
       return renderBusinessDashboard();
     }
     
@@ -476,7 +476,7 @@ const DashboardOverview = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Only show HMRC widget for pure business users, not residents */}
-          {primaryType === 'business' && (
+          {primaryType?.name === 'business' && (
             <IncomeWarningWidget showTitle={false} />
           )}
           <DonationWidget 
