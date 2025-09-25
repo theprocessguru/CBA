@@ -597,28 +597,68 @@ export default function ResidentProfile() {
                 Select the roles that best describe you. This helps us provide relevant content and opportunities.
               </p>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {allPersonTypes.map((type) => {
-                  const isSelected = selectedPersonTypes.includes(type.id);
-                  
-                  return (
-                    <div key={type.id} className="flex items-center space-x-3 border rounded-lg p-3">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => handlePersonTypeToggle(type.id)}
-                        data-testid={`checkbox-person-type-${type.name}`}
-                      />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <Badge className={getPersonTypeColor(type.color)}>
-                            {type.displayName}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-gray-600 mt-1">{type.description}</p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Roles Column */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Roles</h4>
+                  <div className="space-y-3">
+                    {allPersonTypes
+                      .filter(type => type.category === 'role')
+                      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                      .map((type) => {
+                        const isSelected = selectedPersonTypes.includes(type.id);
+                        
+                        return (
+                          <div key={type.id} className="flex items-center space-x-3 border rounded-lg p-3">
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                              data-testid={`checkbox-person-type-${type.name}`}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Badge className={getPersonTypeColor(type.color)}>
+                                  {type.displayName}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Interests Column */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Interests</h4>
+                  <div className="space-y-3">
+                    {allPersonTypes
+                      .filter(type => type.category === 'interest')
+                      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                      .map((type) => {
+                        const isSelected = selectedPersonTypes.includes(type.id);
+                        
+                        return (
+                          <div key={type.id} className="flex items-center space-x-3 border rounded-lg p-3">
+                            <Checkbox
+                              checked={isSelected}
+                              onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                              data-testid={`checkbox-person-type-${type.name}`}
+                            />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <Badge className={getPersonTypeColor(type.color)}>
+                                  {type.displayName}
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
