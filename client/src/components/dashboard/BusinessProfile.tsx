@@ -283,27 +283,64 @@ const BusinessProfile = () => {
             </div>
           ) : (
             <div className="space-y-4">
-              <div className="flex gap-2 flex-wrap">
-                {userPersonTypes && userPersonTypes.length > 0 ? (
-                  userPersonTypes.filter(personType => personType && personType.id).map((personType) => (
-                    <Badge
-                      key={personType.id}
-                      variant="outline"
-                      className={`${getPersonTypeColor(personType.color || "gray")} flex items-center gap-1`}
-                      data-testid={`badge-person-type-${personType.name}`}
-                    >
-                      {personType.icon && (
-                        <span className="text-xs">{personType.icon}</span>
-                      )}
-                      {personType.displayName}
-                    </Badge>
-                  ))
-                ) : (
-                  <div className="text-sm text-neutral-500 py-2">
-                    No roles assigned yet. Visit your profile to select your interests and roles.
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Roles Column */}
+                <div>
+                  <h4 className="font-medium text-neutral-900 mb-3">Roles</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {userPersonTypes && userPersonTypes.length > 0 ? (
+                      userPersonTypes
+                        .filter(personType => personType && personType.id && personType.category === 'role')
+                        .map((personType) => (
+                          <Badge
+                            key={personType.id}
+                            variant="outline"
+                            className={`${getPersonTypeColor(personType.color || "gray")} flex items-center gap-1`}
+                            data-testid={`badge-person-type-${personType.name}`}
+                          >
+                            {personType.icon && (
+                              <span className="text-xs">{personType.icon}</span>
+                            )}
+                            {personType.displayName}
+                          </Badge>
+                        ))
+                    ) : (
+                      <div className="text-sm text-neutral-500 py-2">
+                        No roles assigned yet.
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* Interests Column */}
+                <div>
+                  <h4 className="font-medium text-neutral-900 mb-3">Interests</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {userPersonTypes && userPersonTypes.length > 0 ? (
+                      userPersonTypes
+                        .filter(personType => personType && personType.id && personType.category === 'interest')
+                        .map((personType) => (
+                          <Badge
+                            key={personType.id}
+                            variant="outline"
+                            className={`${getPersonTypeColor(personType.color || "gray")} flex items-center gap-1`}
+                            data-testid={`badge-person-type-${personType.name}`}
+                          >
+                            {personType.icon && (
+                              <span className="text-xs">{personType.icon}</span>
+                            )}
+                            {personType.displayName}
+                          </Badge>
+                        ))
+                    ) : (
+                      <div className="text-sm text-neutral-500 py-2">
+                        No interests assigned yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
+              
               <div className="flex justify-start">
                 <Link href="/my-profile#roles">
                   <Button 
@@ -313,7 +350,7 @@ const BusinessProfile = () => {
                     data-testid="button-manage-roles"
                   >
                     <Settings className="h-4 w-4" />
-                    Manage Roles
+                    Manage Roles & Interests
                   </Button>
                 </Link>
               </div>
