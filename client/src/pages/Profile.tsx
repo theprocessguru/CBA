@@ -1020,34 +1020,72 @@ export default function Profile() {
                 </AlertDescription>
               </Alert>
 
-              <div className="space-y-3">
-                {/* First display roles alphabetically, then interests alphabetically */}
-                {[
-                  ...availablePersonTypes.filter(type => type.category === 'role').sort((a, b) => a.displayName.localeCompare(b.displayName)),
-                  ...availablePersonTypes.filter(type => type.category === 'interest').sort((a, b) => a.displayName.localeCompare(b.displayName))
-                ].map((type) => {
-                  const isAssigned = assignedPersonTypes.includes(type.id);
-                  
-                  return (
-                    <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={isAssigned}
-                          onCheckedChange={() => handlePersonTypeToggle(type.id)}
-                          disabled={selfAssignPersonTypeMutation.isPending}
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <Badge className={getTypeColor(type.color || 'blue')}>
-                              {type.displayName}
-                            </Badge>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Roles Column */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Roles</h4>
+                  <div className="space-y-3">
+                    {availablePersonTypes
+                      .filter(type => type.category === 'role')
+                      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                      .map((type) => {
+                        const isAssigned = assignedPersonTypes.includes(type.id);
+                        
+                        return (
+                          <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <Checkbox
+                                checked={isAssigned}
+                                onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                                disabled={selfAssignPersonTypeMutation.isPending}
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getTypeColor(type.color || 'blue')}>
+                                    {type.displayName}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-xs text-gray-600 mt-1">{type.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* Interests Column */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3">Interests</h4>
+                  <div className="space-y-3">
+                    {availablePersonTypes
+                      .filter(type => type.category === 'interest')
+                      .sort((a, b) => a.displayName.localeCompare(b.displayName))
+                      .map((type) => {
+                        const isAssigned = assignedPersonTypes.includes(type.id);
+                        
+                        return (
+                          <div key={type.id} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <Checkbox
+                                checked={isAssigned}
+                                onCheckedChange={() => handlePersonTypeToggle(type.id)}
+                                disabled={selfAssignPersonTypeMutation.isPending}
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Badge className={getTypeColor(type.color || 'blue')}>
+                                    {type.displayName}
+                                  </Badge>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1">{type.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
