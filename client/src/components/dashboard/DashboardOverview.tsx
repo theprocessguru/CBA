@@ -96,28 +96,28 @@ const DashboardOverview = () => {
       return renderBusinessDashboard();
     }
     
-    // Fallback logic for users without clear primary type
+    // Fallback logic based on original signup choice taking priority
+    // Attendees (original "Resident" signups) always get resident dashboard, regardless of later business roles
+    if (assignedTypeNames.includes('attendee')) {
+      return renderResidentDashboard();
+    }
+    
     // Volunteers get volunteer-specific dashboard
-    if (hasVolunteerType && !hasBusinessType) {
+    if (hasVolunteerType) {
       return renderVolunteerDashboard();
     }
     
-    // Residents get community-focused dashboard  
-    if (hasResidentType && !hasBusinessType) {
+    // True residents get community-focused dashboard  
+    if (hasResidentType) {
       return renderResidentDashboard();
     }
     
     // Students get student-specific dashboard
-    if (hasStudentType && !hasBusinessType) {
+    if (hasStudentType) {
       return renderStudentDashboard();
     }
     
-    // Attendees (who are displayed as residents) get resident dashboard
-    if (assignedTypeNames.includes('attendee') && !hasVolunteerType) {
-      return renderResidentDashboard();
-    }
-    
-    // Business users get business dashboard only if they have business-specific roles
+    // Pure business users (who signed up as "Business") get business dashboard
     if (hasBusinessType) {
       return renderBusinessDashboard();
     }
