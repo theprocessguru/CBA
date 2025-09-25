@@ -34,7 +34,8 @@ const DashboardOverview = () => {
     hasVolunteerType, 
     hasResidentType, 
     hasStudentType,
-    primaryType 
+    primaryType,
+    assignedTypeNames 
   } = usePersonTypes();
   
   const { data: business, isLoading: isLoadingBusiness } = useQuery<Business>({
@@ -80,6 +81,7 @@ const DashboardOverview = () => {
   
   // Determine what dashboard content to show based on user types
   const renderPersonalizedDashboard = () => {
+    
     // Prioritize based on primary type first, then fallback to any type
     if (primaryType?.name === 'volunteer') {
       return renderVolunteerDashboard();
@@ -110,7 +112,12 @@ const DashboardOverview = () => {
       return renderStudentDashboard();
     }
     
-    // Business users get business dashboard
+    // Attendees (who are displayed as residents) get resident dashboard
+    if (assignedTypeNames.includes('attendee') && !hasVolunteerType) {
+      return renderResidentDashboard();
+    }
+    
+    // Business users get business dashboard only if they have business-specific roles
     if (hasBusinessType) {
       return renderBusinessDashboard();
     }
