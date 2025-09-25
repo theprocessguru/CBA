@@ -9,6 +9,7 @@ This platform is a comprehensive business automation solution designed to help b
 Preferred communication style: Simple, everyday language.
 Volunteers: No business listing menu items in dashboard (they don't need business features).
 Navigation: Logged-in users only see logo and action buttons (Scanner, Mobile Badge, Dashboard) - no dropdown menus.
+**CRITICAL DEVELOPMENT APPROACH**: Never assume data structure or table relationships without asking first. Always confirm with user before making assumptions about where data should be stored or how tables relate. Ask before creating solutions based on assumed table mappings.
 
 ## System Architecture
 ### Frontend Architecture
